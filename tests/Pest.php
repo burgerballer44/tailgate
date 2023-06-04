@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\User;
+use function Pest\Laravel\{actingAs};
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -14,7 +17,6 @@
 uses(
     Illuminate\Foundation\Testing\TestCase::class,
     Tests\CreatesApplication::class,
-    // Illuminate\Foundation\Testing\RefreshDatabase::class,
 )->in('Feature', 'Unit');
 
 /*
@@ -43,7 +45,16 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Sign in and act as a regular user
+ * @param  User|null $user
+ * @return User
+ */
+function signInRegularUser(User $user = null) : User
 {
-    // ..
+    // create user if not provided
+    $user = $user ?: User::factory()->create(['name' => 'Regular User']);
+
+    actingAs($user);
+    return $user;
 }
