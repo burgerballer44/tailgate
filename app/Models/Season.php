@@ -20,10 +20,10 @@ class Season extends Model
     ];
 
     /**
-    * The attributes that are mass assignable.
-    *
-    * @var array<int, string>
-    */
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'sport',
@@ -33,24 +33,24 @@ class Season extends Model
     ];
 
     /**
-    * Get the route key for the model.
-    *
-    * @return string
-    */
+     * Get the route key for the model.
+     *
+     * @return string
+     */
     public function getRouteKeyName()
     {
-     return 'uuid';
+     return 'ulid';
     }
 
     /**
-    * Perform any actions required after the model boots.
-    *
-    * @return void
-    */
+     * Perform any actions required after the model boots.
+     *
+     * @return void
+     */
     protected static function booted(): void
     {
-        static::creating(function ($team) {
-            $team->uuid = Str::uuid()->toString();
+        static::creating(function ($season) {
+            $season->ulid = Str::ulid();
         });
     }
 }

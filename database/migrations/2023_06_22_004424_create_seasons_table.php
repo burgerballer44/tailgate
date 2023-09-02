@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('seasons', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->index();
+            $table->ulid('ulid')->index();
             $table->string('name');
             $table->enum('sport', array_column(Sport::cases(), 'value'));
             $table->enum('season_type', array_column(SeasonType::cases(), 'value'));

@@ -37,18 +37,18 @@ class Team extends Model
     */
     public function getRouteKeyName()
     {
-        return 'uuid';
+        return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
-     *
-     * @return void
-     */
+    * Perform any actions required after the model boots.
+    *
+    * @return void
+    */
     protected static function booted(): void
     {
         static::creating(function ($team) {
-            $team->uuid = Str::uuid()->toString();
+            $team->ulid = Str::ulid();
         });
     }
 }

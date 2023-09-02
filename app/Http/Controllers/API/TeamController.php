@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTeamRequest;
 use App\Http\Requests\UpdateTeamRequest;
+use App\Http\Resources\TeamResource;
 use App\Models\Team;
 
 class TeamController extends Controller
@@ -14,7 +15,7 @@ class TeamController extends Controller
      */
     public function index()
     {
-        //
+        return new TeamResource(Team::paginate(50));
     }
 
     /**
@@ -27,6 +28,8 @@ class TeamController extends Controller
         $team = new Team($validated);
 
         $team->save();
+
+        return new TeamResource($team);
     }
 
     /**
@@ -34,7 +37,7 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
-        return $team->toJson();
+        return new TeamResource($team);
     }
 
     /**
@@ -47,6 +50,8 @@ class TeamController extends Controller
         $team->fill($validated);
         
         $team->save();
+
+        return response()->noContent();
     }
 
     /**

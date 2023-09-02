@@ -6,15 +6,48 @@ use Illuminate\Support\Str;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
+beforeEach(function() {
+    $this->user = signInRegularUser();
+});
+
 test('a team can be created', function () {
-    // make a team
+    // make data for a team
     $teamData = Team::factory()->make()->getAttributes();
 
     // there should be no teams in the db
     $this->assertDatabaseCount('teams', 0);
 
     // post the team data
-    $this->post("api/v1/teams", $teamData)->assertOk();
+    $this->post("api/v1/teams", $teamData)->assertCreated();
+
+    // there should be 1 team in the db
+    $this->assertDatabaseCount('teams', 1);
+});
+
+test('the team is returned when a team is created', function () {
+    // make data for a team
+    $teamData = Team::factory()->make()->getAttributes();
+
+    // post the team data
+    $this->post("api/v1/teams", $teamData)
+        ->assertCreated()
+        ->assertJson(['data' => [
+            'designation' => $teamData['designation'],
+            'mascot'      => $teamData['mascot'],
+            'sport'       => $teamData['sport'],
+            ]
+        ]);
+});
+
+test('the ulid field is populated when a team is created', function () {
+    // make data for a team
+    $teamData = Team::factory()->make()->getAttributes();
+
+    // there should be no teams in the db
+    $this->assertDatabaseCount('teams', 0);
+
+    // post the team data
+    $this->post("api/v1/teams", $teamData)->assertCreated();
 
     // there should be 1 team in the db
     $this->assertDatabaseCount('teams', 1);
@@ -22,44 +55,26 @@ test('a team can be created', function () {
     // get the team we posted
     $team = Team::first();
 
-    expect($team->designation)->toBe($teamData['designation']);
-    expect($team->mascot)->toBe($teamData['mascot']);
-    expect($team->sport)->toBe($teamData['sport']);
+    expect(Str::isUlid($team->ulid))->toBeTrue();
 });
 
-test('the uuid field is populated when a team is created', function () {
-    // make a team
-    $teamData = Team::factory()->make()->getAttributes();
-
-    // there should be no teams in the db
-    $this->assertDatabaseCount('teams', 0);
-
-    // post the team data
-    $this->post("api/v1/teams", $teamData)->assertOk();
-
-    // there should be 1 team in the db
-    $this->assertDatabaseCount('teams', 1);
-
-    // get the team we posted
-    $team = Team::first();
-
-    expect(Str::isUuid($team->uuid))->toBeTrue();
-});
-
-test('a team can be viewed by uuid', function () {
+test('a team can be viewed by ulid', function () {
     // create a team
     $team = Team::factory()->create();
 
     // get the team
-    $response = $this->get("api/v1/teams/{$team->uuid}");
-
-    $team->refresh();
-
-    expect($response->json())->toBe(json_decode($team->toJson(), true));
+    $this->get("api/v1/teams/{$team->ulid}")
+        ->assertOk()
+        ->assertJson(['data' => [
+            'designation' => $team->designation,
+            'mascot'      => $team->mascot,
+            'sport'       => $team->sport,
+            ]
+        ]);
 });
 
 test('a team cannot be viewed by id', function () {
-
+    // we want to catch the exception not see the pretty response
     $this->withoutExceptionHandling();
 
     // create a team
@@ -80,10 +95,30 @@ test('a team can be updated', function () {
     ];
 
     // post the data
-    $this->patch("api/v1/teams/{$team->uuid}", $data)->assertOk();
+    $this->patch("api/v1/teams/{$team->ulid}", $data)->assertNoContent();
 
     $team->refresh();
     
     expect($team->designation)->toBe($data['designation']);
     expect($team->mascot)->toBe($data['mascot']);
+});
+
+test('a lists of teams can be retrieved', function () {
+    // create 2 teams
+    [$team1, $team2] = Team::factory()->count(2)->create();
+
+    // get the teams
+    $this->get("api/v1/teams")
+        ->assertOk()
+        ->assertJson(['data' => [
+            [
+                'designation' => $team1->designation,
+                'mascot'      => $team1->mascot,
+                'sport'       => $team1->sport,
+            ], [
+                'designation' => $team2->designation,
+                'mascot'      => $team2->mascot,
+                'sport'       => $team2->sport,
+            ]
+        ]]);
 });

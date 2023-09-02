@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
-            $table->uuid('uuid')->index();
+            $table->ulid('ulid')->index();
             $table->string('designation');
             $table->string('mascot');
             $table->enum('sport', array_column(Sport::cases(), 'value'));

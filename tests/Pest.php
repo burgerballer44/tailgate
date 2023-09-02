@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\UserRole;
 use function Pest\Laravel\{actingAs};
 
 /*
@@ -47,14 +48,16 @@ expect()->extend('toBeOne', function () {
 
 /**
  * Sign in and act as a regular user
- * @param  User|null $user
- * @return User
  */
-function signInRegularUser(User $user = null) : User
+function signInRegularUser(User $user = null): User
 {
     // create user if not provided
-    $user = $user ?: User::factory()->create(['name' => 'Regular User']);
+    $user = $user ?: User::factory()->create([
+        'name' => 'Regular User',
+        'role' => UserRole::REGULAR,
+    ]);
 
     actingAs($user);
+
     return $user;
 }

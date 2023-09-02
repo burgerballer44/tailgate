@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSeasonRequest;
 use App\Http\Requests\UpdateSeasonRequest;
+use App\Http\Resources\SeasonResource;
 use App\Models\Season;
 
 class SeasonController extends Controller
@@ -13,7 +14,7 @@ class SeasonController extends Controller
      */
     public function index()
     {
-        //
+        return new SeasonResource(Season::paginate(50));
     }
 
     /**
@@ -26,6 +27,8 @@ class SeasonController extends Controller
         $season = new Season($validated);
 
         $season->save();
+
+        return new SeasonResource($season);
     }
 
     /**
@@ -33,7 +36,7 @@ class SeasonController extends Controller
      */
     public function show(Season $season)
     {
-        return $season->toJson();
+        return new SeasonResource($season);
     }
 
     /**
@@ -46,6 +49,8 @@ class SeasonController extends Controller
         $season->fill($validated);
         
         $season->save();
+
+        return response()->noContent();
     }
 
     /**

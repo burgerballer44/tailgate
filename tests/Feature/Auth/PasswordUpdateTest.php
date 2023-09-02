@@ -1,12 +1,10 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Tests\TestCase;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-test('password can be updated', function() {
+test('password can be updated', function () {
     $user = signInRegularUser();
 
     $this->from('/profile')->put('/password', [
@@ -14,13 +12,13 @@ test('password can be updated', function() {
         'password' => 'new-password',
         'password_confirmation' => 'new-password',
     ])
-    ->assertSessionHasNoErrors()
-    ->assertRedirect('/profile');
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/profile');
 
     expect(Hash::check('new-password', $user->refresh()->password))->toBeTrue();
 });
 
-test('correct password must be provided to update password', function() {
+test('correct password must be provided to update password', function () {
     $user = signInRegularUser();
 
     $this->from('/profile')->put('/password', [
@@ -28,6 +26,6 @@ test('correct password must be provided to update password', function() {
         'password' => 'new-password',
         'password_confirmation' => 'new-password',
     ])
-    ->assertSessionHasErrorsIn('updatePassword', 'current_password')
-    ->assertRedirect('/profile');
+        ->assertSessionHasErrorsIn('updatePassword', 'current_password')
+        ->assertRedirect('/profile');
 });

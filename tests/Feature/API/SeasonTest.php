@@ -8,15 +8,51 @@ use Illuminate\Support\Str;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
+beforeEach(function() {
+    $this->user = signInRegularUser();
+});
+
+
 test('a season can be created', function () {
-    // make a season
+    // make values for a season
     $seasonData = Season::factory()->make()->getAttributes();
 
     // there should be no seasons in the db
     $this->assertDatabaseCount('seasons', 0);
 
     // post the season data
-    $this->post("api/v1/seasons", $seasonData)->assertOk();
+    $this->post("api/v1/seasons", $seasonData)->assertCreated();
+
+    // there should be 1 season in the db
+    $this->assertDatabaseCount('seasons', 1);
+});
+
+test('the season is returned when a season is created', function () {
+    // make values for a season
+    $seasonData = Season::factory()->make()->getAttributes();
+
+    // post the season data
+    $this->post("api/v1/seasons", $seasonData)
+        ->assertCreated()
+        ->assertJson(['data' => [
+            'name'         => $seasonData['name'],
+            'sport'        => $seasonData['sport'],
+            'season_type'  => $seasonData['season_type'],
+            'season_start' => $seasonData['season_start'],
+            'season_end'   => $seasonData['season_end'],
+            ]
+        ]);
+});
+
+test('the ulid field is populated when a season is created', function () {
+    // make values for a season
+    $seasonData = Season::factory()->make()->getAttributes();
+
+    // there should be no seasons in the db
+    $this->assertDatabaseCount('seasons', 0);
+
+    // post the season data
+    $this->post("api/v1/seasons", $seasonData)->assertCreated();
 
     // there should be 1 season in the db
     $this->assertDatabaseCount('seasons', 1);
@@ -24,46 +60,27 @@ test('a season can be created', function () {
     // get the season we posted
     $season = Season::first();
 
-    expect($season->name)->toBe($seasonData['name']);
-    expect($season->sport)->toBe($seasonData['sport']);
-    expect($season->season_type)->toBe($seasonData['season_type']);
-    expect($season->season_start)->toBe($seasonData['season_start']);
-    expect($season->season_end)->toBe($seasonData['season_end']);
+    expect(Str::isUlid($season->ulid))->toBeTrue();
 });
 
-test('the uuid field is populated when a season is created', function () {
-    // make a season
-    $seasonData = Season::factory()->make()->getAttributes();
-
-    // there should be no seasons in the db
-    $this->assertDatabaseCount('seasons', 0);
-
-    // post the season data
-    $this->post("api/v1/seasons", $seasonData)->assertOk();
-
-    // there should be 1 season in the db
-    $this->assertDatabaseCount('seasons', 1);
-
-    // get the season we posted
-    $season = Season::first();
-
-    expect(Str::isUuid($season->uuid))->toBeTrue();
-});
-
-test('a season can be viewed by uuid', function () {
+test('a season can be viewed by ulid', function () {
     // create a season
     $season = Season::factory()->create();
 
     // get the season
-    $response = $this->get("api/v1/seasons/{$season->uuid}");
-
-    $season->refresh();
-
-    expect($response->json())->toBe(json_decode($season->toJson(), true));
+    $this->get("api/v1/seasons/{$season->ulid}")
+        ->assertJson(['data' => [
+            'name'         => $season->name,
+            'sport'        => $season->sport,
+            'season_type'  => $season->season_type,
+            'season_start' => $season->season_start,
+            'season_end'   => $season->season_end,
+            ]
+        ]);
 });
 
 test('a season cannot be viewed by id', function () {
-
+    // we want to catch the exception not see the pretty response
     $this->withoutExceptionHandling();
 
     // create a season
@@ -87,7 +104,7 @@ test('a season can be updated', function () {
     ];
 
     // post the data
-    $this->patch("api/v1/seasons/{$season->uuid}", $data)->assertOk();
+    $this->patch("api/v1/seasons/{$season->ulid}", $data)->assertNoContent();
 
     $season->refresh();
     
@@ -96,4 +113,28 @@ test('a season can be updated', function () {
     expect($season->season_type)->toBe($data['season_type']);
     expect($season->season_start)->toBe($data['season_start']);
     expect($season->season_end)->toBe($data['season_end']);
+});
+
+test('a lists of seasons can be retrieved', function () {
+    // create 2 seasons
+    [$season1, $season2] = season::factory()->count(2)->create();
+
+    // get the seasons
+    $this->get("api/v1/seasons")
+        ->assertOk()
+        ->assertJson(['data' => [
+            [
+                'name'         => $season1->name,
+                'sport'        => $season1->sport,
+                'season_type'  => $season1->season_type,
+                'season_start' => $season1->season_start,
+                'season_end'   => $season1->season_end,
+            ], [
+                'name'         => $season2->name,
+                'sport'        => $season2->sport,
+                'season_type'  => $season2->season_type,
+                'season_start' => $season2->season_start,
+                'season_end'   => $season2->season_end,
+            ]
+        ]]);
 });
