@@ -53,4 +53,21 @@ class Season extends Model
             $season->ulid = Str::ulid();
         });
     }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (isset($filters['sport'])) {
+            $query->where('sport', $filters['sport']);
+        }
+
+        if (isset($filters['season_type'])) {
+            $query->where('season_type', $filters['season_type']);
+        }
+
+        if (isset($filters['name'])) {
+            $query->where('name', 'LIKE', "%{$filters['name']}%");
+        }
+
+        return $query;
+    }
 }

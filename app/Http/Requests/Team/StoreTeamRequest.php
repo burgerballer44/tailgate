@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Team;
 
+use App\Http\Requests\ApiFormRequest;
 use App\Models\Sport;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
-class StoreTeamRequest extends FormRequest
+class StoreTeamRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

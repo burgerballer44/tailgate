@@ -12,7 +12,6 @@ beforeEach(function() {
     $this->user = signInRegularUser();
 });
 
-
 test('a season can be created', function () {
     // make values for a season
     $seasonData = Season::factory()->make()->getAttributes();
@@ -137,4 +136,97 @@ test('a lists of seasons can be retrieved', function () {
                 'season_end'   => $season2->season_end,
             ]
         ]]);
+});
+
+test('a lists of seasons can be filtered by sport', function () {
+    // create 2 basketball seasons
+    [$season1, $season2] = Season::factory()->count(2)->create(['sport' => Sport::BASKETBALL->value]);
+
+    // create 2 football seasons
+    [$season3, $season4] = Season::factory()->count(2)->create(['sport' => Sport::FOOTBALL->value]);
+
+    // get the basketball seasons only
+    $this->get("api/v1/seasons?sport=Basketball")
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJson(['data' => [
+            [
+                'name'         => $season1->name,
+                'sport'        => $season1->sport,
+                'season_type'  => $season1->season_type,
+                'season_start' => $season1->season_start,
+                'season_end'   => $season1->season_end,
+            ], [
+                'name'         => $season2->name,
+                'sport'        => $season2->sport,
+                'season_type'  => $season2->season_type,
+                'season_start' => $season2->season_start,
+                'season_end'   => $season2->season_end,
+            ]
+        ]]);
+});
+
+test('a lists of seasons can be filtered by season_type', function () {
+    // create 2 basketball seasons
+    [$season1, $season2] = Season::factory()->count(2)->create(['season_type' => SeasonType::REGULAR->value]);
+
+    // create 2 football seasons
+    [$season3, $season4] = Season::factory()->count(2)->create(['season_type' => SeasonType::POST->value]);
+
+    // get the regular seasons only
+    $this->get("api/v1/seasons?season_type=Regular Season")
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJson(['data' => [
+            [
+                'name'         => $season1->name,
+                'sport'        => $season1->sport,
+                'season_type'  => $season1->season_type,
+                'season_start' => $season1->season_start,
+                'season_end'   => $season1->season_end,
+            ], [
+                'name'         => $season2->name,
+                'sport'        => $season2->sport,
+                'season_type'  => $season2->season_type,
+                'season_start' => $season2->season_start,
+                'season_end'   => $season2->season_end,
+            ]
+        ]]);
+});
+
+test('a lists of seasons can be filtered by name for desigantion', function () {
+    // thing to find
+    $name = 'FindMe';
+
+    // create a season
+    $season = Season::factory()->create(['name' => $name]);
+    $differentSeasonToNotFind = Season::factory()->create(['name' => 'somethingelse']);
+
+    // get the season
+    $this->get("api/v1/seasons?name=$name")
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJson(['data' => [
+            [
+                'name'         => $season->name,
+                'sport'        => $season->sport,
+                'season_type'  => $season->season_type,
+                'season_start' => $season->season_start,
+                'season_end'   => $season->season_end,
+            ]
+        ]]);
+});
+
+test('a season can be deleted', function () {
+    // create a season
+    $season = Season::factory()->create();
+
+    // there should be 1 season in the db
+    $this->assertDatabaseCount('seasons', 1);
+
+    // delete the season
+    $this->delete("api/v1/seasons/{$season->ulid}")->assertAccepted();
+
+    // there should be no seasons in the db
+    $this->assertDatabaseCount('seasons', 0);
 });

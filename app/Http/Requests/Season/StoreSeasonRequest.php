@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Season;
 
+use App\Http\Requests\ApiFormRequest;
 use App\Models\Common\DateOrString;
 use App\Models\SeasonType;
 use App\Models\Sport;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
-class StoreSeasonRequest extends FormRequest
+class StoreSeasonRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

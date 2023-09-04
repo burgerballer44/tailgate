@@ -51,4 +51,18 @@ class Team extends Model
             $team->ulid = Str::ulid();
         });
     }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (isset($filters['sport'])) {
+            $query->where('sport', $filters['sport']);
+        }
+
+        if (isset($filters['name'])) {
+            $query->where('designation', 'LIKE', "%{$filters['name']}%")
+                ->orWhere('mascot', 'LIKE', "%{$filters['name']}%");
+        }
+
+        return $query;
+    }
 }

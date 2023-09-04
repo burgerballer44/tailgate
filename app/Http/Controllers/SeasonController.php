@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreSeasonRequest;
-use App\Http\Requests\UpdateSeasonRequest;
+use App\Http\Requests\Season\StoreSeasonRequest;
+use App\Http\Requests\Season\UpdateSeasonRequest;
 use App\Http\Resources\SeasonResource;
 use App\Models\Season;
 
@@ -14,7 +14,7 @@ class SeasonController extends Controller
      */
     public function index()
     {
-        return new SeasonResource(Season::paginate(50));
+        return new SeasonResource(Season::filter(request()->input())->paginate(50));
     }
 
     /**
@@ -58,6 +58,7 @@ class SeasonController extends Controller
      */
     public function destroy(Season $season)
     {
-        //
+        $season->delete();
+        return response()->json([], 202);
     }
 }

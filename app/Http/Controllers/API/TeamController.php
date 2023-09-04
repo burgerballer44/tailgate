@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreTeamRequest;
-use App\Http\Requests\UpdateTeamRequest;
+use App\Http\Requests\Team\StoreTeamRequest;
+use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Http\Resources\TeamResource;
 use App\Models\Team;
 
@@ -15,7 +15,7 @@ class TeamController extends Controller
      */
     public function index()
     {
-        return new TeamResource(Team::paginate(50));
+        return new TeamResource(Team::filter(request()->input())->paginate(50));
     }
 
     /**
@@ -59,6 +59,7 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
-        //
+        $team->delete();
+        return response()->json([], 202);
     }
 }
