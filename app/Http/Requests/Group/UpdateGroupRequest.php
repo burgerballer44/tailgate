@@ -22,8 +22,7 @@ class UpdateGroupRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'designation' => 'required|string|max:255',
-            'mascot' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
         ];
     }
 }

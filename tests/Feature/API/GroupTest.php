@@ -2,6 +2,7 @@
 
 
 use App\Models\Group;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
@@ -25,151 +26,140 @@ test('a group can be created', function () {
     $this->assertDatabaseCount('groups', 1);
 });
 
-// test('the group is returned when a group is created', function () {
-//     // make data for a group
-//     $groupData = Group::factory()->make()->getAttributes();
+test('the group is returned when a group is created', function () {
+    // make data for a group
+    $groupData = Group::factory()->make()->getAttributes();
 
-//     // post the group data
-//     $this->post("api/v1/groups", $groupData)
-//         ->assertCreated()
-//         ->assertJson(['data' => [
-//             'designation' => $groupData['designation'],
-//             'mascot'      => $groupData['mascot'],
-//             'sport'       => $groupData['sport'],
-//             ]
-//         ]);
-// });
+    // post the group data
+    $this->post("api/v1/groups", $groupData)
+        ->assertCreated()
+        ->assertJson(['data' => [
+                'name' => $groupData['name'],
+                'owner_id' => $groupData['owner_id'],
+            ]
+        ]);
+});
 
-// test('the ulid field is populated when a team is created', function () {
-//     // make data for a group
-//     $groupData = Group::factory()->make()->getAttributes();
+test('the ulid field is populated when a group is created', function () {
+    // make data for a group
+    $groupData = Group::factory()->make()->getAttributes();
 
-//     // post the group data
-//     $this->post("api/v1/groups", $groupData)->assertCreated();
+    // post the group data
+    $this->post("api/v1/groups", $groupData)->assertCreated();
 
-//     // get the team we posted
-//     $group = Group::first();
+    // get the group we posted
+    $group = Group::first();
 
-//     expect(Str::isUlid($group->ulid))->toBeTrue();
-// });
+    expect(Str::isUlid($group->ulid))->toBeTrue();
+});
 
-// test('a team can be viewed by ulid', function () {
-//     // create a team
-//     $group = Group::factory()->create();
+test('the invite_code field is populated when a group is created', function () {
+    // make data for a group
+    $groupData = Group::factory()->make()->getAttributes();
 
-//     // get the team
-//     $this->get("api/v1/groups/{$group->ulid}")
-//         ->assertOk()
-//         ->assertJson(['data' => [
-//             'designation' => $group->designation,
-//             'mascot'      => $group->mascot,
-//             'sport'       => $group->sport,
-//             ]
-//         ]);
-// });
+    // post the group data
+    $this->post("api/v1/groups", $groupData)->assertCreated();
 
-// test('a team cannot be viewed by id', function () {
-//     // we want to catch the exception not see the pretty response
-//     $this->withoutExceptionHandling();
+    // get the group we posted
+    $group = Group::first();
 
-//     // create a team
-//     $group = Group::factory()->create();
+    expect($group->invite_code)->toBeString();
+});
 
-//     // get the team
-//     $this->get("api/v1/groups/{$group->id}");
-// })->throws(ModelNotFoundException::class);
+test('a group can be viewed by ulid', function () {
+    // create a group
+    $group = Group::factory()->create();
 
-// test('a team can be updated', function () {
-//     // create a team
-//     $group = Group::factory()->create();
+    // get the group
+    $this->get("api/v1/groups/{$group->ulid}")
+        ->assertOk()
+        ->assertJson(['data' => [
+                'name' => $group->name,
+                'owner_id' => $group->owner_id,
+            ]
+        ]);
+});
 
-//     // set fields to update
-//     $data = [
-//         'designation' => 'updatedDesignation',
-//         'mascot' => 'updatedMascot',
-//     ];
+test('a group cannot be viewed by id', function () {
+    // we want to catch the exception not see the pretty response
+    $this->withoutExceptionHandling();
 
-//     // post the data
-//     $this->patch("api/v1/groups/{$group->ulid}", $data)->assertNoContent();
+    // create a group
+    $group = Group::factory()->create();
 
-//     $group->refresh();
+    // get the group
+    $this->get("api/v1/groups/{$group->id}");
+})->throws(ModelNotFoundException::class);
+
+test('a group can be updated', function () {
+    // create a group
+    $group = Group::factory()->create();
+
+    // set fields to update
+    $data = [
+        'name' => 'updatedName',
+    ];
+
+    // post the data
+    $this->patch("api/v1/groups/{$group->ulid}", $data)->assertNoContent();
+
+    $group->refresh();
     
-//     expect($group->designation)->toBe($data['designation']);
-//     expect($group->mascot)->toBe($data['mascot']);
-// });
+    expect($group->name)->toBe($data['name']);
+});
 
-// test('a teams sport cannot be updated', function () {
-//     // create a team
-//     $group = Group::factory()->create();
+test('a lists of groups can be retrieved', function () {
+    // create 2 groups
+    [$group1, $group2] = Group::factory()->count(2)->create();
 
-//     // set fields to update
-//     $data = [
-//         'designation' => 'updatedDesignation',
-//         'mascot' => 'updatedMascot',
-//         'sport' => 'updatedSport',
-//     ];
+    // get the groups
+    $this->get("api/v1/groups")
+        ->assertOk()
+        ->assertJson(['data' => [
+            [
+                'name' => $group1->name,
+                'owner_id' => $group1->owner_id,
+            ], [
+                'name' => $group2->name,
+                'owner_id' => $group2->owner_id,
+            ]
+        ]]);
+});
 
-//     // post the data
-//     $this->patch("api/v1/groups/{$group->ulid}", $data)->assertNoContent();
+test('a lists of groups can be filtered by user', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
 
-//     $group->refresh();
-    
-//     expect($group->sport)->not->toBe($data['sport']);
-// });
+    // create 2 User1 groups
+    [$group1, $group2] = Group::factory()->count(2)->create(['owner_id' => $user1->id]);
 
-// test('a lists of teams can be retrieved', function () {
-//     // create 2 teams
-//     [$group1, $group2] = Group::factory()->count(2)->create();
+    // create 2 User2 groups
+    [$group3, $group4] = Group::factory()->count(2)->create(['owner_id' => $user2->id]);
 
-//     // get the teams
-//     $this->get("api/v1/groups")
-//         ->assertOk()
-//         ->assertJson(['data' => [
-//             [
-//                 'designation' => $group1->designation,
-//                 'mascot'      => $group1->mascot,
-//                 'sport'       => $group1->sport,
-//             ], [
-//                 'designation' => $group2->designation,
-//                 'mascot'      => $group2->mascot,
-//                 'sport'       => $group2->sport,
-//             ]
-//         ]]);
-// });
+    // get the User1 groups only
+    $this->get("api/v1/groups?owner_id={$user1->id}")
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJson(['data' => [
+            [
+               'name' => $group1->name,
+               'owner_id' => $group1->owner_id,
+           ], [
+               'name' => $group2->name,
+               'owner_id' => $group2->owner_id,
+           ]
+        ]]);
+});
 
-// test('a lists of teams can be filtered by sport', function () {
-//     // create 2 basketball teams
-//     [$group1, $group2] = Group::factory()->count(2)->create(['sport' => Sport::BASKETBALL->value]);
-
-//     // create 2 football teams
-//     [$group3, $group4] = Group::factory()->count(2)->create(['sport' => Sport::FOOTBALL->value]);
-
-//     // get the basketball teams only
-//     $this->get("api/v1/groups?sport=Basketball")
-//         ->assertOk()
-//         ->assertJsonCount(2, 'data')
-//         ->assertJson(['data' => [
-//             [
-//                 'designation' => $group1->designation,
-//                 'mascot'      => $group1->mascot,
-//                 'sport'       => $group1->sport,
-//             ], [
-//                 'designation' => $group2->designation,
-//                 'mascot'      => $group2->mascot,
-//                 'sport'       => $group2->sport,
-//             ]
-//         ]]);
-// });
-
-// test('a lists of teams can be filtered by name for desigantion', function () {
+// test('a lists of groups can be filtered by name for desigantion', function () {
 //     // thing to find
 //     $name = 'FindMe';
 
-//     // create a team
+//     // create a group
 //     $group = Group::factory()->create(['designation' => $name]);
-//     $differentTeamToNotFind = Group::factory()->create(['designation' => 'somethingelse']);
+//     $differentgroupToNotFind = Group::factory()->create(['designation' => 'somethingelse']);
 
-//     // get the team
+//     // get the group
 //     $this->get("api/v1/groups?name=$name")
 //         ->assertOk()
 //         ->assertJsonCount(1, 'data')
@@ -182,15 +172,15 @@ test('a group can be created', function () {
 //         ]]);
 // });
 
-// test('a lists of teams can be filtered by name for mascot', function () {
+// test('a lists of groups can be filtered by name for mascot', function () {
 //     // thing to find
 //     $name = 'FindMe';
 
-//     // create a team
+//     // create a group
 //     $group = Group::factory()->create(['mascot' => $name]);
-//     $differentTeamToNotFind = Group::factory()->create(['mascot' => 'somethingelse']);
+//     $differentgroupToNotFind = Group::factory()->create(['mascot' => 'somethingelse']);
 
-//     // get the team
+//     // get the group
 //     $this->get("api/v1/groups?name=$name")
 //         ->assertOk()
 //         ->assertJsonCount(1, 'data')
@@ -203,16 +193,16 @@ test('a group can be created', function () {
 //         ]]);
 // });
 
-// test('a team can be deleted', function () {
-//     // create a team
+// test('a group can be deleted', function () {
+//     // create a group
 //     $group = Group::factory()->create();
 
-//     // there should be 1 team in the db
+//     // there should be 1 group in the db
 //     $this->assertDatabaseCount('groups', 1);
 
-//     // delete the team
+//     // delete the group
 //     $this->delete("api/v1/groups/{$group->ulid}")->assertAccepted();
 
-//     // there should be no teams in the db
+//     // there should be no groups in the db
 //     $this->assertDatabaseCount('groups', 0);
 // });

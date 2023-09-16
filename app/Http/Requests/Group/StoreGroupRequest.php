@@ -22,9 +22,8 @@ class StoreGroupRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'designation' => 'required|string|max:255',
-            'mascot' => 'required|string|max:255',
-            'sport' => ['required', new Enum(Sport::class)],
+            'name' => 'required|string|max:255',
+            'owner_id' => ['required', 'exists:users,id'],
         ];
     }
 }
