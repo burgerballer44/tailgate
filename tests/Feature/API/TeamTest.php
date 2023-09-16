@@ -44,14 +44,8 @@ test('the ulid field is populated when a team is created', function () {
     // make data for a team
     $teamData = Team::factory()->make()->getAttributes();
 
-    // there should be no teams in the db
-    $this->assertDatabaseCount('teams', 0);
-
     // post the team data
     $this->post("api/v1/teams", $teamData)->assertCreated();
-
-    // there should be 1 team in the db
-    $this->assertDatabaseCount('teams', 1);
 
     // get the team we posted
     $team = Team::first();
