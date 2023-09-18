@@ -151,58 +151,38 @@ test('a lists of groups can be filtered by user', function () {
         ]]);
 });
 
-// test('a lists of groups can be filtered by name for desigantion', function () {
-//     // thing to find
-//     $name = 'FindMe';
+test('a lists of groups can be filtered by invite_code', function () {
+    $user1 = User::factory()->create();
+    $user2 = User::factory()->create();
 
-//     // create a group
-//     $group = Group::factory()->create(['designation' => $name]);
-//     $differentgroupToNotFind = Group::factory()->create(['designation' => 'somethingelse']);
+    // create 2 User1 groups
+    [$group1, $group2] = Group::factory()->count(2)->create(['owner_id' => $user1->id]);
 
-//     // get the group
-//     $this->get("api/v1/groups?name=$name")
-//         ->assertOk()
-//         ->assertJsonCount(1, 'data')
-//         ->assertJson(['data' => [
-//             [
-//                 'designation' => $group->designation,
-//                 'mascot'      => $group->mascot,
-//                 'sport'       => $group->sport,
-//             ]
-//         ]]);
-// });
+    // create 2 User2 groups
+    [$group3, $group4] = Group::factory()->count(2)->create(['owner_id' => $user2->id]);
 
-// test('a lists of groups can be filtered by name for mascot', function () {
-//     // thing to find
-//     $name = 'FindMe';
+    // get the User1 groups only
+    $this->get("api/v1/groups?invite_code={$group2->invite_code}")
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJson(['data' => [
+            [
+               'name' => $group2->name,
+               'owner_id' => $group2->owner_id,
+           ]
+        ]]);
+});
 
-//     // create a group
-//     $group = Group::factory()->create(['mascot' => $name]);
-//     $differentgroupToNotFind = Group::factory()->create(['mascot' => 'somethingelse']);
+test('a group can be deleted', function () {
+    // create a group
+    $group = Group::factory()->create();
 
-//     // get the group
-//     $this->get("api/v1/groups?name=$name")
-//         ->assertOk()
-//         ->assertJsonCount(1, 'data')
-//         ->assertJson(['data' => [
-//             [
-//                 'designation' => $group->designation,
-//                 'mascot'      => $group->mascot,
-//                 'sport'       => $group->sport,
-//             ]
-//         ]]);
-// });
+    // there should be 1 group in the db
+    $this->assertDatabaseCount('groups', 1);
 
-// test('a group can be deleted', function () {
-//     // create a group
-//     $group = Group::factory()->create();
+    // delete the group
+    $this->delete("api/v1/groups/{$group->ulid}")->assertAccepted();
 
-//     // there should be 1 group in the db
-//     $this->assertDatabaseCount('groups', 1);
-
-//     // delete the group
-//     $this->delete("api/v1/groups/{$group->ulid}")->assertAccepted();
-
-//     // there should be no groups in the db
-//     $this->assertDatabaseCount('groups', 0);
-// });
+    // there should be no groups in the db
+    $this->assertDatabaseCount('groups', 0);
+});

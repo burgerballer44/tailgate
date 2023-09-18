@@ -3,9 +3,11 @@
 namespace App\Http\Requests\Group;
 
 use App\Http\Requests\ApiFormRequest;
-use App\Rules\MustBeAMember;
+use App\Rules\MustNotBeAMember;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rule;
 
-class UpdateGroupRequest extends ApiFormRequest
+class StoreMemberRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,10 +26,10 @@ class UpdateGroupRequest extends ApiFormRequest
     {
         return [
             'group_id' => ['required', 'exists:groups,id'],
-            'name' => 'nullable|string|max:255',
-            'owner_id' => [
-                'nullable',
-                new MustBeAMember
+            'user_id' => [
+                'required',
+                'exists:users,id',
+                new MustNotBeAMember
             ],
         ];
     }

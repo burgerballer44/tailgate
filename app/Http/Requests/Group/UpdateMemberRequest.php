@@ -3,9 +3,11 @@
 namespace App\Http\Requests\Group;
 
 use App\Http\Requests\ApiFormRequest;
-use App\Rules\MustBeAMember;
+use App\Models\GroupRole;
+use App\Rules\MustNotBeAMember;
+use Illuminate\Validation\Rules\Enum;
 
-class UpdateGroupRequest extends ApiFormRequest
+class UpdateMemberRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,11 +25,14 @@ class UpdateGroupRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
+            'role' => ['required', new Enum(GroupRole::class)],
+        ];
+        return [
             'group_id' => ['required', 'exists:groups,id'],
-            'name' => 'nullable|string|max:255',
-            'owner_id' => [
-                'nullable',
-                new MustBeAMember
+            'user_id' => [
+                'required',
+                'exists:users,id',
+                new MustNotBeAMember
             ],
         ];
     }
