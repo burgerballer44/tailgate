@@ -6,8 +6,9 @@ use App\Models\Member;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Group extends Model
@@ -17,17 +18,11 @@ class Group extends Model
     // the length of the invite code generated for a group upon creation
     public const LENGTH_INVITE_CODE = 10;
 
-    // member can not add multiple players to group
-    public const SINGLE_PLAYER = 0;
+    // initial maximum number of members in a group
+    public const INITIAL_MEMBER_LIMIT = 30;
 
-    // member can add multiple players to group
-    public const MULTIPLE_PLAYERS = 1;
-
-    // maximum number of members in a group
-    public const MEMBER_LIMIT = 30;
-
-    // maximum number of players for a player who can have multiple
-    public const PLAYER_LIMIT = 5;
+    // initial maximum number of players for a player who can have multiple
+    public const INITIAL_PLAYER_LIMIT = 5;
 
     // minimum number of admins that have to be in a group
     public const MIN_NUMBER_ADMINS = 1;
@@ -49,6 +44,8 @@ class Group extends Model
     protected $fillable = [
         'name',
         'owner_id',
+        'member_limit',
+        'player_limit',
     ];
 
     /**
@@ -71,6 +68,8 @@ class Group extends Model
         static::creating(function ($group) {
             $group->ulid = Str::ulid();
             $group->invite_code = substr(str_shuffle("23456789ABCDEFGHJKLMNPQRSTUVWXYZ"), 0, self::LENGTH_INVITE_CODE);
+            $group->member_limit = self::INITIAL_MEMBER_LIMIT;
+            $group->player_limit = self::INITIAL_PLAYER_LIMIT;
         });
 
         static::created(function ($group) {
@@ -79,6 +78,13 @@ class Group extends Model
                 'user_id' => $group->owner_id,
                 'role' => GroupRole::GROUP_ADMIN->value,
             ]));
+        });
+
+        static::deleting(function ($group) {
+            // delete all members
+            $group->members->each(function($member) {
+                $member->delete();
+            });
         });
     }
 
@@ -95,13 +101,23 @@ class Group extends Model
         return $query;
     }
 
-    public function owner(): BelongsTo
+    public function owner(): HasOne
     {
-        return $this->belongsTo(User::class);
+        return $this->hasOne(Member::class)->where('user_id', $this->owner_id);
+    }
+
+    public function admin(): HasMany
+    {
+        return $this->hasMany(Member::class)->where('role', GroupRole::GROUP_ADMIN);
     }
 
     public function members(): HasMany
     {
         return $this->hasMany(Member::class);
+    }
+
+    public function players(): HasManyThrough
+    {
+        return $this->HasManyThrough(Player::class, Member::class);
     }
 }

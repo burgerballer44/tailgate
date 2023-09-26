@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
  
-class MustBeAMember implements ValidationRule, DataAwareRule
+class UserMustBeAMember implements ValidationRule, DataAwareRule
 {
     /**
      * All of the data under validation.
@@ -33,10 +33,12 @@ class MustBeAMember implements ValidationRule, DataAwareRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        $group = request()->route('group');
+
         // could be passing in an owner_id or user_id?
         $idToUse = $this->data['owner_id'] ?? $this->data['user_id'];
 
-        if (! Member::where('group_id', $this->data['group_id'])->where('user_id', $idToUse)->exists()) {
+        if (! $group->members->contains('user_id', $idToUse)) {
             $fail('The user is not a member of the group.');
         }
     }

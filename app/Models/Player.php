@@ -4,10 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-class Member extends Model
+class Player extends Model
 {
     use HasFactory;
 
@@ -26,8 +25,8 @@ class Member extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
-        'role',
+        'member_id',
+        'player_name',
     ];
 
     /**
@@ -47,20 +46,8 @@ class Member extends Model
     */
     protected static function booted(): void
     {
-        static::creating(function ($member) {
-            $member->ulid = Str::ulid();
+        static::creating(function ($player) {
+            $player->ulid = Str::ulid();
         });
-
-        static::deleting(function ($member) {
-            // delete all players
-            $member->players->each(function($player) {
-                $player->delete();
-            });
-        });
-    }
-
-    public function players(): HasMany
-    {
-        return $this->hasMany(Player::class);
     }
 }

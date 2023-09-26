@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\GameController;
 use App\Http\Controllers\API\GroupController;
 use App\Http\Controllers\API\MemberController;
+use App\Http\Controllers\API\PlayerController;
 use App\Http\Controllers\API\SeasonController;
 use App\Http\Controllers\API\TeamController;
 use Illuminate\Http\Request;
@@ -30,5 +31,11 @@ Route::prefix('seasons/{season}')->group(function () {
 Route::resource('groups', GroupController::class);
 
 Route::prefix('groups/{group}')->group(function () {
+
     Route::resource('members', MemberController::class);
+
+    Route::prefix('members/{member}')->group(function () {
+        Route::post('/player', [PlayerController::class, 'store']);
+        Route::patch('/player/{player}', [PlayerController::class, 'update']);
+    });
 });

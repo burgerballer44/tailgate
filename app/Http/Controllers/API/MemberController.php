@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\MemberMustBeInGroup;
 use App\Http\Requests\Group\StoreMemberRequest;
 use App\Http\Requests\Group\UpdateMemberRequest;
 use App\Http\Resources\MemberResource;
@@ -12,6 +13,14 @@ use App\Models\Member;
 
 class MemberController extends Controller
 {
+    /**
+     * Instantiate a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware(MemberMustBeInGroup::class)->only('update', 'destroy');
+    }
+    
     /**
      * Store a newly created resource in storage.
      */
@@ -34,9 +43,9 @@ class MemberController extends Controller
     {
         $validated = $request->validated();
 
-        $group->fill($validated);
+        $member->fill($validated);
         
-        $group->save();
+        $member->save();
 
         return response()->noContent();
     }
@@ -44,9 +53,9 @@ class MemberController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Group $group)
+    public function destroy(Group $group, Member $member)
     {
-        $group->delete();
+        $member->delete();
         
         return response()->json([], 202);
     }

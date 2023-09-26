@@ -36,6 +36,8 @@ test('the group is returned when a group is created', function () {
         ->assertJson(['data' => [
                 'name' => $groupData['name'],
                 'owner_id' => $groupData['owner_id'],
+                'member_limit' => $groupData['member_limit'],
+                'player_limit' => $groupData['player_limit'],
             ]
         ]);
 });
@@ -66,6 +68,32 @@ test('the invite_code field is populated when a group is created', function () {
     expect($group->invite_code)->toBeString();
 });
 
+test('the member limit field uses the initial value when a group is created', function () {
+    // make data for a group
+    $groupData = Group::factory()->make()->getAttributes();
+
+    // post the group data
+    $this->post("api/v1/groups", $groupData)->assertCreated();
+
+    // get the group we posted
+    $group = Group::first();
+
+    expect($group->member_limit)->toBe(Group::INITIAL_MEMBER_LIMIT);
+});
+
+test('the player limit field uses the initial value when a group is created', function () {
+    // make data for a group
+    $groupData = Group::factory()->make()->getAttributes();
+
+    // post the group data
+    $this->post("api/v1/groups", $groupData)->assertCreated();
+
+    // get the group we posted
+    $group = Group::first();
+
+    expect($group->player_limit)->toBe(Group::INITIAL_PLAYER_LIMIT);
+});
+
 test('a group can be viewed by ulid', function () {
     // create a group
     $group = Group::factory()->create();
@@ -76,6 +104,8 @@ test('a group can be viewed by ulid', function () {
         ->assertJson(['data' => [
                 'name' => $group->name,
                 'owner_id' => $group->owner_id,
+                'member_limit' => $group->member_limit,
+                'player_limit' => $group->player_limit,
             ]
         ]);
 });
@@ -97,7 +127,10 @@ test('a group can be updated', function () {
 
     // set fields to update
     $data = [
+        'group_id' => $group->id,
         'name' => 'updatedName',
+        'member_limit' => 40,
+        'player_limit' => 4,
     ];
 
     // post the data
@@ -106,6 +139,8 @@ test('a group can be updated', function () {
     $group->refresh();
     
     expect($group->name)->toBe($data['name']);
+    expect($group->member_limit)->toBe($data['member_limit']);
+    expect($group->player_limit)->toBe($data['player_limit']);
 });
 
 test('a lists of groups can be retrieved', function () {
@@ -119,9 +154,13 @@ test('a lists of groups can be retrieved', function () {
             [
                 'name' => $group1->name,
                 'owner_id' => $group1->owner_id,
+                'member_limit' => $group1->member_limit,
+                'player_limit' => $group1->player_limit,
             ], [
                 'name' => $group2->name,
                 'owner_id' => $group2->owner_id,
+                'member_limit' => $group2->member_limit,
+                'player_limit' => $group2->player_limit,
             ]
         ]]);
 });
@@ -144,9 +183,13 @@ test('a lists of groups can be filtered by user', function () {
             [
                'name' => $group1->name,
                'owner_id' => $group1->owner_id,
+               'member_limit' => $group1->member_limit,
+               'player_limit' => $group1->player_limit,
            ], [
                'name' => $group2->name,
                'owner_id' => $group2->owner_id,
+               'member_limit' => $group2->member_limit,
+               'player_limit' => $group2->player_limit,
            ]
         ]]);
 });
@@ -169,6 +212,8 @@ test('a lists of groups can be filtered by invite_code', function () {
             [
                'name' => $group2->name,
                'owner_id' => $group2->owner_id,
+               'member_limit' => $group2->member_limit,
+               'player_limit' => $group2->player_limit,
            ]
         ]]);
 });

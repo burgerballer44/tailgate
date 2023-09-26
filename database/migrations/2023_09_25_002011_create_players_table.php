@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('groups', function (Blueprint $table) {
+        Schema::create('players', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->index();
-            $table->string('name');
-            $table->unsignedBigInteger('owner_id');
-            $table->string('invite_code');
-            $table->integer('member_limit');
-            $table->integer('player_limit');
+            $table->unsignedBigInteger('member_id');
+            $table->string('player_name');
             $table->timestamps();
 
-            $table->foreign('owner_id')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('restrict');
         });
     }
 
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('groups');
+        Schema::dropIfExists('players');
     }
 };

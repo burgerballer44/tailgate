@@ -53,6 +53,13 @@ class Season extends Model
         static::creating(function ($season) {
             $season->ulid = Str::ulid();
         });
+
+        static::deleting(function ($season) {
+            // delete all games
+            $season->games->each(function($game) {
+                $game->delete();
+            });
+        });
     }
 
     public function scopeFilter($query, array $filters)

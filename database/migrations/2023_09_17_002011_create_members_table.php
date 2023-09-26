@@ -18,6 +18,9 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->enum('role', ['Group-Admin', 'Group-Member']);
             $table->timestamps();
+
+            $table->foreign('group_id')->references('id')->on('groups')->onDelete('restrict');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
         });
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\GameMustBelongToSeason;
 use App\Http\Requests\Season\AddGameRequest;
 use App\Http\Requests\Season\UpdateGameRequest;
 use App\Http\Resources\GameResource;
@@ -11,6 +12,14 @@ use App\Models\Season;
 
 class GameController extends Controller
 {
+    /**
+     * Instantiate a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware(GameMustBelongToSeason::class)->only('update', 'destroy');
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -30,10 +39,6 @@ class GameController extends Controller
      */
     public function update(UpdateGameRequest $request, Season $season, Game $game)
     {
-        if (! $season->games->contains($game)) {
-            abort(404, 'Game cannot be found or is not part of the listed season.');
-        }
-
         $validated = $request->validated();
 
         $game->fill($validated);
@@ -48,11 +53,7 @@ class GameController extends Controller
      */
     public function destroy(Season $season, Game $game)
     {
-        if ($season->games->contains($game)) {
-            $game->delete();
-            return response()->json([], 202);
-        }
-
-       abort(404, 'Game cannot be found or is not part of the listed season.');
+        $game->delete();
+        return response()->json([], 202);
     }
 }

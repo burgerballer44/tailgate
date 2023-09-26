@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Group;
 
 use App\Http\Requests\ApiFormRequest;
-use App\Rules\MustBeAMember;
+use App\Rules\UserMustBeAMember;
 
 class UpdateGroupRequest extends ApiFormRequest
 {
@@ -23,12 +23,10 @@ class UpdateGroupRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'group_id' => ['required', 'exists:groups,id'],
             'name' => 'nullable|string|max:255',
-            'owner_id' => [
-                'nullable',
-                new MustBeAMember
-            ],
+            'member_limit' => ['nullable', 'integer', 'max:50'],
+            'player_limit' => ['nullable', 'integer', 'max:10'],
+            'owner_id' => ['nullable', new UserMustBeAMember],
         ];
     }
 }

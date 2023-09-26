@@ -33,7 +33,9 @@ class MustNotBeAMember implements ValidationRule, DataAwareRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (Member::where('group_id', $this->data['group_id'])->where('user_id', $this->data['user_id'])->exists()) {
+        $group = request()->route('group');
+
+        if ($group->members->contains('user_id', $this->data['user_id'])) {
             $fail('The user is already a member of the group.');
         }
     }

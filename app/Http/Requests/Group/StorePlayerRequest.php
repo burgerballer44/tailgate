@@ -3,11 +3,11 @@
 namespace App\Http\Requests\Group;
 
 use App\Http\Requests\ApiFormRequest;
-use App\Rules\GroupMemberLimit;
-use App\Rules\MustNotBeAMember;
+use App\Rules\PlayerLimit;
+use App\Rules\UniqueUsernamePerGroup;
 use Illuminate\Validation\Rule;
 
-class StoreMemberRequest extends ApiFormRequest
+class StorePlayerRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +25,7 @@ class StoreMemberRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'exists:users,id', new MustNotBeAMember, new GroupMemberLimit],
+            'player_name' => ['required', 'string', new PlayerLimit, new UniqueUsernamePerGroup],
         ];
     }
 }
