@@ -1,7 +1,10 @@
 <?php
 
 
+use App\Models\Follow;
 use App\Models\Group;
+use App\Models\Season;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
@@ -230,4 +233,102 @@ test('a group can be deleted', function () {
 
     // there should be no groups in the db
     $this->assertDatabaseCount('groups', 0);
+});
+
+test('a group can follow a team', function () {
+    // create a group
+    $group = Group::factory()->create();
+
+    // set the team and season to follow
+    $data = [
+        'team_id' => Team::factory()->create()->id,
+        'season_id' => Season::factory()->create()->id,
+    ];
+
+    // there should be 0 follow in the db
+    $this->assertDatabaseCount('follows', 0);
+
+    // try to follow the team in a season
+    $this->post("api/v1/groups/{$group->ulid}/follow", $data)->assertCreated();
+
+    // there should be 1 follow in the db
+    $this->assertDatabaseCount('follows', 1);
+});
+
+test('following a team populates the uild field', function () {
+    // create a group
+    $group = Group::factory()->create();
+
+    // set the team and season to follow
+    $data = [
+        'team_id' => Team::factory()->create()->id,
+        'season_id' => Season::factory()->create()->id,
+    ];
+
+    // there should be 0 follow in the db
+    $this->assertDatabaseCount('follows', 0);
+
+    // try to follow the team in a season
+    $this->post("api/v1/groups/{$group->ulid}/follow", $data)->assertCreated();
+
+    // get the follow we posted
+    $follow = $group->follow;
+
+    expect(Str::isUlid($follow->ulid))->toBeTrue();
+});
+
+test('a team cannot be followed for a season that has ended', function () {
+    // create a group
+    $group = Group::factory()->create();
+
+    // set the team and season to follow
+    $data = [
+        'team_id' => Team::factory()->create()->id,
+        'season_id' => Season::factory()->create(['season_end' => '2019-12-28'])->id,
+    ];
+
+    // try to follow the team in a season
+    $this->post("api/v1/groups/{$group->ulid}/follow", $data)
+        ->assertUnprocessable()
+        ->assertJson(['data' => [
+                'season_id' => ['Season has ended.'],
+            ]
+        ]);
+});
+
+test('cannot follow a team if already following a team', function () {
+    // create a group
+    $group = Group::factory()->create();
+    // follow a team
+    $follow = Follow::factory()->create(['group_id' => $group->id]);
+
+    // set the team and season to follow
+    $data = [
+        'team_id' => Team::factory()->create()->id,
+        'season_id' => Season::factory()->create(['season_end' => '2019-12-28'])->id,
+    ];
+
+    // try to follow the team in a season
+    $this->post("api/v1/groups/{$group->ulid}/follow", $data)
+        ->assertUnprocessable()
+        ->assertJson(['data' => [
+                'follow' => ['This group is already following a team.'],
+            ]
+        ]);
+});
+
+test('a follow can be removed', function () {
+    // create a group
+    $group = Group::factory()->create();
+    // follow a team
+    $follow = Follow::factory()->create(['group_id' => $group->id]);
+
+    // there should be 1 follow in the db
+    $this->assertDatabaseCount('follows', 1);
+
+    // try to remove the follow
+    $this->delete("api/v1/groups/{$group->ulid}/follow/{$follow->ulid}")->assertAccepted();
+
+    // there should be 0 follow in the db
+    $this->assertDatabaseCount('follows', 0);
 });

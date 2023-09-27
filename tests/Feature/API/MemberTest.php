@@ -225,7 +225,7 @@ test('a members role cannot be updated if they are the last group admin', functi
     $this->patch("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}", $data)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'role' => ['Group admin minimum reached. Please update a different member to the Group Amin role before updating this member.'],
+                'role' => ['Group admin minimum reached. Please update a different member to the Group Admin role before updating this member.'],
             ]
         ]);
 
@@ -245,6 +245,25 @@ test('a member can be removed from the group', function () {
 
     // try to remove the member
     $this->delete("api/v1/groups/{$group->ulid}/members/{$member->ulid}")->assertAccepted();
+
+    // there should be 1 member in the db
+    $this->assertDatabaseCount('members', 1);
+});
+
+test('a member cannot be removed from the group if they are the last admin', function () {
+    // create a group
+    $group = Group::factory()->create();
+
+    // there should be 1 member in the db
+    $this->assertDatabaseCount('members', 1);
+
+    // try to remove the member
+    $this->delete("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}")
+        ->assertUnprocessable()
+        ->assertJson(['data' => [
+                'member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.'],
+            ]
+        ]);
 
     // there should be 1 member in the db
     $this->assertDatabaseCount('members', 1);
@@ -332,9 +351,7 @@ test('a player cannot be added if the name has been used by any member in the gr
         ]);
 });
 
-test('the owner of a player can be changed to a different member', function () {
-    
-    $this->withoutExceptionHandling();
+test('the owner of a player can be changed to a different member', function () {    
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner
@@ -347,6 +364,7 @@ test('the owner of a player can be changed to a different member', function () {
         'member_id' => $member->id,
     ];
 
+    // should start off as the owner player
     expect($player->member_id)->toBe($group->owner->id);
 
     // try to update the player
@@ -356,4 +374,20 @@ test('the owner of a player can be changed to a different member', function () {
 
     // the player should belong to the other member now
     expect($player->member_id)->toBe($member->id);
+});
+
+test('a player can be removed', function () {    
+    // create a group
+    $group = Group::factory()->create();
+    // add a player to the owner
+    $player = Player::factory()->create(['player_name' => 'name used', 'member_id' => $group->owner->id]);
+
+    // there should be 1 player in the db
+    $this->assertDatabaseCount('players', 1);
+
+    // try to delete the player
+    $this->delete("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}/player/{$player->ulid}")->assertAccepted();
+
+    // there should be 0 player in the db
+    $this->assertDatabaseCount('players', 0);
 });

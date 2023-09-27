@@ -24,7 +24,7 @@ class SeasonFactory extends Factory
             'sport' => fake()->randomElement(Sport::cases())->value,
             'season_type' => fake()->randomElement(SeasonType::cases())->value,
             'season_start' => '2019-09-01',
-            'season_end' => '2019-12-28',
+            'season_end' => '2099-12-28',
         ];
     }
 }

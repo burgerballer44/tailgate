@@ -3,13 +3,25 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\FollowBelongsToGroup;
+use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
+use App\Http\Resources\FollowResource;
 use App\Http\Resources\GroupResource;
+use App\Models\Follow;
 use App\Models\Group;
 
 class GroupController extends Controller
 {
+    /**
+     * Instantiate a new controller instance.
+     */
+    public function __construct()
+    {
+        $this->middleware(FollowBelongsToGroup::class)->only('removeFollow');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -61,6 +73,37 @@ class GroupController extends Controller
     {
         $group->delete();
         
+        return response()->json([], 202);
+    }
+
+    /**
+     * Follow a team
+     */
+    public function followTeam(FollowTeamRequest $request, Group $group)
+    {
+        $validated = $request->validated();
+
+        if ($group->follow) {
+            return response()->json(['data' => ['follow' => ['This group is already following a team.']]], 422);
+        }
+
+        $follow = $group->follow()->save(
+            new Follow([
+                'team_id' => $validated['team_id'],
+                'season_id' => $validated['season_id'],
+            ])
+        );
+
+        return new FollowResource($follow);
+    }
+
+    /**
+     * Remove a follow
+     */
+    public function removeFollow(Group $group, Follow $follow)
+    {
+        $follow->delete();
+
         return response()->json([], 202);
     }
 }

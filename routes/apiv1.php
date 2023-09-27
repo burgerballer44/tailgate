@@ -32,10 +32,14 @@ Route::resource('groups', GroupController::class);
 
 Route::prefix('groups/{group}')->group(function () {
 
+    Route::post('/follow', [GroupController::class, 'followTeam']);
+    Route::delete('/follow/{follow}', [GroupController::class, 'removeFollow']);
+
     Route::resource('members', MemberController::class);
 
     Route::prefix('members/{member}')->group(function () {
         Route::post('/player', [PlayerController::class, 'store']);
         Route::patch('/player/{player}', [PlayerController::class, 'update']);
+        Route::delete('/player/{player}', [PlayerController::class, 'destroy']);
     });
 });

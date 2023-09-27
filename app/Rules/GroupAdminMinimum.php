@@ -26,7 +26,7 @@ class GroupAdminMinimum implements ValidationRule
             $group->admin->first() == $member &&
             GroupRole::GROUP_ADMIN != $value
         ) {
-            $fail('Group admin minimum reached. Please update a different member to the Group Amin role before updating this member.');
+            $fail('Group admin minimum reached. Please update a different member to the Group Admin role before updating this member.');
         }
 
     }

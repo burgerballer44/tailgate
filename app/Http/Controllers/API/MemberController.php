@@ -55,6 +55,13 @@ class MemberController extends Controller
      */
     public function destroy(Group $group, Member $member)
     {
+        if (
+            Group::MIN_NUMBER_ADMINS == $group->admin->count() &&
+            $group->admin->first() == $member
+        ) {
+            return response()->json(['data' =>['member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.']]], 422);
+        }
+
         $member->delete();
         
         return response()->json([], 202);

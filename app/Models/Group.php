@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Follow;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -85,6 +86,8 @@ class Group extends Model
             $group->members->each(function($member) {
                 $member->delete();
             });
+            // delete follow
+            $group->follow?->delete();
         });
     }
 
@@ -104,6 +107,11 @@ class Group extends Model
     public function owner(): HasOne
     {
         return $this->hasOne(Member::class)->where('user_id', $this->owner_id);
+    }
+
+    public function follow(): HasOne
+    {
+        return $this->hasOne(Follow::class);
     }
 
     public function admin(): HasMany
