@@ -14,14 +14,12 @@ return new class extends Migration
         Schema::create('scores', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->index();
-            $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('player_id');
             $table->unsignedBigInteger('game_id');
             $table->string('home_team_prediction');
             $table->string('away_team_prediction');
             $table->timestamps();
 
-            $table->foreign('group_id')->references('id')->on('groups')->onDelete('restrict');
             $table->foreign('player_id')->references('id')->on('players')->onDelete('restrict');
             $table->foreign('game_id')->references('id')->on('games')->onDelete('restrict');
         });

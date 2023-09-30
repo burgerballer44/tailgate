@@ -355,7 +355,7 @@ test('the owner of a player can be changed to a different member', function () {
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner
-    $player = Player::factory()->create(['player_name' => 'name used', 'member_id' => $group->owner->id]);
+    $player = Player::factory()->create(['member_id' => $group->owner->id]);
     // add a member
     $member = Member::factory()->create(['group_id' => $group->id]);
 
@@ -380,7 +380,7 @@ test('a player can be removed', function () {
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner
-    $player = Player::factory()->create(['player_name' => 'name used', 'member_id' => $group->owner->id]);
+    $player = Player::factory()->create(['member_id' => $group->owner->id]);
 
     // there should be 1 player in the db
     $this->assertDatabaseCount('players', 1);

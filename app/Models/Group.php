@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Follow;
 use App\Models\Member;
+use App\Models\Score;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -126,6 +127,6 @@ class Group extends Model
 
     public function players(): HasManyThrough
     {
-        return $this->HasManyThrough(Player::class, Member::class);
+        return $this->hasManyThrough(Player::class, Member::class);
     }
 }

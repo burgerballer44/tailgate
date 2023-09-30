@@ -14,7 +14,7 @@ class SeasonNotEnded implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $season = Season::find($value)->first();
+        $season = Season::where('id', $value)->first();
 
         $today = (new \DateTime('today'))->format('Y-m-d');
         $seasonEnd = \DateTimeImmutable::createFromFormat("Y-m-d", $season->season_end)->format("Y-m-d");

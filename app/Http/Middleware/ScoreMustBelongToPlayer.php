@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class PlayerMustBelongToGroup
+class ScoreMustBelongToPlayer
 {
    /**
     * Handle an incoming request.
@@ -17,13 +17,13 @@ class PlayerMustBelongToGroup
     */
     public function handle(Request $request, Closure $next): Response
     {
-        $group = $request->route('group');
         $player = $request->route('player');
+        $score = $request->route('score');
 
-        if ($group->players->contains($player)) {
+        if ($player->scores->contains($score)) {
             return $next($request);
         }
 
-        return response()->json(['message' => 'Player cannot be found or is not part of the group.'], 404);
+        return response()->json(['message' => 'Score cannot be found or is not part of the group.'], 404);
     }
 }

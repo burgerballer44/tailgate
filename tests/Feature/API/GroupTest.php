@@ -305,7 +305,7 @@ test('cannot follow a team if already following a team', function () {
     // set the team and season to follow
     $data = [
         'team_id' => Team::factory()->create()->id,
-        'season_id' => Season::factory()->create(['season_end' => '2019-12-28'])->id,
+        'season_id' => Season::factory()->create()->id,
     ];
 
     // try to follow the team in a season

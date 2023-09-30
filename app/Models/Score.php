@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Score;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
-class Player extends Model
+class Score extends Model
 {
     use HasFactory;
 
@@ -27,8 +26,20 @@ class Player extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'member_id',
-        'player_name',
+        'player_id',
+        'game_id',
+        'home_team_prediction',
+        'away_team_prediction',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'home_team_prediction' => 'integer',
+        'away_team_prediction' => 'integer',
     ];
 
     /**
@@ -48,13 +59,13 @@ class Player extends Model
     */
     protected static function booted(): void
     {
-        static::creating(function ($player) {
-            $player->ulid = Str::ulid();
+        static::creating(function ($score) {
+            $score->ulid = Str::ulid();
         });
     }
 
-    public function scores(): HasMany
+    public function game(): BelongsTo
     {
-        return $this->hasMany(Score::class);
+        return $this->belongsTo(Game::class);
     }
 }

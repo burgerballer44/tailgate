@@ -7,7 +7,7 @@ use DateTimeImmutable;
 // some date fields need to be able to hold things like 'TBD'
 class DateOrString
 {
-    private const DATE_FORMAT = 'Y-m-d';
+    public const DATE_FORMAT = 'Y-m-d';
 
     private $date;
 

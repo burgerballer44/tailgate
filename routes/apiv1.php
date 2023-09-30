@@ -38,8 +38,12 @@ Route::prefix('groups/{group}')->group(function () {
     Route::resource('members', MemberController::class);
 
     Route::prefix('members/{member}')->group(function () {
-        Route::post('/player', [PlayerController::class, 'store']);
-        Route::patch('/player/{player}', [PlayerController::class, 'update']);
-        Route::delete('/player/{player}', [PlayerController::class, 'destroy']);
+        
+        Route::resource('player', PlayerController::class);
+
+        Route::post('/player/{player}/score', [PlayerController::class, 'submitScore']);
+        Route::patch('/player/{player}/score/{score}', [PlayerController::class, 'updateScore']);
+        Route::delete('/player/{player}/score/{score}', [PlayerController::class, 'destroyScore']);
     });
+
 });

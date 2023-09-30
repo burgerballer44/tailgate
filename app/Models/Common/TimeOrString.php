@@ -7,7 +7,7 @@ use DateTimeImmutable;
 // some time fields need to be able to hold things like 'TBD'
 class TimeOrString
 {
-    private const TIME_FORMAT = 'H:i';
+    public const TIME_FORMAT = 'H:i';
 
     private $time;
 
