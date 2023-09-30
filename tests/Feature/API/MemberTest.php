@@ -368,7 +368,7 @@ test('the owner of a player can be changed to a different member', function () {
     expect($player->member_id)->toBe($group->owner->id);
 
     // try to update the player
-    $this->patch("api/v1/groups/{$group->ulid}/members/{$member->ulid}/player/{$player->ulid}", $data)->assertNoContent();
+    $this->patch("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}/player/{$player->ulid}", $data)->assertNoContent();
 
     $player->refresh();
 
