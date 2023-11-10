@@ -2,47 +2,61 @@
 import { ref } from "vue";
 import { reset } from '@formkit/core';
 
-const props = defineProps([]);
+const props = defineProps({
+    sports: {
+        type: Array,
+        default: [],
+    },
+    team: {
+      type: Object,
+        default(rawProps) {
+            return {ulid: null, designation: '', mascot: '', sport: ''}
+        }
+    },
+    addTeam: {
+        type: Function,
+    },
+    editTeam: {
+        type: Function,
+    }
+});
 
-async function handleSubmit (formValues, form) {
+// determine if we are editing
+let editing = false;
+if (props.team.ulid) {
+    editing = true;
+}
 
-    showSuccessAlert.value = false;
+async function handleSubmit(formValues, form) {
+
     form.clearErrors()
 
-    let apiUrl = '/api/datamodelmanager/v1/taxonomies/' + props.taxonomy_id + '/attributes'
-    let apiMethod = 'POST'
+    let response;
 
-    if (editingForm) {
-        formValues['attribute_id'] = selectedAttribute.id
-        apiUrl = '/api/datamodelmanager/v1/taxonomies/' + props.taxonomy_id + '/attributes/' + formValues['attribute_id']
-        apiMethod = 'PATCH'
+    // if we are editing
+    if (editing) {
+        formValues['team_ulid'] = props.team.ulid
+        response = await props.editTeam(formValues);
+    // else we are adding
+    } else {
+        response = await props.addTeam(formValues);
     }
 
-    axios({
-        method: apiMethod,
-        url: apiUrl,
-        data: formValues,
-        headers: {
-            'Accept': 'application/json'
-        },
-        params: {
-            org_key: plezio.current_org_key,
-        }
-    })
-    .then(function (response) {
-        showSuccessAlert.value = true
-        props.getAttributes()
-        if (!editingForm) {
-            reset(form);
-        }
-    }).catch(function (error) {
-        form.setErrors('', error.response.data.data)
-    });
+    if (true == response) {
+        reset(form);
+    } else {
+        form.setErrors('', response.response.data.data)
+    }
 }
 
 </script>
 
 <template>
+
+    <div class="mb-4 text-lg font-semibold leading-6 text-gray-900">
+        <p v-if="editing"> Edit Team - {{ team.designation }} {{ team.mascot }}</p>
+        <p v-else>New Team</p>
+    </div>
 
     <FormKit
         type="form"
@@ -52,26 +66,31 @@ async function handleSubmit (formValues, form) {
 
         <FormKit
             type="text"
-            name="name"
-            id="name"
-            label="Name"
+            name="designation"
+            id="designation"
+            label="Designation"
             validation="required|length:1,255"
-        />
-
-        <FormKit
-            type="textarea"
-            name="description"
-            id="description"
-            label="Description"
-            validation="length:0,999"
+            :value="team.designation"
         />
 
         <FormKit
             type="text"
-            name="group"
-            id="group"
-            label="Group"
-            validation="length:0,255"
+            name="mascot"
+            id="mascot"
+            label="Mascot"
+            validation="required|length:1,255"
+            :value="team.mascot"
+        />
+
+        <FormKit
+            type="select"
+            label="Which sport?"
+            placeholder="Select a sport"
+            name="sport"
+            id="sport"
+            :options="sports"
+            validation="required"
+            :value="team.sport"
         />
 
     </FormKit>

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Sport;
+
 class TeamController extends Controller
 {
     /**
@@ -9,6 +11,8 @@ class TeamController extends Controller
      */
     public function index()
     {
-        return view('teams.index');
+        return view('teams.index', [
+            'sports' => collect(Sport::cases())->pluck('value')
+        ]);
     }
 }
