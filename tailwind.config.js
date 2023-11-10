@@ -1,5 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+const formKitTailwind = require('@formkit/themes/tailwindcss');
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -21,5 +22,8 @@ export default {
         },
     },
 
-    plugins: [forms],
+    plugins: [
+        forms,
+        formKitTailwind
+    ],
 };
