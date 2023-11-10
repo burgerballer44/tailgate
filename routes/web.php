@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -56,6 +57,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
             Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        });
+
+        Route::prefix('teams')->group(function () {
+            Route::get('/', [TeamController::class, 'index'])->name('teams.index');
         });
     });
 });

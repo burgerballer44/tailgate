@@ -1,18 +1,10 @@
 import './bootstrap';
-
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-Alpine.start();
-
 import { createApp } from 'vue'
-import Teams from './components/Teams.vue'
+import { plugin, defaultConfig } from '@formkit/vue'
+import TeamsManager from './components/teams/TeamsManager.vue'
 
-const app = createApp({
+let app = createApp({
     components: {
-        Teams,
+        TeamsManager
     }
-});
-
-app.mount("#app");
+}).use(plugin, defaultConfig).mount('#app');

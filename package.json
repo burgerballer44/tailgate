@@ -16,6 +16,10 @@
         "vite": "^4.0.0"
     },
     "dependencies": {
-        "@vitejs/plugin-vue": "^4.3.4"
+        "@formkit/vue": "^1.2.1",
+        "@headlessui/vue": "^1.7.16",
+        "@heroicons/vue": "^2.0.18",
+        "@vitejs/plugin-vue": "^4.3.4",
+        "@vue-hero-icons/outline": "^1.7.2"
     }
 }
