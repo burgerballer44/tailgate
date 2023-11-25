@@ -4,6 +4,7 @@ import Modal from "@/components/tailwindui/Modal.vue";
 import TeamForm from "@/components/teams/TeamForm.vue";
 
 const props = defineProps({
+    // list of sports a team can be
     sports: {
         type: Array,
         default: [],

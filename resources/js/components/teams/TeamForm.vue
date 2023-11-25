@@ -3,30 +3,36 @@ import { ref } from "vue";
 import { reset } from '@formkit/core';
 
 const props = defineProps({
+    // list of sports a team can be
     sports: {
         type: Array,
         default: [],
     },
+    // the team we are editing or a default team object
     team: {
       type: Object,
         default(rawProps) {
             return {ulid: null, designation: '', mascot: '', sport: ''}
         }
     },
+    // function for adding to team
     addTeam: {
         type: Function,
     },
+    // function for editing a team
     editTeam: {
         type: Function,
     }
 });
 
 // determine if we are editing
+// by checking a ulid
 let editing = false;
 if (props.team.ulid) {
     editing = true;
 }
 
+// submit the form
 async function handleSubmit(formValues, form) {
 
     form.clearErrors()
