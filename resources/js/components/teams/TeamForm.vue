@@ -49,7 +49,9 @@ async function handleSubmit(formValues, form) {
     }
 
     if (true == response) {
-        reset(form);
+        if (!editing) {
+            reset(form);
+        }
     } else {
         form.setErrors('', response.response.data.data)
     }

@@ -6,7 +6,9 @@
                     <div class="flex space-x-4">
                         @auth
                             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'bg-gray-900 text-white aria-current=\'page\'' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Dashboard</a>
+                            <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.index') ? 'bg-gray-900 text-white aria-current=\'page\'' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Users</a>
                             <a href="{{ route('teams.index') }}" class="{{ request()->routeIs('teams.index') ? 'bg-gray-900 text-white aria-current=\'page\'' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Teams</a>
+                            <a href="{{ route('seasons.index') }}" class="{{ request()->routeIs('seasons.index') ? 'bg-gray-900 text-white aria-current=\'page\'' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Seasons</a>
                         @else
                             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'bg-gray-900 text-white aria-current=\'page\'' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }} rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Home</a>
                         @endauth

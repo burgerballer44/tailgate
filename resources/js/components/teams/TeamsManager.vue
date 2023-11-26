@@ -30,7 +30,7 @@ const showModal = ref(false)
 
 // get all the teams
 async function getTeams() {
-    const result = await fetch('api/v1/teams')
+    const result = await fetch(apiBase)
         .then(response => response.json())
         .then(json => (teams.value = json.data))
         .catch(err => (apiError.value = err))

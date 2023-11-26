@@ -72,4 +72,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->status = UserStatus::ACTIVE;
     }
+
+    public function scopeFilter($query, array $filters)
+    {
+
+
+        return $query;
+    }
 }

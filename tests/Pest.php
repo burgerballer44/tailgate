@@ -54,7 +54,7 @@ function signInRegularUser(User $user = null): User
     // create user if not provided
     $user = $user ?: User::factory()->create([
         'name' => 'Regular User',
-        'role' => UserRole::REGULAR,
+        'role' => UserRole::REGULAR->value,
     ]);
 
     actingAs($user);
