@@ -128,6 +128,7 @@ onMounted(() => {
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Role</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email Verified</th>
                     <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span class="sr-only">Edit</span>
                     </th>
@@ -140,6 +141,7 @@ onMounted(() => {
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ user.email }}</td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ user.status }}</td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ user.role }}</td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ user.email_verified_at }}</td>
                     <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                       <a href="#" @click.prevent="selectedUser = user; showModal = true;" class="px-2 text-indigo-600 hover:text-indigo-900">Edit</a>
                       <a href="#" @click.prevent="deleteUser(user.ulid)" class="px-2 text-indigo-600 hover:text-indigo-900">Delete</a>
