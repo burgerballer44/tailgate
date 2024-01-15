@@ -135,7 +135,7 @@ test('a user cannot be added to a group if already a member ', function () {
 
     // use the group owner id
     $memberData = [
-        'user_id' => $group->owner->user_id
+        'user_id' => $group->owner->id
     ];
 
     // try to add the member
@@ -222,7 +222,7 @@ test('a members role cannot be updated if they are the last group admin', functi
     ];
 
     // try to update the OWNER to be a regular group member
-    $this->patch("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}", $data)
+    $this->patch("api/v1/groups/{$group->ulid}/members/{$group->ownerMember->ulid}", $data)
         ->assertUnprocessable()
         ->assertJson(['data' => [
                 'role' => ['Group admin minimum reached. Please update a different member to the Group Admin role before updating this member.'],
@@ -258,7 +258,7 @@ test('a member cannot be removed from the group if they are the last admin', fun
     $this->assertDatabaseCount('members', 1);
 
     // try to remove the member
-    $this->delete("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}")
+    $this->delete("api/v1/groups/{$group->ulid}/members/{$group->ownerMember->ulid}")
         ->assertUnprocessable()
         ->assertJson(['data' => [
                 'member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.'],
@@ -335,7 +335,7 @@ test('a player cannot be added if the name has been used by any member in the gr
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner
-    $player = Player::factory()->create(['player_name' => 'name used', 'member_id' => $group->owner->id]);
+    $player = Player::factory()->create(['player_name' => 'name used', 'member_id' => $group->ownerMember->id]);
     // add a member
     $member = Member::factory()->create(['group_id' => $group->id]);
 
@@ -355,7 +355,7 @@ test('the owner of a player can be changed to a different member', function () {
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner
-    $player = Player::factory()->create(['member_id' => $group->owner->id]);
+    $player = Player::factory()->create(['member_id' => $group->ownerMember->id]);
     // add a member
     $member = Member::factory()->create(['group_id' => $group->id]);
 
@@ -365,10 +365,10 @@ test('the owner of a player can be changed to a different member', function () {
     ];
 
     // should start off as the owner player
-    expect($player->member_id)->toBe($group->owner->id);
+    expect($player->member_id)->toBe($group->ownerMember->id);
 
     // try to update the player
-    $this->patch("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}/player/{$player->ulid}", $data)->assertNoContent();
+    $this->patch("api/v1/groups/{$group->ulid}/members/{$group->ownerMember->ulid}/player/{$player->ulid}", $data)->assertNoContent();
 
     $player->refresh();
 
@@ -380,13 +380,13 @@ test('a player can be removed', function () {
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner
-    $player = Player::factory()->create(['member_id' => $group->owner->id]);
+    $player = Player::factory()->create(['member_id' => $group->ownerMember->id]);
 
     // there should be 1 player in the db
     $this->assertDatabaseCount('players', 1);
 
     // try to delete the player
-    $this->delete("api/v1/groups/{$group->ulid}/members/{$group->owner->ulid}/player/{$player->ulid}")->assertAccepted();
+    $this->delete("api/v1/groups/{$group->ulid}/members/{$group->ownerMember->ulid}/player/{$player->ulid}")->assertAccepted();
 
     // there should be 0 player in the db
     $this->assertDatabaseCount('players', 0);

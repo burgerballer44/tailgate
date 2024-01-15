@@ -111,6 +111,11 @@ class Group extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function ownerMember(): HasOne
+    {
+        return $this->hasOne(Member::class)->where('user_id', $this->owner_id);
+    }
+
     public function follow(): HasOne
     {
         return $this->hasOne(Follow::class);

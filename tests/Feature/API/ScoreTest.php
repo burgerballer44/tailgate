@@ -40,7 +40,7 @@ beforeEach(function() {
     ]);
 
     // add a player to the owner
-    $this->player = Player::factory()->create(['member_id' => $this->group->owner->id]);
+    $this->player = Player::factory()->create(['member_id' => $this->group->ownerMember->id]);
 });
 
 test('a player can submit a score', function () {    
@@ -55,7 +55,7 @@ test('a player can submit a score', function () {
     $this->assertDatabaseCount('scores', 0);
 
     // try to submit a score
-    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score", $scoreData)
+    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertCreated();
 
     // there should be 1 scores in the db
@@ -71,7 +71,7 @@ test('submitting a score populates the ulid field', function () {
     ];
 
     // try to submit a score
-    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score", $scoreData)
+    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertCreated();
 
     // get the score we posted
@@ -95,7 +95,7 @@ test('a player cannot submit another score for a game they already submitted for
     $this->assertDatabaseCount('scores', 1);
 
     // try to submit a score with the same data
-    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score", $scoreData)
+    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
             'game_id' => ['A score has already been submitted for this game by this player.']
@@ -121,7 +121,7 @@ test('a player cannot submit a score for a game that is not in their followed se
     $this->assertDatabaseCount('scores', 0);
 
     // try to submit a score
-    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score", $scoreData)
+    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
             'game_id' => ['Cannot submit a score for a game in a season you are not following.']
@@ -151,7 +151,7 @@ test('a player cannot submit a score for a game with a date and time in the past
     $this->assertDatabaseCount('scores', 0);
 
     // try to submit a score
-    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score", $scoreData)
+    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
             'game_id' => ['The start of the game has passed.']
@@ -181,7 +181,7 @@ test('a player cannot submit a score for a game with a date in the past and with
     $this->assertDatabaseCount('scores', 0);
 
     // try to submit a score
-    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score", $scoreData)
+    $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
             'game_id' => ['The start of the game has passed.']
@@ -207,7 +207,7 @@ test('a player can update their score', function () {
     ];
 
     // try to update the score
-    $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
+    $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
         ->assertNoContent();
 
     $score = $score->refresh();
@@ -239,7 +239,7 @@ test('a player cannot update a score for a game with a date and time in the past
     ];
 
     // try to update the score
-    $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
+    $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
             'score_id' => ['The start of the game has passed.']
@@ -269,7 +269,7 @@ test('a player cannot update a score for a game with a date in the past and with
     ];
 
     // try to update the score
-    $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
+    $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
             'score_id' => ['The start of the game has passed.']
@@ -289,7 +289,7 @@ test('a player can delete their score', function () {
     $this->assertDatabaseCount('scores', 1);
 
     // try to delete the score
-    $this->delete("api/v1/groups/{$this->group->ulid}/members/{$this->group->owner->ulid}/player/{$this->player->ulid}/score/{$score->ulid}")
+    $this->delete("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score/{$score->ulid}")
         ->assertAccepted();
 
     // there should be 0 scores in the db
