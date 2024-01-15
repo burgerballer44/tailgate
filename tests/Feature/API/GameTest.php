@@ -166,3 +166,37 @@ test('a game score can be updated if not part of the season', function() {
     // update the game score
     $this->patch("api/v1/seasons/{$season->ulid}/games/{$gameFromDifferentSeason->ulid}", $scoreData)->assertNotFound();
 });
+
+test('all games are returned when retrieving a season', function () {
+    // create a season
+    $season = Season::factory()->create();
+    // add a game
+    $game = Game::factory()->create(['season_id' => $season->id]);
+
+    // get the season
+    $this->get("api/v1/seasons/{$season->ulid}")
+        ->assertOk()
+        ->assertJsonCount(1 , 'data.games')
+        ->assertJson(['data' => [
+            'games'=> [
+                [
+                    'season_id' => $season->id,
+                    'home_team_id' => $game['home_team_id'],
+                    'away_team_id' => $game['away_team_id'],
+                    'home_team_score' => 0,
+                    'away_team_score' => 0,
+                    'start_date' => $game['start_date'],
+                    'start_time' => $game['start_time'],
+                    'home_team' => [
+                        'designation' => $game->homeTeam->designation,
+                        'mascot' => $game->homeTeam->mascot,
+                    ],
+                    'away_team' => [
+                        'designation' => $game->awayTeam->designation,
+                        'mascot' => $game->awayTeam->mascot,
+                    ],
+                ]
+            ],
+            ]
+        ]);
+});

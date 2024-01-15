@@ -27,7 +27,7 @@ class GroupController extends Controller
      */
     public function index()
     {
-        return new GroupResource(Group::filter(request()->input())->paginate(50));
+        return GroupResource::collection(Group::filter(request()->input())->with('owner')->paginate(500));
     }
 
     /**

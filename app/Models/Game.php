@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Game extends Model
@@ -18,6 +20,8 @@ class Game extends Model
     protected $hidden = [
      'id'
     ];
+
+    protected $with = ['homeTeam', 'awayTeam'];
 
     /**
      * The attributes that are mass assignable.
@@ -66,5 +70,23 @@ class Game extends Model
             $game->home_team_score = 0;
             $game->away_team_score = 0;
         });
+    }
+
+    /**
+     * Home Team
+     * @return [type] [description]
+     */
+    public function homeTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Away Team
+     * @return [type] [description]
+     */
+    public function awayTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 }

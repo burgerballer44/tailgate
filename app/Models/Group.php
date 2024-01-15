@@ -8,6 +8,7 @@ use App\Models\Score;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -105,9 +106,9 @@ class Group extends Model
         return $query;
     }
 
-    public function owner(): HasOne
+    public function owner(): BelongsTo
     {
-        return $this->hasOne(Member::class)->where('user_id', $this->owner_id);
+        return $this->belongsTo(User::class);
     }
 
     public function follow(): HasOne

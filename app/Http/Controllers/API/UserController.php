@@ -16,7 +16,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return new UserResource(User::filter(request()->input())->paginate(50));
+        return UserResource::collection(User::filter(request()->input())->paginate(500));
     }
 
     /**

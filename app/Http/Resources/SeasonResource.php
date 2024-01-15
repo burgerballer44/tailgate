@@ -14,6 +14,8 @@ class SeasonResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        $array = parent::toArray($request);
+        $array['games'] = GameResource::collection($this->whenLoaded('games'));
+        return $array;
     }
 }

@@ -28,6 +28,7 @@ Route::resource('teams', TeamController::class);
 Route::resource('seasons', SeasonController::class);
 
 Route::prefix('seasons/{season}')->group(function () {
+    Route::get('/teams', [SeasonController::class, 'getTeams']);
     Route::resource('games', GameController::class);
 });
 

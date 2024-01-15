@@ -4,6 +4,7 @@ use App\Models\Game;
 use App\Models\Season;
 use App\Models\SeasonType;
 use App\Models\Sport;
+use App\Models\Team;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
@@ -224,4 +225,34 @@ test('a season can be deleted', function () {
 
     // there should be no seasons in the db
     $this->assertDatabaseCount('seasons', 0);
+});
+
+test('all teams available for a season can be retrieved', function () {
+    $sport = Sport::BASKETBALL->value;
+    $wrongSport = Sport::FOOTBALL->value;
+
+    // create a season
+    $season = Season::factory()->create(['sport' => $sport]);
+
+    // create teams of the same sport
+    [$team1, $team2] = Team::factory()->count(2)->create(['sport' => $sport]);
+    // create teams of a different sport
+    [$wrongTeam1, $wrongTeam2] = Team::factory()->count(2)->create(['sport' => $wrongSport]);
+
+    // get the season teams
+    $this->get("api/v1/seasons/{$season->ulid}/teams")
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJson(['data' => [
+            [
+                'designation' => $team1->designation,
+                'mascot'      => $team1->mascot,
+                'sport'       => $team1->sport,
+            ], [
+                'designation' => $team2->designation,
+                'mascot'      => $team2->mascot,
+                'sport'       => $team2->sport,
+            ],
+            ]
+        ]);
 });

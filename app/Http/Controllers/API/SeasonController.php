@@ -9,8 +9,10 @@ use App\Http\Requests\Season\UpdateGameRequest;
 use App\Http\Requests\Season\UpdateSeasonRequest;
 use App\Http\Resources\GameResource;
 use App\Http\Resources\SeasonResource;
+use App\Http\Resources\TeamResource;
 use App\Models\Game;
 use App\Models\Season;
+use App\Models\Team;
 
 class SeasonController extends Controller
 {
@@ -19,7 +21,7 @@ class SeasonController extends Controller
      */
     public function index()
     {
-        return new SeasonResource(Season::filter(request()->input())->paginate(50));
+        return SeasonResource::collection(Season::filter(request()->input())->paginate(500));
     }
 
     /**
@@ -40,7 +42,8 @@ class SeasonController extends Controller
      * Display the specified resource.
      */
     public function show(Season $season)
-    {
+    {   
+        $season->games;
         return new SeasonResource($season);
     }
 
@@ -65,5 +68,14 @@ class SeasonController extends Controller
     {
         $season->delete();
         return response()->json([], 202);
+    }
+
+    /**
+     * Display a listing of the teams.
+     */
+    public function getTeams(Season $season)
+    {   
+        // show ids in this case since we need them for adding a game
+        return TeamResource::collection(Team::filter(['sport' => $season->sport])->get()->makeVisible(['id']));
     }
 }

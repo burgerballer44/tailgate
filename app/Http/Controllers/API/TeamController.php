@@ -15,7 +15,7 @@ class TeamController extends Controller
      */
     public function index()
     {
-        return new TeamResource(Team::filter(request()->input())->paginate(50));
+        return TeamResource::collection(Team::filter(request()->input())->paginate(500));
     }
 
     /**
