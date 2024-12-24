@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->ulid('ulid')->index();
             $table->string('name');
-            $table->enum('sport', Sport::cases());
+            $table->enum('sport', Sport::values());
             $table->enum('season_type', SeasonType::values());
             $table->string('season_start');
             $table->string('season_end');
