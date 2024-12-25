@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\User;
+use App\Models\UserRole;
+use Laravel\Sanctum\Sanctum;
+use function Pest\Laravel\{actingAs};
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -12,7 +17,7 @@
 */
 
 pest()->extend(Tests\TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
 
 /*
@@ -41,7 +46,34 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Create access token to act as a user.
+ */
+function actAsAPIUser(User $user = null, array $abilities = ['*']): User
 {
-    // ..
+    Sanctum::actingAs(
+        $user = $user ?: User::factory()->create([
+            'name' => 'Regular User',
+            'role' => UserRole::REGULAR->value,
+        ]),
+        $abilities
+    );
+
+    return $user;
+}
+
+/**
+ * Sign in and act as a regular user.
+ */
+function signInRegularUser(User $user = null): User
+{
+    // create user if not provided
+    $user = $user ?: User::factory()->create([
+        'name' => 'Regular User',
+        'role' => UserRole::REGULAR->value,
+    ]);
+
+    actingAs($user);
+
+    return $user;
 }
