@@ -3,15 +3,6 @@
 <body class="h-full">
 
     <div class="min-h-full">
-      
-        <x-navigation></x-navigation>
-
-        <header class="bg-white shadow-sm">
-            <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                <h1 class="text-lg/6 font-semibold text-gray-900">Dashboard</h1>
-            </div>
-        </header>
-
         <main>
             <div id="app" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 {{ $slot }}

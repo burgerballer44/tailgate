@@ -8,11 +8,11 @@
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         @auth
-                            <x-nav-link href="{{ route('dashboard') }}">Dashboard</x-nav-link>
-                            <x-nav-link href="{{ route('users') }}">Users</x-nav-link>
-                            <x-nav-link href="{{ route('teams') }}">Teams</x-nav-link>
-                            <x-nav-link href="{{ route('seasons') }}">Seasns</x-nav-link>
-                            <x-nav-link href="{{ route('groups') }}">Groups</x-nav-link>
+                            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
+                            <x-nav-link href="{{ route('users') }}" :active="request()->routeIs('users')">Users</x-nav-link>
+                            <x-nav-link href="{{ route('teams') }}" :active="request()->routeIs('teams')">Teams</x-nav-link>
+                            <x-nav-link href="{{ route('seasons') }}" :active="request()->routeIs('seasons')">Seasns</x-nav-link>
+                            <x-nav-link href="{{ route('groups') }}" :active="request()->routeIs('groups')">Groups</x-nav-link>
                         @else
                             <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('home')">Home</x-nav-link>
                         @endauth
@@ -21,8 +21,8 @@
             </div>
             @auth
                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                    <x-nav-link routeName="profile.edit">Profile</x-nav-link>
-                    <x-nav-link routeName="logout">Log Out</x-nav-link>
+                    <x-nav-link href="{{ route('profile.edit') }}" :active="request()->routeIs('profile')">Profile</x-nav-link>
+                    <x-nav-link href="{{ route('logout') }}" :active="request()->routeIs('profile')">Log Out</x-nav-link>
                 </div>
             @endauth
         </div>
