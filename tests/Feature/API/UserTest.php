@@ -17,7 +17,7 @@ test('a user can be created', function () {
     $userData['password_confirmation'] = $userData['password'];
 
     // there should be 1 user in the db
-    // $this->assertDatabaseCount('users', 1);
+    $this->assertDatabaseCount('users', 1);
 
     // post the user data
     $this->post("api/v1/users", $userData)->assertCreated();

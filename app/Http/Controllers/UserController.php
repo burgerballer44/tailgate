@@ -12,7 +12,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('users.index', [
+        return view('admin.users.index', [
             'statuses' => collect(UserStatus::cases())->pluck('value'),
             'roles' => collect(UserRole::cases())->pluck('value')
         ]);
