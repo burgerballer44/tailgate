@@ -62,20 +62,12 @@ Route::middleware('auth')->group(function () {
             Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
         });
 
-        Route::prefix('users')->group(function () {
-            Route::get('/', [UserController::class, 'index'])->name('users');
-        });
+        Route::resource('users', UserController::class);
 
-        Route::prefix('teams')->group(function () {
-            Route::get('/', [TeamController::class, 'index'])->name('teams');
-        });
+        Route::resource('teams', TeamController::class);
 
-        Route::prefix('seasons')->group(function () {
-            Route::get('/', [SeasonController::class, 'index'])->name('seasons');
-        });
+        Route::resource('seasons', SeasonController::class);
 
-        Route::prefix('groups')->group(function () {
-            Route::get('/', [GroupController::class, 'index'])->name('groups');
-        });
+        Route::resource('groups', GroupController::class);
     });
 });

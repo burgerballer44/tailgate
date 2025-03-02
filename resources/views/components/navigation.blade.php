@@ -8,21 +8,21 @@
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         @auth
-                            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                            <x-nav-link href="{{ route('users') }}" :active="request()->routeIs('users')">Users</x-nav-link>
-                            <x-nav-link href="{{ route('teams') }}" :active="request()->routeIs('teams')">Teams</x-nav-link>
-                            <x-nav-link href="{{ route('seasons') }}" :active="request()->routeIs('seasons')">Seasons</x-nav-link>
-                            <x-nav-link href="{{ route('groups') }}" :active="request()->routeIs('groups')">Groups</x-nav-link>
+                            <x-nav-link route='dashboard'>Dashboard</x-nav-link>
+                            <x-nav-link route='users.index'>Users</x-nav-link>
+                            <x-nav-link route='teams.index'>Teams</x-nav-link>
+                            <x-nav-link route='seasons.index'>Seasons</x-nav-link>
+                            <x-nav-link route='groups.index'>Groups</x-nav-link>
                         @else
-                            <x-nav-link href="{{ route('home') }}" :active="request()->routeIs('home')">Home</x-nav-link>
+                            <x-nav-link route='home'>Home</x-nav-link>
                         @endauth
                     </div>
                 </div>
             </div>
             @auth
                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                    <x-nav-link href="{{ route('profile.edit') }}" :active="request()->routeIs('profile')">Profile</x-nav-link>
-                    <x-nav-link href="{{ route('logout') }}" :active="request()->routeIs('profile')">Log Out</x-nav-link>
+                    <x-nav-link route='profile.edit'>Profile</x-nav-link>
+                    <x-nav-link route='logout'>Log Out</x-nav-link>
                 </div>
             @endauth
         </div>

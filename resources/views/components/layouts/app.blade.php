@@ -8,7 +8,7 @@
 
         <header class="bg-white shadow-sm">
             <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                <h1 class="text-lg/6 font-semibold text-gray-900">{{ $heading }}</h1>
+                <h2>{{ $heading }}</h2>
             </div>
         </header>
 
