@@ -72,14 +72,26 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
+    /**
+     * Activate the user by setting their status to ACTIVE.
+     *
+     * @return void
+     */
     public function activate()
     {
         $this->status = UserStatus::ACTIVE;
     }
 
+    /**
+     * Scope a query to filter users based on the provided filters.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $filters
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
     public function scopeFilter($query, array $filters)
     {
-
+        
 
         return $query;
     }
