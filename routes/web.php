@@ -27,11 +27,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// home page
-Route::get('/', function () { return view('welcome'); })->name('home');
 
 // cannot be not signed in
 Route::middleware('guest')->group(function () {
+    // home page
+    Route::get('/', function () { return view('welcome'); })->name('home');
+
     Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
@@ -54,13 +55,17 @@ Route::middleware('auth')->group(function () {
 
     // must be verified
     Route::middleware('verified')->group(function () {
+        // dashboard
         Route::get('/dashboard', function () { return view('dashboard'); })->name('dashboard');
 
+        // profile
         Route::prefix('profile')->group(function () {
             Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
             Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
         });
+
+        // web resource controllers
 
         Route::resource('users', UserController::class);
 

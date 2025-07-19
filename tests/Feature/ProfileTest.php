@@ -61,3 +61,19 @@ test('correct password must be provided to delete account', function () {
 
     expect($user->fresh())->not->toBeNull();
 });
+
+test('profile update resets email_verified_at when email is changed ensuring that must be verified again', function () {
+    $user = signInRegularUser();
+
+    expect($user->email_verified_at)->not->toBeNull();
+
+    $this->patch(route('profile.update'), [
+        'name' => $user->name,
+        'email' => 'new@example.com',
+    ])->assertRedirect(route('profile.edit'))
+      ->assertSessionHas('status', 'profile-updated');
+
+    $user->refresh();
+
+    expect($user->email_verified_at)->toBeNull();
+});
