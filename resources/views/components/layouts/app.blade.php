@@ -1,6 +1,6 @@
 <x-layouts.html-header></x-layouts.html-header>
 
-<body class="h-full">
+<body class="h-full bg-gray-100">
 
     <div class="min-h-full">
       

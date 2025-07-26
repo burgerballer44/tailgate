@@ -1,13 +1,9 @@
 <x-layouts.html-header></x-layouts.html-header>
 
-<body class="h-full">
+<body class="h-full bg-gray-100">
 
-    <div class="min-h-full">
-        <main>
-            <div id="app" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                {{ $slot }}
-            </div>
-        </main>
+    <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+        {{ $slot }}
     </div>
 
 </body>
