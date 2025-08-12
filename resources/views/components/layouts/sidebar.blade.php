@@ -543,7 +543,7 @@
     </div>
 
     <main
-        class="py-10 transition-all duration-200 ease-in-out lg:ml-20"
+        class="py-10 transition-all duration-200 ease-in-out lg:ml-72"
         :class="{ 'lg:ml-72': !sidebarCollapsed, 'lg:ml-20': sidebarCollapsed }"
     >
         <div class="px-4 sm:px-6 lg:px-8">
