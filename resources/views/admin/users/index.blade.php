@@ -1,12 +1,9 @@
-<x-layouts.app>
+<x-layouts.sidebar>
+    <x-slot:heading>Users</x-slot>
 
-    <x-slot:heading>
-        Users
-    </x-slot>
-
-    <x-tables.full-width 
-        heading='Users'
-        description='A list of all the users including their name, title, email and role.'
+    <x-tables.full-width
+        heading="Users"
+        description="A list of all the users including their name, title, email and role."
         :tableActions="[
             ['route' => 'users.create', 'text' => 'Add User']
         ]"
@@ -28,8 +25,5 @@
                 'confirm' => 'Are you sure you want to delete this user?'
             ]
         ]"
-    >
-
-    </x-tables.full-width>
-
-</x-layouts.app>
+    ></x-tables.full-width>
+</x-layouts.sidebar>
