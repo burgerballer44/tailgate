@@ -1,19 +1,24 @@
 name: tailgate
 type: laravel
 docroot: public
-php_version: "8.4"
+php_version: '8.4'
 webserver_type: nginx-fpm
 xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
 database:
     type: postgres
-    version: "17"
+    version: '17'
+host_db_port: 54320
 use_dns_when_possible: true
-composer_version: "2"
+composer_version: '2'
 web_environment: []
 corepack_enable: false
-
+web_extra_exposed_ports:
+    - name: node-vite
+      container_port: 5173
+      http_port: 5172
+      https_port: 5173
 # Key features of DDEV's config.yaml:
 
 # name: <projectname> # Name of the project, automatically provides
