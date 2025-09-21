@@ -49,7 +49,7 @@ expect()->extend('toBeOne', function () {
 /**
  * Create access token to act as a user.
  */
-function actAsAPIUser(User $user = null, array $abilities = ['*']): User
+function actAsAPIUser(?User $user = null, array $abilities = ['*']): User
 {
     Sanctum::actingAs(
         $user = $user ?: User::factory()->create([
@@ -65,7 +65,7 @@ function actAsAPIUser(User $user = null, array $abilities = ['*']): User
 /**
  * Sign in and act as a regular user.
  */
-function signInRegularUser(User $user = null): User
+function signInRegularUser(?User $user = null): User
 {
     // create user if not provided
     $user = $user ?: User::factory()->create([
