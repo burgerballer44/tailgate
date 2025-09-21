@@ -3,11 +3,7 @@
 namespace App\Http\Requests\Group;
 
 use App\Http\Requests\ApiFormRequest;
-use App\Rules\GameMustExistInSeasonGroupFollows;
-use App\Rules\GameTimeNotPassed;
 use App\Rules\GameTimeNotPassedForUpdate;
-use App\Rules\NoScoreSubmitted;
-use Illuminate\Validation\Rule;
 
 class UpdateScoreRequest extends ApiFormRequest
 {

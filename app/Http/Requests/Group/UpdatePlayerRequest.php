@@ -3,9 +3,6 @@
 namespace App\Http\Requests\Group;
 
 use App\Http\Requests\ApiFormRequest;
-use App\Rules\PlayerLimit;
-use App\Rules\UniqueUsernamePerGroup;
-use Illuminate\Validation\Rule;
 
 class UpdatePlayerRequest extends ApiFormRequest
 {

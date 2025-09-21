@@ -8,7 +8,6 @@ use App\Models\UserRole;
 use App\Models\UserStatus;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends ApiFormRequest
 {

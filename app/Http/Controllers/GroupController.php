@@ -14,7 +14,7 @@ class GroupController extends Controller
     {
         return view('groups.index', [
             // show ids in this case since we need them for group owner
-            'users' => UserResource::collection(User::get()->makeVisible(['id']))
+            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
         ]);
     }
 }

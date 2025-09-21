@@ -11,14 +11,14 @@ class Team extends Model
     use HasFactory;
 
     /**
-    * The attributes that should be hidden for arrays.
-    *
-    * @var array
-    */
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
-        'id'
+        'id',
     ];
-   
+
     /**
      * The attributes that are mass assignable.
      *
@@ -30,21 +30,19 @@ class Team extends Model
         'sport',
     ];
 
-   /**
-    * Get the route key for the model.
-    *
-    * @return string
-    */
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
     public function getRouteKeyName()
     {
         return 'ulid';
     }
 
     /**
-    * Perform any actions required after the model boots.
-    *
-    * @return void
-    */
+     * Perform any actions required after the model boots.
+     */
     protected static function booted(): void
     {
         static::creating(function ($team) {

@@ -62,8 +62,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Perform any actions required after the model boots.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -85,13 +83,11 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Scope a query to filter users based on the provided filters.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array $filters
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeFilter($query, array $filters)
     {
-        
 
         return $query;
     }

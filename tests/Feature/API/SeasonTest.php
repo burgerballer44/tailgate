@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Game;
 use App\Models\Season;
 use App\Models\SeasonType;
 use App\Models\Sport;
@@ -8,7 +7,7 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = actAsAPIUser();
 });
 
@@ -20,7 +19,7 @@ test('a season can be created', function () {
     $this->assertDatabaseCount('seasons', 0);
 
     // post the season data
-    $this->post("api/v1/seasons", $seasonData)->assertCreated();
+    $this->post('api/v1/seasons', $seasonData)->assertCreated();
 
     // there should be 1 season in the db
     $this->assertDatabaseCount('seasons', 1);
@@ -31,15 +30,15 @@ test('the season is returned when a season is created', function () {
     $seasonData = Season::factory()->make()->getAttributes();
 
     // post the season data
-    $this->post("api/v1/seasons", $seasonData)
+    $this->post('api/v1/seasons', $seasonData)
         ->assertCreated()
         ->assertJson(['data' => [
-            'name'         => $seasonData['name'],
-            'sport'        => $seasonData['sport'],
-            'season_type'  => $seasonData['season_type'],
+            'name' => $seasonData['name'],
+            'sport' => $seasonData['sport'],
+            'season_type' => $seasonData['season_type'],
             'season_start' => $seasonData['season_start'],
-            'season_end'   => $seasonData['season_end'],
-            ]
+            'season_end' => $seasonData['season_end'],
+        ],
         ]);
 });
 
@@ -48,7 +47,7 @@ test('the ulid field is populated when a season is created', function () {
     $seasonData = Season::factory()->make()->getAttributes();
 
     // post the season data
-    $this->post("api/v1/seasons", $seasonData)->assertCreated();
+    $this->post('api/v1/seasons', $seasonData)->assertCreated();
 
     // get the season we posted
     $season = Season::first();
@@ -63,12 +62,12 @@ test('a season can be viewed by ulid', function () {
     // get the season
     $this->get("api/v1/seasons/{$season->ulid}")
         ->assertJson(['data' => [
-            'name'         => $season->name,
-            'sport'        => $season->sport,
-            'season_type'  => $season->season_type,
+            'name' => $season->name,
+            'sport' => $season->sport,
+            'season_type' => $season->season_type,
             'season_start' => $season->season_start,
-            'season_end'   => $season->season_end,
-            ]
+            'season_end' => $season->season_end,
+        ],
         ]);
 });
 
@@ -100,7 +99,7 @@ test('a season can be updated', function () {
     $this->patch("api/v1/seasons/{$season->ulid}", $data)->assertNoContent();
 
     $season->refresh();
-    
+
     expect($season->name)->toBe($data['name']);
     expect($season->sport)->toBe($data['sport']);
     expect($season->season_type)->toBe($data['season_type']);
@@ -113,22 +112,22 @@ test('a lists of seasons can be retrieved', function () {
     [$season1, $season2] = season::factory()->count(2)->create();
 
     // get the seasons
-    $this->get("api/v1/seasons")
+    $this->get('api/v1/seasons')
         ->assertOk()
         ->assertJson(['data' => [
             [
-                'name'         => $season1->name,
-                'sport'        => $season1->sport,
-                'season_type'  => $season1->season_type,
+                'name' => $season1->name,
+                'sport' => $season1->sport,
+                'season_type' => $season1->season_type,
                 'season_start' => $season1->season_start,
-                'season_end'   => $season1->season_end,
+                'season_end' => $season1->season_end,
             ], [
-                'name'         => $season2->name,
-                'sport'        => $season2->sport,
-                'season_type'  => $season2->season_type,
+                'name' => $season2->name,
+                'sport' => $season2->sport,
+                'season_type' => $season2->season_type,
                 'season_start' => $season2->season_start,
-                'season_end'   => $season2->season_end,
-            ]
+                'season_end' => $season2->season_end,
+            ],
         ]]);
 });
 
@@ -140,23 +139,23 @@ test('a lists of seasons can be filtered by sport', function () {
     [$season3, $season4] = Season::factory()->count(2)->create(['sport' => Sport::FOOTBALL->value]);
 
     // get the basketball seasons only
-    $this->get("api/v1/seasons?sport=Basketball")
+    $this->get('api/v1/seasons?sport=Basketball')
         ->assertOk()
         ->assertJsonCount(2, 'data')
         ->assertJson(['data' => [
             [
-                'name'         => $season1->name,
-                'sport'        => $season1->sport,
-                'season_type'  => $season1->season_type,
+                'name' => $season1->name,
+                'sport' => $season1->sport,
+                'season_type' => $season1->season_type,
                 'season_start' => $season1->season_start,
-                'season_end'   => $season1->season_end,
+                'season_end' => $season1->season_end,
             ], [
-                'name'         => $season2->name,
-                'sport'        => $season2->sport,
-                'season_type'  => $season2->season_type,
+                'name' => $season2->name,
+                'sport' => $season2->sport,
+                'season_type' => $season2->season_type,
                 'season_start' => $season2->season_start,
-                'season_end'   => $season2->season_end,
-            ]
+                'season_end' => $season2->season_end,
+            ],
         ]]);
 });
 
@@ -168,23 +167,23 @@ test('a lists of seasons can be filtered by season_type', function () {
     [$season3, $season4] = Season::factory()->count(2)->create(['season_type' => SeasonType::POST->value]);
 
     // get the regular seasons only
-    $this->get("api/v1/seasons?season_type=Regular Season")
+    $this->get('api/v1/seasons?season_type=Regular Season')
         ->assertOk()
         ->assertJsonCount(2, 'data')
         ->assertJson(['data' => [
             [
-                'name'         => $season1->name,
-                'sport'        => $season1->sport,
-                'season_type'  => $season1->season_type,
+                'name' => $season1->name,
+                'sport' => $season1->sport,
+                'season_type' => $season1->season_type,
                 'season_start' => $season1->season_start,
-                'season_end'   => $season1->season_end,
+                'season_end' => $season1->season_end,
             ], [
-                'name'         => $season2->name,
-                'sport'        => $season2->sport,
-                'season_type'  => $season2->season_type,
+                'name' => $season2->name,
+                'sport' => $season2->sport,
+                'season_type' => $season2->season_type,
                 'season_start' => $season2->season_start,
-                'season_end'   => $season2->season_end,
-            ]
+                'season_end' => $season2->season_end,
+            ],
         ]]);
 });
 
@@ -202,12 +201,12 @@ test('a lists of seasons can be filtered by name for desigantion', function () {
         ->assertJsonCount(1, 'data')
         ->assertJson(['data' => [
             [
-                'name'         => $season->name,
-                'sport'        => $season->sport,
-                'season_type'  => $season->season_type,
+                'name' => $season->name,
+                'sport' => $season->sport,
+                'season_type' => $season->season_type,
                 'season_start' => $season->season_start,
-                'season_end'   => $season->season_end,
-            ]
+                'season_end' => $season->season_end,
+            ],
         ]]);
 });
 
@@ -244,13 +243,13 @@ test('all teams available for a season can be retrieved', function () {
         ->assertJson(['data' => [
             [
                 'designation' => $team1->designation,
-                'mascot'      => $team1->mascot,
-                'sport'       => $team1->sport,
+                'mascot' => $team1->mascot,
+                'sport' => $team1->sport,
             ], [
                 'designation' => $team2->designation,
-                'mascot'      => $team2->mascot,
-                'sport'       => $team2->sport,
+                'mascot' => $team2->mascot,
+                'sport' => $team2->sport,
             ],
-            ]
+        ],
         ]);
 });

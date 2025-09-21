@@ -29,7 +29,7 @@ class PlayerController extends Controller implements HasMiddleware
         return [
             new Middleware(MemberMustBeInGroup::class),
             new Middleware(PlayerMustBelongToMember::class, only: [
-                'update', 'destroy', 'submitScore', 'updateScore', 'destroyScore'
+                'update', 'destroy', 'submitScore', 'updateScore', 'destroyScore',
             ]),
             new Middleware(ScoreMustBelongToPlayer::class, only: ['updateScore', 'destroyScore']),
         ];
@@ -55,7 +55,7 @@ class PlayerController extends Controller implements HasMiddleware
         $validated = $request->validated();
 
         $player->fill($validated);
-        
+
         $player->save();
 
         return response()->noContent();
@@ -67,7 +67,7 @@ class PlayerController extends Controller implements HasMiddleware
     public function destroy(Group $group, Member $member, Player $player)
     {
         $player->delete();
-        
+
         return response()->json([], 202);
     }
 
@@ -100,7 +100,7 @@ class PlayerController extends Controller implements HasMiddleware
         $validated = $request->validated();
 
         $score->fill($validated);
-        
+
         $score->save();
 
         return response()->noContent();
@@ -116,7 +116,7 @@ class PlayerController extends Controller implements HasMiddleware
         Score $score,
     ) {
         $score->delete();
-        
+
         return response()->json([], 202);
     }
 }

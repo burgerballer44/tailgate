@@ -4,7 +4,6 @@ namespace App\Http\Requests\Group;
 
 use App\Http\Requests\ApiFormRequest;
 use App\Rules\SeasonNotEnded;
-use Illuminate\Validation\Rule;
 
 class FollowTeamRequest extends ApiFormRequest
 {

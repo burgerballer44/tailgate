@@ -5,7 +5,7 @@ use App\Models\Team;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = actAsAPIUser();
 });
 
@@ -17,7 +17,7 @@ test('a team can be created', function () {
     $this->assertDatabaseCount('teams', 0);
 
     // post the team data
-    $this->post("api/v1/teams", $teamData)->assertCreated();
+    $this->post('api/v1/teams', $teamData)->assertCreated();
 
     // there should be 1 team in the db
     $this->assertDatabaseCount('teams', 1);
@@ -28,13 +28,13 @@ test('the team is returned when a team is created', function () {
     $teamData = Team::factory()->make()->getAttributes();
 
     // post the team data
-    $this->post("api/v1/teams", $teamData)
+    $this->post('api/v1/teams', $teamData)
         ->assertCreated()
         ->assertJson(['data' => [
             'designation' => $teamData['designation'],
-            'mascot'      => $teamData['mascot'],
-            'sport'       => $teamData['sport'],
-            ]
+            'mascot' => $teamData['mascot'],
+            'sport' => $teamData['sport'],
+        ],
         ]);
 });
 
@@ -43,7 +43,7 @@ test('the ulid field is populated when a team is created', function () {
     $teamData = Team::factory()->make()->getAttributes();
 
     // post the team data
-    $this->post("api/v1/teams", $teamData)->assertCreated();
+    $this->post('api/v1/teams', $teamData)->assertCreated();
 
     // get the team we posted
     $team = Team::first();
@@ -60,9 +60,9 @@ test('a team can be viewed by ulid', function () {
         ->assertOk()
         ->assertJson(['data' => [
             'designation' => $team->designation,
-            'mascot'      => $team->mascot,
-            'sport'       => $team->sport,
-            ]
+            'mascot' => $team->mascot,
+            'sport' => $team->sport,
+        ],
         ]);
 });
 
@@ -91,7 +91,7 @@ test('a team can be updated', function () {
     $this->patch("api/v1/teams/{$team->ulid}", $data)->assertNoContent();
 
     $team->refresh();
-    
+
     expect($team->designation)->toBe($data['designation']);
     expect($team->mascot)->toBe($data['mascot']);
 });
@@ -111,7 +111,7 @@ test('a teams sport cannot be updated', function () {
     $this->patch("api/v1/teams/{$team->ulid}", $data)->assertNoContent();
 
     $team->refresh();
-    
+
     expect($team->sport)->not->toBe($data['sport']);
 });
 
@@ -120,18 +120,18 @@ test('a lists of teams can be retrieved', function () {
     [$team1, $team2] = Team::factory()->count(2)->create();
 
     // get the teams
-    $this->get("api/v1/teams")
+    $this->get('api/v1/teams')
         ->assertOk()
         ->assertJson(['data' => [
             [
                 'designation' => $team1->designation,
-                'mascot'      => $team1->mascot,
-                'sport'       => $team1->sport,
+                'mascot' => $team1->mascot,
+                'sport' => $team1->sport,
             ], [
                 'designation' => $team2->designation,
-                'mascot'      => $team2->mascot,
-                'sport'       => $team2->sport,
-            ]
+                'mascot' => $team2->mascot,
+                'sport' => $team2->sport,
+            ],
         ]]);
 });
 
@@ -143,19 +143,19 @@ test('a lists of teams can be filtered by sport', function () {
     [$team3, $team4] = Team::factory()->count(2)->create(['sport' => Sport::FOOTBALL->value]);
 
     // get the basketball teams only
-    $this->get("api/v1/teams?sport=Basketball")
+    $this->get('api/v1/teams?sport=Basketball')
         ->assertOk()
         ->assertJsonCount(2, 'data')
         ->assertJson(['data' => [
             [
                 'designation' => $team1->designation,
-                'mascot'      => $team1->mascot,
-                'sport'       => $team1->sport,
+                'mascot' => $team1->mascot,
+                'sport' => $team1->sport,
             ], [
                 'designation' => $team2->designation,
-                'mascot'      => $team2->mascot,
-                'sport'       => $team2->sport,
-            ]
+                'mascot' => $team2->mascot,
+                'sport' => $team2->sport,
+            ],
         ]]);
 });
 
@@ -174,9 +174,9 @@ test('a lists of teams can be filtered by name for desigantion', function () {
         ->assertJson(['data' => [
             [
                 'designation' => $team->designation,
-                'mascot'      => $team->mascot,
-                'sport'       => $team->sport,
-            ]
+                'mascot' => $team->mascot,
+                'sport' => $team->sport,
+            ],
         ]]);
 });
 
@@ -195,9 +195,9 @@ test('a lists of teams can be filtered by name for mascot', function () {
         ->assertJson(['data' => [
             [
                 'designation' => $team->designation,
-                'mascot'      => $team->mascot,
-                'sport'       => $team->sport,
-            ]
+                'mascot' => $team->mascot,
+                'sport' => $team->sport,
+            ],
         ]]);
 });
 

@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Common\DateOrString;
 use App\Models\SeasonType;
 use App\Models\Sport;
 use Illuminate\Database\Eloquent\Factories\Factory;

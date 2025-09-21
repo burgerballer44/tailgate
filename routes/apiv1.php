@@ -7,7 +7,6 @@ use App\Http\Controllers\API\PlayerController;
 use App\Http\Controllers\API\SeasonController;
 use App\Http\Controllers\API\TeamController;
 use App\Http\Controllers\API\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,7 +41,7 @@ Route::prefix('groups/{group}')->group(function () {
     Route::resource('members', MemberController::class);
 
     Route::prefix('members/{member}')->group(function () {
-        
+
         Route::resource('player', PlayerController::class);
 
         Route::post('/player/{player}/score', [PlayerController::class, 'submitScore']);

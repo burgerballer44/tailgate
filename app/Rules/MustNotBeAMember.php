@@ -1,13 +1,12 @@
 <?php
- 
+
 namespace App\Rules;
- 
-use App\Models\Member;
+
 use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
- 
-class MustNotBeAMember implements ValidationRule, DataAwareRule
+
+class MustNotBeAMember implements DataAwareRule, ValidationRule
 {
     /**
      * All of the data under validation.
@@ -24,7 +23,7 @@ class MustNotBeAMember implements ValidationRule, DataAwareRule
     public function setData(array $data): static
     {
         $this->data = $data;
-    
+
         return $this;
     }
 

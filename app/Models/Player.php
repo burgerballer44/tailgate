@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Score;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,12 +12,12 @@ class Player extends Model
     use HasFactory;
 
     /**
-    * The attributes that should be hidden for arrays.
-    *
-    * @var array
-    */
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
-        'id'
+        'id',
     ];
 
     /**
@@ -42,10 +41,8 @@ class Player extends Model
     }
 
     /**
-    * Perform any actions required after the model boots.
-    *
-    * @return void
-    */
+     * Perform any actions required after the model boots.
+     */
     protected static function booted(): void
     {
         static::creating(function ($player) {

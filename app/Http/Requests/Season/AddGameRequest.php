@@ -22,7 +22,7 @@ class AddGameRequest extends ApiFormRequest
     {
         $this->replace([
             'start_date' => DateOrString::fromString($this->start_date),
-            'start_time' => DateOrString::fromString($this->start_time)
+            'start_time' => DateOrString::fromString($this->start_time),
         ]);
     }
 

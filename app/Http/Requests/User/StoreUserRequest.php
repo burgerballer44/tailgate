@@ -3,7 +3,6 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\ApiFormRequest;
-use App\Models\Sport;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;

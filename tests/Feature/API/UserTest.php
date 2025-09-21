@@ -6,7 +6,7 @@ use App\Models\UserStatus;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = actAsAPIUser();
 });
 
@@ -19,7 +19,7 @@ test('a user can be created', function () {
     $this->assertDatabaseCount('users', 1);
 
     // post the user data
-    $this->post("api/v1/users", $userData)->assertCreated();
+    $this->post('api/v1/users', $userData)->assertCreated();
 
     // there should be 2 users in the db
     $this->assertDatabaseCount('users', 2);
@@ -31,14 +31,14 @@ test('the user is returned when a user is created', function () {
     $userData['password_confirmation'] = $userData['password'];
 
     // post the user data
-    $this->post("api/v1/users", $userData)
+    $this->post('api/v1/users', $userData)
         ->assertCreated()
         ->assertJson(['data' => [
-            'name'     => $userData['name'],
-            'email'    => $userData['email'],
-            'status'   => $userData['status'],
-            'role'     => $userData['role'],
-            ]
+            'name' => $userData['name'],
+            'email' => $userData['email'],
+            'status' => $userData['status'],
+            'role' => $userData['role'],
+        ],
         ]);
 });
 
@@ -48,7 +48,7 @@ test('the ulid field is populated when a user is created', function () {
     $userData['password_confirmation'] = $userData['password'];
 
     // post the user data
-    $this->post("api/v1/users", $userData)->assertCreated();
+    $this->post('api/v1/users', $userData)->assertCreated();
 
     // get the user we posted
     $user = User::first();
@@ -64,11 +64,11 @@ test('a user can be viewed by ulid', function () {
     $this->get("api/v1/users/{$user->ulid}")
         ->assertOk()
         ->assertJson(['data' => [
-            'name'     => $user->name,
-            'email'    => $user->email,
-            'status'   => $user->status,
-            'role'     => $user->role,
-            ]
+            'name' => $user->name,
+            'email' => $user->email,
+            'status' => $user->status,
+            'role' => $user->role,
+        ],
         ]);
 });
 
@@ -89,17 +89,17 @@ test('a user can be updated', function () {
 
     // set fields to update
     $data = [
-        'name'   => 'updatedName',
-        'email'  => 'updatedEmail@email.com',
+        'name' => 'updatedName',
+        'email' => 'updatedEmail@email.com',
         'status' => UserStatus::ACTIVE->value,
-        'role'   => UserRole::REGULAR->value,
+        'role' => UserRole::REGULAR->value,
     ];
 
     // post the data
     $this->patch("api/v1/users/{$user->ulid}", $data)->assertNoContent();
 
     $user->refresh();
-    
+
     expect($user->name)->toBe($data['name']);
     expect($user->email)->toBe($data['email']);
     expect($user->status)->toBe($data['status']);
@@ -111,25 +111,25 @@ test('a lists of users can be retrieved', function () {
     [$user1, $user2] = User::factory()->count(2)->create();
 
     // get the users
-    $this->get("api/v1/users")
+    $this->get('api/v1/users')
         ->assertOk()
         ->assertJson(['data' => [
             [
-                'name'     => $this->user->name,
-                'email'    => $this->user->email,
-                'status'   => $this->user->status,
-                'role'     => $this->user->role,
-            ],[
-                'name'     => $user1->name,
-                'email'    => $user1->email,
-                'status'   => $user1->status,
-                'role'     => $user1->role,
+                'name' => $this->user->name,
+                'email' => $this->user->email,
+                'status' => $this->user->status,
+                'role' => $this->user->role,
             ], [
-                'name'     => $user2->name,
-                'email'    => $user2->email,
-                'status'   => $user2->status,
-                'role'     => $user2->role,
-            ]
+                'name' => $user1->name,
+                'email' => $user1->email,
+                'status' => $user1->status,
+                'role' => $user1->role,
+            ], [
+                'name' => $user2->name,
+                'email' => $user2->email,
+                'status' => $user2->status,
+                'role' => $user2->role,
+            ],
         ]]);
 });
 

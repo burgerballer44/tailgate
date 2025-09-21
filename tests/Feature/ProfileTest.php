@@ -71,7 +71,7 @@ test('profile update resets email_verified_at when email is changed ensuring tha
         'name' => $user->name,
         'email' => 'new@example.com',
     ])->assertRedirect(route('profile.edit'))
-      ->assertSessionHas('status', 'profile-updated');
+        ->assertSessionHas('status', 'profile-updated');
 
     $user->refresh();
 

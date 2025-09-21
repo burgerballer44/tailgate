@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = actAsAPIUser();
 });
 
@@ -20,7 +20,7 @@ test('a group can be created', function () {
     $this->assertDatabaseCount('groups', 0);
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)->assertCreated();
+    $this->post('api/v1/groups', $groupData)->assertCreated();
 
     // there should be 1 group in the db
     $this->assertDatabaseCount('groups', 1);
@@ -31,14 +31,14 @@ test('the group is returned when a group is created', function () {
     $groupData = Group::factory()->make()->getAttributes();
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)
+    $this->post('api/v1/groups', $groupData)
         ->assertCreated()
         ->assertJson(['data' => [
-                'name' => $groupData['name'],
-                'owner_id' => $groupData['owner_id'],
-                'member_limit' => $groupData['member_limit'],
-                'player_limit' => $groupData['player_limit'],
-            ]
+            'name' => $groupData['name'],
+            'owner_id' => $groupData['owner_id'],
+            'member_limit' => $groupData['member_limit'],
+            'player_limit' => $groupData['player_limit'],
+        ],
         ]);
 });
 
@@ -47,7 +47,7 @@ test('the ulid field is populated when a group is created', function () {
     $groupData = Group::factory()->make()->getAttributes();
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)->assertCreated();
+    $this->post('api/v1/groups', $groupData)->assertCreated();
 
     // get the group we posted
     $group = Group::first();
@@ -60,7 +60,7 @@ test('the invite_code field is populated when a group is created', function () {
     $groupData = Group::factory()->make()->getAttributes();
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)->assertCreated();
+    $this->post('api/v1/groups', $groupData)->assertCreated();
 
     // get the group we posted
     $group = Group::first();
@@ -73,7 +73,7 @@ test('the member limit field uses the initial value when a group is created', fu
     $groupData = Group::factory()->make()->getAttributes();
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)->assertCreated();
+    $this->post('api/v1/groups', $groupData)->assertCreated();
 
     // get the group we posted
     $group = Group::first();
@@ -86,7 +86,7 @@ test('the player limit field uses the initial value when a group is created', fu
     $groupData = Group::factory()->make()->getAttributes();
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)->assertCreated();
+    $this->post('api/v1/groups', $groupData)->assertCreated();
 
     // get the group we posted
     $group = Group::first();
@@ -102,11 +102,11 @@ test('a group can be viewed by ulid', function () {
     $this->get("api/v1/groups/{$group->ulid}")
         ->assertOk()
         ->assertJson(['data' => [
-                'name' => $group->name,
-                'owner_id' => $group->owner_id,
-                'member_limit' => $group->member_limit,
-                'player_limit' => $group->player_limit,
-            ]
+            'name' => $group->name,
+            'owner_id' => $group->owner_id,
+            'member_limit' => $group->member_limit,
+            'player_limit' => $group->player_limit,
+        ],
         ]);
 });
 
@@ -137,7 +137,7 @@ test('a group can be updated', function () {
     $this->patch("api/v1/groups/{$group->ulid}", $data)->assertNoContent();
 
     $group->refresh();
-    
+
     expect($group->name)->toBe($data['name']);
     expect($group->member_limit)->toBe($data['member_limit']);
     expect($group->player_limit)->toBe($data['player_limit']);
@@ -148,7 +148,7 @@ test('a lists of groups can be retrieved', function () {
     [$group1, $group2] = Group::factory()->count(2)->create();
 
     // get the groups
-    $this->get("api/v1/groups")
+    $this->get('api/v1/groups')
         ->assertOk()
         ->assertJson(['data' => [
             [
@@ -161,7 +161,7 @@ test('a lists of groups can be retrieved', function () {
                 'owner_id' => $group2->owner_id,
                 'member_limit' => $group2->member_limit,
                 'player_limit' => $group2->player_limit,
-            ]
+            ],
         ]]);
 });
 
@@ -181,16 +181,16 @@ test('a lists of groups can be filtered by user', function () {
         ->assertJsonCount(2, 'data')
         ->assertJson(['data' => [
             [
-               'name' => $group1->name,
-               'owner_id' => $group1->owner_id,
-               'member_limit' => $group1->member_limit,
-               'player_limit' => $group1->player_limit,
-           ], [
-               'name' => $group2->name,
-               'owner_id' => $group2->owner_id,
-               'member_limit' => $group2->member_limit,
-               'player_limit' => $group2->player_limit,
-           ]
+                'name' => $group1->name,
+                'owner_id' => $group1->owner_id,
+                'member_limit' => $group1->member_limit,
+                'player_limit' => $group1->player_limit,
+            ], [
+                'name' => $group2->name,
+                'owner_id' => $group2->owner_id,
+                'member_limit' => $group2->member_limit,
+                'player_limit' => $group2->player_limit,
+            ],
         ]]);
 });
 
@@ -210,11 +210,11 @@ test('a lists of groups can be filtered by invite_code', function () {
         ->assertJsonCount(1, 'data')
         ->assertJson(['data' => [
             [
-               'name' => $group2->name,
-               'owner_id' => $group2->owner_id,
-               'member_limit' => $group2->member_limit,
-               'player_limit' => $group2->player_limit,
-           ]
+                'name' => $group2->name,
+                'owner_id' => $group2->owner_id,
+                'member_limit' => $group2->member_limit,
+                'player_limit' => $group2->player_limit,
+            ],
         ]]);
 });
 
@@ -288,8 +288,8 @@ test('a team cannot be followed for a season that has ended', function () {
     $this->post("api/v1/groups/{$group->ulid}/follow", $data)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'season_id' => ['Season has ended.'],
-            ]
+            'season_id' => ['Season has ended.'],
+        ],
         ]);
 });
 
@@ -309,8 +309,8 @@ test('cannot follow a team if already following a team', function () {
     $this->post("api/v1/groups/{$group->ulid}/follow", $data)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'follow' => ['This group is already following a team.'],
-            ]
+            'follow' => ['This group is already following a team.'],
+        ],
         ]);
 });
 

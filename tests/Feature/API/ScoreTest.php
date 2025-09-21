@@ -7,11 +7,9 @@ use App\Models\Player;
 use App\Models\Score;
 use App\Models\Season;
 use App\Models\Team;
-use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = actAsAPIUser();
 
     // CREATE THE CONDITIONS FOR A SCORE TO BE SUBMITTED
@@ -40,7 +38,7 @@ beforeEach(function() {
     $this->player = Player::factory()->create(['member_id' => $this->group->ownerMember->id]);
 });
 
-test('a player can submit a score', function () {    
+test('a player can submit a score', function () {
     $scoreData = [
         'player_id' => $this->player->id,
         'game_id' => $this->game->id,
@@ -59,7 +57,7 @@ test('a player can submit a score', function () {
     $this->assertDatabaseCount('scores', 1);
 });
 
-test('submitting a score populates the ulid field', function () {    
+test('submitting a score populates the ulid field', function () {
     $scoreData = [
         'player_id' => $this->player->id,
         'game_id' => $this->game->id,
@@ -95,15 +93,14 @@ test('a player cannot submit another score for a game they already submitted for
     $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-            'game_id' => ['A score has already been submitted for this game by this player.']
+            'game_id' => ['A score has already been submitted for this game by this player.'],
         ]]);
-
 
     // there should be 1 scores in the db
     $this->assertDatabaseCount('scores', 1);
 });
 
-test('a player cannot submit a score for a game that is not in their followed season', function () {    
+test('a player cannot submit a score for a game that is not in their followed season', function () {
     // create a game from a different season
     $gameFromDifferentSeason = Game::factory()->create();
 
@@ -121,14 +118,14 @@ test('a player cannot submit a score for a game that is not in their followed se
     $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-            'game_id' => ['Cannot submit a score for a game in a season you are not following.']
+            'game_id' => ['Cannot submit a score for a game in a season you are not following.'],
         ]]);
 
     // there should be 0 scores in the db
     $this->assertDatabaseCount('scores', 0);
 });
 
-test('a player cannot submit a score for a game with a date and time in the past', function () {    
+test('a player cannot submit a score for a game with a date and time in the past', function () {
     // create a game that is in the past
     $gameAlreadyStarted = Game::factory()->create([
         'season_id' => $this->season->id,
@@ -151,14 +148,14 @@ test('a player cannot submit a score for a game with a date and time in the past
     $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-            'game_id' => ['The start of the game has passed.']
+            'game_id' => ['The start of the game has passed.'],
         ]]);
 
     // there should be 0 scores in the db
     $this->assertDatabaseCount('scores', 0);
 });
 
-test('a player cannot submit a score for a game with a date in the past and with a TBA start time', function () {    
+test('a player cannot submit a score for a game with a date in the past and with a TBA start time', function () {
     // create a game that is in the past
     $gameAlreadyStarted = Game::factory()->create([
         'season_id' => $this->season->id,
@@ -181,7 +178,7 @@ test('a player cannot submit a score for a game with a date in the past and with
     $this->post("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-            'game_id' => ['The start of the game has passed.']
+            'game_id' => ['The start of the game has passed.'],
         ]]);
 
     // there should be 0 scores in the db
@@ -239,7 +236,7 @@ test('a player cannot update a score for a game with a date and time in the past
     $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-            'score_id' => ['The start of the game has passed.']
+            'score_id' => ['The start of the game has passed.'],
         ]]);
 });
 
@@ -269,7 +266,7 @@ test('a player cannot update a score for a game with a date in the past and with
     $this->patch("api/v1/groups/{$this->group->ulid}/members/{$this->group->ownerMember->ulid}/player/{$this->player->ulid}/score/{$score->ulid}", $scoreData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-            'score_id' => ['The start of the game has passed.']
+            'score_id' => ['The start of the game has passed.'],
         ]]);
 });
 

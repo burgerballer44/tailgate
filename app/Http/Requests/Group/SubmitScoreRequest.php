@@ -6,7 +6,6 @@ use App\Http\Requests\ApiFormRequest;
 use App\Rules\GameMustExistInSeasonGroupFollows;
 use App\Rules\GameTimeNotPassed;
 use App\Rules\NoScoreSubmitted;
-use Illuminate\Validation\Rule;
 
 class SubmitScoreRequest extends ApiFormRequest
 {

@@ -2,10 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Follow;
-use App\Models\Member;
-use App\Models\Score;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,12 +27,12 @@ class Group extends Model
     public const MIN_NUMBER_ADMINS = 1;
 
     /**
-    * The attributes that should be hidden for arrays.
-    *
-    * @var array
-    */
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
-        'id'
+        'id',
     ];
 
     /**
@@ -62,15 +58,13 @@ class Group extends Model
     }
 
     /**
-    * Perform any actions required after the model boots.
-    *
-    * @return void
-    */
+     * Perform any actions required after the model boots.
+     */
     protected static function booted(): void
     {
         static::creating(function ($group) {
             $group->ulid = Str::ulid();
-            $group->invite_code = substr(str_shuffle("23456789ABCDEFGHJKLMNPQRSTUVWXYZ"), 0, self::LENGTH_INVITE_CODE);
+            $group->invite_code = substr(str_shuffle('23456789ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, self::LENGTH_INVITE_CODE);
             $group->member_limit = self::INITIAL_MEMBER_LIMIT;
             $group->player_limit = self::INITIAL_PLAYER_LIMIT;
         });
@@ -85,7 +79,7 @@ class Group extends Model
 
         static::deleting(function ($group) {
             // delete all members
-            $group->members->each(function($member) {
+            $group->members->each(function ($member) {
                 $member->delete();
             });
             // delete follow

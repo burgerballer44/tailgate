@@ -64,7 +64,7 @@ class GroupController extends Controller implements HasMiddleware
         $validated = $request->validated();
 
         $group->fill($validated);
-        
+
         $group->save();
 
         return response()->noContent();
@@ -76,7 +76,7 @@ class GroupController extends Controller implements HasMiddleware
     public function destroy(Group $group)
     {
         $group->delete();
-        
+
         return response()->json([], 202);
     }
 

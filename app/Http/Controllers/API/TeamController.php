@@ -48,7 +48,7 @@ class TeamController extends Controller
         $validated = $request->validated();
 
         $team->fill($validated);
-        
+
         $team->save();
 
         return response()->noContent();
@@ -60,6 +60,7 @@ class TeamController extends Controller
     public function destroy(Team $team)
     {
         $team->delete();
+
         return response()->json([], 202);
     }
 }

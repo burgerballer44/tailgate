@@ -13,12 +13,12 @@ class Member extends Model
     use HasFactory;
 
     /**
-    * The attributes that should be hidden for arrays.
-    *
-    * @var array
-    */
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
-        'id'
+        'id',
     ];
 
     /**
@@ -42,10 +42,8 @@ class Member extends Model
     }
 
     /**
-    * Perform any actions required after the model boots.
-    *
-    * @return void
-    */
+     * Perform any actions required after the model boots.
+     */
     protected static function booted(): void
     {
         static::creating(function ($member) {
@@ -54,7 +52,7 @@ class Member extends Model
 
         static::deleting(function ($member) {
             // delete all players
-            $member->players->each(function($player) {
+            $member->players->each(function ($player) {
                 $player->delete();
             });
         });

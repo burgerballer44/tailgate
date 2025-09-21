@@ -8,13 +8,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PlayerMustBelongToMember
 {
-   /**
-    * Handle an incoming request.
-    *
-    * @param  \Illuminate\Http\Request  $request
-    * @param  \Closure  $next
-    * @return Response
-    */
+    /**
+     * Handle an incoming request.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $group = $request->route('group');

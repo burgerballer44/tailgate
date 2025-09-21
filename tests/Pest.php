@@ -3,7 +3,8 @@
 use App\Models\User;
 use App\Models\UserRole;
 use Laravel\Sanctum\Sanctum;
-use function Pest\Laravel\{actingAs};
+
+use function Pest\Laravel\actingAs;
 
 /*
 |--------------------------------------------------------------------------

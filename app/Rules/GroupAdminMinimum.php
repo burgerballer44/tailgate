@@ -1,15 +1,14 @@
 <?php
- 
+
 namespace App\Rules;
- 
+
 use App\Models\Group;
 use App\Models\GroupRole;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
- 
+
 class GroupAdminMinimum implements ValidationRule
 {
-
     /**
      * Run the validation rule.
      */
@@ -22,9 +21,9 @@ class GroupAdminMinimum implements ValidationRule
         // the member being updated is the only admin AND
         // the role is being updated to something els
         if (
-            Group::MIN_NUMBER_ADMINS == $group->admin->count() &&
+            $group->admin->count() == Group::MIN_NUMBER_ADMINS &&
             $group->admin->first() == $member &&
-            GroupRole::GROUP_ADMIN != $value
+            $value != GroupRole::GROUP_ADMIN
         ) {
             $fail('Group admin minimum reached. Please update a different member to the Group Admin role before updating this member.');
         }

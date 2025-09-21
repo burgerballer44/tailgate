@@ -24,7 +24,7 @@ class MemberController extends Controller implements HasMiddleware
             new Middleware(MemberMustBeInGroup::class, only: ['update', 'destroy']),
         ];
     }
-    
+
     /**
      * Store a newly created resource in storage.
      */
@@ -48,7 +48,7 @@ class MemberController extends Controller implements HasMiddleware
         $validated = $request->validated();
 
         $member->fill($validated);
-        
+
         $member->save();
 
         return response()->noContent();
@@ -60,14 +60,14 @@ class MemberController extends Controller implements HasMiddleware
     public function destroy(Group $group, Member $member)
     {
         if (
-            Group::MIN_NUMBER_ADMINS == $group->admin->count() &&
+            $group->admin->count() == Group::MIN_NUMBER_ADMINS &&
             $group->admin->first() == $member
         ) {
-            return response()->json(['data' =>['member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.']]], 422);
+            return response()->json(['data' => ['member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.']]], 422);
         }
 
         $member->delete();
-        
+
         return response()->json([], 202);
     }
 }

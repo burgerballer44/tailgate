@@ -2,10 +2,9 @@
 
 use App\Models\Game;
 use App\Models\Season;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = actAsAPIUser();
 });
 
@@ -44,7 +43,7 @@ test('adding a game returns the game', function () {
             'away_team_score' => 0,
             'start_date' => $gameData['start_date'],
             'start_time' => $gameData['start_time'],
-            ]
+        ],
         ]);
 });
 
@@ -122,7 +121,7 @@ test('a game cannot be deleted from a season it does not belong to', function ()
     $this->delete("api/v1/seasons/{$season->ulid}/games/{$gameFromDifferentSeason->ulid}")->assertNotFound();
 });
 
-test('a game score can be updated', function() {
+test('a game score can be updated', function () {
     // create a season
     $season = Season::factory()->create();
     // add a game
@@ -134,8 +133,8 @@ test('a game score can be updated', function() {
     $scoreData = [
         'home_team_score' => 10,
         'away_team_score' => 20,
-        'start_date'      => '2019-10-01',
-        'start_time'      => '12:12'
+        'start_date' => '2019-10-01',
+        'start_time' => '12:12',
     ];
 
     // update the game score
@@ -147,7 +146,7 @@ test('a game score can be updated', function() {
     expect($game->away_team_score)->toBe(20);
 });
 
-test('a game score can be updated if not part of the season', function() {
+test('a game score can be updated if not part of the season', function () {
     // create a season
     $season = Season::factory()->create();
     // add a game for a different season
@@ -156,8 +155,8 @@ test('a game score can be updated if not part of the season', function() {
     $scoreData = [
         'home_team_score' => 10,
         'away_team_score' => 20,
-        'start_date'      => '2019-10-01',
-        'start_time'      => '12:12'
+        'start_date' => '2019-10-01',
+        'start_time' => '12:12',
     ];
 
     // update the game score
@@ -173,9 +172,9 @@ test('all games are returned when retrieving a season', function () {
     // get the season
     $this->get("api/v1/seasons/{$season->ulid}")
         ->assertOk()
-        ->assertJsonCount(1 , 'data.games')
+        ->assertJsonCount(1, 'data.games')
         ->assertJson(['data' => [
-            'games'=> [
+            'games' => [
                 [
                     'season_id' => $season->id,
                     'home_team_id' => $game['home_team_id'],
@@ -192,8 +191,8 @@ test('all games are returned when retrieving a season', function () {
                         'designation' => $game->awayTeam->designation,
                         'mascot' => $game->awayTeam->mascot,
                     ],
-                ]
+                ],
             ],
-            ]
+        ],
         ]);
 });

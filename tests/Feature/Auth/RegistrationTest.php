@@ -62,5 +62,5 @@ test('the ulid field is populated when a guest registers', function () {
 
     $user = Auth::user();
 
-    expect(Str::isUlid((string)$user->ulid))->toBeTrue();
+    expect(Str::isUlid((string) $user->ulid))->toBeTrue();
 });

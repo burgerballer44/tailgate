@@ -5,10 +5,9 @@ use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Str;
 
-beforeEach(function() {
+beforeEach(function () {
     $this->user = actAsAPIUser();
 });
 
@@ -20,7 +19,7 @@ test('the group owner is added as a member when the group is created', function 
     $this->assertDatabaseCount('members', 0);
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)->assertCreated();
+    $this->post('api/v1/groups', $groupData)->assertCreated();
 
     // there should be 1 member in the db
     $this->assertDatabaseCount('members', 1);
@@ -36,7 +35,7 @@ test('the group owner is a group admin when the group is created', function () {
     $groupData = Group::factory()->make()->getAttributes();
 
     // post the group data
-    $this->post("api/v1/groups", $groupData)->assertCreated();
+    $this->post('api/v1/groups', $groupData)->assertCreated();
 
     // get the member
     $member = Member::first();
@@ -51,7 +50,7 @@ test('a user can be added to a group as a member', function () {
     $user = User::factory()->create();
 
     $memberData = [
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ];
 
     // there should be 1 members in the db
@@ -71,13 +70,13 @@ test('the ulid field is populated when a member is created', function () {
     $user = User::factory()->create();
 
     $memberData = [
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ];
 
     // try to add the member
     $this->post("api/v1/groups/{$group->ulid}/members", $memberData)->assertCreated();
 
-    // get the member 
+    // get the member
     $member = $group->members()->first();
 
     expect(Str::isUlid($member->ulid))->toBeTrue();
@@ -95,15 +94,15 @@ test('a user cannot be added to a group when the group limit is reached', functi
     $user = User::factory()->create();
 
     $memberData = [
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ];
 
     // try to add the member
     $this->post("api/v1/groups/{$group->ulid}/members", $memberData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'user_id' => ['Group member limit reached.'],
-            ]
+            'user_id' => ['Group member limit reached.'],
+        ],
         ]);
 });
 
@@ -114,7 +113,7 @@ test('a member has a group member role when added to a group', function () {
     $user = User::factory()->create();
 
     $memberData = [
-        'user_id' => $user->id
+        'user_id' => $user->id,
     ];
 
     // try to add the member
@@ -132,15 +131,15 @@ test('a user cannot be added to a group if already a member ', function () {
 
     // use the group owner id
     $memberData = [
-        'user_id' => $group->owner->id
+        'user_id' => $group->owner->id,
     ];
 
     // try to add the member
     $this->post("api/v1/groups/{$group->ulid}/members", $memberData)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'user_id' => ['The user is already a member of the group.'],
-            ]
+            'user_id' => ['The user is already a member of the group.'],
+        ],
         ]);
 });
 
@@ -158,7 +157,7 @@ test('the group owner can be changed', function () {
     $this->patch("api/v1/groups/{$group->ulid}", $data)->assertNoContent();
 
     $group->refresh();
-    
+
     expect($group->owner_id)->toBe($data['owner_id']);
 });
 
@@ -177,8 +176,8 @@ test('a group owner cannot be changed if the added user is not a member of the g
     $this->patch("api/v1/groups/{$group->ulid}", $data)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'owner_id' => ['The user is not a member of the group.'],
-            ]
+            'owner_id' => ['The user is not a member of the group.'],
+        ],
         ]);
 });
 
@@ -188,12 +187,12 @@ test('a member can be updated', function () {
     // add a member
     $member = Member::factory()->create([
         'group_id' => $group->id,
-        'role' => GroupRole::GROUP_ADMIN->value
+        'role' => GroupRole::GROUP_ADMIN->value,
     ]);
 
     // set fields to update
     $data = [
-        'role' => GroupRole::GROUP_MEMBER->value
+        'role' => GroupRole::GROUP_MEMBER->value,
     ];
 
     // try to update the member
@@ -210,20 +209,20 @@ test('a members role cannot be updated if they are the last group admin', functi
     // add a group member
     $member = Member::factory()->create([
         'group_id' => $group->id,
-        'role' => GroupRole::GROUP_MEMBER->value
+        'role' => GroupRole::GROUP_MEMBER->value,
     ]);
 
     // set fields to update
     $data = [
-        'role' => GroupRole::GROUP_MEMBER->value
+        'role' => GroupRole::GROUP_MEMBER->value,
     ];
 
     // try to update the OWNER to be a regular group member
     $this->patch("api/v1/groups/{$group->ulid}/members/{$group->ownerMember->ulid}", $data)
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'role' => ['Group admin minimum reached. Please update a different member to the Group Admin role before updating this member.'],
-            ]
+            'role' => ['Group admin minimum reached. Please update a different member to the Group Admin role before updating this member.'],
+        ],
         ]);
 
     $member->refresh();
@@ -258,8 +257,8 @@ test('a member cannot be removed from the group if they are the last admin', fun
     $this->delete("api/v1/groups/{$group->ulid}/members/{$group->ownerMember->ulid}")
         ->assertUnprocessable()
         ->assertJson(['data' => [
-                'member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.'],
-            ]
+            'member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.'],
+        ],
         ]);
 
     // there should be 1 member in the db
@@ -299,7 +298,7 @@ test('the ulid field is populated when a player is created', function () {
     // try to add the player
     $this->post("api/v1/groups/{$group->ulid}/members/{$member->ulid}/player", $data)->assertCreated();
 
-    // get the player 
+    // get the player
     $player = $member->players()->first();
 
     expect(Str::isUlid($player->ulid))->toBeTrue();
@@ -323,8 +322,8 @@ test('a player cannot be added if the limit has been reached', function () {
     // try to add the player
     $this->post("api/v1/groups/{$group->ulid}/members/{$member->ulid}/player", $data)->assertUnprocessable()
         ->assertJson(['data' => [
-                'player_name' => ['Player limit reached.'],
-            ]
+            'player_name' => ['Player limit reached.'],
+        ],
         ]);
 });
 
@@ -343,12 +342,12 @@ test('a player cannot be added if the name has been used by any member in the gr
     // try to add the player name to the member
     $this->post("api/v1/groups/{$group->ulid}/members/{$member->ulid}/player", $data)->assertUnprocessable()
         ->assertJson(['data' => [
-                'player_name' => ['Please choose a unique username for this group. This username is unavailable.'],
-            ]
+            'player_name' => ['Please choose a unique username for this group. This username is unavailable.'],
+        ],
         ]);
 });
 
-test('the owner of a player can be changed to a different member', function () {    
+test('the owner of a player can be changed to a different member', function () {
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner
@@ -373,7 +372,7 @@ test('the owner of a player can be changed to a different member', function () {
     expect($player->member_id)->toBe($member->id);
 });
 
-test('a player can be removed', function () {    
+test('a player can be removed', function () {
     // create a group
     $group = Group::factory()->create();
     // add a player to the owner

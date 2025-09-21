@@ -12,7 +12,7 @@ class TeamController extends Controller
     public function index()
     {
         return view('teams.index', [
-            'sports' => collect(Sport::cases())->pluck('value')
+            'sports' => collect(Sport::cases())->pluck('value'),
         ]);
     }
 }

@@ -14,7 +14,7 @@ class SeasonController extends Controller
     {
         return view('seasons.index', [
             'seasonTypes' => collect(SeasonType::cases())->pluck('value'),
-            'sports' => collect(Sport::cases())->pluck('value')
+            'sports' => collect(Sport::cases())->pluck('value'),
         ]);
     }
 }

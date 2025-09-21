@@ -5,7 +5,6 @@ namespace App\Http\Requests\Group;
 use App\Http\Requests\ApiFormRequest;
 use App\Models\GroupRole;
 use App\Rules\GroupAdminMinimum;
-use App\Rules\MustNotBeAMember;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateMemberRequest extends ApiFormRequest

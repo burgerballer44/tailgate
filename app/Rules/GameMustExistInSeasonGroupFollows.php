@@ -1,12 +1,11 @@
 <?php
- 
+
 namespace App\Rules;
- 
+
 use App\Models\Game;
-use App\Models\Group;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
- 
+
 class GameMustExistInSeasonGroupFollows implements ValidationRule
 {
     /**

@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->api(append: [
-            'auth:sanctum'
+            'auth:sanctum',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

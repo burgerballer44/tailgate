@@ -1,11 +1,10 @@
 <?php
- 
+
 namespace App\Rules;
- 
-use App\Models\Group;
+
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
- 
+
 class PlayerLimit implements ValidationRule
 {
     /**

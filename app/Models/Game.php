@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Game extends Model
@@ -13,12 +12,12 @@ class Game extends Model
     use HasFactory;
 
     /**
-    * The attributes that should be hidden for arrays.
-    *
-    * @var array
-    */
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
-     'id'
+        'id',
     ];
 
     protected $with = ['homeTeam', 'awayTeam'];
@@ -55,13 +54,11 @@ class Game extends Model
      */
     public function getRouteKeyName()
     {
-     return 'ulid';
+        return 'ulid';
     }
 
     /**
      * Perform any actions required after the model boots.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -74,6 +71,7 @@ class Game extends Model
 
     /**
      * Home Team
+     *
      * @return [type] [description]
      */
     public function homeTeam(): BelongsTo
@@ -83,6 +81,7 @@ class Game extends Model
 
     /**
      * Away Team
+     *
      * @return [type] [description]
      */
     public function awayTeam(): BelongsTo

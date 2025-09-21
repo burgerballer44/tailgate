@@ -7,10 +7,14 @@ use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private UserService $userService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -26,13 +30,7 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'status' => $validated['status'],
-            'role' => $validated['role'],
-        ]);
+        $user = $this->userService->create($validated);
 
         return new UserResource($user);
     }
@@ -52,9 +50,7 @@ class UserController extends Controller
     {
         $validated = $request->validated();
 
-        $user->fill($validated);
-        
-        $user->save();
+        $this->userService->update($user, $validated);
 
         return response()->noContent();
     }
@@ -64,7 +60,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
+        $this->userService->delete($user);
+
         return response()->json([], 202);
     }
 }

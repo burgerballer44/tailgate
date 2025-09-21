@@ -34,7 +34,7 @@ class GameController extends Controller implements HasMiddleware
         $game = new Game($validated);
 
         $game = $season->games()->save($game);
-        
+
         return new GameResource($game);
     }
 
@@ -48,7 +48,7 @@ class GameController extends Controller implements HasMiddleware
         $game->fill($validated);
 
         $game->save();
-        
+
         return response()->noContent();
     }
 
@@ -58,6 +58,7 @@ class GameController extends Controller implements HasMiddleware
     public function destroy(Season $season, Game $game)
     {
         $game->delete();
+
         return response()->json([], 202);
     }
 }

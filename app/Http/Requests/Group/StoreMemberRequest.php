@@ -5,7 +5,6 @@ namespace App\Http\Requests\Group;
 use App\Http\Requests\ApiFormRequest;
 use App\Rules\GroupMemberLimit;
 use App\Rules\MustNotBeAMember;
-use Illuminate\Validation\Rule;
 
 class StoreMemberRequest extends ApiFormRequest
 {

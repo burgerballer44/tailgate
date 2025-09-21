@@ -25,7 +25,7 @@ class UpdateSeasonRequest extends ApiFormRequest
     {
         $this->replace([
             'season_start' => DateOrString::fromString($this->season_start),
-            'season_end' => DateOrString::fromString($this->season_end)
+            'season_end' => DateOrString::fromString($this->season_end),
         ]);
     }
 

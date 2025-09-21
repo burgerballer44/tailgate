@@ -12,12 +12,12 @@ class Season extends Model
     use HasFactory;
 
     /**
-    * The attributes that should be hidden for arrays.
-    *
-    * @var array
-    */
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
-        'id'
+        'id',
     ];
 
     /**
@@ -30,7 +30,7 @@ class Season extends Model
         'sport',
         'season_type',
         'season_start',
-        'season_end'
+        'season_end',
     ];
 
     /**
@@ -40,13 +40,11 @@ class Season extends Model
      */
     public function getRouteKeyName()
     {
-     return 'ulid';
+        return 'ulid';
     }
 
     /**
      * Perform any actions required after the model boots.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -56,7 +54,7 @@ class Season extends Model
 
         static::deleting(function ($season) {
             // delete all games
-            $season->games->each(function($game) {
+            $season->games->each(function ($game) {
                 $game->delete();
             });
         });

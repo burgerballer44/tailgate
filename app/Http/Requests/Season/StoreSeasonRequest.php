@@ -6,7 +6,6 @@ use App\Http\Requests\ApiFormRequest;
 use App\Models\Common\DateOrString;
 use App\Models\SeasonType;
 use App\Models\Sport;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreSeasonRequest extends ApiFormRequest
@@ -26,7 +25,7 @@ class StoreSeasonRequest extends ApiFormRequest
     {
         $this->replace([
             'season_start' => DateOrString::fromString($this->season_start),
-            'season_end' => DateOrString::fromString($this->season_end)
+            'season_end' => DateOrString::fromString($this->season_end),
         ]);
     }
 

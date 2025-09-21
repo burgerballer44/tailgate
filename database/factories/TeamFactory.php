@@ -18,8 +18,8 @@ class TeamFactory extends Factory
     public function definition(): array
     {
         return [
-            'designation' => fake()->name() . 'designation',
-            'mascot' => fake()->name() . 'mascot',
+            'designation' => fake()->name().'designation',
+            'mascot' => fake()->name().'mascot',
             'sport' => fake()->randomElement(Sport::cases())->value,
         ];
     }
