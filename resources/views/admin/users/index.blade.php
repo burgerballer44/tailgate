@@ -1,4 +1,4 @@
-<x-layouts.sidebar>
+<x-layouts.app>
     <x-slot:heading>Users</x-slot>
 
     <x-tables.full-width
@@ -26,4 +26,4 @@
             ]
         ]"
     ></x-tables.full-width>
-</x-layouts.sidebar>
+</x-layouts.app>

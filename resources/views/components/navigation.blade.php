@@ -21,8 +21,14 @@
             </div>
             @auth
                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                    <x-nav-link route="profile.edit">Profile</x-nav-link>
-                    <x-nav-link route="logout">Log Out</x-nav-link>
+                    <x-nav-link-dropdown
+                        label="{{ Auth::user()->name }}"
+                        align="end"
+                        :items="[
+                            ['label' => 'Profile', 'route' => 'profile.edit'],
+                            ['label' => 'Log out', 'route' => 'logout'],
+                        ]"
+                    ></x-nav-link-dropdown>
                 </div>
             @endauth
         </div>
