@@ -1,6 +1,10 @@
-<x-layouts.app>
-    <x-slot:heading>Users</x-slot>
-
+<x-layouts.app
+    mainHeading="Users"
+    mainDescription="A list of all the users including their name, title, email and role."
+    :mainActions="[
+        ['text' => 'Add User', 'route' => 'users.create'],
+    ]"
+>
     <x-tables.full-width
         heading="Users"
         description="A list of all the users including their name, title, email and role."
