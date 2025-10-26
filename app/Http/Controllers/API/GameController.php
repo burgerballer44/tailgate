@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use App\Http\Middleware\GameMustBelongToSeason;
-use App\Http\Requests\Season\AddGameRequest;
-use App\Http\Requests\Season\UpdateGameRequest;
-use App\Http\Resources\GameResource;
 use App\Models\Game;
 use App\Models\Season;
-use Illuminate\Routing\Controllers\HasMiddleware;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\GameResource;
+use App\Http\Requests\Season\AddGameRequest;
 use Illuminate\Routing\Controllers\Middleware;
+use App\Http\Middleware\GameMustBelongToSeason;
+use App\Http\Requests\Season\UpdateGameRequest;
+use Illuminate\Routing\Controllers\HasMiddleware;
 
 class GameController extends Controller implements HasMiddleware
 {

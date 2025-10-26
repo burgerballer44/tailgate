@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 class EmailVerificationNotificationController extends Controller
 {
@@ -19,6 +19,8 @@ class EmailVerificationNotificationController extends Controller
 
         $request->user()->sendEmailVerificationNotification();
 
-        return back()->with('status', 'verification-link-sent');
+        $this->setFlashAlert('success', 'A new verification link has been sent to the email address you provided during registration.');
+
+        return back();
     }
 }

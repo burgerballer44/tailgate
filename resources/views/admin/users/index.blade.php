@@ -5,27 +5,48 @@
         ['text' => 'Add User', 'route' => 'users.create'],
     ]"
 >
+    {{-- query --}}
+    <x-form.query-filters>
+        <x-form.query-search label="Search by name or email" />
+        <x-form.select
+            name="status"
+            label="Status"
+            :options="['' => 'All Statuses'] + $statuses->mapWithKeys(fn($status) => [$status => ucfirst($status)])->toArray()"
+        />
+        <x-form.select
+            name="role"
+            label="Role"
+            :options="['' => 'All Roles'] + $roles->mapWithKeys(fn($role) => [$role => ucfirst($role)])->toArray()"
+        />
+    </x-form.query-filters>
+
+    {{-- table --}}
     <x-tables.full-width
         heading="Users"
         description="A list of all the users including their name, title, email and role."
         :tableActions="[
             ['route' => 'users.create', 'text' => 'Add User']
         ]"
-        :headers="['Name', 'Email', 'Status', 'Role']"
+        :headers="['Name', 'Email', 'Status', 'Role', 'Created', 'Actions']"
         :rows="$users"
-        :columns="['name','email','status','role']"
+        :columns="['name', 'email', 'status', 'role', 'created_at']"
         :rowActions="[
+            [
+                'label' => 'Show',
+                'route' => 'users.show',
+                'routeParams' => ['user' => 'ulid'],
+            ],
             [
                 'label' => 'Edit',
                 'route' => 'users.edit',
-                'routeParams' => ['user' => 'id'],
-                // 'permission' => 'update', 
+                'routeParams' => ['user' => 'ulid'],
+                // 'permission' => 'update',
             ],
             [
                 'label' => 'Delete',
                 'route' => 'users.destroy',
-                'routeParams' => ['user' => 'id'],
-                // 'permission' => 'delete', 
+                'routeParams' => ['user' => 'ulid'],
+                // 'permission' => 'delete',
                 'confirm' => 'Are you sure you want to delete this user?'
             ]
         ]"

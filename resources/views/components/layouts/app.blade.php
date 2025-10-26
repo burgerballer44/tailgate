@@ -8,8 +8,10 @@
 
 <body class="h-full bg-gray-100">
     <div class="min-h-full">
-        <x-navigation></x-navigation>
+        {{-- navigation bar --}}
+        <x-navigation.navigation></x-navigation.navigation>
 
+        {{-- top bar --}}
         <div class="bg-white shadow-sm">
             <header class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 {{-- left side text --}}
@@ -31,8 +33,12 @@
                 </div>
             </header>
         </div>
+
+        {{-- main body --}}
         <main>
             <div id="app" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <x-layouts.partials.flash-alert></x-layouts.partials.flash-alert>
+
                 {{ $slot }}
             </div>
         </main>

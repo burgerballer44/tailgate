@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SeasonType;
 use App\Models\Sport;
+use App\Models\SeasonType;
 
 class SeasonController extends Controller
 {

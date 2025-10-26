@@ -1,41 +1,31 @@
-<x-layouts.guest>
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="mt-6 text-center text-2xl/9 text-xl font-bold font-semibold tracking-tight text-gray-900">
-            Confirm Password
-        </h2>
+<x-layouts.guest mainHeading="Confirm Password">
+    <div class="mb-4 text-sm text-gray-600">
+        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>
 
-    <div class="flex flex-col items-center pt-6 sm:justify-center sm:pt-0">
-        <div class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg">
-            <div class="mb-4 text-sm text-gray-600">
-                {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
-            </div>
+    <form method="POST" action="{{ route('password.confirm') }}">
+        @csrf
 
-            <form method="POST" action="{{ route('password.confirm') }}">
-                @csrf
+        <!-- Password -->
+        <div>
+            <x-inputs.input-label for="password" :value="__('Password')" />
 
-                <!-- Password -->
-                <div>
-                    <x-input-label for="password" :value="__('Password')" />
+            <x-inputs.text-input
+                id="password"
+                class="mt-1 block w-full"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+            />
 
-                    <x-text-input
-                        id="password"
-                        class="mt-1 block w-full"
-                        type="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                    />
-
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                </div>
-
-                <div class="mt-4 flex justify-end">
-                    <x-primary-button>
-                        {{ __('Confirm') }}
-                    </x-primary-button>
-                </div>
-            </form>
+            <x-inputs.input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
-    </div>
+
+        <div class="mt-4 flex justify-end">
+            <x-buttons.primary-button>
+                {{ __('Confirm') }}
+            </x-buttons.primary-button>
+        </div>
+    </form>
 </x-layouts.guest>

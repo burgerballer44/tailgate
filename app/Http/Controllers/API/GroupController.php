@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Group;
+use App\Models\Follow;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\GroupResource;
+use App\Http\Resources\FollowResource;
 use App\Http\Middleware\FollowBelongsToGroup;
 use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
-use App\Http\Requests\Group\UpdateGroupRequest;
-use App\Http\Resources\FollowResource;
-use App\Http\Resources\GroupResource;
-use App\Models\Follow;
-use App\Models\Group;
-use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use App\Http\Requests\Group\UpdateGroupRequest;
+use Illuminate\Routing\Controllers\HasMiddleware;
 
 class GroupController extends Controller implements HasMiddleware
 {

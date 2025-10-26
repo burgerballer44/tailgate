@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Group;
+use App\Models\Member;
+use App\Models\GroupRole;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\MemberResource;
 use App\Http\Middleware\MemberMustBeInGroup;
+use Illuminate\Routing\Controllers\Middleware;
 use App\Http\Requests\Group\StoreMemberRequest;
 use App\Http\Requests\Group\UpdateMemberRequest;
-use App\Http\Resources\MemberResource;
-use App\Models\Group;
-use App\Models\GroupRole;
-use App\Models\Member;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Illuminate\Routing\Controllers\Middleware;
 
 class MemberController extends Controller implements HasMiddleware
 {

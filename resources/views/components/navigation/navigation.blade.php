@@ -8,27 +8,27 @@
                 <div class="hidden md:block">
                     <div class="flex items-baseline space-x-4">
                         @auth
-                            <x-nav-link route="dashboard">Dashboard</x-nav-link>
-                            <x-nav-link route="users.index">Users</x-nav-link>
-                            <x-nav-link route="teams.index">Teams</x-nav-link>
-                            <x-nav-link route="seasons.index">Seasons</x-nav-link>
-                            <x-nav-link route="groups.index">Groups</x-nav-link>
+                            <x-navigation.nav-link route="dashboard">Dashboard</x-navigation.nav-link>
+                            <x-navigation.nav-link route="users.index">Users</x-navigation.nav-link>
+                            <x-navigation.nav-link route="teams.index">Teams</x-navigation.nav-link>
+                            <x-navigation.nav-link route="seasons.index">Seasons</x-navigation.nav-link>
+                            <x-navigation.nav-link route="groups.index">Groups</x-navigation.nav-link>
                         @else
-                            <x-nav-link route="home">Home</x-nav-link>
+                            <x-navigation.nav-link route="home">Home</x-navigation.nav-link>
                         @endauth
                     </div>
                 </div>
             </div>
             @auth
                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                    <x-nav-link-dropdown
+                    <x-navigation.dropdown-nav-links
                         label="{{ Auth::user()->name }}"
                         align="end"
                         :items="[
                             ['label' => 'Profile', 'route' => 'profile.edit'],
-                            ['label' => 'Log out', 'route' => 'logout'],
+                            ['label' => 'Log out', 'route' => 'logout', 'method' => 'POST'],
                         ]"
-                    ></x-nav-link-dropdown>
+                    ></x-navigation.dropdown-nav-links>
                 </div>
             @endauth
         </div>

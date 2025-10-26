@@ -1,28 +1,10 @@
 <x-layouts.guest>
-    <div class="py-24 sm:py-32">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto max-w-2xl text-center">
-                <h1 class="text-navy text-4xl font-bold sm:text-6xl">Tar Heel Tailgate</h1>
-                <p class="text-carolina mt-6 text-lg leading-8">Score prediction with friends</p>
-                <div class="mt-10 flex items-center justify-center gap-x-6">
-                    <a href="{{ route('login') }}">
-                        <button
-                            type="button"
-                            class="bg-carolina hover:bg-navy focus-visible:outline-navy rounded-md px-3.5 py-2.5 font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
-                            Log in
-                        </button>
-                    </a>
-                    <a href="{{ route('register') }}">
-                        <button
-                            type="button"
-                            class="bg-carolina hover:bg-navy focus-visible:outline-navy rounded-md px-3.5 py-2.5 font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
-                            Register
-                        </button>
-                    </a>
-                </div>
-            </div>
+    <div class="mx-auto max-w-2xl text-center">
+        <h1 class="text-navy text-4xl font-bold sm:text-6xl">Tar Heel Tailgate</h1>
+        <p class="text-carolina mt-6 text-lg leading-8">Score prediction with friends</p>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+            <x-buttons.nav-button route="login">Log in</x-buttons.nav-button>
+            <x-buttons.nav-button route="register">Register</x-buttons.nav-button>
         </div>
     </div>
 </x-layouts.guest>

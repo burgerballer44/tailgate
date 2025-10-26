@@ -63,16 +63,20 @@
         <div class="py-1">
             @foreach ($items as $item)
                 @php
-                    $isForm = isset($item['form']);
                     $isActive = isset($item['route']) && request()->routeIs($item['route']);
-                    $href = $item['route'] ? route($item['route']) : $item['href'] ?? '#';
+                    $href = isset($item['route']) ? route($item['route']) : $item['href'] ?? '#';
+
+                    $action = $href;
+                    $intended_method = isset($item['method']) ? strtoupper($item['method']) : 'GET';
+                    $isForm = $intended_method !== 'GET';
+                    $target = isset($item['target']) ? ' target="' . $item['target'] . '" rel="noopener noreferrer"' : '';
                 @endphp
 
                 @if (! $isForm)
                     <a
-                        href="{{ $href }}"
-                        @if(isset($item['target'])) target="{{ $item['target'] }}" rel="noopener noreferrer" @endif
-                        class="{{ $linkClass }} {{ $isActive ? 'bg-gray-100' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white' }}"
+                        href="{{ $action }}"
+                        {!! $target !!}
+                        class="{{ $linkClass }} {{ $isActive ? 'bg-gray-100 text-gray-900 dark:bg-white/5 dark:text-white' : '' }}"
                         @click="close"
                         role="menuitem"
                         aria-current="{{ $isActive ? 'page' : 'false' }}"
@@ -80,14 +84,10 @@
                         {{ $item['label'] ?? 'Item' }}
                     </a>
                 @else
-                    <form
-                        action="{{ $item['form']['action'] ?? '#' }}"
-                        method="{{ $item['form']['method'] ?? 'POST' }}"
-                        role="none"
-                    >
+                    <form action="{{ $action }}" method="POST" role="none">
                         @csrf
-                        @if (isset($item['form']['method']) && ! in_array(strtoupper($item['form']['method']), ['GET', 'POST']))
-                            @method($item['form']['method'])
+                        @if ($intended_method !== 'POST')
+                            @method($intended_method)
                         @endif
 
                         <button type="submit" class="{{ $linkClass }} w-full text-left" role="menuitem" @click="close">

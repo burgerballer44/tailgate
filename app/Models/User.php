@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -65,6 +67,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected static function booted(): void
     {
+        // generate ULID on creating
         static::creating(function ($user) {
             $user->ulid = Str::ulid();
         });
@@ -81,14 +84,23 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Scope a query to filter users based on the provided filters.
-     *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * Scope to filter users based on the provided filters.
      */
-    public function scopeFilter($query, array $filters)
+    #[Scope]
+    protected function filter(Builder $builder, array $query)
     {
+        if ($q = $query['q'] ?? null) {
+            $builder->where('name', 'like', "%{$q}%")
+                ->orWhere('email', 'like', "%{$q}%");
+        }
 
-        return $query;
+        if ($status = $query['status'] ?? null) {
+            $builder->where('status', $status);
+        }
+
+        if ($role = $query['role'] ?? null) {
+            $builder->where('role', $role);
+        }
     }
+
 }

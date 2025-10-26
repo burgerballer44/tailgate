@@ -7,20 +7,26 @@ use App\Models\UserRole;
 use App\Models\UserStatus;
 use Illuminate\Http\Request;
 use App\Services\UserService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 
 class UserController extends Controller
 {
     public function __construct(
         private UserService $userService
     ) {}
-
-    public function index()
+    
+    public function index(Request $request): View
     {
+        $errors = new \Illuminate\Support\MessageBag();
+        $errors->add('q', 'The email field is required.');
         return view('admin.users.index', [
-            'users' => User::paginate(),
+            'users' => $this->userService->query($request->all())->paginate(),
             'statuses' => collect(UserStatus::cases())->pluck('value'),
             'roles' => collect(UserRole::cases())->pluck('value'),
-        ]);
+        ])->withErrors($errors);
     }
 
     public function create()
@@ -28,18 +34,40 @@ class UserController extends Controller
         return view('admin.users.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'status' => 'required|in:'.implode(',', array_column(UserStatus::cases(), 'value')),
-            'role' => 'required|in:'.implode(',', array_column(UserRole::cases(), 'value')),
-        ]);
+        $this->userService->create($request->validated());
 
-        $this->userService->create($validated);
+        $this->setFlashAlert('success', 'User created successfully!');
 
-        return redirect()->route('users.index')->with('status', 'User created successfully.');
+        return redirect()->route('users.index');
+    }
+
+    public function show(User $user): View
+    {
+        return view('admin.users.show', ['user' => $user]);
+    }
+
+    public function edit(User $user): View
+    {
+        return view('admin.users.edit', ['user' => $user]);
+    }
+
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    {
+        $this->userService->update($user, $request->validated());
+
+        $this->setFlashAlert('success', 'User updated successfully!');
+
+        return redirect()->route('users.index');
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        $this->userService->delete($user);
+
+        $this->setFlashAlert('success', 'User deleted successfully!');
+
+        return redirect()->route('users.index');
     }
 }

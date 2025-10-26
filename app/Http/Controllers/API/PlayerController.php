@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use App\Http\Middleware\MemberMustBeInGroup;
-use App\Http\Middleware\PlayerMustBelongToMember;
-use App\Http\Middleware\ScoreMustBelongToPlayer;
-use App\Http\Requests\Group\StorePlayerRequest;
-use App\Http\Requests\Group\SubmitScoreRequest;
-use App\Http\Requests\Group\UpdatePlayerRequest;
-use App\Http\Requests\Group\UpdateScoreRequest;
-use App\Http\Resources\PlayerResource;
-use App\Http\Resources\ScoreResource;
 use App\Models\Group;
+use App\Models\Score;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Score;
-use Illuminate\Routing\Controllers\HasMiddleware;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ScoreResource;
+use App\Http\Resources\PlayerResource;
+use App\Http\Middleware\MemberMustBeInGroup;
 use Illuminate\Routing\Controllers\Middleware;
+use App\Http\Requests\Group\StorePlayerRequest;
+use App\Http\Requests\Group\SubmitScoreRequest;
+use App\Http\Requests\Group\UpdateScoreRequest;
+use App\Http\Middleware\ScoreMustBelongToPlayer;
+use App\Http\Requests\Group\UpdatePlayerRequest;
+use App\Http\Middleware\PlayerMustBelongToMember;
+use Illuminate\Routing\Controllers\HasMiddleware;
 
 class PlayerController extends Controller implements HasMiddleware
 {

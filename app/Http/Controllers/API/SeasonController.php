@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Game;
+use App\Models\Team;
+use App\Models\Season;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TeamResource;
+use App\Http\Resources\SeasonResource;
 use App\Http\Requests\Season\StoreSeasonRequest;
 use App\Http\Requests\Season\UpdateSeasonRequest;
-use App\Http\Resources\SeasonResource;
-use App\Http\Resources\TeamResource;
-use App\Models\Game;
-use App\Models\Season;
-use App\Models\Team;
 
 class SeasonController extends Controller
 {
