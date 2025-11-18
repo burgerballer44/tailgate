@@ -2,6 +2,11 @@
 
 namespace App\Helpers;
 
+/**
+ * Trait EnumToArray
+ *
+ * Provides methods to convert enum cases to arrays of names, values, or a combined array.
+ */
 trait EnumToArray
 {
     public static function names(): array

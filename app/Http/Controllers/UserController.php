@@ -20,18 +20,19 @@ class UserController extends Controller
     
     public function index(Request $request): View
     {
-        $errors = new \Illuminate\Support\MessageBag();
-        $errors->add('q', 'The email field is required.');
         return view('admin.users.index', [
             'users' => $this->userService->query($request->all())->paginate(),
             'statuses' => collect(UserStatus::cases())->pluck('value'),
             'roles' => collect(UserRole::cases())->pluck('value'),
-        ])->withErrors($errors);
+        ]);
     }
 
     public function create()
     {
-        return view('admin.users.create');
+        return view('admin.users.create', [
+            'roles' => collect(UserRole::cases())->pluck('value'),
+            'statuses' => collect(UserStatus::cases())->pluck('value'),
+        ]);
     }
 
     public function store(StoreUserRequest $request): RedirectResponse
@@ -50,7 +51,11 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
-        return view('admin.users.edit', ['user' => $user]);
+        return view('admin.users.edit', [
+            'user' => $user,
+            'roles' => collect(UserRole::cases())->pluck('value'),
+            'statuses' => collect(UserStatus::cases())->pluck('value'),
+        ]);
     }
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse

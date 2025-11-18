@@ -1,49 +1,31 @@
 @props([
-    // text to show on the dropdown button
-    'label' => 'Options',
-    // should the dropdown align at the start of the button or end
-    'align' => 'end',
-    // how wide should the items in the menu be
-    'width' => 'w-56',
-    // array of items (or pass custom slot)
     'items' => [],
-
-    'buttonClass' => 'inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs inset-ring-1 inset-ring-gray-300 hover:bg-gray-50',
+    'align' => 'end',
+    'width' => 'min-w-24',
+    'buttonClass' => 'cursor-pointer px-2 text-xl text-gray-500 hover:text-gray-700 focus:outline-none',
     'menuClass' => 'origin-top-right rounded-md bg-white shadow-lg outline-1 outline-black/5 transition',
-    'linkClass' => 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900',
+    'linkClass' => 'block px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900',
 ])
 
 @php
     $alignClasses = $align === 'start' ? 'left-0 origin-top-left' : 'right-0 origin-top-right';
 @endphp
 
-<div x-data="dropdown()" class="relative inline-block text-left">
-    {{-- Trigger --}}
-    @isset($trigger)
-        <div x-ref="button" @click="toggle" :aria-expanded="open" aria-haspopup="true">
-            {{ $trigger }}
-        </div>
-    @else
-        <button
-            type="button"
-            x-ref="button"
-            @click="toggle"
-            :aria-expanded="open"
-            aria-haspopup="true"
-            class="{{ $buttonClass }}"
-        >
-            {{ $label }}
-            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="-mr-1 size-5 text-gray-400">
-                <path
-                    d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                    clip-rule="evenodd"
-                    fill-rule="evenodd"
-                />
-            </svg>
-        </button>
-    @endisset
+<div x-data="dropdown()" class="relative inline-block text-right">
+    {{-- trigger --}}
+    <button
+        type="button"
+        x-ref="button"
+        @click="toggle"
+        :aria-expanded="open"
+        aria-haspopup="true"
+        class="{{ $buttonClass }}"
+    >
+        &#x22EE;
+        {{-- vertical ellipsis character --}}
+    </button>
 
-    {{-- Menu --}}
+    {{-- menu --}}
     <div
         x-ref="menu"
         x-show="open"
@@ -63,19 +45,20 @@
         <div class="py-1">
             @foreach ($items as $item)
                 @php
-                    $isActive = isset($item['route']) && request()->routeIs($item['route']);
-                    $href = isset($item['route']) ? route($item['route']) : $item['href'] ?? '#';
-
+                    $isActive = false; // no routeIs check needed here
+                    $href = $item['href'] ?? '#';
                     $action = $href;
                     $intended_method = isset($item['method']) ? strtoupper($item['method']) : 'GET';
                     $isForm = $intended_method !== 'GET';
                     $target = isset($item['target']) ? ' target="' . $item['target'] . '" rel="noopener noreferrer"' : '';
+                    $onclick = isset($item['confirm']) ? 'onclick="return confirm(\'' . addslashes($item['confirm']) . '\')"' : '';
                 @endphp
 
                 @if (! $isForm)
                     <a
                         href="{{ $action }}"
                         {!! $target !!}
+                        {!! $onclick !!}
                         class="{{ $linkClass }} {{ $isActive ? 'bg-gray-100 text-gray-900' : '' }}"
                         @click="close"
                         role="menuitem"
@@ -90,7 +73,13 @@
                             @method($intended_method)
                         @endif
 
-                        <button type="submit" class="{{ $linkClass }} w-full text-left" role="menuitem" @click="close">
+                        <button
+                            type="submit"
+                            class="{{ $linkClass }} w-full text-left"
+                            role="menuitem"
+                            @click="close"
+                            {!! $onclick !!}
+                        >
                             {{ $item['label'] ?? 'Submit' }}
                         </button>
                     </form>

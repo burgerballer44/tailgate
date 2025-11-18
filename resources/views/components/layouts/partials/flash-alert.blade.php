@@ -97,7 +97,7 @@
                 <div class="-mx-1.5 -my-1.5">
                     <button
                         type="button"
-                        class="{{ $buttonBg }} {{ $buttonText }} {{ $buttonHover }} {{ $focusRing }} {{ $focusOffset }} inline-flex rounded-md p-1.5 focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                        class="{{ $buttonBg }} {{ $buttonText }} {{ $buttonHover }} {{ $focusRing }} {{ $focusOffset }} inline-flex cursor-pointer rounded-md p-1.5 focus:ring-2 focus:ring-offset-2 focus:outline-none"
                     >
                         <span class="sr-only">Dismiss</span>
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

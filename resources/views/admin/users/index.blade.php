@@ -7,15 +7,19 @@
 >
     {{-- query --}}
     <x-form.query-filters>
-        <x-form.query-search label="Search by name or email" />
+        <x-form.query-search label="Search by name or email" :error="$errors->get('q')" />
+
         <x-form.select
             name="status"
             label="Status"
+            :value="old('status', request()->input('status'))"
             :options="['' => 'All Statuses'] + $statuses->mapWithKeys(fn($status) => [$status => ucfirst($status)])->toArray()"
         />
+
         <x-form.select
             name="role"
             label="Role"
+            :value="old('role', request()->input('role'))"
             :options="['' => 'All Roles'] + $roles->mapWithKeys(fn($role) => [$role => ucfirst($role)])->toArray()"
         />
     </x-form.query-filters>
@@ -40,13 +44,12 @@
                 'label' => 'Edit',
                 'route' => 'users.edit',
                 'routeParams' => ['user' => 'ulid'],
-                // 'permission' => 'update',
             ],
             [
                 'label' => 'Delete',
+                'type' => 'form',
                 'route' => 'users.destroy',
                 'routeParams' => ['user' => 'ulid'],
-                // 'permission' => 'delete',
                 'confirm' => 'Are you sure you want to delete this user?'
             ]
         ]"

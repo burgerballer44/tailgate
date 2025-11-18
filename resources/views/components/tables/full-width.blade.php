@@ -1,14 +1,14 @@
 <div class="px-4 sm:px-6 lg:px-8">
     {{-- table --}}
     <div class="mt-8 flow-root">
-        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
             <div class="inline-block min-w-full py-2 align-middle">
                 <table class="min-w-full divide-y divide-gray-300">
-                    {{-- table header --}}
+                    {{-- table header row --}}
                     <thead>
                         <tr>
                             @foreach ($headers as $header)
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold">{{ $header }}</th>
+                                <th scope="col" class="px-2 py-3 text-left text-sm font-semibold">{{ $header }}</th>
                             @endforeach
                         </tr>
                     </thead>
@@ -33,32 +33,44 @@
                                 {{-- row actions --}}
                                 @if (! empty($rowActions))
                                     <td
-                                        class="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-6 lg:pr-8"
+                                        class="relative pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-6 lg:pr-8"
                                     >
-                                        @foreach ($rowActions as $action)
-                                            @php
+                                        {{-- reminder --}}
+                                        {{-- @if (!isset($action['permission']) || Auth::user()->can($action['permission'], $row)) --}}
+                                        {{-- @endif --}}
+
+                                        @php
+                                            $dropdownItems = [];
+                                            foreach ($rowActions as $action) {
                                                 $routeParams = [];
-                                                if ($action["routeParams"]) {
-                                                    foreach ($action["routeParams"] as $key => $value) {
+                                                if (isset($action['routeParams'])) {
+                                                    foreach ($action['routeParams'] as $key => $value) {
                                                         $routeParams[$key] = $row->$value;
                                                     }
                                                 }
-                                            @endphp
+                                                $item = [
+                                                    'label' => $action['label'],
+                                                    'href' => route($action['route'], $routeParams),
+                                                ];
+                                                if (isset($action['confirm'])) {
+                                                    $item['confirm'] = $action['confirm'];
+                                                }
+                                                // add 'method' if the action requires POST/DELETE, etc.
+                                                if (isset($action['type']) && $action['type'] === 'form') {
+                                                    $routeSegments = explode('.', $action['route']);
+                                                    $actionName = array_pop($routeSegments);
+                                                    $methodMap = [
+                                                        'store' => 'POST',
+                                                        'update' => 'PUT',
+                                                        'destroy' => 'DELETE',
+                                                    ];
+                                                    $item['method'] = $methodMap[$actionName] ?? 'POST';
+                                                }
+                                                $dropdownItems[] = $item;
+                                            }
+                                        @endphp
 
-                                            {{-- @if (!isset($action['permission']) || Auth::user()->can($action['permission'], $row)) --}}
-
-                                            <a
-                                                class="text-carolina hover:text-navy"
-                                                href="{{ route($action["route"], $routeParams) }}"
-                                                @if (isset($action["confirm"]))
-                                                    onclick="return confirm('{{ $action["confirm"] }}')"
-                                                @endif
-                                            >
-                                                {{ $action["label"] }}
-                                            </a>
-
-                                            {{-- @endif --}}
-                                        @endforeach
+                                        <x-tables.row-actions-dropdown :items="$dropdownItems" />
                                     </td>
                                 @endif
                             </tr>
