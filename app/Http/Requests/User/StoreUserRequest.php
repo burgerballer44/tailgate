@@ -6,11 +6,11 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
 use App\DTO\ValidatedUserData;
-use App\Http\Requests\ApiFormRequest;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Foundation\Http\FormRequest;
 
-class StoreUserRequest extends ApiFormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

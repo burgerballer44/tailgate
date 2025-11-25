@@ -28,6 +28,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
+        // dd($request->expectsJson());
         $user = $this->userService->create($request->toDTO());
 
         return new UserResource($user);

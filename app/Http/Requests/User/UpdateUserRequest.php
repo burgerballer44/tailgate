@@ -6,10 +6,10 @@ use App\Models\UserRole;
 use App\Models\UserStatus;
 use App\DTO\ValidatedUserData;
 use Illuminate\Validation\Rule;
-use App\Http\Requests\ApiFormRequest;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateUserRequest extends ApiFormRequest
+class UpdateUserRequest  extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

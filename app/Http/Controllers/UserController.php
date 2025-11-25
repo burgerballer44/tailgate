@@ -9,8 +9,8 @@ use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 
 class UserController extends Controller
 {
