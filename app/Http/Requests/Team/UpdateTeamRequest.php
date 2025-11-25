@@ -2,9 +2,13 @@
 
 namespace App\Http\Requests\Team;
 
-use App\Http\Requests\ApiFormRequest;
+use App\Models\Sport;
+use App\DTO\ValidatedTeamData;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateTeamRequest extends ApiFormRequest
+class UpdateTeamRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +26,19 @@ class UpdateTeamRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'designation' => 'required|string|max:255',
-            'mascot' => 'required|string|max:255',
+            'designation' => ['string', 'max:255'],
+            'mascot' => ['string', 'max:255'],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedTeamData object.
+     * This method is used to pass validated team data to the service layer.
+     *
+     * @return ValidatedTeamData The validated team data transfer object.
+     */
+    public function toDTO(): ValidatedTeamData
+    {
+        return ValidatedTeamData::fromArray($this->validated());
     }
 }

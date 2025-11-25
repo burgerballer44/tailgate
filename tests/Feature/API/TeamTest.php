@@ -98,13 +98,17 @@ test('a team can be updated', function () {
 
 test('a teams sport cannot be updated', function () {
     // create a team
-    $team = Team::factory()->create();
+    $team = Team::factory()->create([
+        'designation' => 'theDesignation',
+        'mascot' => 'theMascot',
+        'sport' => Sport::BASKETBALL->value,
+    ]);
 
     // set fields to update
     $data = [
         'designation' => 'updatedDesignation',
         'mascot' => 'updatedMascot',
-        'sport' => 'updatedSport',
+        'sport' => Sport::FOOTBALL->value,
     ];
 
     // post the data
@@ -112,6 +116,7 @@ test('a teams sport cannot be updated', function () {
 
     $team->refresh();
 
+    // the sport should not be updated
     expect($team->sport)->not->toBe($data['sport']);
 });
 

@@ -50,6 +50,10 @@ class Team extends Model
         });
     }
 
+    /**
+     * Scope to filter teams based on the provided filters.
+     */
+    #[Scope]
     public function scopeFilter($query, array $filters)
     {
         if (isset($filters['sport'])) {

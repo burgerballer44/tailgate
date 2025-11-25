@@ -1,11 +1,14 @@
 <?php
 
 use App\Models\User;
+use App\Models\UserRole;
+use App\Models\UserStatus;
+use Illuminate\Support\Str;
 use App\Services\UserService;
 use App\DTO\ValidatedUserData;
 
 beforeEach(function () {
-    $this->service = app(UserService::class);
+    $this->service = new UserService();
 });
 
 describe('create a user', function () {
@@ -25,15 +28,15 @@ describe('create a user', function () {
         $this->assertDatabaseHas('users', ['email' => $data['email']]);
 
         // verify returned user data
-        expect($user)->toBeInstanceOf(\App\Models\User::class);
+        expect($user)->toBeInstanceOf(User::class);
         expect($user->name)->toBe($data['name']);
         expect($user->email)->toBe($data['email']);
         expect($user->status)->toBe($data['status']);
         expect($user->role)->toBe($data['role']);
         expect($user->updated_at)->not->toBeNull();
         expect($user->created_at)->not->toBeNull();
-        expect(\Illuminate\Support\Str::isUlid((string)$user->ulid))->toBeTrue();
-        expect(\Illuminate\Support\Facades\Hash::check('password', $user->password))->toBeTrue();
+        expect(Str::isUlid((string)$user->ulid))->toBeTrue();
+        expect($this->service->checkPassword('password', $user->password))->toBeTrue();
     });
 });
 
@@ -43,43 +46,43 @@ describe('update a user', function () {
         $user = User::factory()->create([
             'name' => 'Original Name',
             'email' => 'original@example.com',
-            'status' => \App\Models\UserStatus::ACTIVE->value,
-            'role' => \App\Models\UserRole::REGULAR->value,
+            'status' => UserStatus::ACTIVE->value,
+            'role' => UserRole::REGULAR->value,
         ]);
 
         // data to update to
-        $data = [
+        $data = ValidatedUserData::fromArray([
             'name' => 'Updated Name',
             'email' => 'updated@example.com',
-            'status' => \App\Models\UserStatus::PENDING->value,
-            'role' => \App\Models\UserRole::ADMIN->value,
-        ];
+            'status' => UserStatus::PENDING,
+            'role' => UserRole::ADMIN,
+        ]);
 
         // try to update the user
-        $this->service->update($user, ValidatedUserData::fromArray($data));
+        $this->service->update($user, $data);
 
         $user->refresh();
 
         // verify updated data
-        expect($user->name)->toBe($data['name']);
-        expect($user->email)->toBe($data['email']);
-        expect($user->status)->toBe($data['status']);
-        expect($user->role)->toBe($data['role']);
+        expect($user->name)->toBe($data->name);
+        expect($user->email)->toBe($data->email);
+        expect($user->status)->toBe($data->status->value);
+        expect($user->role)->toBe($data->role->value);
     });
 
     test('changing password', function () {
         // create existing user with known password
         $user = User::factory()->create([
-            'password' => $this->service::hashPassword('oldpassword')
+            'password' => $this->service->hashPassword('oldpassword')
         ]);
 
         // data to update password
-        $data = [
+        $data = ValidatedUserData::fromArray([
             'password' => 'newpassword',
-        ];
+        ]);
 
         // try to update the user password
-        $this->service->update($user, ValidatedUserData::fromArray($data));
+        $this->service->update($user, $data);
 
         $user->refresh();
 
@@ -94,18 +97,18 @@ describe('update a user', function () {
         ]);
 
         // data with blank password
-        $data = [
+        $data = ValidatedUserData::fromArray([
             'password' => '',
             'name' => 'Updated Name',
-        ];
+        ]);
 
         // try to update the user
-        $this->service->update($user, ValidatedUserData::fromArray($data));
+        $this->service->update($user, $data);
 
         $user->refresh();
 
         // verify name updated but password unchanged
-        expect($user->name)->toBe($data['name']);
+        expect($user->name)->toBe($data->name);
         expect($this->service->checkPassword('oldpassword', $user->password))->toBeTrue();
     });
 

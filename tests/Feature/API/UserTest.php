@@ -90,14 +90,19 @@ describe('viewing a user', function () {
 describe('updating a user', function () {
     test('works', function () {
         // create a user
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'name' => 'Original Name',
+            'email' => 'original@example.com',
+            'status' => UserStatus::ACTIVE->value,
+            'role' => UserRole::REGULAR->value,
+        ]);
 
         // set fields to update
         $data = [
             'name' => 'updatedName',
             'email' => 'updatedEmail@email.com',
-            'status' => UserStatus::ACTIVE->value,
-            'role' => UserRole::REGULAR->value,
+            'status' => UserStatus::PENDING->value,
+            'role' => UserRole::ADMIN->value,
         ];
 
         // post the data

@@ -152,7 +152,12 @@ describe('updating user', function () {
 
     test('updates a user', function () {
         // create a user
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'name' => 'Original Name',
+            'email' => 'original@example.com',
+            'status' => UserStatus::ACTIVE->value,
+            'role' => UserRole::REGULAR->value,
+        ]);
 
         // update data
         $updateData = [
