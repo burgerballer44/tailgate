@@ -37,7 +37,7 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        $this->userService->create($request->validated());
+        $this->userService->create($request->toDTO());
 
         $this->setFlashAlert('success', 'User created successfully!');
 
@@ -60,7 +60,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $this->userService->update($user, $request->validated());
+        $this->userService->update($user, $request->toDTO());
 
         $this->setFlashAlert('success', 'User updated successfully!');
 

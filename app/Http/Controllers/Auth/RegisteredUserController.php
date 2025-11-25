@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use App\Models\UserStatus;
 use Illuminate\Http\Request;
 use App\Services\UserService;
+use App\DTO\ValidatedUserData;
 use Illuminate\Validation\Rules;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -41,13 +42,13 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = $this->userService->create([
+        $user = $this->userService->create(ValidatedUserData::fromArray([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
             'status' => UserStatus::PENDING,
             'role' => UserRole::REGULAR,
-        ]);
+        ]));
 
         event(new Registered($user));
 

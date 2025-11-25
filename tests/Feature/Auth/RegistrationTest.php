@@ -32,7 +32,7 @@ test('guests that register have a pending status', function () {
 
     $user = Auth::user();
 
-    expect($user->status)->toBe(UserStatus::PENDING);
+    expect($user->status)->toBe(UserStatus::PENDING->value);
 });
 
 test('guests that register have a regular role', function () {
@@ -47,7 +47,7 @@ test('guests that register have a regular role', function () {
 
     $user = Auth::user();
 
-    expect($user->role)->toBe(UserRole::REGULAR);
+    expect($user->role)->toBe(UserRole::REGULAR->value);
 });
 
 test('the ulid field is populated when a guest registers', function () {

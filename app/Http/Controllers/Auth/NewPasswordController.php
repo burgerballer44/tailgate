@@ -6,6 +6,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Services\UserService;
+use App\DTO\ValidatedUserData;
 use Illuminate\Validation\Rules;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -45,8 +46,9 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
-                $this->userService->update($user, [
+                $this->userService->update($user, ValidatedUserData::fromArray([
                     'password' => $request->password,
+                ]), [
                     'remember_token' => Str::random(60),
                 ]);
 

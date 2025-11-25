@@ -28,9 +28,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $validated = $request->validated();
-
-        $user = $this->userService->create($validated);
+        $user = $this->userService->create($request->toDTO());
 
         return new UserResource($user);
     }
@@ -48,9 +46,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        $validated = $request->validated();
-
-        $this->userService->update($user, $validated);
+        $this->userService->update($user, $request->toDTO());
 
         return response()->noContent();
     }

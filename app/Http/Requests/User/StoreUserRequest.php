@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\User;
 
-use App\Http\Requests\ApiFormRequest;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
+use App\DTO\ValidatedUserData;
+use App\Http\Requests\ApiFormRequest;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Password;
 
@@ -33,5 +34,16 @@ class StoreUserRequest extends ApiFormRequest
             'status' => ['required', new Enum(UserStatus::class)],
             'role' => ['required', new Enum(UserRole::class)],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedUserData object.
+     * This method is used to pass validated user data to the service layer.
+     *
+     * @return ValidatedUserData The validated user data transfer object.
+     */
+    public function toDTO(): ValidatedUserData
+    {
+        return ValidatedUserData::fromArray($this->validated());
     }
 }
