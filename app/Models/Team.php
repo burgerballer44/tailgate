@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Team extends Model
 {
@@ -71,19 +73,18 @@ class Team extends Model
     /**
      * Scope to filter teams based on the provided filters.
      */
-    public function scopeFilter($query, array $filters)
+    #[Scope]
+    protected function filter(Builder $builder, array $query)
     {
-        if (isset($filters['sport'])) {
-            $query->whereHas('sports', function ($q) use ($filters) {
-                $q->where('sport', $filters['sport']);
+        if ($q = $query['q'] ?? null) {
+            $builder->where('designation', 'like', "%{$q}%")
+                ->orWhere('mascot', 'like', "%{$q}%");
+        }
+
+        if (isset($query['sport'])) {
+            $builder->whereHas('sports', function ($s) use ($query) {
+                $s->where('sport', $query['sport']);
             });
         }
-
-        if (isset($filters['name'])) {
-            $query->where('designation', 'LIKE', "%{$filters['name']}%")
-                ->orWhere('mascot', 'LIKE', "%{$filters['name']}%");
-        }
-
-        return $query;
     }
 }
