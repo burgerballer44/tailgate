@@ -28,6 +28,8 @@ class UpdateTeamRequest extends FormRequest
         return [
             'designation' => ['string', 'max:255'],
             'mascot' => ['string', 'max:255'],
+            'sports' => ['required', 'array', 'min:1'],
+            'sports.*' => [new Enum(Sport::class)],
         ];
     }
 

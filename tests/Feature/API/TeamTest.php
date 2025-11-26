@@ -12,7 +12,8 @@ beforeEach(function () {
 test('a team can be created', function () {
     // make data for a team
     $teamData = Team::factory()->make()->getAttributes();
-
+    $teamData['sports'] = [Sport::BASKETBALL->value];
+    
     // there should be no teams in the db
     $this->assertDatabaseCount('teams', 0);
 
@@ -26,6 +27,7 @@ test('a team can be created', function () {
 test('the team is returned when a team is created', function () {
     // make data for a team
     $teamData = Team::factory()->make()->getAttributes();
+    $teamData['sports'] = [Sport::BASKETBALL->value];
 
     // post the team data
     $this->post('api/v1/teams', $teamData)
@@ -33,7 +35,7 @@ test('the team is returned when a team is created', function () {
         ->assertJson(['data' => [
             'designation' => $teamData['designation'],
             'mascot' => $teamData['mascot'],
-            'sport' => $teamData['sport'],
+            'sports' => $teamData['sports'],
         ],
         ]);
 });
@@ -41,6 +43,7 @@ test('the team is returned when a team is created', function () {
 test('the ulid field is populated when a team is created', function () {
     // make data for a team
     $teamData = Team::factory()->make()->getAttributes();
+    $teamData['sports'] = [Sport::BASKETBALL->value];
 
     // post the team data
     $this->post('api/v1/teams', $teamData)->assertCreated();
@@ -61,7 +64,7 @@ test('a team can be viewed by ulid', function () {
         ->assertJson(['data' => [
             'designation' => $team->designation,
             'mascot' => $team->mascot,
-            'sport' => $team->sport,
+            'sports' => $team->sports->pluck('sport')->pluck('value')->toArray(),
         ],
         ]);
 });
@@ -85,6 +88,7 @@ test('a team can be updated', function () {
     $data = [
         'designation' => 'updatedDesignation',
         'mascot' => 'updatedMascot',
+        'sports' => [Sport::FOOTBALL->value],
     ];
 
     // post the data
@@ -94,30 +98,7 @@ test('a team can be updated', function () {
 
     expect($team->designation)->toBe($data['designation']);
     expect($team->mascot)->toBe($data['mascot']);
-});
-
-test('a teams sport cannot be updated', function () {
-    // create a team
-    $team = Team::factory()->create([
-        'designation' => 'theDesignation',
-        'mascot' => 'theMascot',
-        'sport' => Sport::BASKETBALL->value,
-    ]);
-
-    // set fields to update
-    $data = [
-        'designation' => 'updatedDesignation',
-        'mascot' => 'updatedMascot',
-        'sport' => Sport::FOOTBALL->value,
-    ];
-
-    // post the data
-    $this->patch("api/v1/teams/{$team->ulid}", $data)->assertNoContent();
-
-    $team->refresh();
-
-    // the sport should not be updated
-    expect($team->sport)->not->toBe($data['sport']);
+    expect($team->sports->pluck('sport')->toArray())->toBe([Sport::FOOTBALL]);
 });
 
 test('a lists of teams can be retrieved', function () {
@@ -131,21 +112,21 @@ test('a lists of teams can be retrieved', function () {
             [
                 'designation' => $team1->designation,
                 'mascot' => $team1->mascot,
-                'sport' => $team1->sport,
+                'sports' => $team1->sports->pluck('sport')->pluck('value')->toArray(),
             ], [
                 'designation' => $team2->designation,
                 'mascot' => $team2->mascot,
-                'sport' => $team2->sport,
+                'sports' => $team2->sports->pluck('sport')->pluck('value')->toArray(),
             ],
         ]]);
 });
 
 test('a lists of teams can be filtered by sport', function () {
     // create 2 basketball teams
-    [$team1, $team2] = Team::factory()->count(2)->create(['sport' => Sport::BASKETBALL->value]);
+    [$team1, $team2] = Team::factory()->withSports([Sport::BASKETBALL])->count(2)->create();
 
     // create 2 football teams
-    [$team3, $team4] = Team::factory()->count(2)->create(['sport' => Sport::FOOTBALL->value]);
+    [$team3, $team4] = Team::factory()->withSports([Sport::FOOTBALL])->count(2)->create();
 
     // get the basketball teams only
     $this->get('api/v1/teams?sport=Basketball')
@@ -155,11 +136,11 @@ test('a lists of teams can be filtered by sport', function () {
             [
                 'designation' => $team1->designation,
                 'mascot' => $team1->mascot,
-                'sport' => $team1->sport,
+                'sports' => $team1->sports->pluck('sport')->pluck('value')->toArray(),
             ], [
                 'designation' => $team2->designation,
                 'mascot' => $team2->mascot,
-                'sport' => $team2->sport,
+                'sports' => $team2->sports->pluck('sport')->pluck('value')->toArray(),
             ],
         ]]);
 });
@@ -169,8 +150,8 @@ test('a lists of teams can be filtered by name for desigantion', function () {
     $name = 'FindMe';
 
     // create a team
-    $team = Team::factory()->create(['designation' => $name]);
-    $differentTeamToNotFind = Team::factory()->create(['designation' => 'somethingelse']);
+    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => $name]);
+    $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => 'somethingelse']);
 
     // get the team
     $this->get("api/v1/teams?name=$name")
@@ -180,7 +161,7 @@ test('a lists of teams can be filtered by name for desigantion', function () {
             [
                 'designation' => $team->designation,
                 'mascot' => $team->mascot,
-                'sport' => $team->sport,
+                'sports' => $team->sports->pluck('sport')->pluck('value')->toArray(),
             ],
         ]]);
 });
@@ -190,8 +171,8 @@ test('a lists of teams can be filtered by name for mascot', function () {
     $name = 'FindMe';
 
     // create a team
-    $team = Team::factory()->create(['mascot' => $name]);
-    $differentTeamToNotFind = Team::factory()->create(['mascot' => 'somethingelse']);
+    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => $name]);
+    $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => 'somethingelse']);
 
     // get the team
     $this->get("api/v1/teams?name=$name")
@@ -201,7 +182,7 @@ test('a lists of teams can be filtered by name for mascot', function () {
             [
                 'designation' => $team->designation,
                 'mascot' => $team->mascot,
-                'sport' => $team->sport,
+                'sports' => $team->sports->pluck('sport')->pluck('value')->toArray(),
             ],
         ]]);
 });

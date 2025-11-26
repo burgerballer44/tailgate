@@ -225,16 +225,16 @@ test('a season can be deleted', function () {
 });
 
 test('all teams available for a season can be retrieved', function () {
-    $sport = Sport::BASKETBALL->value;
-    $wrongSport = Sport::FOOTBALL->value;
+    $sport = Sport::BASKETBALL;
+    $wrongSport = Sport::FOOTBALL;
 
     // create a season
-    $season = Season::factory()->create(['sport' => $sport]);
+    $season = Season::factory()->create(['sport' => $sport->value]);
 
     // create teams of the same sport
-    [$team1, $team2] = Team::factory()->count(2)->create(['sport' => $sport]);
+    [$team1, $team2] = Team::factory()->withSports([$sport])->count(2)->create();
     // create teams of a different sport
-    [$wrongTeam1, $wrongTeam2] = Team::factory()->count(2)->create(['sport' => $wrongSport]);
+    [$wrongTeam1, $wrongTeam2] = Team::factory()->withSports([$wrongSport])->count(2)->create();
 
     // get the season teams
     $this->get("api/v1/seasons/{$season->ulid}/teams")
@@ -244,11 +244,11 @@ test('all teams available for a season can be retrieved', function () {
             [
                 'designation' => $team1->designation,
                 'mascot' => $team1->mascot,
-                'sport' => $team1->sport,
+                'sports' => $team1->sports->pluck('sport')->pluck('value')->toArray(),
             ], [
                 'designation' => $team2->designation,
                 'mascot' => $team2->mascot,
-                'sport' => $team2->sport,
+                'sports' => $team2->sports->pluck('sport')->pluck('value')->toArray(),
             ],
         ],
         ]);

@@ -2,6 +2,7 @@
 
 use App\Models\Team;
 use App\Models\Sport;
+use App\Models\TeamSport;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
@@ -9,7 +10,7 @@ beforeEach(function () {
 });
 
 describe('index', function () {
-    test('works', function () {
+    test('page loads', function () {
         // create additional teams
         $team1 = Team::factory()->create();
         $team2 = Team::factory()->create();
@@ -57,9 +58,13 @@ describe('creating a team', function () {
         expect($sports)->toBeInstanceOf(Collection::class);
     });
 
-    test('works', function () {
+    test('will create a team', function () {
         // team data
-        $teamData = Team::factory()->make()->toArray();
+        $teamData = [
+            'designation' => 'Test Team',
+            'mascot' => 'Test Mascot',
+            'sports' => [Sport::BASKETBALL->value],
+        ];
 
         // there should be 0 teams in the db
         $this->assertDatabaseCount('teams', 0);
@@ -77,13 +82,20 @@ describe('creating a team', function () {
         $this->assertDatabaseHas('teams', [
             'designation' => $teamData['designation'],
             'mascot' => $teamData['mascot'],
-            'sport' => $teamData['sport'],
         ]);
+
+        // verify team sports were created
+        $team = Team::first();
+        expect($team->sports->pluck('sport')->toArray())->toBe([Sport::BASKETBALL]);
     });
 
     test('flashes success message on store', function () {
         // team data
-        $teamData = Team::factory()->make()->toArray();
+        $teamData = [
+            'designation' => 'Test Team',
+            'mascot' => 'Test Mascot',
+            'sports' => [Sport::BASKETBALL->value],
+        ];
 
         // post the team data
         $this->post(route('teams.store'), $teamData)->assertRedirect();
@@ -137,16 +149,16 @@ describe('updating team', function () {
 
     test('updates a team', function () {
         // create a team
-        $team = Team::factory()->create([
+        $team = Team::factory()->withSports([Sport::BASKETBALL])->create([
             'designation' => 'theDesignation',
             'mascot' => 'theMascot',
-            'sport' => Sport::BASKETBALL->value,
         ]);
 
-        // update data
+        // update dataX
         $updateData = [
             'designation' => 'Updated Designation',
             'mascot' => 'Updated Mascot',
+            'sports' => [Sport::FOOTBALL->value],
         ];
 
         // patch the team data
@@ -159,28 +171,7 @@ describe('updating team', function () {
         $team->refresh();
         expect($team->designation)->toBe($updateData['designation']);
         expect($team->mascot)->toBe($updateData['mascot']);
-    });
-
-    test('sport of a team cannot be updated', function () {
-        // create a team
-        $team = Team::factory()->create([
-            'sport' => Sport::BASKETBALL->value,
-        ]);
-    
-        // update data
-        $updateData = [
-            'sport' => Sport::FOOTBALL->value,
-        ];
-    
-        // patch the team data
-        $response = $this->patch(route('teams.update', $team), $updateData);
-    
-        // should redirect to index
-        $response->assertRedirect(route('teams.index'));
-    
-        // verify team was updated
-        $team->refresh();
-        expect($team->sport)->not->toBe($updateData['sport']);
+        expect($team->sports->pluck('sport')->toArray())->toBe([Sport::FOOTBALL]);
     });
 
     test('flashes success message on update', function () {
@@ -191,7 +182,7 @@ describe('updating team', function () {
         $updateData = [
             'designation' => 'Updated Designation',
             'mascot' => 'Updated Mascot',
-            'sport' => Sport::FOOTBALL->value,
+            'sports' => [Sport::FOOTBALL->value],
         ];
 
         // patch the team data

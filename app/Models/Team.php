@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Team extends Model
@@ -27,7 +28,6 @@ class Team extends Model
     protected $fillable = [
         'designation',
         'mascot',
-        'sport',
     ];
 
     /**
@@ -51,13 +51,32 @@ class Team extends Model
     }
 
     /**
+     * Get the sports associated with the team.
+     */
+    public function sports(): HasMany
+    {
+        return $this->hasMany(TeamSport::class);
+    }
+
+    /**
+     * Get a string representation of the team's sports.
+     * 
+     * Methods ending with "Attribute" are treated as accessors in Laravel.
+     */
+    public function getSportsStringAttribute(): string
+    {
+        return $this->sports->pluck('sport')->map(fn($sport) => ucfirst($sport->value))->join(', ');
+    }
+
+    /**
      * Scope to filter teams based on the provided filters.
      */
-    #[Scope]
     public function scopeFilter($query, array $filters)
     {
         if (isset($filters['sport'])) {
-            $query->where('sport', $filters['sport']);
+            $query->whereHas('sports', function ($q) use ($filters) {
+                $q->where('sport', $filters['sport']);
+            });
         }
 
         if (isset($filters['name'])) {

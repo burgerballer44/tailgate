@@ -12,7 +12,11 @@ beforeEach(function () {
 describe('create a team', function () {
     test('with valid data', function () {
         // create team data
-        $data = Team::factory()->make()->toArray();
+        $data = [
+            'designation' => 'Test Team',
+            'mascot' => 'Test Mascot',
+            'sports' => [Sport::BASKETBALL->value],
+        ];
 
         // ensure team does not exist
         $this->assertDatabaseMissing('teams', ['designation' => $data['designation']]);
@@ -26,24 +30,23 @@ describe('create a team', function () {
         expect($team)->toBeInstanceOf(Team::class);
         expect($team->designation)->toBe($data['designation']);
         expect($team->mascot)->toBe($data['mascot']);
-        expect($team->sport)->toBe($data['sport']);
+        expect($team->sports->pluck('sport')->toArray())->toBe([Sport::BASKETBALL]);
     });
 });
 
 describe('update a team', function () {
     test('with valid data', function () {
         // create existing team
-        $team = Team::factory()->create([
+        $team = Team::factory()->withSports([Sport::FOOTBALL])->create([
             'designation' => 'Old Designation',
-            'mascot' => 'Old Mascot',
-            'sport' => Sport::FOOTBALL->value,
+            'mascot' => 'Old Mascot'
         ]);
 
         // data to update to
         $data = ValidatedTeamData::fromArray([
             'designation' => 'New Designation',
             'mascot' => 'New Mascot',
-            'sport' => Sport::BASKETBALL,
+            'sports' => [Sport::BASKETBALL->value],
         ]);
 
         // try to update the team
@@ -52,22 +55,21 @@ describe('update a team', function () {
         $team->refresh();
         expect($team->designation)->toBe($data->designation);
         expect($team->mascot)->toBe($data->mascot);
-        expect($team->sport)->toBe($data->sport->value);
+        expect($team->sports->pluck('sport')->toArray())->toBe($data->sports);
     });
 
     test('does not update null values', function () {
         // create existing team
-        $team = Team::factory()->create([
+        $team = Team::factory()->withSports([Sport::FOOTBALL])->create([
             'designation' => 'Original Designation',
             'mascot' => 'Original Mascot',
-            'sport' => Sport::FOOTBALL->value,
         ]);
 
         // data to update to with nulls
         $data = ValidatedTeamData::fromArray([
             'designation' => null,
             'mascot' => 'Updated Mascot',
-            'sport' => null,
+            'sports' => null,
         ]);
 
         //
@@ -76,7 +78,7 @@ describe('update a team', function () {
         $team->refresh();
         expect($team->designation)->toBe($team->designation);
         expect($team->mascot)->toBe($data->mascot);
-        expect($team->sport)->toBe($team->sport);
+        expect($team->sports->pluck('sport')->toArray())->toBe([Sport::FOOTBALL]);
     });
 });
 

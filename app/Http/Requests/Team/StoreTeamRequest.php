@@ -27,7 +27,8 @@ class StoreTeamRequest extends FormRequest
         return [
             'designation' => ['required', 'string', 'max:255'],
             'mascot' => ['required', 'string', 'max:255'],
-            'sport' => ['required', new Enum(Sport::class)],
+            'sports' => ['required', 'array', 'min:1'],
+            'sports.*' => [new Enum(Sport::class)],
         ];
     }
 

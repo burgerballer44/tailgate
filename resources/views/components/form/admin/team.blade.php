@@ -4,6 +4,14 @@
         @method($method)
     @endif
 
+    @php
+        // get the sports associated with the team for checking the checkboxes
+        $teamSports = $team?->sports
+            ->pluck('sport')
+            ->pluck('value')
+            ->toArray();
+    @endphp
+
     <div>
         <x-inputs.input-label for="designation" class="font-semibold" :value="__('Designation')" />
         <x-inputs.text-input
@@ -34,14 +42,24 @@
     </div>
 
     <div class="mt-4">
-        <x-form.select
-            name="sport"
-            label="Sport"
-            :required="true"
-            :value="old('sport', $team?->sport)"
-            :options="['' => ''] + collect($sports)->mapWithKeys(fn($sport) => [$sport => ucfirst($sport)])->toArray()"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('sport')" />
+        <label for="sports" class="block font-semibold">Sports</label>
+        <div class="mt-2 space-y-2">
+            @foreach ($sports as $sport)
+                <div class="flex items-center">
+                    <input
+                        type="checkbox"
+                        id="sport_{{ $sport }}"
+                        name="sports[]"
+                        value="{{ $sport }}"
+                        {{ in_array($sport, old('sports', $teamSports ?? [])) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                    />
+                    <label for="sport_{{ $sport }}" class="ml-2 text-sm">{{ ucfirst($sport) }}</label>
+                </div>
+            @endforeach
+        </div>
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('sports')" />
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('sports.*')" />
     </div>
 
     {{-- buttons --}}

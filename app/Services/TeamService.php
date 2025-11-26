@@ -20,10 +20,18 @@ class TeamService
         $teamData = [
             'designation' => $data->designation,
             'mascot' => $data->mascot,
-            'sport' => $data->sport->value,
         ];
 
-        return Team::create($teamData);
+        $team = Team::create($teamData);
+
+        // add sports if provided
+        if (isset($data->sports) && !empty($data->sports)) {
+            foreach ($data->sports as $sport) {
+                $team->sports()->create(['sport' => $sport->value]);
+            }
+        }
+
+        return $team;
     }
 
     /**
@@ -36,17 +44,24 @@ class TeamService
     public function update(Team $team, ValidatedTeamData $data): void
     {
         // Team data properties are never expected to be null or set to null.
-        // The $extra array can contain any additional fields to update including null values.
 
         // remove null values
         $updateData = array_filter([
             'designation' => $data->designation,
             'mascot' => $data->mascot,
-            'sport' => $data->sport?->value,
         ], static fn ($value) => $value !== null);
 
         $team->fill($updateData);
         $team->save();
+
+         // update sports if provided
+        if (isset($data->sports) && !empty($data->sports)) {
+            // remove existing sports and add new ones
+            $team->sports()->delete();
+            foreach ($data->sports as $sport) {
+                $team->sports()->create(['sport' => $sport->value]);
+            }
+        }
     }
 
     /**
@@ -69,6 +84,6 @@ class TeamService
      */
     public function query(array $query)
     {
-        return Team::filter($query);
+        return Team::filter($query)->with('sports');
     }
 }

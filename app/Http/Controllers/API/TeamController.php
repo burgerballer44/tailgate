@@ -7,15 +7,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\TeamResource;
 use App\Http\Requests\Team\StoreTeamRequest;
 use App\Http\Requests\Team\UpdateTeamRequest;
+use App\Services\TeamService;
 
 class TeamController extends Controller
 {
+    public function __construct(
+        private TeamService $teamService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return TeamResource::collection(Team::filter(request()->input())->paginate(500));
+        return TeamResource::collection($this->teamService->query(request()->input())->paginate(500));
     }
 
     /**
@@ -23,11 +28,7 @@ class TeamController extends Controller
      */
     public function store(StoreTeamRequest $request)
     {
-        $validated = $request->validated();
-
-        $team = new Team($validated);
-
-        $team->save();
+        $team = $this->teamService->create($request->toDTO());
 
         return new TeamResource($team);
     }
@@ -45,11 +46,7 @@ class TeamController extends Controller
      */
     public function update(UpdateTeamRequest $request, Team $team)
     {
-        $validated = $request->validated();
-
-        $team->fill($validated);
-
-        $team->save();
+        $this->teamService->update($team, $request->toDTO());
 
         return response()->noContent();
     }
@@ -59,7 +56,7 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
-        $team->delete();
+        $this->teamService->delete($team);
 
         return response()->json([], 202);
     }

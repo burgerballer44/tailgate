@@ -17,8 +17,8 @@
                 'value' => $team->mascot,
             ],
             [
-                'label' => 'Sport',
-                'value' => $team->sport,
+                'label' => 'Sports',
+                'value' => $team->sports_string,
             ],
             [
                 'label' => 'ULID',

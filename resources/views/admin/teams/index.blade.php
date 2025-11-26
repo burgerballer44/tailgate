@@ -24,9 +24,9 @@
         :tableActions="[
             ['route' => 'teams.create', 'text' => 'Add Team']
         ]"
-        :headers="['Designation', 'Mascot', 'Sport', 'Created', 'Actions']"
+        :headers="['Designation', 'Mascot', 'Sports', 'Created', 'Actions']"
         :rows="$teams"
-        :columns="['designation', 'mascot', 'sport', 'created_at']"
+        :columns="['designation', 'mascot', 'sports_string', 'created_at']"
         :rowActions="[
             [
                 'label' => 'Show',
