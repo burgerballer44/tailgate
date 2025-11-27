@@ -13,14 +13,16 @@
             name="status"
             label="Status"
             :value="old('status', request()->input('status'))"
-            :options="['' => 'All Statuses'] + $statuses->mapWithKeys(fn($status) => [$status => ucfirst($status)])->toArray()"
+            placeholder="All Statuses"
+            :options="$statuses->mapWithKeys(fn($status) => [$status => ucfirst($status)])->toArray()"
         />
 
         <x-form.select
             name="role"
             label="Role"
             :value="old('role', request()->input('role'))"
-            :options="['' => 'All Roles'] + $roles->mapWithKeys(fn($role) => [$role => ucfirst($role)])->toArray()"
+            placeholder="All Roles"
+            :options="$roles->mapWithKeys(fn($role) => [$role => ucfirst($role)])->toArray()"
         />
     </x-form.query-filters>
 

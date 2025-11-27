@@ -77,8 +77,10 @@ class Team extends Model
     protected function filter(Builder $builder, array $query)
     {
         if ($q = $query['q'] ?? null) {
-            $builder->where('designation', 'like', "%{$q}%")
-                ->orWhere('mascot', 'like', "%{$q}%");
+            $builder->where(function ($query) use ($q) {
+                $query->whereRaw('LOWER(designation) LIKE LOWER(?)', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(mascot) LIKE LOWER(?)', ["%{$q}%"]);
+            });
         }
 
         if (isset($query['sport'])) {

@@ -90,8 +90,10 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function filter(Builder $builder, array $query)
     {
         if ($q = $query['q'] ?? null) {
-            $builder->where('name', 'like', "%{$q}%")
-                ->orWhere('email', 'like', "%{$q}%");
+            $builder->where(function ($query) use ($q) {
+                $query->whereRaw('LOWER(name) LIKE LOWER(?)', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(email) LIKE LOWER(?)', ["%{$q}%"]);
+            });
         }
 
         if ($status = $query['status'] ?? null) {
