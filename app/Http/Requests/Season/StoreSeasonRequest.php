@@ -2,13 +2,13 @@
 
 namespace App\Http\Requests\Season;
 
-use App\Http\Requests\ApiFormRequest;
-use App\Models\Common\DateOrString;
 use App\Models\SeasonType;
 use App\Models\Sport;
+use App\DTO\ValidatedSeasonData;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Foundation\Http\FormRequest;
 
-class StoreSeasonRequest extends ApiFormRequest
+class StoreSeasonRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,17 +19,6 @@ class StoreSeasonRequest extends ApiFormRequest
     }
 
     /**
-     * Handle a passed validation attempt.
-     */
-    protected function passedValidation(): void
-    {
-        $this->replace([
-            'season_start' => DateOrString::fromString($this->season_start),
-            'season_end' => DateOrString::fromString($this->season_end),
-        ]);
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
@@ -37,11 +26,22 @@ class StoreSeasonRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|max:255',
+            'name' => ['required', 'string', 'max:255'],
             'sport' => ['required', new Enum(Sport::class)],
             'season_type' => ['required', new Enum(SeasonType::class)],
-            'season_start' => ['required', 'string', 'max:255'],
-            'season_end' => ['required', 'string', 'max:255'],
+            'season_start' => ['required', 'date'],
+            'season_end' => ['required', 'date', 'after:season_start'],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedSeasonData object.
+     * This method is used to pass validated season data to the service layer.
+     *
+     * @return ValidatedSeasonData The validated season data transfer object.
+     */
+    public function toDTO(): ValidatedSeasonData
+    {
+        return ValidatedSeasonData::fromArray($this->validated());
     }
 }

@@ -144,6 +144,107 @@ describe('listing users', function () {
                 ],
             ]]);
     });
+
+    test('list of users can be filtered by role', function () {
+        // create 2 admin users
+        [$admin1, $admin2] = User::factory()->count(2)->create(['role' => UserRole::ADMIN->value]);
+        // create 2 regular users
+        [$regular1, $regular2] = User::factory()->count(2)->create(['role' => UserRole::REGULAR->value]);
+
+        // get the admin users only
+        $this->get('api/v1/users?role=Admin')
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJson(['data' => [
+                [
+                    'name' => $admin1->name,
+                    'email' => $admin1->email,
+                    'status' => $admin1->status,
+                    'role' => $admin1->role,
+                ], [
+                    'name' => $admin2->name,
+                    'email' => $admin2->email,
+                    'status' => $admin2->status,
+                    'role' => $admin2->role,
+                ],
+            ]]);
+    });
+
+    test('list of users can be filtered by status', function () {
+        // create 2 active users
+        [$active1, $active2] = User::factory()->count(2)->create(['status' => UserStatus::ACTIVE->value]);
+        // create 2 pending users
+        [$pending1, $pending2] = User::factory()->count(2)->create(['status' => UserStatus::PENDING->value]);
+
+        // get the active users only
+        $this->get('api/v1/users?status=Active')
+            ->assertOk()
+            // includes signed in user
+            ->assertJsonCount(3, 'data')
+            ->assertJson(['data' => [
+                [
+                    'name' => $this->user->name,
+                    'email' => $this->user->email,
+                    'status' => $this->user->status,
+                    'role' => $this->user->role,
+                ], [
+                    'name' => $active1->name,
+                    'email' => $active1->email,
+                    'status' => $active1->status,
+                    'role' => $active1->role,
+                ], [
+                    'name' => $active2->name,
+                    'email' => $active2->email,
+                    'status' => $active2->status,
+                    'role' => $active2->role,
+                ],
+            ]]);
+    });
+
+    test('list of users can be filtered by q for name', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a user
+        $user = User::factory()->create(['name' => $q]);
+        $differentUserToNotFind = User::factory()->create(['name' => 'somethingelse']);
+
+        // get the user
+        $this->get("api/v1/users?q=$q")
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJson(['data' => [
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'status' => $user->status,
+                    'role' => $user->role,
+                ],
+            ]]);
+    });
+
+    test('list of users can be filtered by q for email', function () {
+        // thing to find
+        $q = 'FindMe';
+    
+        // create a user
+        $user = User::factory()->create(['email' => $q]);
+        $differentUserToNotFind = User::factory()->create(['email' => 'somethingelse']);
+    
+        // get the user
+        $this->get("api/v1/users?q=$q")
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJson(['data' => [
+                [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'status' => $user->status,
+                    'role' => $user->role,
+                ],
+            ]]);
+    });
+
 });
 
 describe('deleting a user', function () {

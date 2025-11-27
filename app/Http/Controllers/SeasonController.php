@@ -2,19 +2,77 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Season;
 use App\Models\Sport;
 use App\Models\SeasonType;
+use Illuminate\Http\Request;
+use App\Services\SeasonService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\Season\StoreSeasonRequest;
+use App\Http\Requests\Season\UpdateSeasonRequest;
 
 class SeasonController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        private SeasonService $seasonService
+    ) {}
+
+    public function index(Request $request): View
     {
-        return view('seasons.index', [
-            'seasonTypes' => collect(SeasonType::cases())->pluck('value'),
+        return view('admin.seasons.index', [
+            'seasons' => $this->seasonService->query($request->all())->paginate(),
             'sports' => collect(Sport::cases())->pluck('value'),
+            'seasonTypes' => collect(SeasonType::cases())->pluck('value'),
         ]);
+    }
+
+    public function create()
+    {
+        return view('admin.seasons.create', [
+            'sports' => collect(Sport::cases())->pluck('value'),
+            'seasonTypes' => collect(SeasonType::cases())->pluck('value'),
+        ]);
+    }
+
+    public function store(StoreSeasonRequest $request): RedirectResponse
+    {
+        $this->seasonService->create($request->toDTO());
+
+        $this->setFlashAlert('success', 'Season created successfully!');
+
+        return redirect()->route('seasons.index');
+    }
+
+    public function show(Season $season): View
+    {
+        return view('admin.seasons.show', ['season' => $season]);
+    }
+
+    public function edit(Season $season): View
+    {
+        return view('admin.seasons.edit', [
+            'season' => $season,
+            'sports' => collect(Sport::cases())->pluck('value'),
+            'seasonTypes' => collect(SeasonType::cases())->pluck('value'),
+        ]);
+    }
+
+    public function update(UpdateSeasonRequest $request, Season $season): RedirectResponse
+    {
+        $this->seasonService->update($season, $request->toDTO());
+
+        $this->setFlashAlert('success', 'Season updated successfully!');
+
+        return redirect()->route('seasons.index');
+    }
+
+    public function destroy(Season $season): RedirectResponse
+    {
+        $this->seasonService->delete($season);
+
+        $this->setFlashAlert('success', 'Season deleted successfully!');
+
+        return redirect()->route('seasons.index');
     }
 }

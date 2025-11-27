@@ -84,15 +84,21 @@ test('a season cannot be viewed by id', function () {
 
 test('a season can be updated', function () {
     // create a season
-    $season = Season::factory()->create();
+    $season = Season::factory()->create([
+        'name' => 'originalName',
+        'sport' => Sport::BASKETBALL->value,
+        'season_type' => SeasonType::POST->value,
+        'season_start' => '2023-01-01',
+        'season_end' => '2023-12-31',
+    ]);
 
     // set fields to update
     $data = [
         'name' => 'updatedName',
         'sport' => Sport::FOOTBALL->value,
         'season_type' => SeasonType::REGULAR->value,
-        'season_start' => 'updatedSeason_start',
-        'season_end' => 'updatedSeason_end',
+        'season_start' => '2024-01-01',
+        'season_end' => '2024-12-31',
     ];
 
     // post the data

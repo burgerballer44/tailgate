@@ -145,16 +145,37 @@ test('a lists of teams can be filtered by sport', function () {
         ]]);
 });
 
-test('a lists of teams can be filtered by name for desigantion', function () {
+test('a lists of teams can be filtered by q for designation', function () {
     // thing to find
-    $name = 'FindMe';
+    $q = 'FindMe';
 
     // create a team
-    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => $name]);
+    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => $q]);
     $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => 'somethingelse']);
 
     // get the team
-    $this->get("api/v1/teams?name=$name")
+    $this->get("api/v1/teams?q=$q")
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJson(['data' => [
+            [
+                'designation' => $team->designation,
+                'mascot' => $team->mascot,
+                'sports' => $team->sports->pluck('sport')->pluck('value')->toArray(),
+            ],
+        ]]);
+});
+
+test('a lists of teams can be filtered by q for mascot', function () {
+    // thing to find
+    $q = 'FindMe';
+
+    // create a team
+    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => $q]);
+    $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => 'somethingelse']);
+
+    // get the team
+    $this->get("api/v1/teams?q=$q")
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJson(['data' => [
@@ -168,14 +189,14 @@ test('a lists of teams can be filtered by name for desigantion', function () {
 
 test('a lists of teams can be filtered by name for mascot', function () {
     // thing to find
-    $name = 'FindMe';
+    $q = 'FindMe';
 
     // create a team
-    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => $name]);
+    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => $q]);
     $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => 'somethingelse']);
 
     // get the team
-    $this->get("api/v1/teams?name=$name")
+    $this->get("api/v1/teams?q=$q")
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJson(['data' => [
