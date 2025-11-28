@@ -40,16 +40,16 @@ class TeamService
      *
      * @param  Team  $team  The team to update.
      * @param  ValidatedTeamData  $data  Validated data to update the team with.
+     * @return Team The updated team instance.
      */
-    public function update(Team $team, ValidatedTeamData $data): void
+    public function update(Team $team, ValidatedTeamData $data): Team
     {
         // Team data properties are never expected to be null or set to null.
 
-        // remove null values
-        $updateData = array_filter([
+        $updateData = [
             'designation' => $data->designation,
             'mascot' => $data->mascot,
-        ], static fn ($value) => $value !== null);
+        ];
 
         $team->fill($updateData);
         $team->save();
@@ -62,6 +62,8 @@ class TeamService
                 $team->sports()->create(['sport' => $sport->value]);
             }
         }
+
+        return $team;
     }
 
     /**

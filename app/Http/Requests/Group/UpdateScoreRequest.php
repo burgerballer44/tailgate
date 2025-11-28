@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Group;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\GameTimeNotPassedForUpdate;
 
-class UpdateScoreRequest extends ApiFormRequest
+class UpdateScoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

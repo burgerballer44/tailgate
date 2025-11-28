@@ -2,11 +2,12 @@
 
 use App\Models\Team;
 use App\Models\Sport;
+use Illuminate\Support\Str;
 use App\Services\TeamService;
 use App\DTO\ValidatedTeamData;
 
 beforeEach(function () {
-    $this->teamService = new TeamService();
+    $this->service = new TeamService();
 });
 
 describe('create a team', function () {
@@ -22,7 +23,7 @@ describe('create a team', function () {
         $this->assertDatabaseMissing('teams', ['designation' => $data['designation']]);
 
         // try to create the team
-        $team = $this->teamService->create(ValidatedTeamData::fromArray($data));
+        $team = $this->service->create(ValidatedTeamData::fromArray($data));
 
         // verify team exists in database
         $this->assertDatabaseHas('teams', ['designation' => $data['designation']]);
@@ -31,6 +32,7 @@ describe('create a team', function () {
         expect($team->designation)->toBe($data['designation']);
         expect($team->mascot)->toBe($data['mascot']);
         expect($team->sports->pluck('sport')->toArray())->toBe([Sport::BASKETBALL]);
+        expect(Str::isUlid((string)$team->ulid))->toBeTrue();
     });
 });
 
@@ -49,10 +51,25 @@ describe('update a team', function () {
             'sports' => [Sport::BASKETBALL->value],
         ]);
 
-        // try to update the team
-        $this->teamService->update($team, $data);
+        // ensure updated team does not exist
+        $this->assertDatabaseMissing('teams', [
+            'designation' => $data->designation,
+            'mascot' => $data->mascot,
+        ]);
 
-        $team->refresh();
+        // try to update the team
+        $updatedTeam = $this->service->update($team, $data);
+
+        // verify updated team exists in database
+        $this->assertDatabaseHas('teams', [
+            'designation' => $data->designation,
+            'mascot' => $data->mascot,
+        ]);
+
+        // verify returned team is the same instance
+        expect($updatedTeam)->toBe($team);
+
+        // verify updated data
         expect($team->designation)->toBe($data->designation);
         expect($team->mascot)->toBe($data->mascot);
         expect($team->sports->pluck('sport')->toArray())->toBe($data->sports);
@@ -72,13 +89,14 @@ describe('update a team', function () {
             'sports' => null,
         ]);
 
-        //
-        $this->teamService->update($team, $data);
+        // try to update the team
+        $updatedTeam = $this->service->update($team, $data);
 
-        $team->refresh();
-        expect($team->designation)->toBe($team->designation);
-        expect($team->mascot)->toBe($data->mascot);
-        expect($team->sports->pluck('sport')->toArray())->toBe([Sport::FOOTBALL]);
+        // verify returned team is the same instance
+        expect($updatedTeam)->toBe($team);
+
+        // verify data is unchanged
+        expect($updatedTeam->toArray())->toBe($team->toArray());
     });
 });
 
@@ -88,7 +106,7 @@ describe('delete', function () {
         $team = Team::factory()->create();
 
         // delete the team
-        $this->teamService->delete($team);
+        $this->service->delete($team);
 
         // verify team is deleted from database
         expect(Team::find($team->id))->toBeNull();

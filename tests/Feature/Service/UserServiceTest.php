@@ -40,8 +40,8 @@ describe('create a user', function () {
     });
 });
 
-describe('update a user', function () {
-    test('with valid data without changing password', function () {
+describe('update user profile', function () {
+    test('with valid data', function () {
         // create existing user
         $user = User::factory()->create([
             'name' => 'Original Name',
@@ -54,14 +54,32 @@ describe('update a user', function () {
         $data = ValidatedUserData::fromArray([
             'name' => 'Updated Name',
             'email' => 'updated@example.com',
-            'status' => UserStatus::PENDING,
-            'role' => UserRole::ADMIN,
+            'password' => '',
+            'status' => UserStatus::PENDING->value,
+            'role' => UserRole::ADMIN->value,
         ]);
 
-        // try to update the user
-        $this->service->update($user, $data);
+        // ensure updated user does not exist
+        $this->assertDatabaseMissing('users', [
+            'name' => $data->name,
+            'email' => $data->email,
+            'status' => $data->status->value,
+            'role' => $data->role->value,
+        ]);
 
-        $user->refresh();
+        // try to update the user profile
+        $updatedUser = $this->service->updateProfile($user, $data);
+
+        // verify updated user exists in database
+        $this->assertDatabaseHas('users', [
+            'name' => $data->name,
+            'email' => $data->email,
+            'status' => $data->status->value,
+            'role' => $data->role->value,
+        ]);
+
+        // verify returned user is the same instance
+        expect($updatedUser)->toBe($user);
 
         // verify updated data
         expect($user->name)->toBe($data->name);
@@ -70,67 +88,45 @@ describe('update a user', function () {
         expect($user->role)->toBe($data->role->value);
     });
 
-    test('changing password', function () {
+});
+
+describe('change user password', function () {
+    test('with valid new password', function () {
         // create existing user with known password
         $user = User::factory()->create([
             'password' => $this->service->hashPassword('oldpassword')
         ]);
 
-        // data to update password
-        $data = ValidatedUserData::fromArray([
-            'password' => 'newpassword',
-        ]);
+        // change password
+        $updatedUser = $this->service->changePassword($user, 'newpassword');
 
-        // try to update the user password
-        $this->service->update($user, $data);
-
-        $user->refresh();
+        // verify returned user is the same instance
+        expect($updatedUser)->toBe($user);
 
         expect($this->service->checkPassword('newpassword', $user->password))->toBeTrue();
         expect($this->service->checkPassword('oldpassword', $user->password))->toBeFalse();
     });
+});
 
-    test('does not update password if password is blank', function () {
+describe('reset user password', function () {
+    test('with valid new password and remember token', function () {
         // create existing user with known password
         $user = User::factory()->create([
-            'password' => $this->service->hashPassword('oldpassword')
+            'password' => $this->service->hashPassword('oldpassword'),
+            'remember_token' => null,
         ]);
 
-        // data with blank password
-        $data = ValidatedUserData::fromArray([
-            'password' => '',
-            'name' => 'Updated Name',
-        ]);
+        expect($user->remember_token)->toBeNull();
 
-        // try to update the user
-        $this->service->update($user, $data);
+        // reset password with remember token
+        $updatedUser = $this->service->resetPassword($user, 'newpassword', 'newtoken123');
 
-        $user->refresh();
+        // verify returned user is the same instance
+        expect($updatedUser)->toBe($user);
 
-        // verify name updated but password unchanged
-        expect($user->name)->toBe($data->name);
-        expect($this->service->checkPassword('oldpassword', $user->password))->toBeTrue();
-    });
-
-    test('update with empty data does nothing', function () {
-        // create existing user
-        $user = User::factory()->create();
-        // capture original data
-        $original = $user->toArray();
-
-        // try to update with empty data
-        $this->service->update($user, ValidatedUserData::fromArray([]));
-
-        $user->refresh();
-        $userArray = $user->toArray();
-
-        // verify no changes
-        expect($userArray['name'])->toBe($original['name']);
-        expect($userArray['email'])->toBe($original['email']);
-        expect($userArray['status'])->toBe($original['status']);
-        expect($userArray['role'])->toBe($original['role']);
-        expect($userArray['updated_at'])->toBe($original['updated_at']);
-        expect($userArray['created_at'])->toBe($original['created_at']);
+        expect($this->service->checkPassword('newpassword', $user->password))->toBeTrue();
+        expect($this->service->checkPassword('oldpassword', $user->password))->toBeFalse();
+        expect($user->remember_token)->toBe('newtoken123');
     });
 });
 

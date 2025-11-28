@@ -29,10 +29,10 @@ class UpdateUserRequest  extends FormRequest
         $user = request()->route('user');
 
         return [
-            'name' => ['string', 'max:255'],
-            'email' => ['string', 'email', 'max:255', Rule::unique('users')->ignore($user)],
-            'status' => [new Enum(UserStatus::class)],
-            'role' => [new Enum(UserRole::class)],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user)],
+            'status' => ['required', new Enum(UserStatus::class)],
+            'role' => ['required', new Enum(UserRole::class)],
         ];
     }
 

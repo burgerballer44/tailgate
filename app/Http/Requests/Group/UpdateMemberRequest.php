@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests\Group;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use App\Models\GroupRole;
 use App\Rules\GroupAdminMinimum;
 use Illuminate\Validation\Rules\Enum;
 
-class UpdateMemberRequest extends ApiFormRequest
+class UpdateMemberRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

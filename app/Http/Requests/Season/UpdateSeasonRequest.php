@@ -4,6 +4,7 @@ namespace App\Http\Requests\Season;
 
 use App\Models\SeasonType;
 use App\Models\Sport;
+use App\Models\Common\DateOrString;
 use App\DTO\ValidatedSeasonData;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,12 +27,23 @@ class UpdateSeasonRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['string', 'max:255'],
-            'sport' => [new Enum(Sport::class)],
-            'season_type' => [new Enum(SeasonType::class)],
-            'season_start' => ['date'],
-            'season_end' => ['date', 'after:season_start'],
+            'name' => ['required', 'string', 'max:255'],
+            'sport' => ['required', new Enum(Sport::class)],
+            'season_type' => ['required', new Enum(SeasonType::class)],
+            'season_start' => ['required', 'date'],
+            'season_end' => ['required', 'date', 'after:season_start'],
         ];
+    }
+
+    /**
+     * Handle a passed validation attempt.
+     */
+    protected function passedValidation(): void
+    {
+        $this->replace([
+            'season_start' => DateOrString::fromString($this->season_start),
+            'season_end' => DateOrString::fromString($this->season_end),
+        ]);
     }
 
     /**

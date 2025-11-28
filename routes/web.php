@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeasonController;
@@ -75,6 +76,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('teams', TeamController::class);
 
         Route::resource('seasons', SeasonController::class);
+
+        Route::resource('seasons.games', GameController::class);
 
         Route::resource('groups', GroupController::class);
     });

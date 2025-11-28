@@ -290,7 +290,7 @@ test('a team cannot be followed for a season that has ended', function () {
         ->assertJson(['data' => [
             'season_id' => ['Season has ended.'],
         ],
-        ]);
+    ]);
 });
 
 test('cannot follow a team if already following a team', function () {

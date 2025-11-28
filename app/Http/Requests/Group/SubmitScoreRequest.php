@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests\Group;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\GameMustExistInSeasonGroupFollows;
 use App\Rules\GameTimeNotPassed;
 use App\Rules\NoScoreSubmitted;
 
-class SubmitScoreRequest extends ApiFormRequest
+class SubmitScoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

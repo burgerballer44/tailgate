@@ -4,6 +4,7 @@
     :mainActions="[
         ['text' => 'Back to Seasons', 'route' => 'seasons.index'],
         ['text' => 'Edit Season', 'route' => 'seasons.edit', 'params' => ['season' => $season]],
+        ['text' => 'Add Game', 'route' => 'seasons.games.create', 'params' => ['season' => $season]],
     ]"
 >
     <x-model-viewer
@@ -38,4 +39,37 @@
             ],
         ]"
     />
+
+    <div class="mt-8">
+        <x-tables.full-width
+            heading="Games"
+            description="A list of all the games for this season including teams, scores, and date/time."
+            :tableActions="[
+                ['route' => 'seasons.games.create', 'routeParams' => ['season' => $season], 'text' => 'Add Game'],
+                ['route' => 'seasons.games.index', 'routeParams' => ['season' => $season], 'text' => 'View All Games']
+            ]"
+            :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Date', 'Time', 'Actions']"
+            :rows="$season->games"
+            :columns="['home_team.name', 'away_team.name', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
+            :rowActions="[
+                [
+                    'label' => 'Show',
+                    'route' => 'seasons.games.show',
+                    'routeParams' => ['season' => $season->ulid, 'game' => 'ulid'],
+                ],
+                [
+                    'label' => 'Edit',
+                    'route' => 'seasons.games.edit',
+                    'routeParams' => ['season' => $season->ulid, 'game' => 'ulid'],
+                ],
+                [
+                    'label' => 'Delete',
+                    'type' => 'form',
+                    'route' => 'seasons.games.destroy',
+                    'routeParams' => ['season' => $season->ulid, 'game' => 'ulid'],
+                    'confirm' => 'Are you sure you want to delete this game?'
+                ]
+            ]"
+        ></x-tables.full-width>
+    </div>
 </x-layouts.app>

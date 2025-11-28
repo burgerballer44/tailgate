@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Models\Game;
 use App\Models\Team;
 use App\Models\Season;
+use App\Services\SeasonService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TeamResource;
 use App\Http\Resources\SeasonResource;
@@ -13,12 +14,16 @@ use App\Http\Requests\Season\UpdateSeasonRequest;
 
 class SeasonController extends Controller
 {
+    public function __construct(
+        private SeasonService $seasonService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return SeasonResource::collection(Season::filter(request()->input())->paginate(500));
+        return SeasonResource::collection($this->seasonService->query(request()->input())->paginate(500));
     }
 
     /**
@@ -26,11 +31,7 @@ class SeasonController extends Controller
      */
     public function store(StoreSeasonRequest $request)
     {
-        $validated = $request->validated();
-
-        $season = new Season($validated);
-
-        $season->save();
+        $season = $this->seasonService->create($request->toDTO());
 
         return new SeasonResource($season);
     }
@@ -50,11 +51,7 @@ class SeasonController extends Controller
      */
     public function update(UpdateSeasonRequest $request, Season $season)
     {
-        $validated = $request->validated();
-
-        $season->fill($validated);
-
-        $season->save();
+        $this->seasonService->update($season, $request->toDTO());
 
         return response()->noContent();
     }
@@ -64,7 +61,7 @@ class SeasonController extends Controller
      */
     public function destroy(Season $season)
     {
-        $season->delete();
+        $this->seasonService->delete($season);
 
         return response()->json([], 202);
     }

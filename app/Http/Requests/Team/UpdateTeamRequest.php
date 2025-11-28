@@ -26,8 +26,8 @@ class UpdateTeamRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'designation' => ['string', 'max:255'],
-            'mascot' => ['string', 'max:255'],
+            'designation' => ['required', 'string', 'max:255'],
+            'mascot' => ['required', 'string', 'max:255'],
             'sports' => ['required', 'array', 'min:1'],
             'sports.*' => [new Enum(Sport::class)],
         ];

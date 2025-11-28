@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Season;
 
-use App\Http\Requests\ApiFormRequest;
+use App\DTO\ValidatedGameData;
 use App\Models\Common\DateOrString;
+use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateGameRequest extends ApiFormRequest
+class UpdateGameRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -34,10 +35,25 @@ class UpdateGameRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'home_team_score' => ['nullable', 'integer:min,0'],
-            'away_team_score' => ['nullable', 'integer:min,0'],
-            'start_date' => ['nullable', 'string', 'max:255'],
-            'start_time' => ['nullable', 'string', 'max:255'],
+            'game_id' => ['required', 'exists:games,id'],
+            'season_id' => ['required', 'exists:seasons,id'],
+            'home_team_id' => ['required', 'exists:teams,id'],
+            'away_team_id' => ['required', 'exists:teams,id', 'different:home_team_id'],
+            'home_team_score' => ['required', 'integer', 'min:0'],
+            'away_team_score' => ['required', 'integer', 'min:0'],
+            'start_date' => ['required', 'string', 'max:255'],
+            'start_time' => ['required', 'string', 'max:255'],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedGameData object.
+     * This method is used to pass validated game data to the service layer.
+     *
+     * @return ValidatedGameData The validated game data transfer object.
+     */
+    public function toDTO(): ValidatedGameData
+    {
+        return ValidatedGameData::fromArray($this->validated());
     }
 }

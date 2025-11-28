@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use App\Services\UserService;
-use App\DTO\ValidatedUserData;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
@@ -25,9 +24,7 @@ class PasswordController extends Controller
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
-        $this->userService->update($request->user(), ValidatedUserData::fromArray([
-            'password' => $validated['password'],
-        ]));
+        $user = $this->userService->changePassword($request->user(), $validated['password']);
 
         $this->setFlashAlert('success', 'Password updated successfully!');
 

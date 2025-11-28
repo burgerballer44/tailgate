@@ -2,12 +2,21 @@
 
 namespace App\Services;
 
+use App\Models\Game;
 use App\Models\Season;
+use App\Models\Sport;
+use App\Models\SeasonType;
+use App\Services\GameService;
+use App\DTO\ValidatedGameData;
 use App\DTO\ValidatedSeasonData;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class SeasonService
 {
+    public function __construct(
+        private GameService $gameService
+    ) {}
+
     /**
      * Create a new season with the provided data.
      * This method handles season creation logic, including setting name, sport, season_type, and dates.
@@ -21,8 +30,8 @@ class SeasonService
             'name' => $data->name,
             'sport' => $data->sport->value,
             'season_type' => $data->season_type->value,
-            'season_start' => $data->season_start,
-            'season_end' => $data->season_end,
+            'season_start' => (string) $data->season_start,
+            'season_end' => (string) $data->season_end,
         ];
 
         return Season::create($seasonData);
@@ -34,22 +43,24 @@ class SeasonService
      *
      * @param  Season  $season  The season to update.
      * @param  ValidatedSeasonData  $data  Validated data to update the season with.
+     * @return Season The updated season instance.
      */
-    public function update(Season $season, ValidatedSeasonData $data): void
+    public function update(Season $season, ValidatedSeasonData $data): Season
     {
         // Season data properties are never expected to be null or set to null.
 
-        // remove null values
-        $updateData = array_filter([
+        $updateData = [
             'name' => $data->name,
-            'sport' => $data->sport?->value,
-            'season_type' => $data->season_type?->value,
-            'season_start' => $data->season_start,
-            'season_end' => $data->season_end,
-        ], static fn ($value) => $value !== null);
+            'sport' => $data->sport->value,
+            'season_type' => $data->season_type->value,
+            'season_start' => (string) $data->season_start,
+            'season_end' => (string) $data->season_end,
+        ];
 
         $season->fill($updateData);
         $season->save();
+
+        return $season;
     }
 
     /**
@@ -61,6 +72,30 @@ class SeasonService
     public function delete(Season $season): void
     {
         $season->delete();
+    }
+
+    /**
+     * Add a game to a season.
+     * This method creates a new game and associates it with the given season.
+     *
+     * @param  Season  $season  The season to add the game to.
+     * @param  ValidatedGameData  $data  Validated game data including teams, scores, start_date, start_time.
+     * @return Game The created game instance.
+     */
+    public function addGame(Season $season, ValidatedGameData $data): Game
+    {
+        // create new game data
+        $gameData = ValidatedGameData::fromArray([
+            'season_id' => $season->id,
+            'home_team_id' => $data->home_team_id,
+            'away_team_id' => $data->away_team_id,
+            'home_team_score' => $data->home_team_score,
+            'away_team_score' => $data->away_team_score,
+            'start_date' => $data->start_date,
+            'start_time' => $data->start_time,
+        ]);
+
+        return $this->gameService->create($gameData);
     }
 
     /**

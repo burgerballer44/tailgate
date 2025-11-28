@@ -46,7 +46,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        $this->userService->update($user, $request->toDTO());
+        $this->userService->updateProfile($user, $request->toDTO());
 
         return response()->noContent();
     }

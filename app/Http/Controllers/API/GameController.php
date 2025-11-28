@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Game;
 use App\Models\Season;
+use App\Services\SeasonService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GameResource;
 use App\Http\Requests\Season\AddGameRequest;
@@ -14,6 +15,10 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 
 class GameController extends Controller implements HasMiddleware
 {
+    public function __construct(
+        private SeasonService $seasonService
+    ) {}
+
     /**
      * Get the middleware that should be assigned to the controller.
      */
@@ -29,11 +34,7 @@ class GameController extends Controller implements HasMiddleware
      */
     public function store(AddGameRequest $request, Season $season)
     {
-        $validated = $request->validated();
-
-        $game = new Game($validated);
-
-        $game = $season->games()->save($game);
+        $game = $this->seasonService->addGame($season, $request->toDTO());
 
         return new GameResource($game);
     }

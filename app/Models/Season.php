@@ -60,6 +60,11 @@ class Season extends Model
         });
     }
 
+    public function games(): HasMany
+    {
+        return $this->hasMany(Game::class);
+    }
+
     public function scopeFilter($query, array $filters)
     {
         if (isset($filters['sport'])) {
@@ -75,10 +80,5 @@ class Season extends Model
         }
 
         return $query;
-    }
-
-    public function games(): HasMany
-    {
-        return $this->hasMany(Game::class);
     }
 }

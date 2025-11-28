@@ -4,6 +4,7 @@ namespace App\Http\Requests\Season;
 
 use App\Models\SeasonType;
 use App\Models\Sport;
+use App\Models\Common\DateOrString;
 use App\DTO\ValidatedSeasonData;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,6 +33,17 @@ class StoreSeasonRequest extends FormRequest
             'season_start' => ['required', 'date'],
             'season_end' => ['required', 'date', 'after:season_start'],
         ];
+    }
+
+    /**
+     * Handle a passed validation attempt.
+     */
+    protected function passedValidation(): void
+    {
+        $this->replace([
+            'season_start' => DateOrString::fromString($this->season_start),
+            'season_end' => DateOrString::fromString($this->season_end),
+        ]);
     }
 
     /**

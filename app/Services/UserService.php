@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\UserStatus;
+use App\Models\UserRole;
+use Illuminate\Support\Str;
 use App\DTO\ValidatedUserData;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -30,36 +33,70 @@ class UserService
     }
 
     /**
-     * Update an existing user's information in the system.
-     * This method is used to modify user details such as name, email, role, or status,
-     * and optionally update the password (hashing it if provided and filled).
+     * Update a user's profile information (name, email, status, role).
+     * This method is used to modify user profile details.
      *
      * @param  User  $user  The user to update.
-     * @param  ValidatedUserData  $data  Validated data to update the user with. If 'password' is present and filled, it will be hashed.
-     * @param  array  $extra  Additional data to update, not part of validated user data.
+     * @param  ValidatedUserData  $data  Validated data containing profile information to update.
+     * @return User The updated user instance.
      */
-    public function update(User $user, ValidatedUserData $data, array $extra = []): void
+    public function updateProfile(User $user, ValidatedUserData $data): User
     {
-        // User data properties are never expected to be null or set to null.
-        // The $extra array can contain any additional fields to update including null values.
+        // User properties are never expected to be null or set to null.
 
-        // remove null values
-        $updateData = array_filter([
-            'name'   => $data->name,
-            'email'  => $data->email,
-            'status' => $data->status?->value,
-            'role'   => $data->role?->value,
-        ], static fn ($value) => $value !== null);
+        $updateData = [
+            'name' => $data->name,
+            'email' => $data->email,
+            'status' => $data->status->value,
+            'role' => $data->role->value,
+        ];
 
-        // handle password separately
+        // handle password if provided
         if (null !== $data->password && filled($data->password)) {
             $updateData['password'] = self::hashPassword($data->password);
         }
 
-        // $updateData takes precedence over $extra
-        $user->fill($updateData + $extra);
+        $user->fill($updateData);
         $user->save();
+
+        return $user;
     }
+
+    /**
+     * Change a user's password.
+     * This method updates the user's password after hashing it.
+     *
+     * @param  User  $user  The user whose password to change.
+     * @param  string  $newPassword  The new plain text password.
+     * @return User The updated user instance.
+     */
+    public function changePassword(User $user, string $newPassword): User
+    {
+        $user->password = self::hashPassword($newPassword);
+        $user->save();
+
+        return $user;
+    }
+
+    /**
+     * Reset a user's password during password reset flow.
+     * This method updates the user's password and sets the remember_token.
+     *
+     * @param  User  $user  The user whose password to reset.
+     * @param  string  $newPassword  The new plain text password.
+     * @param  string|null  $rememberToken  The remember token to set.
+     * @return User The updated user instance.
+     */
+    public function resetPassword(User $user, string $newPassword, string $rememberToken): User
+    {
+        $user->password = self::hashPassword($newPassword);
+        $user->remember_token = $rememberToken;
+
+        $user->save();
+
+        return $user;
+    }
+
 
     /**
      * Delete a user from the system.

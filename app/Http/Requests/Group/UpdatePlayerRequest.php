@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Group;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePlayerRequest extends ApiFormRequest
+class UpdatePlayerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

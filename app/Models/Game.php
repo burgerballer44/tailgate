@@ -64,8 +64,6 @@ class Game extends Model
     {
         static::creating(function ($game) {
             $game->ulid = Str::ulid();
-            $game->home_team_score = 0;
-            $game->away_team_score = 0;
         });
     }
 
@@ -87,5 +85,15 @@ class Game extends Model
     public function awayTeam(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    /**
+     * Season
+     *
+     * @return BelongsTo
+     */
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
     }
 }

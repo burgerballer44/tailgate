@@ -60,7 +60,7 @@ class UserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $this->userService->update($user, $request->toDTO());
+        $this->userService->updateProfile($user, $request->toDTO());
 
         $this->setFlashAlert('success', 'User updated successfully!');
 

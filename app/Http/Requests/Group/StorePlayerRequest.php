@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\Group;
 
-use App\Http\Requests\ApiFormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\PlayerLimit;
 use App\Rules\UniqueUsernamePerGroup;
 
-class StorePlayerRequest extends ApiFormRequest
+class StorePlayerRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
