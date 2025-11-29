@@ -7,7 +7,7 @@ use App\Models\Sport;
 use App\Models\Common\DateOrString;
 use App\DTO\ValidatedSeasonData;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class StoreSeasonRequest extends FormRequest
 {

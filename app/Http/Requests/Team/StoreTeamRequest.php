@@ -5,7 +5,7 @@ namespace App\Http\Requests\Team;
 use App\Models\Sport;
 use App\DTO\ValidatedTeamData;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class StoreTeamRequest extends FormRequest
 {

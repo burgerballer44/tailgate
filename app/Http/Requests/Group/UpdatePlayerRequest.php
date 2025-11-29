@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Group;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class UpdatePlayerRequest extends FormRequest
 {

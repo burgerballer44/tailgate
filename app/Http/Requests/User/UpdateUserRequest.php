@@ -7,7 +7,7 @@ use App\Models\UserStatus;
 use App\DTO\ValidatedUserData;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class UpdateUserRequest  extends FormRequest
 {

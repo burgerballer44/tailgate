@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Season;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use App\Models\Common\DateOrString;
+use App\Models\Common\TimeOrString;
 use App\DTO\ValidatedGameData;
 
 class AddGameRequest extends FormRequest
@@ -23,7 +24,7 @@ class AddGameRequest extends FormRequest
     {
         $this->replace([
             'start_date' => DateOrString::fromString($this->start_date),
-            'start_time' => DateOrString::fromString($this->start_time),
+            'start_time' => TimeOrString::fromString($this->start_time),
         ]);
     }
 

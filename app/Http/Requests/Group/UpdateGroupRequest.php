@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Group;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use App\Rules\UserMustBeAMember;
 
 class UpdateGroupRequest extends FormRequest

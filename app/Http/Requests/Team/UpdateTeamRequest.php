@@ -6,7 +6,7 @@ use App\Models\Sport;
 use App\DTO\ValidatedTeamData;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class UpdateTeamRequest extends FormRequest
 {
