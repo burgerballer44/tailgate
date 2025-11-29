@@ -1,8 +1,9 @@
 <x-layouts.app
-    mainHeading="Game Details for {{ $season->name }}"
+    mainHeading="Game Details for {!! $season->name !!}"
     mainDescription="Details for this game including teams, scores, and date/time."
     :mainActions="[
         ['text' => 'Back to Games', 'route' => 'seasons.games.index', 'params' => ['season' => $season]],
+        ['text' => 'Back to Season', 'route' => 'seasons.show', 'params' => ['season' => $season]],
         ['text' => 'Edit Game', 'route' => 'seasons.games.edit', 'params' => ['season' => $season, 'game' => $game]],
     ]"
 >
@@ -10,11 +11,11 @@
         :fields="[
             [
                 'label' => 'Home Team',
-                'value' => $game->homeTeam->name,
+                'value' => $game->homeTeam->full_name,
             ],
             [
                 'label' => 'Away Team',
-                'value' => $game->awayTeam->name,
+                'value' => $game->awayTeam->full_name,
             ],
             [
                 'label' => 'Home Team Score',

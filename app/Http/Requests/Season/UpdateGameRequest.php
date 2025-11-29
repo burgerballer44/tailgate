@@ -36,7 +36,6 @@ class UpdateGameRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'game_id' => ['required', 'exists:games,id'],
             'season_id' => ['required', 'exists:seasons,id'],
             'home_team_id' => ['required', 'exists:teams,id'],
             'away_team_id' => ['required', 'exists:teams,id', 'different:home_team_id'],

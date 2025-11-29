@@ -1,5 +1,5 @@
 <x-layouts.app
-    mainHeading="Games for {{ $season->name }}"
+    mainHeading="Games for {!! $season->name !!}"
     mainDescription="A list of all the games for this season including teams, scores, and date/time."
     :mainActions="[
         ['text' => 'Back to Season', 'route' => 'seasons.show', 'params' => ['season' => $season]],
@@ -15,7 +15,7 @@
         ]"
         :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Date', 'Time', 'Actions']"
         :rows="$games"
-        :columns="['home_team.name', 'away_team.name', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
+        :columns="['homeTeam.full_name', 'awayTeam.full_name', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
         :rowActions="[
             [
                 'label' => 'Show',

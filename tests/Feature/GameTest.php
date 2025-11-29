@@ -190,7 +190,6 @@ describe('updating a game', function () {
 
         // update data
         $updateData = [
-            'game_id' => $game->id,
             'season_id' => $season->id,
             'home_team_id' => $homeTeam->id,
             'away_team_id' => $awayTeam->id,
@@ -228,7 +227,6 @@ describe('updating a game', function () {
 
         // update data
         $updateData = [
-            'game_id' => $game->id,
             'season_id' => $season->id,
             'home_team_id' => $homeTeam->id,
             'away_team_id' => $awayTeam->id,

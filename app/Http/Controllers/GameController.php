@@ -42,15 +42,16 @@ class GameController extends Controller implements HasMiddleware
     {
         return view('admin.games.create', [
             'season' => $season,
+            // todo: move to service
             'teams' => Team::whereHas('sports', function ($query) use ($season) {
                 $query->where('sport', $season->sport);
-            })->get(),
+            })->get()->pluck('full_name', 'id')->toArray(),
         ]);
     }
 
     public function store(Season $season, AddGameRequest $request): RedirectResponse
     {
-        $this->seasonService->addGame($season, $request->toDTO());
+        $game = $this->seasonService->addGame($season, $request->toDTO());
 
         $this->setFlashAlert('success', 'Game created successfully!');
 
@@ -70,15 +71,16 @@ class GameController extends Controller implements HasMiddleware
         return view('admin.games.edit', [
             'season' => $season,
             'game' => $game,
+            // todo: move to service
             'teams' => Team::whereHas('sports', function ($query) use ($season) {
                 $query->where('sport', $season->sport);
-            })->get(),
+            })->get()->pluck('full_name', 'id')->toArray(),
         ]);
     }
 
     public function update(Season $season, Game $game, UpdateGameRequest $request): RedirectResponse
     {
-        $this->gameService->update($game, $request->toDTO());
+        $game = $this->gameService->update($game, $request->toDTO());
 
         $this->setFlashAlert('success', 'Game updated successfully!');
 

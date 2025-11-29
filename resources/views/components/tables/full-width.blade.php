@@ -45,7 +45,12 @@
                                                 $routeParams = [];
                                                 if (isset($action['routeParams'])) {
                                                     foreach ($action['routeParams'] as $key => $value) {
-                                                        $routeParams[$key] = $row->$value;
+                                                        // if the value is a string and matches a property on the row, use that value
+                                                        if (is_string($value) && isset($row->$value)) {
+                                                            $routeParams[$key] = $row->$value;
+                                                        } else {
+                                                            $routeParams[$key] = $value;
+                                                        }
                                                     }
                                                 }
                                                 $item = [

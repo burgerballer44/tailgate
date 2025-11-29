@@ -99,7 +99,6 @@ test('a game score can be updated', function () {
     expect($game->away_team_score)->toBe(5);
 
     $scoreData = [
-        'game_id' => $game->id,
         'season_id' => $season->id,
         'home_team_id' => $game->home_team_id,
         'away_team_id' => $game->away_team_id,

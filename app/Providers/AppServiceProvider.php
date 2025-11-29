@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Blade::directive('renderTableData', function ($expression) {
-            return "<?php echo is_callable($expression) ? $expression(\$row) : e(\$row[$expression]); ?>";
+            return "<?php echo is_callable($expression) ? $expression(\$row) : e(data_get(\$row, $expression)); ?>";
         });
     }
 }

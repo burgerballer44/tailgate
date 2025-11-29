@@ -4,13 +4,17 @@
         @method($method)
     @endif
 
+    {{-- hidden season id --}}
+    <input type="hidden" name="season_id" value="{{ $season->id }}" />
+
     <div>
         <x-form.select
             name="home_team_id"
             label="Home Team"
             :required="true"
             :value="old('home_team_id', $game?->home_team_id)"
-            :options="['' => ''] + $teams->pluck('name', 'id')->toArray()"
+            placeholder="Select a team"
+            :options="$teams"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('home_team_id')" />
     </div>
@@ -21,7 +25,8 @@
             label="Away Team"
             :required="true"
             :value="old('away_team_id', $game?->away_team_id)"
-            :options="['' => ''] + $teams->pluck('name', 'id')->toArray()"
+            placeholder="Select a team"
+            :options="$teams"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('away_team_id')" />
     </div>

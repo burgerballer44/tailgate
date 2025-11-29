@@ -1,5 +1,5 @@
 <x-layouts.app
-    mainHeading="Edit Game for {{ $season->name }}"
+    mainHeading="Edit Game for {!! $season->name !!}"
     mainDescription="Update the details of this game."
     :mainActions="[
         ['text' => 'Back to Games', 'route' => 'seasons.games.index', 'params' => ['season' => $season]],
