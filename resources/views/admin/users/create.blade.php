@@ -5,6 +5,13 @@
         ['text' => 'Back to Users', 'route' => 'users.index'],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Users', 'url' => route('users.index')],
+            ['text' => 'Create User', 'active' => true],
+        ]"
+    />
     <x-form.admin.user
         :action="route('users.store')"
         :method="'POST'"

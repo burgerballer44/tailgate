@@ -6,6 +6,14 @@
         ['text' => 'Add Game', 'route' => 'seasons.games.create', 'params' => ['season' => $season]],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Seasons', 'url' => route('seasons.index')],
+            ['text' => $season->name, 'url' => route('seasons.show', $season)],
+            ['text' => 'Games', 'active' => true],
+        ]"
+    />
     {{-- table --}}
     <x-tables.full-width
         heading="Games"

@@ -5,6 +5,13 @@
         ['text' => 'Back to Seasons', 'route' => 'seasons.index'],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Seasons', 'url' => route('seasons.index')],
+            ['text' => 'Create Season', 'active' => true],
+        ]"
+    />
     <x-form.admin.season
         :action="route('seasons.store')"
         :method="'POST'"

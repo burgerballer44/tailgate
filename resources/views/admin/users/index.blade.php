@@ -5,6 +5,12 @@
         ['text' => 'Add User', 'route' => 'users.create'],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Users', 'active' => true],
+        ]"
+    />
     {{-- query --}}
     <x-form.query-filters>
         <x-form.query-search label="Search by name or email" :error="$errors->get('q')" />

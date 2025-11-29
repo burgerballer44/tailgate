@@ -7,6 +7,15 @@
         ['text' => 'Edit Game', 'route' => 'seasons.games.edit', 'params' => ['season' => $season, 'game' => $game]],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Seasons', 'url' => route('seasons.index')],
+            ['text' => $season->name, 'url' => route('seasons.show', $season)],
+            ['text' => 'Games', 'url' => route('seasons.games.index', $season)],
+            ['text' => 'Game Details', 'active' => true],
+        ]"
+    />
     <x-model-viewer
         :fields="[
             [

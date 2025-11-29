@@ -6,6 +6,13 @@
         ['text' => 'Edit User', 'route' => 'users.edit', 'params' => ['user' => $user]],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Users', 'url' => route('users.index')],
+            ['text' => $user->name, 'active' => true],
+        ]"
+    />
     <x-model-viewer
         :fields="[
             [

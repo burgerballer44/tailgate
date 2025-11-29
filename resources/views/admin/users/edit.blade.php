@@ -6,6 +6,12 @@
         ['text' => 'View User', 'route' => 'users.show', 'params' => ['user' => $user]],
     ]"
 >
+    <x-breadcrumb :breadcrumbs="[
+        ['text' => 'Home', 'url' => route('dashboard')],
+        ['text' => 'Users', 'url' => route('users.index')],
+        ['text' => $user->name, 'url' => route('users.show', $user)],
+        ['text' => 'Edit User', 'active' => true],
+    ]" />
     <x-form.admin.user
         :action="route('users.update', $user)"
         :method="'PUT'"

@@ -6,6 +6,14 @@
         ['text' => 'View Season', 'route' => 'seasons.show', 'params' => ['season' => $season]],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Seasons', 'url' => route('seasons.index')],
+            ['text' => $season->name, 'url' => route('seasons.show', $season)],
+            ['text' => 'Edit Season', 'active' => true],
+        ]"
+    />
     <x-form.admin.season
         :action="route('seasons.update', $season)"
         :method="'PUT'"

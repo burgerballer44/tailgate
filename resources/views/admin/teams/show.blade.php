@@ -6,6 +6,13 @@
         ['text' => 'Edit Team', 'route' => 'teams.edit', 'params' => ['team' => $team]],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Teams', 'url' => route('teams.index')],
+            ['text' => $team->designation, 'active' => true],
+        ]"
+    />
     <x-model-viewer
         :fields="[
             [

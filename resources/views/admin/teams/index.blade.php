@@ -5,6 +5,12 @@
         ['text' => 'Add Team', 'route' => 'teams.create'],
     ]"
 >
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Teams', 'active' => true],
+        ]"
+    />
     {{-- query --}}
     <x-form.query-filters>
         <x-form.query-search label="Search by designation or mascot" :error="$errors->get('q')" />

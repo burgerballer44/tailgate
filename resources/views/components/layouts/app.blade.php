@@ -36,7 +36,7 @@
 
         {{-- main body --}}
         <main>
-            <div id="app" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <div id="app" class="mx-auto max-w-7xl p-4 sm:px-6 lg:px-8">
                 <x-layouts.partials.flash-alert></x-layouts.partials.flash-alert>
 
                 {{ $slot }}
