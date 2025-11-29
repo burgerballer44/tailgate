@@ -8,6 +8,7 @@ enum SeasonType: string
 {
     use EnumToArray;
 
+    case PRE = 'Preseason';
     case REGULAR = 'Regular Season';
-    case POST = 'Post Season';
+    case POST = 'Postseason';
 }
