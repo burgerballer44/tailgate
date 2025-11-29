@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Helpers\EnumToArray;
+use App\Traits\EnumToArray;
 
 enum GroupRole: string
 {

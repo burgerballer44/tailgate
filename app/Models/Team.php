@@ -71,6 +71,14 @@ class Team extends Model
     }
 
     /**
+     * Get the full name of the team.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->designation} {$this->mascot}";
+    }
+
+    /**
      * Scope to filter teams based on the provided filters.
      */
     #[Scope]
