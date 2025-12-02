@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Game;
-use App\Models\Team;
 use App\Models\Season;
 use Illuminate\Http\Request;
 use App\Services\GameService;
@@ -42,10 +41,7 @@ class GameController extends Controller implements HasMiddleware
     {
         return view('admin.games.create', [
             'season' => $season,
-            // todo: move to service
-            'teams' => Team::whereHas('sports', function ($query) use ($season) {
-                $query->where('sport', $season->sport);
-            })->get()->pluck('full_name', 'id')->toArray(),
+            'teams' => $this->gameService->getAvailableTeamsForSeason($season),
         ]);
     }
 
@@ -71,10 +67,7 @@ class GameController extends Controller implements HasMiddleware
         return view('admin.games.edit', [
             'season' => $season,
             'game' => $game,
-            // todo: move to service
-            'teams' => Team::whereHas('sports', function ($query) use ($season) {
-                $query->where('sport', $season->sport);
-            })->get()->pluck('full_name', 'id')->toArray(),
+            'teams' => $this->gameService->getAvailableTeamsForSeason($season),
         ]);
     }
 
