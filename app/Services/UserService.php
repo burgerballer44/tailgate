@@ -14,17 +14,19 @@ class UserService
 {
     /**
      * Create a new user with the provided data.
-     * This method handles user creation logic, including password hashing.
+     * This method handles user creation logic, including password hashing. If password is null, a random password is generated.
      *
      * @param  ValidatedUserData  $data  Validated user data including name, email, password, status, role.
      * @return User The created user instance.
      */
     public function create(ValidatedUserData $data): User
     {
+        $password = $data->password ?? Str::random(15);
+
         $userData = [
             'name' => $data->name,
             'email' => $data->email,
-            'password' => self::hashPassword($data->password),
+            'password' => self::hashPassword($password),
             'status' => $data->status->value,
             'role' => $data->role->value,
         ];

@@ -79,9 +79,7 @@ class Group extends Model
 
         static::deleting(function ($group) {
             // delete all members
-            $group->members->each(function ($member) {
-                $member->delete();
-            });
+            $group->members()->delete();
             // delete follow
             $group->follow?->delete();
         });

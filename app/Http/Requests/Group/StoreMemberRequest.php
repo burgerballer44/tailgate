@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests\Group;
 
+use App\DTO\ValidatedMemberData;
 use App\Http\Requests\FormRequest;
+use App\Models\GroupRole;
 use App\Rules\GroupMemberLimit;
 use App\Rules\MustNotBeAMember;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreMemberRequest extends FormRequest
 {
@@ -25,6 +28,18 @@ class StoreMemberRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'exists:users,id', new MustNotBeAMember, new GroupMemberLimit],
+            'role' => ['required', new Enum(GroupRole::class)],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedMemberData object.
+     * This method is used to pass validated member data to the service layer.
+     *
+     * @return ValidatedMemberData The validated member data transfer object.
+     */
+    public function toDTO(): ValidatedMemberData
+    {
+        return ValidatedMemberData::fromArray($this->validated());
     }
 }

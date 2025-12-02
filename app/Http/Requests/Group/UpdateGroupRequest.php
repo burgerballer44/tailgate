@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Group;
 
+use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Rules\UserMustBeAMember;
 
@@ -28,5 +29,16 @@ class UpdateGroupRequest extends FormRequest
             'player_limit' => ['nullable', 'integer', 'max:10'],
             'owner_id' => ['nullable', new UserMustBeAMember],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedGroupData object.
+     * This method is used to pass validated group data to the service layer.
+     *
+     * @return ValidatedGroupData The validated group data transfer object.
+     */
+    public function toDTO(): ValidatedGroupData
+    {
+        return ValidatedGroupData::fromArray($this->validated());
     }
 }

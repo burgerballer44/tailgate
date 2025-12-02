@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Game extends Model
@@ -65,6 +66,11 @@ class Game extends Model
         static::creating(function ($game) {
             $game->ulid = Str::ulid();
         });
+
+        static::deleting(function ($game) {
+            // delete all scores
+            $game->scores()->delete();
+        });
     }
 
     /**
@@ -95,5 +101,15 @@ class Game extends Model
     public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
+    }
+
+    /**
+     * Scores
+     *
+     * @return HasMany
+     */
+    public function scores(): HasMany
+    {
+        return $this->hasMany(Score::class);
     }
 }

@@ -91,6 +91,29 @@ describe('creat in a user', function () {
         ]);
     });
 
+    test('works without password since a random one is generated', function () {
+        // user data without password
+        $userData = User::factory()->make()->toArray();
+
+        // there should be 1 user in the db
+        $this->assertDatabaseCount('users', 1);
+
+        // post the user data
+        $response = $this->post(route('users.store'), $userData);
+
+        // should redirect to index
+        $response->assertRedirect(route('users.index'));
+
+        // there should be 2 users in the db
+        $this->assertDatabaseCount('users', 2);
+
+        // verify user was created with a password
+        $createdUser = User::where('email', $userData['email'])->first();
+        expect($createdUser)->not->toBeNull();
+        expect($createdUser->password)->not->toBeNull();
+        expect($createdUser->password)->not->toBe('');
+    });
+
     test('flashes success message on store', function () {
         // user data
         $userData = User::factory()->make()->toArray();

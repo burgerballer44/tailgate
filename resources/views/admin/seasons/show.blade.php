@@ -37,6 +37,18 @@
                 'value' => $season->season_end,
             ],
             [
+                'label' => 'Active',
+                'value' => $season->active ? 'Yes' : 'No',
+            ],
+            [
+                'label' => 'Active Date',
+                'value' => $season->active_date,
+            ],
+            [
+                'label' => 'Inactive Date',
+                'value' => $season->inactive_date,
+            ],
+            [
                 'label' => 'Created At',
                 'value' => $season->created_at->format('F j, Y, g:i a'),
             ],

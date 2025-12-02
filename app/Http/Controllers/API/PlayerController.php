@@ -6,6 +6,7 @@ use App\Models\Group;
 use App\Models\Score;
 use App\Models\Member;
 use App\Models\Player;
+use App\Services\PlayerService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ScoreResource;
 use App\Http\Resources\PlayerResource;
@@ -21,6 +22,10 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 
 class PlayerController extends Controller implements HasMiddleware
 {
+    public function __construct(
+        private PlayerService $playerService
+    ) {}
+
     /**
      * Get the middleware that should be assigned to the controller.
      */
@@ -40,9 +45,7 @@ class PlayerController extends Controller implements HasMiddleware
      */
     public function store(StorePlayerRequest $request, Group $group, Member $member)
     {
-        $validated = $request->validated();
-
-        $player = $member->players()->save(new Player($validated));
+        $player = $this->playerService->createForMember($member, $request->toDTO());
 
         return new PlayerResource($player);
     }
@@ -52,11 +55,7 @@ class PlayerController extends Controller implements HasMiddleware
      */
     public function update(UpdatePlayerRequest $request, Group $group, Member $member, Player $player)
     {
-        $validated = $request->validated();
-
-        $player->fill($validated);
-
-        $player->save();
+        $this->playerService->update($player, $request->toDTO());
 
         return response()->noContent();
     }
@@ -66,7 +65,7 @@ class PlayerController extends Controller implements HasMiddleware
      */
     public function destroy(Group $group, Member $member, Player $player)
     {
-        $player->delete();
+        $this->playerService->delete($player);
 
         return response()->json([], 202);
     }
@@ -80,9 +79,7 @@ class PlayerController extends Controller implements HasMiddleware
         Member $member,
         Player $player
     ) {
-        $validated = $request->validated();
-
-        $score = $player->scores()->save(new Score($validated));
+        $score = $this->playerService->submitScore($player, $request->toDTO());
 
         return new ScoreResource($score);
     }
@@ -97,11 +94,7 @@ class PlayerController extends Controller implements HasMiddleware
         Player $player,
         Score $score,
     ) {
-        $validated = $request->validated();
-
-        $score->fill($validated);
-
-        $score->save();
+        $this->playerService->updateScore($score, $request->toDTO());
 
         return response()->noContent();
     }
@@ -115,7 +108,7 @@ class PlayerController extends Controller implements HasMiddleware
         Player $player,
         Score $score,
     ) {
-        $score->delete();
+        $this->playerService->deleteScore($score);
 
         return response()->json([], 202);
     }

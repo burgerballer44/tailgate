@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\Group;
 
+use App\DTO\ValidatedFollowData;
 use App\Http\Requests\FormRequest;
-use App\Rules\SeasonNotEnded;
+use App\Rules\SeasonIsActive;
 
 class FollowTeamRequest extends FormRequest
 {
@@ -24,7 +25,18 @@ class FollowTeamRequest extends FormRequest
     {
         return [
             'team_id' => ['required', 'exists:teams,id'],
-            'season_id' => ['required', 'exists:seasons,id', new SeasonNotEnded],
+            'season_id' => ['required', 'exists:seasons,id', new SeasonIsActive],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedFollowData object.
+     * This method is used to pass validated follow data to the service layer.
+     *
+     * @return ValidatedFollowData The validated follow data transfer object.
+     */
+    public function toDTO(): ValidatedFollowData
+    {
+        return ValidatedFollowData::fromArray($this->validated());
     }
 }

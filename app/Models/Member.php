@@ -52,9 +52,7 @@ class Member extends Model
 
         static::deleting(function ($member) {
             // delete all players
-            $member->players->each(function ($player) {
-                $player->delete();
-            });
+            $member->players()->delete();
         });
     }
 
@@ -66,5 +64,10 @@ class Member extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 }

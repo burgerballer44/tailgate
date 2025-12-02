@@ -4,7 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Group;
 use App\Models\Member;
-use App\Models\GroupRole;
+use App\Services\MemberService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MemberResource;
 use App\Http\Middleware\MemberMustBeInGroup;
@@ -15,6 +15,10 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 
 class MemberController extends Controller implements HasMiddleware
 {
+    public function __construct(
+        private MemberService $memberService
+    ) {}
+
     /**
      * Get the middleware that should be assigned to the controller.
      */
@@ -30,12 +34,7 @@ class MemberController extends Controller implements HasMiddleware
      */
     public function store(StoreMemberRequest $request, Group $group)
     {
-        $validated = $request->validated();
-
-        $member = $group->members()->save(new Member([
-            'user_id' => $validated['user_id'],
-            'role' => GroupRole::GROUP_MEMBER->value,
-        ]));
+        $member = $this->memberService->createForGroup($group, $request->toDTO());
 
         return new MemberResource($member);
     }
@@ -45,11 +44,7 @@ class MemberController extends Controller implements HasMiddleware
      */
     public function update(UpdateMemberRequest $request, Group $group, Member $member)
     {
-        $validated = $request->validated();
-
-        $member->fill($validated);
-
-        $member->save();
+        $this->memberService->update($member, $request->toDTO());
 
         return response()->noContent();
     }
@@ -59,15 +54,11 @@ class MemberController extends Controller implements HasMiddleware
      */
     public function destroy(Group $group, Member $member)
     {
-        if (
-            $group->admin->count() == Group::MIN_NUMBER_ADMINS &&
-            $group->admin->first() == $member
-        ) {
-            return response()->json(['data' => ['member_id' => ['Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.']]], 422);
+        try {
+            $this->memberService->delete($member);
+            return response()->json([], 202);
+        } catch (\Exception $e) {
+            return response()->json(['data' => ['member_id' => [$e->getMessage()]]], 422);
         }
-
-        $member->delete();
-
-        return response()->json([], 202);
     }
 }

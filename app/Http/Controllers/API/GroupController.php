@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Group;
 use App\Models\Follow;
+use App\Services\GroupService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GroupResource;
 use App\Http\Resources\FollowResource;
@@ -16,6 +17,10 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 
 class GroupController extends Controller implements HasMiddleware
 {
+    public function __construct(
+        private GroupService $groupService
+    ) {}
+
     /**
      * Get the middleware that should be assigned to the controller.
      */
@@ -39,11 +44,7 @@ class GroupController extends Controller implements HasMiddleware
      */
     public function store(StoreGroupRequest $request)
     {
-        $validated = $request->validated();
-
-        $group = new Group($validated);
-
-        $group->save();
+        $group = $this->groupService->create($request->toDTO());
 
         return new GroupResource($group);
     }
@@ -61,11 +62,7 @@ class GroupController extends Controller implements HasMiddleware
      */
     public function update(UpdateGroupRequest $request, Group $group)
     {
-        $validated = $request->validated();
-
-        $group->fill($validated);
-
-        $group->save();
+        $this->groupService->update($group, $request->toDTO());
 
         return response()->noContent();
     }
@@ -75,7 +72,7 @@ class GroupController extends Controller implements HasMiddleware
      */
     public function destroy(Group $group)
     {
-        $group->delete();
+        $this->groupService->delete($group);
 
         return response()->json([], 202);
     }
@@ -85,20 +82,13 @@ class GroupController extends Controller implements HasMiddleware
      */
     public function followTeam(FollowTeamRequest $request, Group $group)
     {
-        $validated = $request->validated();
+        try {
+            $follow = $this->groupService->followTeam($group, $request->toDTO());
 
-        if ($group->follow) {
-            return response()->json(['data' => ['follow' => ['This group is already following a team.']]], 422);
+            return new FollowResource($follow);
+        } catch (\Exception $e) {
+            return response()->json(['data' => ['follow' => [$e->getMessage()]]], 422);
         }
-
-        $follow = $group->follow()->save(
-            new Follow([
-                'team_id' => $validated['team_id'],
-                'season_id' => $validated['season_id'],
-            ])
-        );
-
-        return new FollowResource($follow);
     }
 
     /**
@@ -106,7 +96,7 @@ class GroupController extends Controller implements HasMiddleware
      */
     public function removeFollow(Group $group, Follow $follow)
     {
-        $follow->delete();
+        $this->groupService->removeFollow($group);
 
         return response()->json([], 202);
     }

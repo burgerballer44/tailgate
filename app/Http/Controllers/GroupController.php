@@ -2,19 +2,121 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Follow;
+use App\Models\Group;
+use App\Models\Season;
+use App\Models\Team;
 use App\Models\User;
+use App\Services\GroupService;
+use Illuminate\Http\Request;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\UpdateGroupRequest;
+use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Resources\UserResource;
 
 class GroupController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(
+        private GroupService $groupService
+    ) {}
+
+    public function index(Request $request): View
     {
-        return view('groups.index', [
-            // show ids in this case since we need them for group owner
+        return view('admin.groups.index', [
+            'groups' => $this->groupService->query($request->all())->paginate(),
             'users' => UserResource::collection(User::get()->makeVisible(['id'])),
         ]);
+    }
+
+    public function create(): View
+    {
+        return view('admin.groups.create', [
+            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
+        ]);
+    }
+
+    public function store(StoreGroupRequest $request): RedirectResponse
+    {
+        $this->groupService->create($request->toDTO());
+
+        $this->setFlashAlert('success', 'Group created successfully!');
+
+        return redirect()->route('groups.index');
+    }
+
+    public function show(Group $group): View
+    {
+        return view('admin.groups.show', [
+            'group' => $group->load([
+                'owner',
+                'members.user',
+                'players.member.user',
+                'players.scores.player.member.user',
+                'players.scores.game.homeTeam',
+                'players.scores.game.awayTeam',
+                'follow.team',
+                'follow.season'
+            ]),
+        ]);
+    }
+
+    public function edit(Group $group): View
+    {
+        return view('admin.groups.edit', [
+            'group' => $group,
+            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
+        ]);
+    }
+
+    public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
+    {
+        $this->groupService->update($group, $request->toDTO());
+
+        $this->setFlashAlert('success', 'Group updated successfully!');
+
+        return redirect()->route('groups.index');
+    }
+
+    public function destroy(Group $group): RedirectResponse
+    {
+        $this->groupService->delete($group);
+
+        $this->setFlashAlert('success', 'Group deleted successfully!');
+
+        return redirect()->route('groups.index');
+    }
+
+    public function createFollowTeam(Group $group): View
+    {
+        $teams = Team::all();
+        $seasons = Season::all();
+
+        return view('admin.groups.follow-team', compact('group', 'teams', 'seasons'));
+    }
+
+    public function followTeam(FollowTeamRequest $request, Group $group): RedirectResponse
+    {
+        try {
+            $this->groupService->followTeam($group, $request->toDTO());
+
+            $this->setFlashAlert('success', 'Team followed successfully!');
+
+            return redirect()->route('groups.show', $group);
+        } catch (\Exception $e) {
+            $this->setFlashAlert('error', $e->getMessage());
+
+            return redirect()->back();
+        }
+    }
+
+    public function removeFollow(Group $group, Follow $follow): RedirectResponse
+    {
+        $this->groupService->removeFollow($group);
+
+        $this->setFlashAlert('success', 'Follow removed successfully!');
+
+        return redirect()->route('groups.show', $group);
     }
 }

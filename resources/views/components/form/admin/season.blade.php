@@ -69,6 +69,45 @@
         <x-inputs.input-error class="mt-2" :messages="$errors->get('season_end')" />
     </div>
 
+    <div class="mt-4">
+        <x-inputs.input-label for="active" class="font-semibold" :value="__('Active')" />
+        <input
+            type="checkbox"
+            id="active"
+            name="active"
+            value="1"
+            {{ old('active', $season?->active) ? 'checked' : '' }}
+            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+        />
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('active')" />
+    </div>
+
+    <div class="mt-4">
+        <x-inputs.input-label for="active_date" class="font-semibold" :value="__('Active Date')" />
+        <x-inputs.text-input
+            id="active_date"
+            name="active_date"
+            type="date"
+            class="mt-1 block w-full"
+            :value="old('active_date', $season?->active_date)"
+            autocomplete="active_date"
+        />
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('active_date')" />
+    </div>
+
+    <div class="mt-4">
+        <x-inputs.input-label for="inactive_date" class="font-semibold" :value="__('Inactive Date')" />
+        <x-inputs.text-input
+            id="inactive_date"
+            name="inactive_date"
+            type="date"
+            class="mt-1 block w-full"
+            :value="old('inactive_date', $season?->inactive_date)"
+            autocomplete="inactive_date"
+        />
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('inactive_date')" />
+    </div>
+
     {{-- buttons --}}
     <div class="mt-4 flex items-center justify-end">
         @isset($buttons)

@@ -66,4 +66,9 @@ class Score extends Model
     {
         return $this->belongsTo(Game::class);
     }
+
+    public function player(): BelongsTo
+    {
+        return $this->belongsTo(Player::class);
+    }
 }

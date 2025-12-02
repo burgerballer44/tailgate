@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Score;
+use App\Models\Follow;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Season extends Model
 {
@@ -21,6 +23,17 @@ class Season extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'active' => 'boolean',
+        'active_date' => 'date',
+        'inactive_date' => 'date',
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -31,6 +44,9 @@ class Season extends Model
         'season_type',
         'season_start',
         'season_end',
+        'active',
+        'active_date',
+        'inactive_date',
     ];
 
     /**
@@ -53,10 +69,14 @@ class Season extends Model
         });
 
         static::deleting(function ($season) {
+            // delete all follows for this season
+            Follow::where('season_id', $season->id)->delete();
+            // delete all scores for games in this season
+            Score::whereHas('game', function ($query) use ($season) {
+                $query->where('season_id', $season->id);
+            })->delete();
             // delete all games
-            $season->games->each(function ($game) {
-                $game->delete();
-            });
+            $season->games()->delete();
         });
     }
 

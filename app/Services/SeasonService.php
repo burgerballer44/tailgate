@@ -32,6 +32,9 @@ class SeasonService
             'season_type' => $data->season_type->value,
             'season_start' => (string) $data->season_start,
             'season_end' => (string) $data->season_end,
+            'active' => $data->active ?? false,
+            'active_date' => $data->active_date ? (string) $data->active_date : (string) $data->season_start,
+            'inactive_date' => $data->inactive_date ? (string) $data->inactive_date : (string) $data->season_end,
         ];
 
         return Season::create($seasonData);
@@ -56,6 +59,18 @@ class SeasonService
             'season_start' => (string) $data->season_start,
             'season_end' => (string) $data->season_end,
         ];
+
+        if ($data->active !== null) {
+            $updateData['active'] = $data->active;
+        }
+
+        if ($data->active_date !== null) {
+            $updateData['active_date'] = (string) $data->active_date;
+        }
+
+        if ($data->inactive_date !== null) {
+            $updateData['inactive_date'] = (string) $data->inactive_date;
+        }
 
         $season->fill($updateData);
         $season->save();

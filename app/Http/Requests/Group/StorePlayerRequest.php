@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Group;
 
+use App\DTO\ValidatedPlayerData;
 use App\Http\Requests\FormRequest;
 use App\Rules\PlayerLimit;
 use App\Rules\UniqueUsernamePerGroup;
@@ -26,5 +27,16 @@ class StorePlayerRequest extends FormRequest
         return [
             'player_name' => ['required', 'string', new PlayerLimit, new UniqueUsernamePerGroup],
         ];
+    }
+
+    /**
+     * Get the validated data as a ValidatedPlayerData object.
+     * This method is used to pass validated player data to the service layer.
+     *
+     * @return ValidatedPlayerData The validated player data transfer object.
+     */
+    public function toDTO(): ValidatedPlayerData
+    {
+        return ValidatedPlayerData::fromArray($this->validated());
     }
 }
