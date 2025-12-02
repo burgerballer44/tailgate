@@ -76,13 +76,6 @@ class Group extends Model
                 'role' => GroupRole::GROUP_ADMIN->value,
             ]));
         });
-
-        static::deleting(function ($group) {
-            // delete all members
-            $group->members()->delete();
-            // delete follow
-            $group->follow?->delete();
-        });
     }
 
     public function scopeFilter($query, array $filters)

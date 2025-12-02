@@ -82,6 +82,14 @@ test('a season cannot be viewed by id', function () {
     $this->get("api/v1/seasons/{$season->id}");
 })->throws(ModelNotFoundException::class);
 
+test('viewing a season returns 404 for invalid ulid', function () {
+    // invalid ulid
+    $invalidUlid = 'invalid-ulid';
+
+    // get the season
+    $this->get("api/v1/seasons/{$invalidUlid}")->assertNotFound();
+});
+
 test('a season can be updated', function () {
     // create a season
     $season = Season::factory()->create([
@@ -115,7 +123,7 @@ test('a season can be updated', function () {
 
 test('a lists of seasons can be retrieved', function () {
     // create 2 seasons
-    [$season1, $season2] = season::factory()->count(2)->create();
+    [$season1, $season2] = Season::factory()->count(2)->create();
 
     // get the seasons
     $this->get('api/v1/seasons')

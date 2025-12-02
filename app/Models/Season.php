@@ -67,17 +67,6 @@ class Season extends Model
         static::creating(function ($season) {
             $season->ulid = Str::ulid();
         });
-
-        static::deleting(function ($season) {
-            // delete all follows for this season
-            Follow::where('season_id', $season->id)->delete();
-            // delete all scores for games in this season
-            Score::whereHas('game', function ($query) use ($season) {
-                $query->where('season_id', $season->id);
-            })->delete();
-            // delete all games
-            $season->games()->delete();
-        });
     }
 
     public function games(): HasMany

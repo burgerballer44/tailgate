@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('player_name');
             $table->timestamps();
 
-            $table->foreign('member_id')->references('id')->on('members')->onDelete('restrict');
+            $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
         });
     }
 

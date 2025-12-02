@@ -124,4 +124,16 @@ class SeasonService
     {
         return Season::filter($query);
     }
+
+    /**
+     * Retrieve a season with its associated games and teams loaded.
+     * This method is used to display detailed season information including games with home and away teams.
+     *
+     * @param  Season  $season  The season to load with relationships.
+     * @return Season The season instance with games and teams loaded.
+     */
+    public function loadWithGames(Season $season): Season
+    {
+        return $season->load('games.homeTeam', 'games.awayTeam');
+    }
 }

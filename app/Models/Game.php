@@ -66,17 +66,13 @@ class Game extends Model
         static::creating(function ($game) {
             $game->ulid = Str::ulid();
         });
-
-        static::deleting(function ($game) {
-            // delete all scores
-            $game->scores()->delete();
-        });
     }
 
     /**
-     * Home Team
+     * Get the home team for this game.
+     * This relation retrieves the team playing at home to display game details.
      *
-     * @return [type] [description]
+     * @return BelongsTo The home team relationship.
      */
     public function homeTeam(): BelongsTo
     {
@@ -84,9 +80,10 @@ class Game extends Model
     }
 
     /**
-     * Away Team
+     * Get the away team for this game.
+     * This relation retrieves the team playing away to display game details.
      *
-     * @return [type] [description]
+     * @return BelongsTo The away team relationship.
      */
     public function awayTeam(): BelongsTo
     {

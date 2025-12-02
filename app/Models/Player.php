@@ -49,11 +49,6 @@ class Player extends Model
         static::creating(function ($player) {
             $player->ulid = Str::ulid();
         });
-
-        static::deleting(function ($player) {
-            // delete all scores
-            $player->scores()->delete();
-        });
     }
 
     public function scores(): HasMany

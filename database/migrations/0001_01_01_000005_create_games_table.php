@@ -23,9 +23,9 @@ return new class extends Migration
             $table->string('start_time');
             $table->timestamps();
 
-            $table->foreign('season_id')->references('id')->on('seasons')->onDelete('restrict');
-            $table->foreign('home_team_id')->references('id')->on('teams')->onDelete('restrict');
-            $table->foreign('away_team_id')->references('id')->on('teams')->onDelete('restrict');
+            $table->foreign('season_id')->references('id')->on('seasons')->onDelete('cascade');
+            $table->foreign('home_team_id')->references('id')->on('teams')->onDelete('cascade');
+            $table->foreign('away_team_id')->references('id')->on('teams')->onDelete('cascade');
         });
     }
 

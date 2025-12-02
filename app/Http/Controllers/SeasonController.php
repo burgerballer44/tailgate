@@ -46,8 +46,7 @@ class SeasonController extends Controller
 
     public function show(Season $season): View
     {
-        // todo: add this to the service so we can query the games with pagination later
-        $season->load('games.homeTeam', 'games.awayTeam');
+        $season = $this->seasonService->loadWithGames($season);
 
         return view('admin.seasons.show', ['season' => $season]);
     }

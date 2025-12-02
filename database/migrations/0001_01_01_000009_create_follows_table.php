@@ -19,9 +19,9 @@ return new class extends Migration
             $table->unsignedBigInteger('season_id');
             $table->timestamps();
 
-            $table->foreign('group_id')->references('id')->on('groups')->onDelete('restrict');
-            $table->foreign('team_id')->references('id')->on('teams')->onDelete('restrict');
-            $table->foreign('season_id')->references('id')->on('seasons')->onDelete('restrict');
+            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
+            $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
+            $table->foreign('season_id')->references('id')->on('seasons')->onDelete('cascade');
         });
     }
 

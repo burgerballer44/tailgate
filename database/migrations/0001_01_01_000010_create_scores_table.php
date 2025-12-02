@@ -20,8 +20,8 @@ return new class extends Migration
             $table->string('away_team_prediction');
             $table->timestamps();
 
-            $table->foreign('player_id')->references('id')->on('players')->onDelete('restrict');
-            $table->foreign('game_id')->references('id')->on('games')->onDelete('restrict');
+            $table->foreign('player_id')->references('id')->on('players')->onDelete('cascade');
+            $table->foreign('game_id')->references('id')->on('games')->onDelete('cascade');
         });
     }
 

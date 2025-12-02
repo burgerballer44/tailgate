@@ -85,6 +85,14 @@ describe('viewing a user', function () {
         // get the user
         $this->get("api/v1/users/{$user->id}");
     })->throws(ModelNotFoundException::class);
+
+    test('returns 404 for invalid ulid', function () {
+        // invalid ulid
+        $invalidUlid = 'invalid-ulid';
+
+        // get the user
+        $this->get("api/v1/users/{$invalidUlid}")->assertNotFound();
+    });
 });
 
 describe('updating a user', function () {
@@ -226,11 +234,11 @@ describe('listing users', function () {
     test('list of users can be filtered by q for email', function () {
         // thing to find
         $q = 'FindMe';
-    
+
         // create a user
         $user = User::factory()->create(['email' => $q]);
         $differentUserToNotFind = User::factory()->create(['email' => 'somethingelse']);
-    
+
         // get the user
         $this->get("api/v1/users?q=$q")
             ->assertOk()
@@ -243,6 +251,16 @@ describe('listing users', function () {
                     'role' => $user->role,
                 ],
             ]]);
+    });
+
+    test('list of users returns empty when filter matches nothing', function () {
+        // create a user
+        User::factory()->create(['name' => 'John']);
+
+        // search for something that doesn't exist
+        $this->get('api/v1/users?q=NonExistent')
+            ->assertOk()
+            ->assertJsonCount(0, 'data');
     });
 
 });

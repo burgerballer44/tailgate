@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('player_limit');
             $table->timestamps();
 
-            $table->foreign('owner_id')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

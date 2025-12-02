@@ -20,8 +20,8 @@ return new class extends Migration
             $table->enum('role', GroupRole::values());
             $table->timestamps();
 
-            $table->foreign('group_id')->references('id')->on('groups')->onDelete('restrict');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
+            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

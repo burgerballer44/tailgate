@@ -49,11 +49,6 @@ class Member extends Model
         static::creating(function ($member) {
             $member->ulid = Str::ulid();
         });
-
-        static::deleting(function ($member) {
-            // delete all players
-            $member->players()->delete();
-        });
     }
 
     public function players(): HasMany

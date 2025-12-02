@@ -80,6 +80,14 @@ test('a team cannot be viewed by id', function () {
     $this->get("api/v1/teams/{$team->id}");
 })->throws(ModelNotFoundException::class);
 
+test('viewing a team returns 404 for invalid ulid', function () {
+    // invalid ulid
+    $invalidUlid = 'invalid-ulid';
+
+    // get the team
+    $this->get("api/v1/teams/{$invalidUlid}")->assertNotFound();
+});
+
 test('a team can be updated', function () {
     // create a team
     $team = Team::factory()->create();
@@ -167,27 +175,6 @@ test('a lists of teams can be filtered by q for designation', function () {
 });
 
 test('a lists of teams can be filtered by q for mascot', function () {
-    // thing to find
-    $q = 'FindMe';
-
-    // create a team
-    $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => $q]);
-    $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => 'somethingelse']);
-
-    // get the team
-    $this->get("api/v1/teams?q=$q")
-        ->assertOk()
-        ->assertJsonCount(1, 'data')
-        ->assertJson(['data' => [
-            [
-                'designation' => $team->designation,
-                'mascot' => $team->mascot,
-                'sports' => $team->sports->pluck('sport')->pluck('value')->toArray(),
-            ],
-        ]]);
-});
-
-test('a lists of teams can be filtered by name for mascot', function () {
     // thing to find
     $q = 'FindMe';
 
