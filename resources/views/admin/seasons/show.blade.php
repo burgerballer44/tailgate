@@ -42,11 +42,11 @@
             ],
             [
                 'label' => 'Active Date',
-                'value' => $season->active_date,
+                'value' => $season->active_date->format('F j, Y, g:i a'),
             ],
             [
                 'label' => 'Inactive Date',
-                'value' => $season->inactive_date,
+                'value' => $season->inactive_date->format('F j, Y, g:i a'),
             ],
             [
                 'label' => 'Created At',

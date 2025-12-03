@@ -7,10 +7,7 @@
                 <li>
                     @if ($index === 0 && strtolower($item['text']) === 'home')
                         <div>
-                            <a
-                                href="{{ $item['url'] ?? '#' }}"
-                                class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-300"
-                            >
+                            <a href="{{ $item['url'] ?? '#' }}" class="text-gray-400 hover:text-gray-500">
                                 <svg
                                     viewBox="0 0 20 20"
                                     fill="currentColor"
@@ -35,7 +32,7 @@
                                     fill="currentColor"
                                     data-slot="icon"
                                     aria-hidden="true"
-                                    class="size-5 shrink-0 text-gray-400 dark:text-gray-500"
+                                    class="size-5 shrink-0 text-gray-400"
                                 >
                                     <path
                                         d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
@@ -46,16 +43,13 @@
                             @endif
 
                             @if (isset($item['active']) && $item['active'])
-                                <span
-                                    aria-current="page"
-                                    class="ml-4 text-sm font-medium text-gray-500 dark:text-gray-400"
-                                >
+                                <span aria-current="page" class="ml-4 text-sm font-medium text-gray-500">
                                     {!! $item['text'] !!}
                                 </span>
                             @else
                                 <a
                                     href="{{ $item['url'] ?? '#' }}"
-                                    class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
                                 >
                                     {!! $item['text'] !!}
                                 </a>

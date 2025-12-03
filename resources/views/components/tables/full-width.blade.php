@@ -8,7 +8,15 @@
                     <thead>
                         <tr>
                             @foreach ($headers as $header)
-                                <th scope="col" class="px-2 py-3 text-left text-sm font-semibold">{{ $header }}</th>
+                                @if ($loop->first)
+                                    <th scope="col" class="py-3.5 pr-3 pl-4 text-left text-sm font-semibold">
+                                        {{ $header }}
+                                    </th>
+                                @else
+                                    <th scope="col" class="py-3.5 pr-3 text-left text-sm font-semibold">
+                                        {{ $header }}
+                                    </th>
+                                @endif
                             @endforeach
                         </tr>
                     </thead>
@@ -20,11 +28,11 @@
                                 {{-- row data --}}
                                 @foreach ($columns as $column)
                                     @if ($loop->first)
-                                        <td class="py-4 pr-3 pl-4 font-medium whitespace-nowrap sm:pl-6 lg:pl-8">
+                                        <td class="py-3.5 pr-3 pl-4 font-medium whitespace-nowrap">
                                             @renderTableData($column)
                                         </td>
                                     @else
-                                        <td>
+                                        <td class="py-3.5 pr-3 font-medium whitespace-nowrap">
                                             @renderTableData($column)
                                         </td>
                                     @endif
