@@ -68,7 +68,7 @@
                 ['route' => 'seasons.games.index', 'routeParams' => ['season' => $season], 'text' => 'View All Games']
             ]"
             :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Date', 'Time', 'Actions']"
-            :rows="$season->games"
+            :rows="$games"
             :columns="['homeTeam.full_name', 'awayTeam.full_name', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
             :rowActions="[
                 [
@@ -90,5 +90,9 @@
                 ]
             ]"
         ></x-tables.full-width>
+
+        <div class="mt-4">
+            {{ $games->links() }}
+        </div>
     </div>
 </x-layouts.app>
