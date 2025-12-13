@@ -79,7 +79,7 @@ applyTo: '**'
 
 ## ✅ Testing Standards
 
-- Prefer **PestPHP** with clear, human-readable test names.
+- Use **PestPHP** with clear, human-readable test names.
 - Follow **Arrange/Act/Assert** pattern; avoid hidden globals.
 - Provide at least one negative test and one edge-case test for each feature.
 - Use **factories** for test data setup.
@@ -90,7 +90,14 @@ applyTo: '**'
 
 ## ✅ Software Quality & Maintainability
 
-- Follow **SOLID Principles**:
+- Aim for **CUPID Principles** for joyful, habitable code (as an alternative/complementary lens to SOLID):
+    - **Composable**: Small surface area with narrow, opinionated APIs; intention-revealing; minimal dependencies.
+    - **Unix philosophy**: Do one thing well (single, comprehensive purpose from an outside-in perspective).
+    - **Predictable**: Behaves as expected; deterministic (robust, reliable, resilient); observable (instrumentation, telemetry, monitoring).
+    - **Idiomatic**: Follows language idioms, ecosystem conventions, and team style for reduced cognitive load.
+    - **Domain-based**: Mirrors problem domain in language, types, structure, and boundaries.
+
+- Keep the **SOLID Principles** in mind but CUPID Principles take priority. THe SOLID principles are:
     - Single Responsibility Principle (SRP)
     - Open/Closed Principle (OCP)
     - Liskov Substitution Principle (LSP)
