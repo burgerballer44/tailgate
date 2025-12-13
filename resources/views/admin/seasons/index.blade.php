@@ -62,4 +62,8 @@
             ]
         ]"
     ></x-tables.full-width>
+
+    <div class="mt-4">
+        {{ $seasons->links() }}
+    </div>
 </x-layouts.app>

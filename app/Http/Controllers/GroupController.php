@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Follow;
-use App\Models\Group;
-use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
-use App\Services\GroupService;
+use App\Models\Group;
+use App\Models\Follow;
+use App\Models\Season;
 use Illuminate\Http\Request;
+use App\Services\GroupService;
 use Illuminate\Contracts\View\View;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
-use App\Http\Requests\Group\FollowTeamRequest;
-use App\Http\Resources\UserResource;
 
 class GroupController extends Controller
 {
@@ -48,17 +48,29 @@ class GroupController extends Controller
 
     public function show(Group $group): View
     {
+        $group->load([
+            'owner',
+            'members.user',
+            'players.member.user',
+            'players.scores.player.member.user',
+            'players.scores.game.homeTeam',
+            'players.scores.game.awayTeam',
+            'follow.team',
+            'follow.season'
+        ]);
+
+        $scores = $group->players->flatMap->scores->sortByDesc('created_at');
+        $perPage = 20;
+        $currentPage = request()->get('page', 1);
+        $items = $scores->forPage($currentPage, $perPage);
+        $paginatedScores = new \Illuminate\Pagination\LengthAwarePaginator($items, $scores->count(), $perPage, $currentPage, [
+            'path' => request()->url(),
+            'pageName' => 'page',
+        ]);
+
         return view('admin.groups.show', [
-            'group' => $group->load([
-                'owner',
-                'members.user',
-                'players.member.user',
-                'players.scores.player.member.user',
-                'players.scores.game.homeTeam',
-                'players.scores.game.awayTeam',
-                'follow.team',
-                'follow.season'
-            ]),
+            'group' => $group,
+            'scores' => $paginatedScores,
         ]);
     }
 

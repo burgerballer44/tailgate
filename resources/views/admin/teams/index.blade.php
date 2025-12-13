@@ -53,4 +53,8 @@
             ]
         ]"
     ></x-tables.full-width>
+
+    <div class="mt-4">
+        {{ $teams->links() }}
+    </div>
 </x-layouts.app>

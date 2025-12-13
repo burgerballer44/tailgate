@@ -58,5 +58,9 @@
                 ]
             ]"
         ></x-tables.full-width>
+
+        <div class="mt-4">
+            {{ $player->scores->links() }}
+        </div>
     </div>
 </x-layouts.app>

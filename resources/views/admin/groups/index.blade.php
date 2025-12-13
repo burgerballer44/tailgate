@@ -54,4 +54,8 @@
             ]
         ]"
     ></x-tables.full-width>
+
+    <div class="mt-4">
+        {{ $groups->links() }}
+    </div>
 </x-layouts.app>
