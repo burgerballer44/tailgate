@@ -66,7 +66,7 @@ applyTo: '**'
 - Apply **route model binding** where possible.
 - Use Form Requests for input validation.
 - Adhere to proper HTTP status codes (200, 201, 204, 400, 422, 500, etc.).
-- Include versioning in API routes if applicable (e.g., `/api/v1/users`).
+- Include versioning in API routes if applicable (e.g., `/api/v1/groups`).
 
 ## ✅ Security Best Practices
 

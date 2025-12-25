@@ -40,6 +40,115 @@ describe('index', function () {
         expect($statuses)->toBeInstanceOf(Collection::class);
         expect($roles)->toBeInstanceOf(Collection::class);
     });
+
+    test('users can be filtered by role', function () {
+        // create 2 admin users
+        [$admin1, $admin2] = User::factory()->count(2)->create(['role' => UserRole::ADMIN->value]);
+        // create 2 regular users
+        [$regular1, $regular2] = User::factory()->count(2)->create(['role' => UserRole::REGULAR->value]);
+
+        // get the admin users only
+        $response = $this->get(route('users.index', ['role' => 'Admin']));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.users.index');
+
+        // assert users are filtered
+        $response->assertViewHas('users');
+        $users = $response->viewData('users');
+        expect($users->count())->toBe(2);
+    });
+
+    test('users can be filtered by status', function () {
+        // create 2 active users
+        [$active1, $active2] = User::factory()->count(2)->create(['status' => UserStatus::ACTIVE->value]);
+        // create 2 pending users
+        [$pending1, $pending2] = User::factory()->count(2)->create(['status' => UserStatus::PENDING->value]);
+
+        // get the active users only
+        $response = $this->get(route('users.index', ['status' => 'Active']));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.users.index');
+
+        // assert users are filtered
+        $response->assertViewHas('users');
+        $users = $response->viewData('users');
+        // includes signed in user
+        expect($users->count())->toBe(3);
+    });
+
+    test('users can be filtered by q for name', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a user
+        $user = User::factory()->create(['name' => $q]);
+        $differentUserToNotFind = User::factory()->create(['name' => 'somethingelse']);
+
+        // get the user
+        $response = $this->get(route('users.index', ['q' => $q]));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.users.index');
+
+        // assert users are filtered
+        $response->assertViewHas('users');
+        $users = $response->viewData('users');
+        expect($users->count())->toBe(1);
+    });
+
+    test('users can be filtered by q for email', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a user
+        $user = User::factory()->create(['email' => $q]);
+        $differentUserToNotFind = User::factory()->create(['email' => 'somethingelse']);
+
+        // get the user
+        $response = $this->get(route('users.index', ['q' => $q]));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.users.index');
+
+        // assert users are filtered
+        $response->assertViewHas('users');
+        $users = $response->viewData('users');
+        expect($users->count())->toBe(1);
+    });
+
+    test('users returns empty when filter matches nothing', function () {
+        // create a user
+        User::factory()->create(['name' => 'John']);
+
+        // search for something that doesn't exist
+        $response = $this->get(route('users.index', ['q' => 'NonExistent']));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.users.index');
+
+        // assert users are filtered
+        $response->assertViewHas('users');
+        $users = $response->viewData('users');
+        expect($users->count())->toBe(0);
+    });
+
 });
 
 describe('creat in a user', function () {

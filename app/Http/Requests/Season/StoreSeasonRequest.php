@@ -32,6 +32,9 @@ class StoreSeasonRequest extends FormRequest
             'season_type' => ['required', new Enum(SeasonType::class)],
             'season_start' => ['required', 'date'],
             'season_end' => ['required', 'date', 'after:season_start'],
+            'active' => ['required', 'boolean'],
+            'active_date' => ['required', 'date'],
+            'inactive_date' => ['required', 'date'],
         ];
     }
 
@@ -43,6 +46,8 @@ class StoreSeasonRequest extends FormRequest
         $this->replace([
             'season_start' => DateOrString::fromString($this->season_start),
             'season_end' => DateOrString::fromString($this->season_end),
+            'active_date' => $this->active_date ? DateOrString::fromString($this->active_date) : null,
+            'inactive_date' => $this->inactive_date ? DateOrString::fromString($this->inactive_date) : null,
         ]);
     }
 

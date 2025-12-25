@@ -26,7 +26,7 @@
             name="owner_id"
             label="Owner"
             :required="true"
-            :value="old('owner_id', $group?->owner_id)"
+            :value="old('owner_id', $group?->owner?->id)"
             :options="['' => ''] + $users->mapWithKeys(fn($user) => [$user->id => $user->name])->toArray()"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('owner_id')" />

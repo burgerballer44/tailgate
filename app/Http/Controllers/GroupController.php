@@ -10,7 +10,6 @@ use App\Models\Season;
 use Illuminate\Http\Request;
 use App\Services\GroupService;
 use Illuminate\Contracts\View\View;
-use App\Http\Resources\UserResource;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
@@ -25,15 +24,15 @@ class GroupController extends Controller
     public function index(Request $request): View
     {
         return view('admin.groups.index', [
-            'groups' => $this->groupService->query($request->all())->paginate(),
-            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
+            'groups' => $this->groupService->query($request->query())->paginate(),
+            'users' => User::get(),
         ]);
     }
 
     public function create(): View
     {
         return view('admin.groups.create', [
-            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
+            'users' => User::get(),
         ]);
     }
 
@@ -78,7 +77,7 @@ class GroupController extends Controller
     {
         return view('admin.groups.edit', [
             'group' => $group,
-            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
+            'users' => User::get(),
         ]);
     }
 

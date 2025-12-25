@@ -2,7 +2,7 @@
 
 use App\Models\Team;
 use App\Models\Sport;
-use App\Models\TeamSport;
+use App\Models\TeamType;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
@@ -37,6 +37,119 @@ describe('index', function () {
         $sports = $response->viewData('sports');
         expect($sports)->toBeInstanceOf(Collection::class);
     });
+
+    test('lists of teams can be filtered by sport', function () {
+        // create 2 basketball teams
+        [$team1, $team2] = Team::factory()->withSports([Sport::BASKETBALL])->count(2)->create();
+
+        // create 2 football teams
+        [$team3, $team4] = Team::factory()->withSports([Sport::FOOTBALL])->count(2)->create();
+
+        // get the basketball teams only
+        $response = $this->get(route('teams.index', ['sport' => 'Basketball']));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.teams.index');
+
+        // assert teams are filtered
+        $response->assertViewHas('teams');
+        $teams = $response->viewData('teams');
+        expect($teams->count())->toBe(2);
+    });
+
+    test('lists of teams can be filtered by type', function () {
+        // create 2 college teams
+        [$team1, $team2] = Team::factory()->count(2)->create(['type' => TeamType::COLLEGE]);
+
+        // create 2 professional teams
+        [$team3, $team4] = Team::factory()->count(2)->create(['type' => TeamType::PROFESSIONAL]);
+
+        // get the college teams only
+        $response = $this->get(route('teams.index', ['type' => 'College']));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.teams.index');
+
+        // assert teams are filtered
+        $response->assertViewHas('teams');
+        $teams = $response->viewData('teams');
+        expect($teams->count())->toBe(2);
+    });
+    
+    test('lists of teams can be filtered by q for designation', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a team
+        $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => $q]);
+        $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => 'somethingelse']);
+
+        // get the team
+        $response = $this->get(route('teams.index', ['q' => $q]));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.teams.index');
+
+        // assert teams are filtered
+        $response->assertViewHas('teams');
+        $teams = $response->viewData('teams');
+        expect($teams->count())->toBe(1);
+    });
+    
+    test('lists of teams can be filtered by q for mascot', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a team
+        $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => $q]);
+        $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => 'somethingelse']);
+
+        // get the team
+        $response = $this->get(route('teams.index', ['q' => $q]));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.teams.index');
+
+        // assert teams are filtered
+        $response->assertViewHas('teams');
+        $teams = $response->viewData('teams');
+        expect($teams->count())->toBe(1);
+    });
+
+    test('lists of teams can be filtered by q for organization', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a team
+        $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['organization' => $q]);
+        $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['organization' => 'somethingelse']);
+
+        // get the team
+        $response = $this->get(route('teams.index', ['q' => $q]));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.teams.index');
+
+        // assert teams are filtered
+        $response->assertViewHas('teams');
+        $teams = $response->viewData('teams');
+        expect($teams->count())->toBe(1);
+    });
 });
 
 describe('creating a team', function () {
@@ -61,8 +174,10 @@ describe('creating a team', function () {
     test('will create a team', function () {
         // team data
         $teamData = [
+            'organization' => 'Test Organization',
             'designation' => 'Test Team',
             'mascot' => 'Test Mascot',
+            'type' => TeamType::COLLEGE->value,
             'sports' => [Sport::BASKETBALL->value],
         ];
 
@@ -80,8 +195,10 @@ describe('creating a team', function () {
 
         // verify team was created
         $this->assertDatabaseHas('teams', [
+            'organization' => $teamData['organization'],
             'designation' => $teamData['designation'],
             'mascot' => $teamData['mascot'],
+            'type' => $teamData['type'],
         ]);
 
         // verify team sports were created
@@ -92,8 +209,10 @@ describe('creating a team', function () {
     test('flashes success message on store', function () {
         // team data
         $teamData = [
+            'organization' => 'Test Organization',
             'designation' => 'Test Team',
             'mascot' => 'Test Mascot',
+            'type' => TeamType::COLLEGE->value,
             'sports' => [Sport::BASKETBALL->value],
         ];
 
@@ -150,14 +269,18 @@ describe('updating team', function () {
     test('updates a team', function () {
         // create a team
         $team = Team::factory()->withSports([Sport::BASKETBALL])->create([
+            'organization' => 'theOrganization',
             'designation' => 'theDesignation',
             'mascot' => 'theMascot',
+            'type' => TeamType::COLLEGE,
         ]);
 
         // update dataX
         $updateData = [
+            'organization' => 'Updated Organization',
             'designation' => 'Updated Designation',
             'mascot' => 'Updated Mascot',
+            'type' => TeamType::PROFESSIONAL->value,
             'sports' => [Sport::FOOTBALL->value],
         ];
 
@@ -169,8 +292,10 @@ describe('updating team', function () {
 
         // verify team was updated
         $team->refresh();
+        expect($team->organization)->toBe($updateData['organization']);
         expect($team->designation)->toBe($updateData['designation']);
         expect($team->mascot)->toBe($updateData['mascot']);
+        expect($team->type)->toBe($updateData['type']);
         expect($team->sports->pluck('sport')->toArray())->toBe([Sport::FOOTBALL]);
     });
 
@@ -180,8 +305,10 @@ describe('updating team', function () {
 
         // update data
         $updateData = [
+            'organization' => 'Updated Organization',
             'designation' => 'Updated Designation',
             'mascot' => 'Updated Mascot',
+            'type' => TeamType::PROFESSIONAL->value,
             'sports' => [Sport::FOOTBALL->value],
         ];
 

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Group extends Model
 {
@@ -78,17 +80,24 @@ class Group extends Model
         });
     }
 
-    public function scopeFilter($query, array $filters)
+    /**
+     * Scope to filter groups based on the provided filters.
+     */
+    #[Scope]
+    protected function filter(Builder $builder, array $filters)
     {
+        if ($q = $filters['q'] ?? null) {
+            $builder->where(function ($query) use ($q) {
+                $query->whereRaw('LOWER(name) LIKE LOWER(?)', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(invite_code) LIKE LOWER(?)', ["%{$q}%"]);
+            });
+        }
+
         if (isset($filters['owner_id'])) {
-            $query->where('owner_id', $filters['owner_id']);
+            $builder->where('owner_id', $filters['owner_id']);
         }
 
-        if (isset($filters['invite_code'])) {
-            $query->where('invite_code', $filters['invite_code']);
-        }
-
-        return $query;
+        return $builder;
     }
 
     public function owner(): BelongsTo

@@ -18,5 +18,6 @@
         :method="'PUT'"
         :team="$team"
         :sports="$sports"
+        :types="$types"
     ></x-form.admin.team>
 </x-layouts.app>

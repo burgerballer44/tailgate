@@ -15,7 +15,6 @@ use App\Http\Requests\Group\StorePlayerRequest;
 use App\Http\Requests\Group\UpdatePlayerRequest;
 use App\Http\Requests\Group\SubmitScoreRequest;
 use App\Http\Requests\Group\UpdateScoreRequest;
-use App\Http\Resources\GameResource;
 
 class PlayerController extends Controller
 {
@@ -96,7 +95,7 @@ class PlayerController extends Controller
             'group' => $group,
             'member' => $member,
             'player' => $player,
-            'games' => GameResource::collection($games)->makeVisible(['id']),
+            'games' => $games->makeVisible(['id']),
         ]);
     }
 

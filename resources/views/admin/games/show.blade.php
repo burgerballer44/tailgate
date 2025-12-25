@@ -20,11 +20,11 @@
         :fields="[
             [
                 'label' => 'Home Team',
-                'value' => $game->homeTeam->full_name,
+                'value' => $game->homeTeam->organization,
             ],
             [
                 'label' => 'Away Team',
-                'value' => $game->awayTeam->full_name,
+                'value' => $game->awayTeam->organization,
             ],
             [
                 'label' => 'Home Team Score',

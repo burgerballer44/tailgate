@@ -27,7 +27,7 @@ class UpdateGroupRequest extends FormRequest
             'name' => 'nullable|string|max:255',
             'member_limit' => ['nullable', 'integer', 'max:50'],
             'player_limit' => ['nullable', 'integer', 'max:10'],
-            'owner_id' => ['nullable', new UserMustBeAMember],
+            'owner_id' => ['required', new UserMustBeAMember],
         ];
     }
 

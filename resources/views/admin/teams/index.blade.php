@@ -1,6 +1,6 @@
 <x-layouts.app
     mainHeading="Teams"
-    mainDescription="A list of all the teams including their designation, mascot and sport."
+    mainDescription="A list of all the teams including their organization, designation, mascot and sport."
     :mainActions="[
         ['text' => 'Add Team', 'route' => 'teams.create'],
     ]"
@@ -13,7 +13,7 @@
     />
     {{-- query --}}
     <x-form.query-filters>
-        <x-form.query-search label="Search by designation or mascot" :error="$errors->get('q')" />
+        <x-form.query-search label="Search by organization, designation, mascot" :error="$errors->get('q')" />
 
         <x-form.select
             name="sport"
@@ -21,18 +21,25 @@
             :value="old('sport', request()->input('sport'))"
             :options="['' => 'All Sports'] + $sports->mapWithKeys(fn($sport) => [$sport => ucfirst($sport)])->toArray()"
         />
+
+        <x-form.select
+            name="type"
+            label="Type"
+            :value="old('type', request()->input('type'))"
+            :options="['' => 'All Types'] + $types->mapWithKeys(fn($type) => [$type => ucfirst($type)])->toArray()"
+        />
     </x-form.query-filters>
 
     {{-- table --}}
     <x-tables.full-width
         heading="Teams"
-        description="A list of all the teams including their designation, mascot and sport."
+        description="A list of all the teams including their organization, designation, mascot and sport."
         :tableActions="[
             ['route' => 'teams.create', 'text' => 'Add Team']
         ]"
-        :headers="['Designation', 'Mascot', 'Sports', 'Created', 'Actions']"
+        :headers="['Organization', 'Designation', 'Mascot', 'Type', 'Sports', 'Created', 'Actions']"
         :rows="$teams"
-        :columns="['designation', 'mascot', 'sports_string', 'created_at']"
+        :columns="['organization', 'designation', 'mascot', 'type', 'sports_string', 'created_at']"
         :rowActions="[
             [
                 'label' => 'Show',

@@ -6,6 +6,8 @@ use App\Models\Score;
 use App\Models\Follow;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -69,25 +71,34 @@ class Season extends Model
         });
     }
 
+    /**
+     * Get the games associated with the season.
+     */
     public function games(): HasMany
     {
         return $this->hasMany(Game::class);
     }
 
-    public function scopeFilter($query, array $filters)
+    /**
+     * Scope a query to filter seasons based on provided criteria.
+     */
+    #[Scope]
+    protected function filter(Builder $builder, array $query)
     {
-        if (isset($filters['sport'])) {
-            $query->where('sport', $filters['sport']);
+        if ($q = $query['q'] ?? null) {
+            $builder->where(function ($query) use ($q) {
+                $query->whereRaw('LOWER(name) LIKE LOWER(?)', ["%{$q}%"]);;
+            });
+        }
+        
+        if (isset($query['sport'])) {
+            $builder->where('sport', $query['sport']);
         }
 
-        if (isset($filters['season_type'])) {
-            $query->where('season_type', $filters['season_type']);
+        if (isset($query['season_type'])) {
+            $builder->where('season_type', $query['season_type']);
         }
 
-        if (isset($filters['name'])) {
-            $query->where('name', 'LIKE', "%{$filters['name']}%");
-        }
-
-        return $query;
+        return $builder;
     }
 }

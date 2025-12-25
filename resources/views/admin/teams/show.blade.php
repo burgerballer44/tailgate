@@ -16,12 +16,20 @@
     <x-model-viewer
         :fields="[
             [
+                'label' => 'Organization',
+                'value' => $team->organization,
+            ],
+            [
                 'label' => 'Designation',
                 'value' => $team->designation,
             ],
             [
                 'label' => 'Mascot',
                 'value' => $team->mascot,
+            ],
+            [
+                'label' => 'Type',
+                'value' => $team->type,
             ],
             [
                 'label' => 'Sports',

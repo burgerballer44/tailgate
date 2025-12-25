@@ -14,7 +14,7 @@
     <select
         id="{{ $name }}"
         name="{{ $name }}"
-        class="focus:outline-navy mt-1 block w-full rounded-md bg-white py-1.5 pr-10 pl-3 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 sm:text-sm/6"
+        class="focus:outline-carolina mt-1 block w-full rounded-md bg-white py-1.5 pr-10 pl-3 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 sm:text-sm/6"
         {{ $required ? 'required' : '' }}
     >
         @if ($placeholder)

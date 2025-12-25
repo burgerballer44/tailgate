@@ -13,6 +13,21 @@
     @endphp
 
     <div>
+        <x-inputs.input-label for="organization" class="font-semibold" :value="__('Organization')" />
+        <x-inputs.text-input
+            id="organization"
+            name="organization"
+            type="text"
+            class="mt-1 block w-full"
+            :value="old('organization', $team?->organization)"
+            required
+            autofocus
+            autocomplete="organization"
+        />
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('organization')" />
+    </div>
+
+    <div class="mt-4">
         <x-inputs.input-label for="designation" class="font-semibold" :value="__('Designation')" />
         <x-inputs.text-input
             id="designation"
@@ -21,7 +36,6 @@
             class="mt-1 block w-full"
             :value="old('designation', $team?->designation)"
             required
-            autofocus
             autocomplete="designation"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('designation')" />
@@ -35,10 +49,27 @@
             type="text"
             class="mt-1 block w-full"
             :value="old('mascot', $team?->mascot)"
-            required
             autocomplete="mascot"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('mascot')" />
+    </div>
+
+    <div class="mt-4">
+        <x-inputs.input-label for="type" class="font-semibold" :value="__('Type')" />
+        <select
+            id="type"
+            name="type"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            required
+        >
+            <option value="">Select Type</option>
+            @foreach (['College', 'Professional'] as $typeOption)
+                <option value="{{ $typeOption }}" {{ old('type', $team?->type) === $typeOption ? 'selected' : '' }}>
+                    {{ $typeOption }}
+                </option>
+            @endforeach
+        </select>
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('type')" />
     </div>
 
     <div class="mt-4">

@@ -69,7 +69,7 @@
             ]"
             :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Date', 'Time', 'Actions']"
             :rows="$games"
-            :columns="['homeTeam.full_name', 'awayTeam.full_name', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
+            :columns="['homeTeam.organization', 'awayTeam.organization', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
             :rowActions="[
                 [
                     'label' => 'Show',

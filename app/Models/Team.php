@@ -28,8 +28,10 @@ class Team extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'organization',
         'designation',
         'mascot',
+        'type',
     ];
 
     /**
@@ -64,18 +66,11 @@ class Team extends Model
      * Get a string representation of the team's sports.
      * 
      * Methods ending with "Attribute" are treated as accessors in Laravel.
+     * This allows you to access $team->sports_string directly.
      */
     public function getSportsStringAttribute(): string
     {
         return $this->sports->pluck('sport')->map(fn($sport) => ucfirst($sport->value))->join(', ');
-    }
-
-    /**
-     * Get the full name of the team.
-     */
-    public function getFullNameAttribute(): string
-    {
-        return "{$this->designation} {$this->mascot}";
     }
 
     /**
@@ -86,7 +81,8 @@ class Team extends Model
     {
         if ($q = $query['q'] ?? null) {
             $builder->where(function ($query) use ($q) {
-                $query->whereRaw('LOWER(designation) LIKE LOWER(?)', ["%{$q}%"])
+                $query->whereRaw('LOWER(organization) LIKE LOWER(?)', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(designation) LIKE LOWER(?)', ["%{$q}%"])
                     ->orWhereRaw('LOWER(mascot) LIKE LOWER(?)', ["%{$q}%"]);
             });
         }
@@ -95,6 +91,10 @@ class Team extends Model
             $builder->whereHas('sports', function ($s) use ($query) {
                 $s->where('sport', $query['sport']);
             });
+        }
+
+        if (isset($query['type'])) {
+            $builder->where('type', $query['type']);
         }
     }
 }

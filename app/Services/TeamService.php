@@ -10,16 +10,18 @@ class TeamService
 {
     /**
      * Create a new team with the provided data.
-     * This method handles team creation logic, including setting designation, mascot, and sport.
+     * This method handles team creation logic, including setting organization, designation, mascot, type, and sport.
      *
-     * @param  ValidatedTeamData  $data  Validated team data including designation, mascot, sport.
+     * @param  ValidatedTeamData  $data  Validated team data including organization, designation, mascot, type, sport.
      * @return Team The created team instance.
      */
     public function create(ValidatedTeamData $data): Team
     {
         $teamData = [
+            'organization' => $data->organization,
             'designation' => $data->designation,
             'mascot' => $data->mascot,
+            'type' => $data->type->value,
         ];
 
         $team = Team::create($teamData);
@@ -36,7 +38,7 @@ class TeamService
 
     /**
      * Update an existing team's information in the system.
-     * This method is used to modify team details such as designation, mascot, or sport.
+     * This method is used to modify team details such as organization, designation, mascot, type, or sport.
      *
      * @param  Team  $team  The team to update.
      * @param  ValidatedTeamData  $data  Validated data to update the team with.
@@ -47,8 +49,10 @@ class TeamService
         // Team data properties are never expected to be null or set to null.
 
         $updateData = [
+            'organization' => $data->organization,
             'designation' => $data->designation,
             'mascot' => $data->mascot,
+            'type' => $data->type->value,
         ];
 
         $team->fill($updateData);

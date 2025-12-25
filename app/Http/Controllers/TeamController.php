@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Team;
 use App\Models\Sport;
+use App\Models\TeamType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use App\Services\TeamService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +24,7 @@ class TeamController extends Controller
         return view('admin.teams.index', [
             'teams' => $this->teamService->query($request->all())->paginate(),
             'sports' => collect(Sport::cases())->pluck('value'),
+            'types' => collect(TeamType::cases())->pluck('value'),
         ]);
     }
 
@@ -29,6 +32,7 @@ class TeamController extends Controller
     {
         return view('admin.teams.create', [
             'sports' => collect(Sport::cases())->pluck('value'),
+            'types' => collect(TeamType::cases())->pluck('value'),
         ]);
     }
 
@@ -51,6 +55,7 @@ class TeamController extends Controller
         return view('admin.teams.edit', [
             'team' => $team,
             'sports' => collect(Sport::cases())->pluck('value'),
+            'types' => collect(TeamType::cases())->pluck('value'),
         ]);
     }
 

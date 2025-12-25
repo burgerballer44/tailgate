@@ -35,6 +35,106 @@ describe('index', function () {
         $users = $response->viewData('users');
         expect($users)->toBeInstanceOf(Collection::class);
     });
+
+    test('groups can be filtered by owner', function () {
+        // create 2 users
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+
+        // create 2 groups owned by user1
+        Group::factory()->create(['owner_id' => $user1->id]);
+        Group::factory()->create(['owner_id' => $user1->id]);
+
+        // create 1 group owned by user2
+        Group::factory()->create(['owner_id' => $user2->id]);
+
+        // get the groups owned by user1 only
+        $response = $this->get(route('groups.index') . '?owner_id=' . $user1->id);
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.groups.index');
+
+        // assert groups are filtered
+        $response->assertViewHas('groups');
+        $groups = $response->viewData('groups');
+        expect($groups->count())->toBe(2);
+    });
+
+    test('groups returns empty when owner filter matches nothing', function () {
+        // create a group owned by the signed-in user
+        Group::factory()->create(['owner_id' => $this->user->id]);
+
+        // create a user not owning any groups
+        $user = User::factory()->create();
+
+        // search for groups owned by this user
+        $response = $this->get(route('groups.index') . '?owner_id=' . $user->id);
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.groups.index');
+
+        // assert groups are filtered
+        $response->assertViewHas('groups');
+        $groups = $response->viewData('groups');
+        expect($groups->count())->toBe(0);
+    });
+
+    test('groups can be filtered by q for name', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a group
+        $group = Group::factory()->create(['name' => $q]);
+        $differentGroupToNotFind = Group::factory()->create(['name' => 'somethingelse']);
+
+        // get the group
+        $response = $this->get(route('groups.index') . '?q=' . $q);
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.groups.index');
+
+        // assert groups are filtered
+        $response->assertViewHas('groups');
+        $groups = $response->viewData('groups');
+        expect($groups->count())->toBe(1);
+    });
+
+    test('groups can be filtered by q for invite_code', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a group
+        $group = Group::factory()->create();
+        $group->invite_code = $q;
+        $group->save();
+
+        $differentGroupToNotFind = Group::factory()->create();
+        $differentGroupToNotFind->invite_code = 'somethingelse';
+        $differentGroupToNotFind->save();
+
+        // get the group
+        $response = $this->get(route('groups.index') . '?q=' . $q);
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.groups.index');
+
+        // assert groups are filtered
+        $response->assertViewHas('groups');
+        $groups = $response->viewData('groups');
+        expect($groups->count())->toBe(1);
+    });
 });
 
 describe('creating a group', function () {
@@ -75,7 +175,7 @@ describe('creating a group', function () {
         // verify group was created
         $this->assertDatabaseHas('groups', [
             'name' => $groupData['name'],
-            'owner_id' => $groupData['owner_id'],
+            'owner_id' => $user->id,
         ]);
     });
 
@@ -142,6 +242,7 @@ describe('updating group', function () {
         // update data
         $updateData = [
             'name' => 'Updated Name',
+            'owner_id' => $group->owner->id,
         ];
 
         // patch the group data
@@ -162,6 +263,7 @@ describe('updating group', function () {
         // update data
         $updateData = [
             'name' => 'Updated Name',
+            'owner_id' => $group->owner->id,
         ];
 
         // patch the group data

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Team;
 
 use App\Models\Sport;
+use App\Models\TeamType;
 use App\DTO\ValidatedTeamData;
 use Illuminate\Validation\Rules\Enum;
 use App\Http\Requests\FormRequest;
@@ -25,8 +26,10 @@ class StoreTeamRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'organization' => ['required', 'string', 'max:255'],
             'designation' => ['required', 'string', 'max:255'],
-            'mascot' => ['required', 'string', 'max:255'],
+            'mascot' => ['nullable', 'string', 'max:255'],
+            'type' => ['required', new Enum(TeamType::class)],
             'sports' => ['required', 'array', 'min:1'],
             'sports.*' => [new Enum(Sport::class)],
         ];

@@ -5,12 +5,14 @@ use App\Models\Sport;
 use App\Models\Season;
 use App\Models\SeasonType;
 use Illuminate\Support\Str;
+use App\Services\GameService;
 use App\DTO\ValidatedGameData;
+use Illuminate\Support\Carbon;
 use App\Services\SeasonService;
 use App\DTO\ValidatedSeasonData;
 
 beforeEach(function () {
-    $this->service = new SeasonService(new \App\Services\GameService());
+    $this->service = new SeasonService(new GameService());
 });
 
 describe('create a season', function () {
@@ -33,6 +35,9 @@ describe('create a season', function () {
         expect($season->season_type)->toBe($data['season_type']);
         expect($season->season_start)->toBe($data['season_start']);
         expect($season->season_end)->toBe($data['season_end']);
+        expect($season->active)->toBe($data['active'] ?? false);
+        expect($season->active_date->toDateString())->toBe(Carbon::parse($data['active_date'])->toDateString());
+        expect($season->inactive_date->toDateString())->toBe(Carbon::parse($data['inactive_date'])->toDateString());
         expect(Str::isUlid((string)$season->ulid))->toBeTrue();
     });
 });
@@ -55,6 +60,9 @@ describe('update a season', function () {
             'season_type' => SeasonType::POST->value,
             'season_start' => '2024-01-01',
             'season_end' => '2024-12-31',
+            'active' => true,
+            'active_date' => '2024-01-01',
+            'inactive_date' => '2024-12-31',
         ]);
 
         // ensure updated season does not exist
@@ -79,6 +87,9 @@ describe('update a season', function () {
         expect($season->season_type)->toBe($data->season_type->value);
         expect($season->season_start)->toBe((string) $data->season_start);
         expect($season->season_end)->toBe((string) $data->season_end);
+        expect($season->active)->toBe($data->active);
+        expect($season->active_date->toDateString())->toBe((string) $data->active_date);
+        expect($season->inactive_date->toDateString())->toBe((string) $data->inactive_date);
     });
 
     test('updates with same values', function () {
@@ -98,6 +109,9 @@ describe('update a season', function () {
             'season_type' => SeasonType::REGULAR->value,
             'season_start' => '2023-01-01',
             'season_end' => '2023-12-31',
+            'active' => false,
+            'active_date' => '2023-01-01',
+            'inactive_date' => '2023-12-31',
         ]);
 
         // try to update the season

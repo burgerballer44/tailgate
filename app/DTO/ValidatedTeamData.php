@@ -3,12 +3,15 @@
 namespace App\DTO;
 
 use App\Models\Sport;
+use App\Models\TeamType;
 
 readonly class ValidatedTeamData
 {
     public function __construct(
+        public string $organization,
         public string $designation,
-        public string $mascot,
+        public ?string $mascot,
+        public TeamType $type,
         public array $sports,
     ) {}
 
@@ -23,8 +26,10 @@ readonly class ValidatedTeamData
         }
 
         return new self(
+            organization: (string) $data['organization'],
             designation: (string) $data['designation'],
-            mascot: (string) $data['mascot'],
+            mascot: $data['mascot'] ?? null,
+            type: TeamType::from($data['type']),
             sports: $sports,
         );
     }

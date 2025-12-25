@@ -17,5 +17,6 @@
         :method="'POST'"
         :team="null"
         :sports="$sports"
+        :types="$types"
     ></x-form.admin.team>
 </x-layouts.app>

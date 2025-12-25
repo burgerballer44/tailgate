@@ -34,7 +34,6 @@ class UserMustBeAMember implements DataAwareRule, ValidationRule
     {
         $group = request()->route('group');
 
-        // could be passing in an owner_id or user_id?
         $idToUse = $this->data['owner_id'] ?? $this->data['user_id'];
 
         if (! $group->members->contains('user_id', $idToUse)) {

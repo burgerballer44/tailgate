@@ -39,9 +39,9 @@
         :tableActions="[
             ['route' => 'seasons.create', 'text' => 'Add Season']
         ]"
-        :headers="['Name', 'Sport', 'Season Type', 'Start Date', 'End Date', 'Created', 'Actions']"
+        :headers="['Name', 'Sport', 'Season Type', 'Active', 'Start Date', 'End Date', 'Created', 'Actions']"
         :rows="$seasons"
-        :columns="['name', 'sport', 'season_type', 'season_start', 'season_end', 'created_at']"
+        :columns="['name', 'sport', 'season_type', 'active', 'season_start', 'season_end', 'created_at']"
         :rowActions="[
             [
                 'label' => 'Show',

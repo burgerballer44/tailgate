@@ -15,8 +15,10 @@ return new class extends Migration
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->index();
+            $table->string('organization');
             $table->string('designation');
-            $table->string('mascot');
+            $table->string('mascot')->nullable();
+            $table->string('type');
             $table->timestamps();
         });
     }

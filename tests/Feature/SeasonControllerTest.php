@@ -4,6 +4,7 @@ use App\Models\Season;
 use App\Models\SeasonType;
 use App\Models\Sport;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     $this->user = signInRegularUser();
@@ -39,6 +40,74 @@ describe('index', function () {
         expect($sports)->toBeInstanceOf(Collection::class);
         expect($seasonTypes)->toBeInstanceOf(Collection::class);
     });
+
+    test('seasons can be filtered by sport', function () {
+        // create 2 basketball seasons
+        [$season1, $season2] = Season::factory()->count(2)->create(['sport' => Sport::BASKETBALL->value]);
+
+        // create 2 football seasons
+        [$season3, $season4] = Season::factory()->count(2)->create(['sport' => Sport::FOOTBALL->value]);
+
+        // get the basketball seasons only
+        $response = $this->get(route('seasons.index', ['sport' => 'Basketball']));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.seasons.index');
+
+        // assert seasons are filtered
+        $response->assertViewHas('seasons');
+        $seasons = $response->viewData('seasons');
+        expect($seasons->count())->toBe(2);
+    });
+    
+    test('seasons can be filtered by season_type', function () {
+        // create 2 basketball seasons
+        [$season1, $season2] = Season::factory()->count(2)->create(['season_type' => SeasonType::REGULAR->value]);
+
+        // create 2 football seasons
+        [$season3, $season4] = Season::factory()->count(2)->create(['season_type' => SeasonType::POST->value]);
+
+        // get the regular seasons only
+        $response = $this->get(route('seasons.index', ['season_type' => 'Regular Season']));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.seasons.index');
+
+        // assert seasons are filtered
+        $response->assertViewHas('seasons');
+        $seasons = $response->viewData('seasons');
+        expect($seasons->count())->toBe(2);
+    });
+    
+    test('seasons can be filtered by q for name', function () {
+        // thing to find
+        $q = 'FindMe';
+
+        // create a season
+        $season = Season::factory()->create(['name' => $q]);
+        $differentSeasonToNotFind = Season::factory()->create(['name' => 'somethingelse']);
+
+        // get the season
+        $response = $this->get(route('seasons.index', ['q' => $q]));
+
+        // assert successful response
+        $response->assertOk();
+
+        // assert view is returned
+        $response->assertViewIs('admin.seasons.index');
+
+        // assert seasons are filtered
+        $response->assertViewHas('seasons');
+        $seasons = $response->viewData('seasons');
+        expect($seasons->count())->toBe(1);
+    });
+    
 });
 
 describe('creating a season', function () {
@@ -86,6 +155,9 @@ describe('creating a season', function () {
             'season_type' => $seasonData['season_type'],
             'season_start' => $seasonData['season_start'],
             'season_end' => $seasonData['season_end'],
+            'active' => $seasonData['active'],
+            'active_date' => Carbon::parse($seasonData['active_date'])->toDateTimeString(),
+            'inactive_date' => Carbon::parse($seasonData['inactive_date'])->toDateTimeString(),
         ]);
     });
 
@@ -154,6 +226,9 @@ describe('updating season', function () {
             'season_type' => SeasonType::REGULAR->value,
             'season_start' => '2023-01-01',
             'season_end' => '2023-12-31',
+            'active' => true,
+            'active_date' => '2023-01-01',
+            'inactive_date' => '2023-12-31',
         ]);
 
         // update data
@@ -163,6 +238,9 @@ describe('updating season', function () {
             'season_type' => SeasonType::POST->value,
             'season_start' => '2024-01-01',
             'season_end' => '2024-12-31',
+            'active' => false,
+            'active_date' => '2024-01-01',
+            'inactive_date' => '2024-12-31',
         ];
 
         // patch the season data
@@ -178,6 +256,9 @@ describe('updating season', function () {
         expect($season->season_type)->toBe($updateData['season_type']);
         expect($season->season_start)->toBe($updateData['season_start']);
         expect($season->season_end)->toBe($updateData['season_end']);
+        expect($season->active)->toBe($updateData['active']);
+        expect($season->active_date->toDateString())->toBe($updateData['active_date']);
+        expect($season->inactive_date->toDateString())->toBe($updateData['inactive_date']);
     });
 
     test('flashes success message on update', function () {
@@ -191,6 +272,9 @@ describe('updating season', function () {
             'season_type' => SeasonType::POST->value,
             'season_start' => '2024-01-01',
             'season_end' => '2024-12-31',
+            'active' => false,
+            'active_date' => '2024-01-01',
+            'inactive_date' => '2024-12-31',
         ];
 
         // patch the season data

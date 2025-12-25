@@ -13,6 +13,7 @@ use App\Models\Season;
 use App\Models\SeasonType;
 use App\Models\Sport;
 use App\Models\Team;
+use App\Models\TeamType;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
@@ -109,41 +110,135 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create Teams
-        $teamWithGames1 = Team::factory()->create([
-            'designation' => 'Eagles',
-            'mascot' => 'Bird',
+        $teamWithGames1 = Team::factory()->withoutSports()->create([
+            'organization' => 'University of North Carolina',
+            'designation' => 'Tar Heels',
+            'mascot' => 'Ram',
+            'type' => TeamType::COLLEGE,
         ]);
 
-        $teamWithGames2 = Team::factory()->create([
-            'designation' => 'Falcons',
-            'mascot' => 'Bird of Prey',
+        $teamWithGames2 = Team::factory()->withoutSports()->create([
+            'organization' => 'Duke University',
+            'designation' => 'Blue Devils',
+            'mascot' => 'Blue Devil',
+            'type' => TeamType::COLLEGE,
         ]);
 
-        $teamNoGames1 = Team::factory()->create([
-            'designation' => 'Ravens',
-            'mascot' => 'Raven',
+        $teamNoGames1 = Team::factory()->withoutSports()->create([
+            'organization' => 'North Carolina State University',
+            'designation' => 'Wolfpack',
+            'mascot' => 'Wolf',
+            'type' => TeamType::COLLEGE,
         ]);
 
-        $teamNoGames2 = Team::factory()->create([
-            'designation' => 'Cardinals',
-            'mascot' => 'Cardinal',
+        $teamNoGames2 = Team::factory()->withoutSports()->create([
+            'organization' => 'University of Virginia',
+            'designation' => 'Cavaliers',
+            'mascot' => 'Cavalier',
+            'type' => TeamType::COLLEGE,
         ]);
 
         // Standalone teams not associated with anything
-        Team::factory()->create([
-            'designation' => 'Lions',
-            'mascot' => 'Lion',
+        Team::factory()->withoutSports()->create([
+            'organization' => 'Virginia Tech',
+            'designation' => 'Hokies',
+            'mascot' => 'HokieBird',
+            'type' => TeamType::COLLEGE,
         ]);
 
-        Team::factory()->create([
-            'designation' => 'Tigers',
-            'mascot' => 'Tiger',
+        Team::factory()->withoutSports()->create([
+            'organization' => 'Florida State University',
+            'designation' => 'Seminoles',
+            'mascot' => 'Chief Osceola',
+            'type' => TeamType::COLLEGE,
         ]);
 
-        Team::factory()->create([
-            'designation' => 'Bears',
-            'mascot' => 'Bear',
+        Team::factory()->withoutSports()->create([
+            'organization' => 'Boston College',
+            'designation' => 'Eagles',
+            'mascot' => 'Baldwin',
+            'type' => TeamType::COLLEGE,
         ]);
+
+        // Create Professional Teams
+        $panthers = Team::factory()->withoutSports()->create([
+            'organization' => 'Carolina Panthers',
+            'designation' => 'Panthers',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        $falcons = Team::factory()->withoutSports()->create([
+            'organization' => 'Atlanta Falcons',
+            'designation' => 'Falcons',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        $saints = Team::factory()->withoutSports()->create([
+            'organization' => 'New Orleans Saints',
+            'designation' => 'Saints',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        $buccaneers = Team::factory()->withoutSports()->create([
+            'organization' => 'Tampa Bay Buccaneers',
+            'designation' => 'Buccaneers',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        // Create Professional Basketball Teams
+        $hornets = Team::factory()->withoutSports()->create([
+            'organization' => 'Charlotte Hornets',
+            'designation' => 'Hornets',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        $hawks = Team::factory()->withoutSports()->create([
+            'organization' => 'Atlanta Hawks',
+            'designation' => 'Hawks',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        $heat = Team::factory()->withoutSports()->create([
+            'organization' => 'Miami Heat',
+            'designation' => 'Heat',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        $magic = Team::factory()->withoutSports()->create([
+            'organization' => 'Orlando Magic',
+            'designation' => 'Magic',
+            'mascot' => null,
+            'type' => TeamType::PROFESSIONAL,
+        ]);
+
+        // Assign sports to teams
+        // College teams participate in both sports
+        $collegeTeams = [$teamWithGames1, $teamWithGames2, $teamNoGames1, $teamNoGames2];
+        $standaloneCollegeTeams = Team::where('type', TeamType::COLLEGE)->whereNotIn('id', collect($collegeTeams)->pluck('id'))->get();
+        $allCollegeTeams = collect($collegeTeams)->merge($standaloneCollegeTeams);
+        foreach ($allCollegeTeams as $team) {
+            $team->sports()->create(['sport' => Sport::FOOTBALL]);
+            $team->sports()->create(['sport' => Sport::BASKETBALL]);
+        }
+
+        // Professional football teams
+        $nflTeams = [$panthers, $falcons, $saints, $buccaneers];
+        foreach ($nflTeams as $team) {
+            $team->sports()->create(['sport' => Sport::FOOTBALL]);
+        }
+
+        // Professional basketball teams
+        $nbaTeams = [$hornets, $hawks, $heat, $magic];
+        foreach ($nbaTeams as $team) {
+            $team->sports()->create(['sport' => Sport::BASKETBALL]);
+        }
 
         // Create Seasons
         $seasonFewGames = Season::factory()->create([
@@ -224,6 +319,28 @@ class DatabaseSeeder extends Seeder
             'inactive_date' => '2021-12-31',
         ]);
 
+        $seasonNFL = Season::factory()->create([
+            'name' => 'Season2024NFL',
+            'sport' => Sport::FOOTBALL->value,
+            'season_type' => SeasonType::REGULAR->value,
+            'season_start' => '2024-09-01',
+            'season_end' => '2025-02-28',
+            'active' => true,
+            'active_date' => '2024-09-01',
+            'inactive_date' => '2025-02-28',
+        ]);
+
+        $seasonNBA = Season::factory()->create([
+            'name' => 'Season2024NBA',
+            'sport' => Sport::BASKETBALL->value,
+            'season_type' => SeasonType::REGULAR->value,
+            'season_start' => '2024-10-01',
+            'season_end' => '2025-04-30',
+            'active' => true,
+            'active_date' => '2024-10-01',
+            'inactive_date' => '2025-04-30',
+        ]);
+
         // Create Games for seasons
         // SeasonFewGames: 4 games
         for ($i = 1; $i <= 4; $i++) {
@@ -277,6 +394,38 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // SeasonNFL: 12 games (simulating a few games in the season)
+        $nflTeams = [$panthers, $falcons, $saints, $buccaneers];
+        for ($i = 0; $i < 12; $i++) {
+            $home = $nflTeams[$i % 4];
+            $away = $nflTeams[($i + 1) % 4];
+            Game::factory()->create([
+                'season_id' => $seasonNFL->id,
+                'home_team_id' => $home->id,
+                'away_team_id' => $away->id,
+                'home_team_score' => rand(20, 35),
+                'away_team_score' => rand(20, 35),
+                'start_date' => '2024-09-'.str_pad($i + 1, 2, '0', STR_PAD_LEFT),
+                'start_time' => '13:00',
+            ]);
+        }
+
+        // SeasonNBA: 15 games (simulating a few games in the season)
+        $nbaTeams = [$hornets, $hawks, $heat, $magic];
+        for ($i = 0; $i < 15; $i++) {
+            $home = $nbaTeams[$i % 4];
+            $away = $nbaTeams[($i + 1) % 4];
+            Game::factory()->create([
+                'season_id' => $seasonNBA->id,
+                'home_team_id' => $home->id,
+                'away_team_id' => $away->id,
+                'home_team_score' => rand(95, 125),
+                'away_team_score' => rand(95, 125),
+                'start_date' => '2024-10-'.str_pad($i + 1, 2, '0', STR_PAD_LEFT),
+                'start_time' => '19:00',
+            ]);
+        }
+
         // Create Groups
         $groupNoMembers = Group::factory()->create([
             'name' => 'GroupNoMembers',
@@ -325,6 +474,22 @@ class DatabaseSeeder extends Seeder
             'invite_code' => Str::random(10),
             'member_limit' => 10,
             'player_limit' => 20,
+        ]);
+
+        $groupPanthersFans = Group::factory()->create([
+            'name' => 'GroupPanthersFans',
+            'owner_id' => $userVerifiedEmail->id,
+            'invite_code' => Str::random(10),
+            'member_limit' => 20,
+            'player_limit' => 40,
+        ]);
+
+        $groupHornetsFans = Group::factory()->create([
+            'name' => 'GroupHornetsFans',
+            'owner_id' => $userRegular2->id,
+            'invite_code' => Str::random(10),
+            'member_limit' => 15,
+            'player_limit' => 30,
         ]);
 
         // Create Members
@@ -376,6 +541,34 @@ class DatabaseSeeder extends Seeder
             'user_id' => $userRegular2->id,
             'role' => GroupRole::GROUP_ADMIN->value,
         ]);
+
+        // GroupPanthersFans: owner + 5 members
+        Member::factory()->create([
+            'group_id' => $groupPanthersFans->id,
+            'user_id' => $userVerifiedEmail->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+        ]);
+        for ($i = 0; $i < 5; $i++) {
+            Member::factory()->create([
+                'group_id' => $groupPanthersFans->id,
+                'user_id' => $users[$i]->id,
+                'role' => GroupRole::GROUP_MEMBER->value,
+            ]);
+        }
+
+        // GroupHornetsFans: owner + 4 members
+        Member::factory()->create([
+            'group_id' => $groupHornetsFans->id,
+            'user_id' => $userRegular2->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+        ]);
+        for ($i = 5; $i < 9; $i++) {
+            Member::factory()->create([
+                'group_id' => $groupHornetsFans->id,
+                'user_id' => $users[$i]->id,
+                'role' => GroupRole::GROUP_MEMBER->value,
+            ]);
+        }
 
         // Create Players for members in GroupWithMembers
         $member1 = Member::where('group_id', $groupWithMembers->id)->where('user_id', $userVerifiedEmail->id)->first();
@@ -433,18 +626,32 @@ class DatabaseSeeder extends Seeder
             'season_id' => $seasonManyGames->id,
         ]);
 
-        // Big Family Group follows Eagles team and Few Games season
+        // Big Family Group follows Tar Heels team and Few Games season
         Follow::factory()->create([
             'group_id' => $groupBigFamily->id,
             'team_id' => $teamWithGames1->id,
             'season_id' => $seasonFewGames->id,
         ]);
 
-        // GroupMultipleAdmins follows Falcons team and Many Games season
+        // GroupMultipleAdmins follows Blue Devils team and Many Games season
         Follow::factory()->create([
             'group_id' => $groupMultipleAdmins->id,
             'team_id' => $teamWithGames2->id,
             'season_id' => $seasonManyGames->id,
+        ]);
+
+        // GroupPanthersFans follows Panthers team and NFL season
+        Follow::factory()->create([
+            'group_id' => $groupPanthersFans->id,
+            'team_id' => $panthers->id,
+            'season_id' => $seasonNFL->id,
+        ]);
+
+        // GroupHornetsFans follows Hornets team and NBA season
+        Follow::factory()->create([
+            'group_id' => $groupHornetsFans->id,
+            'team_id' => $hornets->id,
+            'season_id' => $seasonNBA->id,
         ]);
 
         // GroupNoFollow and GroupNoMembers don't follow any teams

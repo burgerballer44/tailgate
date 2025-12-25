@@ -11,7 +11,6 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Group\StoreMemberRequest;
 use App\Http\Requests\Group\UpdateMemberRequest;
-use App\Http\Resources\UserResource;
 
 class MemberController extends Controller
 {
@@ -31,7 +30,7 @@ class MemberController extends Controller
     {
         return view('admin.members.create', [
             'group' => $group,
-            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
+            'users' => User::get()->makeVisible(['id']),
         ]);
     }
 
@@ -57,7 +56,7 @@ class MemberController extends Controller
         return view('admin.members.edit', [
             'group' => $group,
             'member' => $member,
-            'users' => UserResource::collection(User::get()->makeVisible(['id'])),
+            'users' => User::get()->makeVisible(['id']),
         ]);
     }
 

@@ -31,9 +31,9 @@
         :tableActions="[
             ['route' => 'groups.create', 'text' => 'Add Group']
         ]"
-        :headers="['Name', 'Owner', 'Member Limit', 'Player Limit', 'Created', 'Actions']"
+        :headers="['Name', 'Invite Code', 'Owner', 'Member Limit', 'Player Limit', 'Created', 'Actions']"
         :rows="$groups"
-        :columns="['name', 'owner.name', 'member_limit', 'player_limit', 'created_at']"
+        :columns="['name', 'invite_code', 'owner.name', 'member_limit', 'player_limit', 'created_at']"
         :rowActions="[
             [
                 'label' => 'Show',

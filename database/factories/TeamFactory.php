@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Sport;
 use App\Models\Team;
+use App\Models\TeamType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,8 +20,10 @@ class TeamFactory extends Factory
     public function definition(): array
     {
         return [
+            'organization' => fake()->company(),
             'designation' => fake()->name().'designation',
-            'mascot' => fake()->name().'mascot',
+            'mascot' => fake()->optional()->name().'mascot',
+            'type' => fake()->randomElement(TeamType::cases()),
         ];
     }
 
