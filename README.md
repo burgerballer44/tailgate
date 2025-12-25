@@ -186,3 +186,60 @@ Missing or Improvable Features
 - **Improvement**: Support for international sports calendars, custom season types (e.g., World Cup cycles).
 
 These enhancements would make seasons more dynamic and user-friendly, reducing admin workload through automation while increasing engagement with progress tracking and analytics. Priority: automated creation/integration and progress tracking for immediate usability; lifecycle management and archiving for long-term sustainability.
+
+The group system in Tar Heel Tailgate allows users to create leagues with members, players, and followed teams in seasons. Groups have owners, invite codes, and limits on members/players. However, it's basic and could be enhanced for better community building, management, and engagement:
+
+Missing or Improvable Features
+1. Group Discovery and Browsing
+Current State: Groups accessed via invite codes or admin views.
+Improvement: Public group directory with search, categories (e.g., "NCAA Fans", "Friends League"). Featured/popular groups.
+2. Enhanced Invitation System
+Current State: Invite codes only.
+Improvement: Email invitations with accept/decline. Bulk invites. Join requests for private groups. Social sharing of invite links.
+3. Group Roles and Permissions
+Current State: Admin/Member roles.
+Improvement: More granular permissions (e.g., Moderator, Score Manager). Custom roles. Transfer ownership.
+4. Group Settings and Customization
+Current State: Basic limits.
+Improvement: Group avatars, descriptions, rules. Privacy settings (public/private). Custom scoring rules. Themes.
+5. Group Communication
+Current State: None.
+Improvement: In-app messaging, announcements, group chat. Email notifications for group activity.
+6. Multiple Team Following
+Current State: Service limits to one follow per group (bug).
+Improvement: Allow groups to follow multiple teams/seasons. Fix service to support hasMany follows.
+7. Group Analytics and Insights
+Current State: None.
+Improvement: Member activity, prediction stats, engagement metrics. Admin dashboards for group health.
+8. Group Templates and Quick Setup
+Current State: Manual creation.
+Improvement: Pre-made templates (e.g., "March Madness Pool", "Season Long League"). Auto-follow popular teams.
+9. Group Moderation Tools
+Current State: Basic admin controls.
+Improvement: Member management (ban/kick), content moderation, activity logs. Dispute resolution.
+10. Group Events and Challenges
+- **Current State**: Static groups.
+- **Improvement**: Time-limited events, prediction challenges, tournaments. Group milestones and celebrations.
+
+11. Group Social Features
+- **Current State**: Isolated.
+- **Improvement**: Group forums, polls, shared predictions. User profiles within groups. Group badges/achievements.
+
+12. Group Archiving and History
+- **Current State**: No archiving.
+- **Improvement**: Archive ended groups, maintain historical leaderboards. Allow reactivation.
+
+13. Group Integration with External Platforms
+- **Current State**: Standalone.
+- **Improvement**: Discord/Slack integration, social media sharing of results.
+
+14. Group Monetization (Future)
+- **Current State**: None.
+- **Improvement**: Premium groups, sponsored leagues, entry fees with prizes.
+
+15. Group Mobile Experience
+- **Current State**: Web-only.
+- **Improvement**: Ensure responsive design, push notifications for group activity.
+
+These enhancements would transform groups from simple containers into vibrant communities, increasing user retention and engagement. Priority: fix multiple follows bug, add discovery/invitations for growth; communication and social features for engagement.
+
