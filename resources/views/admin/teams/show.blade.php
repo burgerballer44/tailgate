@@ -2,14 +2,14 @@
     mainHeading="Team: {{ $team->designation }} ({{ $team->mascot }})"
     mainDescription="Details for team including designation, mascot, and sport."
     :mainActions="[
-        ['text' => 'Back to Teams', 'route' => 'teams.index'],
-        ['text' => 'Edit Team', 'route' => 'teams.edit', 'params' => ['team' => $team]],
+        ['text' => 'Back to Teams', 'route' => 'admin.teams.index'],
+        ['text' => 'Edit Team', 'route' => 'admin.teams.edit', 'params' => ['team' => $team]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Teams', 'url' => route('teams.index')],
+            ['text' => 'Teams', 'url' => route('admin.teams.index')],
             ['text' => $team->designation, 'active' => true],
         ]"
     />

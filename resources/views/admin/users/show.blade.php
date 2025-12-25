@@ -2,14 +2,14 @@
     mainHeading="User: {{ $user->name }} ({{ $user->email }})"
     mainDescription="Details for user including name, email, status, and role."
     :mainActions="[
-        ['text' => 'Back to Users', 'route' => 'users.index'],
-        ['text' => 'Edit User', 'route' => 'users.edit', 'params' => ['user' => $user]],
+        ['text' => 'Back to Users', 'route' => 'admin.users.index'],
+        ['text' => 'Edit User', 'route' => 'admin.users.edit', 'params' => ['user' => $user]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Users', 'url' => route('users.index')],
+            ['text' => 'Users', 'url' => route('admin.users.index')],
             ['text' => $user->name, 'active' => true],
         ]"
     />

@@ -2,15 +2,15 @@
     mainHeading="Season: {!! $season->name !!}"
     mainDescription="Details for season including name, sport, season type, and dates."
     :mainActions="[
-        ['text' => 'Back to Seasons', 'route' => 'seasons.index'],
-        ['text' => 'Edit Season', 'route' => 'seasons.edit', 'params' => ['season' => $season]],
-        ['text' => 'Add Game', 'route' => 'seasons.games.create', 'params' => ['season' => $season]],
+        ['text' => 'Back to Seasons', 'route' => 'admin.seasons.index'],
+        ['text' => 'Edit Season', 'route' => 'admin.seasons.edit', 'params' => ['season' => $season]],
+        ['text' => 'Add Game', 'route' => 'admin.seasons.games.create', 'params' => ['season' => $season]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Seasons', 'url' => route('seasons.index')],
+            ['text' => 'Seasons', 'url' => route('admin.seasons.index')],
             ['text' => $season->name, 'active' => true],
         ]"
     />
@@ -64,8 +64,8 @@
             heading="Games"
             description="A list of all the games for this season including teams, scores, and date/time."
             :tableActions="[
-                ['route' => 'seasons.games.create', 'routeParams' => ['season' => $season], 'text' => 'Add Game'],
-                ['route' => 'seasons.games.index', 'routeParams' => ['season' => $season], 'text' => 'View All Games']
+                ['route' => 'admin.seasons.games.create', 'routeParams' => ['season' => $season], 'text' => 'Add Game'],
+                ['route' => 'admin.seasons.games.index', 'routeParams' => ['season' => $season], 'text' => 'View All Games']
             ]"
             :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Date', 'Time', 'Actions']"
             :rows="$games"
@@ -73,18 +73,18 @@
             :rowActions="[
                 [
                     'label' => 'Show',
-                    'route' => 'seasons.games.show',
+                    'route' => 'admin.seasons.games.show',
                     'routeParams' => ['season' => $season->ulid, 'game' => 'ulid'],
                 ],
                 [
                     'label' => 'Edit',
-                    'route' => 'seasons.games.edit',
+                    'route' => 'admin.seasons.games.edit',
                     'routeParams' => ['season' => $season->ulid, 'game' => 'ulid'],
                 ],
                 [
                     'label' => 'Delete',
                     'type' => 'form',
-                    'route' => 'seasons.games.destroy',
+                    'route' => 'admin.seasons.games.destroy',
                     'routeParams' => ['season' => $season->ulid, 'game' => 'ulid'],
                     'confirm' => 'Are you sure you want to delete this game?'
                 ]

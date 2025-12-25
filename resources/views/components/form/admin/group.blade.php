@@ -38,7 +38,7 @@
             {{ $buttons }}
         @else
             <x-buttons.cancel-button>
-                <a href="{{ route('groups.index') }}">{{ __('Cancel') }}</a>
+                <a href="{{ route('admin.groups.index') }}">{{ __('Cancel') }}</a>
             </x-buttons.cancel-button>
 
             <x-buttons.primary-button class="ms-4">

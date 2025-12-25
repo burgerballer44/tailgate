@@ -15,7 +15,7 @@ describe('index', function () {
         $member = Member::factory()->create(['group_id' => $group->id]);
 
         // visit the index page
-        $response = $this->get(route('groups.members.players.index', [$group, $member]));
+        $response = $this->get(route('admin.groups.members.players.index', [$group, $member]));
 
         // assert successful response
         $response->assertOk();
@@ -37,7 +37,7 @@ describe('creating a player', function () {
         $member = Member::factory()->create(['group_id' => $group->id]);
 
         // visit the create page
-        $response = $this->get(route('groups.members.players.create', [$group, $member]));
+        $response = $this->get(route('admin.groups.members.players.create', [$group, $member]));
 
         // assert successful response
         $response->assertOk();
@@ -63,10 +63,10 @@ describe('creating a player', function () {
         $this->assertDatabaseCount('players', 0);
 
         // post the player data
-        $response = $this->post(route('groups.members.players.store', [$group, $member]), $playerData);
+        $response = $this->post(route('admin.groups.members.players.store', [$group, $member]), $playerData);
 
         // should redirect to index
-        $response->assertRedirect(route('groups.members.players.index', [$group, $member]));
+        $response->assertRedirect(route('admin.groups.members.players.index', [$group, $member]));
 
         // there should be 1 player in the db
         $this->assertDatabaseCount('players', 1);
@@ -88,7 +88,7 @@ describe('creating a player', function () {
         ];
 
         // post the player data
-        $this->post(route('groups.members.players.store', [$group, $member]), $playerData)->assertRedirect();
+        $this->post(route('admin.groups.members.players.store', [$group, $member]), $playerData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Player added successfully!');
@@ -103,7 +103,7 @@ describe('viewing a player', function () {
         $player = Player::factory()->create(['member_id' => $member->id]);
 
         // visit the show page
-        $response = $this->get(route('groups.members.players.show', [$group, $member, $player]));
+        $response = $this->get(route('admin.groups.members.players.show', [$group, $member, $player]));
 
         // assert successful response
         $response->assertOk();
@@ -126,7 +126,7 @@ describe('updating player', function () {
         $player = Player::factory()->create(['member_id' => $member->id]);
 
         // visit the edit page
-        $response = $this->get(route('groups.members.players.edit', [$group, $member, $player]));
+        $response = $this->get(route('admin.groups.members.players.edit', [$group, $member, $player]));
 
         // assert successful response
         $response->assertOk();
@@ -152,10 +152,10 @@ describe('updating player', function () {
         ];
 
         // patch the player data
-        $response = $this->patch(route('groups.members.players.update', [$group, $member, $player]), $updateData);
+        $response = $this->patch(route('admin.groups.members.players.update', [$group, $member, $player]), $updateData);
 
         // should redirect to index
-        $response->assertRedirect(route('groups.members.players.index', [$group, $member]));
+        $response->assertRedirect(route('admin.groups.members.players.index', [$group, $member]));
 
         // verify player was updated
         $player->refresh();
@@ -174,7 +174,7 @@ describe('updating player', function () {
         ];
 
         // patch the player data
-        $this->patch(route('groups.members.players.update', [$group, $member, $player]), $updateData)->assertRedirect();
+        $this->patch(route('admin.groups.members.players.update', [$group, $member, $player]), $updateData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Player updated successfully!');
@@ -192,10 +192,10 @@ describe('deleting a player', function () {
         $this->assertDatabaseCount('players', 1);
 
         // delete the player
-        $response = $this->delete(route('groups.members.players.destroy', [$group, $member, $player]));
+        $response = $this->delete(route('admin.groups.members.players.destroy', [$group, $member, $player]));
 
         // should redirect to index
-        $response->assertRedirect(route('groups.members.players.index', [$group, $member]));
+        $response->assertRedirect(route('admin.groups.members.players.index', [$group, $member]));
 
         // there should be 0 players in the db
         $this->assertDatabaseCount('players', 0);
@@ -211,7 +211,7 @@ describe('deleting a player', function () {
         $player = Player::factory()->create(['member_id' => $member->id]);
 
         // delete the player
-        $this->delete(route('groups.members.players.destroy', [$group, $member, $player]))->assertRedirect();
+        $this->delete(route('admin.groups.members.players.destroy', [$group, $member, $player]))->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Player removed successfully!');

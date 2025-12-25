@@ -16,7 +16,7 @@ describe('index', function () {
         $team2 = Team::factory()->create();
 
         // visit the index page
-        $response = $this->get(route('teams.index'));
+        $response = $this->get(route('admin.teams.index'));
 
         // assert successful response
         $response->assertOk();
@@ -46,7 +46,7 @@ describe('index', function () {
         [$team3, $team4] = Team::factory()->withSports([Sport::FOOTBALL])->count(2)->create();
 
         // get the basketball teams only
-        $response = $this->get(route('teams.index', ['sport' => 'Basketball']));
+        $response = $this->get(route('admin.teams.index', ['sport' => 'Basketball']));
 
         // assert successful response
         $response->assertOk();
@@ -68,7 +68,7 @@ describe('index', function () {
         [$team3, $team4] = Team::factory()->count(2)->create(['type' => TeamType::PROFESSIONAL]);
 
         // get the college teams only
-        $response = $this->get(route('teams.index', ['type' => 'College']));
+        $response = $this->get(route('admin.teams.index', ['type' => 'College']));
 
         // assert successful response
         $response->assertOk();
@@ -91,7 +91,7 @@ describe('index', function () {
         $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['designation' => 'somethingelse']);
 
         // get the team
-        $response = $this->get(route('teams.index', ['q' => $q]));
+        $response = $this->get(route('admin.teams.index', ['q' => $q]));
 
         // assert successful response
         $response->assertOk();
@@ -114,7 +114,7 @@ describe('index', function () {
         $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => 'somethingelse']);
 
         // get the team
-        $response = $this->get(route('teams.index', ['q' => $q]));
+        $response = $this->get(route('admin.teams.index', ['q' => $q]));
 
         // assert successful response
         $response->assertOk();
@@ -137,7 +137,7 @@ describe('index', function () {
         $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['organization' => 'somethingelse']);
 
         // get the team
-        $response = $this->get(route('teams.index', ['q' => $q]));
+        $response = $this->get(route('admin.teams.index', ['q' => $q]));
 
         // assert successful response
         $response->assertOk();
@@ -155,7 +155,7 @@ describe('index', function () {
 describe('creating a team', function () {
     test('shows create form', function () {
         // visit the create page
-        $response = $this->get(route('teams.create'));
+        $response = $this->get(route('admin.teams.create'));
 
         // assert successful response
         $response->assertOk();
@@ -185,10 +185,10 @@ describe('creating a team', function () {
         $this->assertDatabaseCount('teams', 0);
 
         // post the team data
-        $response = $this->post(route('teams.store'), $teamData);
+        $response = $this->post(route('admin.teams.store'), $teamData);
 
         // should redirect to index
-        $response->assertRedirect(route('teams.index'));
+        $response->assertRedirect(route('admin.teams.index'));
 
         // there should be 1 team in the db
         $this->assertDatabaseCount('teams', 1);
@@ -217,7 +217,7 @@ describe('creating a team', function () {
         ];
 
         // post the team data
-        $this->post(route('teams.store'), $teamData)->assertRedirect();
+        $this->post(route('admin.teams.store'), $teamData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Team created successfully!');
@@ -230,7 +230,7 @@ describe('viewing a team', function () {
         $team = Team::factory()->create();
 
         // visit the show page
-        $response = $this->get(route('teams.show', $team));
+        $response = $this->get(route('admin.teams.show', $team));
 
         // assert successful response
         $response->assertOk();
@@ -249,7 +249,7 @@ describe('updating team', function () {
         $team = Team::factory()->create();
 
         // visit the edit page
-        $response = $this->get(route('teams.edit', $team));
+        $response = $this->get(route('admin.teams.edit', $team));
 
         // assert successful response
         $response->assertOk();
@@ -285,10 +285,10 @@ describe('updating team', function () {
         ];
 
         // patch the team data
-        $response = $this->patch(route('teams.update', $team), $updateData);
+        $response = $this->patch(route('admin.teams.update', $team), $updateData);
 
         // should redirect to index
-        $response->assertRedirect(route('teams.index'));
+        $response->assertRedirect(route('admin.teams.index'));
 
         // verify team was updated
         $team->refresh();
@@ -313,7 +313,7 @@ describe('updating team', function () {
         ];
 
         // patch the team data
-        $this->patch(route('teams.update', $team), $updateData)->assertRedirect();
+        $this->patch(route('admin.teams.update', $team), $updateData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Team updated successfully!');
@@ -329,10 +329,10 @@ describe('deleting a team', function () {
         $this->assertDatabaseCount('teams', 1);
 
         // delete the team
-        $response = $this->delete(route('teams.destroy', $team));
+        $response = $this->delete(route('admin.teams.destroy', $team));
 
         // should redirect to index
-        $response->assertRedirect(route('teams.index'));
+        $response->assertRedirect(route('admin.teams.index'));
 
         // there should be 0 teams in the db
         $this->assertDatabaseCount('teams', 0);
@@ -346,7 +346,7 @@ describe('deleting a team', function () {
         $team = Team::factory()->create();
 
         // delete the team
-        $this->delete(route('teams.destroy', $team))->assertRedirect();
+        $this->delete(route('admin.teams.destroy', $team))->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Team deleted successfully!');

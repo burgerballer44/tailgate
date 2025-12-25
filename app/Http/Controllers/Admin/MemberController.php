@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\User;
@@ -40,7 +41,7 @@ class MemberController extends Controller
 
         $this->setFlashAlert('success', 'Member added successfully!');
 
-        return redirect()->route('groups.members.index', $group);
+        return redirect()->route('admin.groups.members.index', $group);
     }
 
     public function show(Group $group, Member $member): View
@@ -67,7 +68,7 @@ class MemberController extends Controller
 
         $this->setFlashAlert('success', 'Member updated successfully!');
 
-        return redirect()->route('groups.members.index', $group);
+        return redirect()->route('admin.groups.members.index', $group);
     }
 
     public function destroy(Group $group, Member $member): RedirectResponse
@@ -76,6 +77,6 @@ class MemberController extends Controller
 
         $this->setFlashAlert('success', 'Member removed successfully!');
 
-        return redirect()->route('groups.members.index', $group);
+        return redirect()->route('admin.groups.members.index', $group);
     }
 }

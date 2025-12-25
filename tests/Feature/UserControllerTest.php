@@ -16,7 +16,7 @@ describe('index', function () {
         $user2 = User::factory()->create();
 
         // visit the index page
-        $response = $this->get(route('users.index'));
+        $response = $this->get(route('admin.users.index'));
 
         // assert successful response
         $response->assertOk();
@@ -48,7 +48,7 @@ describe('index', function () {
         [$regular1, $regular2] = User::factory()->count(2)->create(['role' => UserRole::REGULAR->value]);
 
         // get the admin users only
-        $response = $this->get(route('users.index', ['role' => 'Admin']));
+        $response = $this->get(route('admin.users.index', ['role' => 'Admin']));
 
         // assert successful response
         $response->assertOk();
@@ -69,7 +69,7 @@ describe('index', function () {
         [$pending1, $pending2] = User::factory()->count(2)->create(['status' => UserStatus::PENDING->value]);
 
         // get the active users only
-        $response = $this->get(route('users.index', ['status' => 'Active']));
+        $response = $this->get(route('admin.users.index', ['status' => 'Active']));
 
         // assert successful response
         $response->assertOk();
@@ -93,7 +93,7 @@ describe('index', function () {
         $differentUserToNotFind = User::factory()->create(['name' => 'somethingelse']);
 
         // get the user
-        $response = $this->get(route('users.index', ['q' => $q]));
+        $response = $this->get(route('admin.users.index', ['q' => $q]));
 
         // assert successful response
         $response->assertOk();
@@ -116,7 +116,7 @@ describe('index', function () {
         $differentUserToNotFind = User::factory()->create(['email' => 'somethingelse']);
 
         // get the user
-        $response = $this->get(route('users.index', ['q' => $q]));
+        $response = $this->get(route('admin.users.index', ['q' => $q]));
 
         // assert successful response
         $response->assertOk();
@@ -135,7 +135,7 @@ describe('index', function () {
         User::factory()->create(['name' => 'John']);
 
         // search for something that doesn't exist
-        $response = $this->get(route('users.index', ['q' => 'NonExistent']));
+        $response = $this->get(route('admin.users.index', ['q' => 'NonExistent']));
 
         // assert successful response
         $response->assertOk();
@@ -154,7 +154,7 @@ describe('index', function () {
 describe('creat in a user', function () {
     test('shows create form', function () {
         // visit the create page
-        $response = $this->get(route('users.create'));
+        $response = $this->get(route('admin.users.create'));
 
         // assert successful response
         $response->assertOk();
@@ -183,10 +183,10 @@ describe('creat in a user', function () {
         $this->assertDatabaseCount('users', 1);
 
         // post the user data
-        $response = $this->post(route('users.store'), $userData);
+        $response = $this->post(route('admin.users.store'), $userData);
 
         // should redirect to index
-        $response->assertRedirect(route('users.index'));
+        $response->assertRedirect(route('admin.users.index'));
 
         // there should be 2 users in the db
         $this->assertDatabaseCount('users', 2);
@@ -208,10 +208,10 @@ describe('creat in a user', function () {
         $this->assertDatabaseCount('users', 1);
 
         // post the user data
-        $response = $this->post(route('users.store'), $userData);
+        $response = $this->post(route('admin.users.store'), $userData);
 
         // should redirect to index
-        $response->assertRedirect(route('users.index'));
+        $response->assertRedirect(route('admin.users.index'));
 
         // there should be 2 users in the db
         $this->assertDatabaseCount('users', 2);
@@ -230,7 +230,7 @@ describe('creat in a user', function () {
         $userData['password_confirmation'] = 'password';
 
         // post the user data
-        $this->post(route('users.store'), $userData)->assertRedirect();
+        $this->post(route('admin.users.store'), $userData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('User created successfully!');
@@ -243,7 +243,7 @@ describe('viewing a user', function () {
         $user = User::factory()->create();
 
         // visit the show page
-        $response = $this->get(route('users.show', $user));
+        $response = $this->get(route('admin.users.show', $user));
 
         // assert successful response
         $response->assertOk();
@@ -262,7 +262,7 @@ describe('updating user', function () {
         $user = User::factory()->create();
 
         // visit the edit page
-        $response = $this->get(route('users.edit', $user));
+        $response = $this->get(route('admin.users.edit', $user));
 
         // assert successful response
         $response->assertOk();
@@ -300,10 +300,10 @@ describe('updating user', function () {
         ];
 
         // patch the user data
-        $response = $this->patch(route('users.update', $user), $updateData);
+        $response = $this->patch(route('admin.users.update', $user), $updateData);
 
         // should redirect to index
-        $response->assertRedirect(route('users.index'));
+        $response->assertRedirect(route('admin.users.index'));
 
         // verify user was updated
         $user->refresh();
@@ -327,7 +327,7 @@ describe('updating user', function () {
         ];
 
         // patch the user data
-        $this->patch(route('users.update', $user), $updateData)->assertRedirect();
+        $this->patch(route('admin.users.update', $user), $updateData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('User updated successfully!');
@@ -343,10 +343,10 @@ describe('deleting a user', function () {
         $this->assertDatabaseCount('users', 2);
 
         // delete the user
-        $response = $this->delete(route('users.destroy', $user));
+        $response = $this->delete(route('admin.users.destroy', $user));
 
         // should redirect to index
-        $response->assertRedirect(route('users.index'));
+        $response->assertRedirect(route('admin.users.index'));
 
         // there should be 1 user in the db
         $this->assertDatabaseCount('users', 1);
@@ -360,7 +360,7 @@ describe('deleting a user', function () {
         $user = User::factory()->create();
 
         // delete the user
-        $this->delete(route('users.destroy', $user))->assertRedirect();
+        $this->delete(route('admin.users.destroy', $user))->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('User deleted successfully!');

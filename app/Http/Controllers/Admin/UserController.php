@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
@@ -41,7 +42,7 @@ class UserController extends Controller
 
         $this->setFlashAlert('success', 'User created successfully!');
 
-        return redirect()->route('users.index');
+        return redirect()->route('admin.users.index');
     }
 
     public function show(User $user): View
@@ -64,7 +65,7 @@ class UserController extends Controller
 
         $this->setFlashAlert('success', 'User updated successfully!');
 
-        return redirect()->route('users.index');
+        return redirect()->route('admin.users.index');
     }
 
     public function destroy(User $user): RedirectResponse
@@ -73,6 +74,6 @@ class UserController extends Controller
 
         $this->setFlashAlert('success', 'User deleted successfully!');
 
-        return redirect()->route('users.index');
+        return redirect()->route('admin.users.index');
     }
 }

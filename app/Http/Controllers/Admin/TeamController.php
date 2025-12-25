@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Team;
 use App\Models\Sport;
 use App\Models\TeamType;
@@ -42,7 +43,7 @@ class TeamController extends Controller
 
         $this->setFlashAlert('success', 'Team created successfully!');
 
-        return redirect()->route('teams.index');
+        return redirect()->route('admin.teams.index');
     }
 
     public function show(Team $team): View
@@ -65,7 +66,7 @@ class TeamController extends Controller
 
         $this->setFlashAlert('success', 'Team updated successfully!');
 
-        return redirect()->route('teams.index');
+        return redirect()->route('admin.teams.index');
     }
 
     public function destroy(Team $team): RedirectResponse
@@ -74,6 +75,6 @@ class TeamController extends Controller
 
         $this->setFlashAlert('success', 'Team deleted successfully!');
 
-        return redirect()->route('teams.index');
+        return redirect()->route('admin.teams.index');
     }
 }

@@ -9,14 +9,14 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Http\Controllers\GameController;
-use App\Http\Controllers\GroupController;
-use App\Http\Controllers\MemberController;
-use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\Admin\GameController;
+use App\Http\Controllers\Admin\GroupController;
+use App\Http\Controllers\Admin\MemberController;
+use App\Http\Controllers\Admin\PlayerController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SeasonController;
-use App\Http\Controllers\TeamController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\SeasonController;
+use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -71,30 +71,33 @@ Route::middleware('auth')->group(function () {
             Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
         });
 
-        // web resource controllers
+        // This is the admin area.
+        // Only users with admin privileges can access these routes.
+        // These routes are all inntended for managing the application data outside of normal user interactions.
+        Route::prefix('admin')->name('admin.')->middleware('role:Admin')->group(function () {
+            Route::resource('users', UserController::class);
 
-        Route::resource('users', UserController::class);
+            Route::resource('teams', TeamController::class);
 
-        Route::resource('teams', TeamController::class);
+            Route::resource('seasons', SeasonController::class);
 
-        Route::resource('seasons', SeasonController::class);
+            Route::resource('seasons.games', GameController::class);
 
-        Route::resource('seasons.games', GameController::class);
+            Route::resource('groups', GroupController::class);
 
-        Route::resource('groups', GroupController::class);
+            Route::get('groups/{group}/follow-team', [GroupController::class, 'createFollowTeam'])->name('groups.follow-team.create');
+            Route::post('groups/{group}/follow-team', [GroupController::class, 'followTeam'])->name('groups.follow-team');
+            Route::delete('groups/{group}/follow/{follow}', [GroupController::class, 'removeFollow'])->name('groups.follow.destroy');
 
-        Route::get('groups/{group}/follow-team', [GroupController::class, 'createFollowTeam'])->name('groups.follow-team.create');
-        Route::post('groups/{group}/follow-team', [GroupController::class, 'followTeam'])->name('groups.follow-team');
-        Route::delete('groups/{group}/follow/{follow}', [GroupController::class, 'removeFollow'])->name('groups.follow.destroy');
+            Route::resource('groups.members', MemberController::class);
 
-        Route::resource('groups.members', MemberController::class);
+            Route::resource('groups.members.players', PlayerController::class);
 
-        Route::resource('groups.members.players', PlayerController::class);
-
-        Route::get('groups/{group}/members/{member}/players/{player}/submit-score', [PlayerController::class, 'createScore'])->name('groups.members.players.submit-score.create');
-        Route::post('groups/{group}/members/{member}/players/{player}/submit-score', [PlayerController::class, 'submitScore'])->name('groups.members.players.submit-score');
-        Route::get('groups/{group}/members/{member}/players/{player}/scores/{score}/edit', [PlayerController::class, 'editScore'])->name('groups.members.players.scores.edit');
-        Route::patch('groups/{group}/members/{member}/players/{player}/scores/{score}', [PlayerController::class, 'updateScore'])->name('groups.members.players.scores.update');
-        Route::delete('groups/{group}/members/{member}/players/{player}/scores/{score}', [PlayerController::class, 'destroyScore'])->name('groups.members.players.scores.destroy');
+            Route::get('groups/{group}/members/{member}/players/{player}/submit-score', [PlayerController::class, 'createScore'])->name('groups.members.players.submit-score.create');
+            Route::post('groups/{group}/members/{member}/players/{player}/submit-score', [PlayerController::class, 'submitScore'])->name('groups.members.players.submit-score');
+            Route::get('groups/{group}/members/{member}/players/{player}/scores/{score}/edit', [PlayerController::class, 'editScore'])->name('groups.members.players.scores.edit');
+            Route::patch('groups/{group}/members/{member}/players/{player}/scores/{score}', [PlayerController::class, 'updateScore'])->name('groups.members.players.scores.update');
+            Route::delete('groups/{group}/members/{member}/players/{player}/scores/{score}', [PlayerController::class, 'destroyScore'])->name('groups.members.players.scores.destroy');
+        });
     });
 });

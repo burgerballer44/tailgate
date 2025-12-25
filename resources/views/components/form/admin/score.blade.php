@@ -55,7 +55,7 @@
             {{ $buttons }}
         @else
             <x-buttons.cancel-button>
-                <a href="{{ route('groups.members.players.show', [$group, $member, $player]) }}">
+                <a href="{{ route('admin.groups.members.players.show', [$group, $member, $player]) }}">
                     {{ __('Cancel') }}
                 </a>
             </x-buttons.cancel-button>

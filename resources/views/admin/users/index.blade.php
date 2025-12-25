@@ -2,7 +2,7 @@
     mainHeading="Users"
     mainDescription="A list of all the users including their name, title, email and role."
     :mainActions="[
-        ['text' => 'Add User', 'route' => 'users.create'],
+        ['text' => 'Add User', 'route' => 'admin.users.create'],
     ]"
 >
     <x-breadcrumb
@@ -37,7 +37,7 @@
         heading="Users"
         description="A list of all the users including their name, title, email and role."
         :tableActions="[
-            ['route' => 'users.create', 'text' => 'Add User']
+            ['route' => 'admin.users.create', 'text' => 'Add User']
         ]"
         :headers="['Name', 'Email', 'Status', 'Role', 'Created', 'Actions']"
         :rows="$users"
@@ -45,18 +45,18 @@
         :rowActions="[
             [
                 'label' => 'Show',
-                'route' => 'users.show',
+                'route' => 'admin.users.show',
                 'routeParams' => ['user' => 'ulid'],
             ],
             [
                 'label' => 'Edit',
-                'route' => 'users.edit',
+                'route' => 'admin.users.edit',
                 'routeParams' => ['user' => 'ulid'],
             ],
             [
                 'label' => 'Delete',
                 'type' => 'form',
-                'route' => 'users.destroy',
+                'route' => 'admin.users.destroy',
                 'routeParams' => ['user' => 'ulid'],
                 'confirm' => 'Are you sure you want to delete this user?'
             ]

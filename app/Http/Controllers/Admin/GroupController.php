@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\Group;
@@ -42,7 +43,7 @@ class GroupController extends Controller
 
         $this->setFlashAlert('success', 'Group created successfully!');
 
-        return redirect()->route('groups.index');
+        return redirect()->route('admin.groups.index');
     }
 
     public function show(Group $group): View
@@ -87,7 +88,7 @@ class GroupController extends Controller
 
         $this->setFlashAlert('success', 'Group updated successfully!');
 
-        return redirect()->route('groups.index');
+        return redirect()->route('admin.groups.index');
     }
 
     public function destroy(Group $group): RedirectResponse
@@ -96,7 +97,7 @@ class GroupController extends Controller
 
         $this->setFlashAlert('success', 'Group deleted successfully!');
 
-        return redirect()->route('groups.index');
+        return redirect()->route('admin.groups.index');
     }
 
     public function createFollowTeam(Group $group): View
@@ -114,7 +115,7 @@ class GroupController extends Controller
 
             $this->setFlashAlert('success', 'Team followed successfully!');
 
-            return redirect()->route('groups.show', $group);
+            return redirect()->route('admin.groups.show', $group);
         } catch (\Exception $e) {
             $this->setFlashAlert('error', $e->getMessage());
 
@@ -128,6 +129,6 @@ class GroupController extends Controller
 
         $this->setFlashAlert('success', 'Follow removed successfully!');
 
-        return redirect()->route('groups.show', $group);
+        return redirect()->route('admin.groups.show', $group);
     }
 }

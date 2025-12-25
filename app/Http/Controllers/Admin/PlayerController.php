@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
@@ -45,7 +46,7 @@ class PlayerController extends Controller
 
         $this->setFlashAlert('success', 'Player added successfully!');
 
-        return redirect()->route('groups.members.players.index', [$group, $member]);
+        return redirect()->route('admin.groups.members.players.index', [$group, $member]);
     }
 
     public function show(Group $group, Member $member, Player $player): View
@@ -73,7 +74,7 @@ class PlayerController extends Controller
 
         $this->setFlashAlert('success', 'Player updated successfully!');
 
-        return redirect()->route('groups.members.players.index', [$group, $member]);
+        return redirect()->route('admin.groups.members.players.index', [$group, $member]);
     }
 
     public function destroy(Group $group, Member $member, Player $player): RedirectResponse
@@ -82,7 +83,7 @@ class PlayerController extends Controller
 
         $this->setFlashAlert('success', 'Player removed successfully!');
 
-        return redirect()->route('groups.members.players.index', [$group, $member]);
+        return redirect()->route('admin.groups.members.players.index', [$group, $member]);
     }
 
     public function createScore(Group $group, Member $member, Player $player): View
@@ -106,7 +107,7 @@ class PlayerController extends Controller
 
         $this->setFlashAlert('success', 'Score submitted successfully!');
 
-        return redirect()->route('groups.members.players.show', [$group, $member, $player]);
+        return redirect()->route('admin.groups.members.players.show', [$group, $member, $player]);
     }
 
     public function updateScore(UpdateScoreRequest $request, Group $group, Member $member, Player $player, Score $score): RedirectResponse
@@ -115,7 +116,7 @@ class PlayerController extends Controller
 
         $this->setFlashAlert('success', 'Score updated successfully!');
 
-        return redirect()->route('groups.members.players.show', [$group, $member, $player]);
+        return redirect()->route('admin.groups.members.players.show', [$group, $member, $player]);
     }
 
     public function editScore(Group $group, Member $member, Player $player, Score $score): View
@@ -134,6 +135,6 @@ class PlayerController extends Controller
 
         $this->setFlashAlert('success', 'Score deleted successfully!');
 
-        return redirect()->route('groups.members.players.show', [$group, $member, $player]);
+        return redirect()->route('admin.groups.members.players.show', [$group, $member, $player]);
     }
 }

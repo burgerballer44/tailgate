@@ -17,7 +17,7 @@ describe('index', function () {
         $season2 = Season::factory()->create();
 
         // visit the index page
-        $response = $this->get(route('seasons.index'));
+        $response = $this->get(route('admin.seasons.index'));
 
         // assert successful response
         $response->assertOk();
@@ -49,7 +49,7 @@ describe('index', function () {
         [$season3, $season4] = Season::factory()->count(2)->create(['sport' => Sport::FOOTBALL->value]);
 
         // get the basketball seasons only
-        $response = $this->get(route('seasons.index', ['sport' => 'Basketball']));
+        $response = $this->get(route('admin.seasons.index', ['sport' => 'Basketball']));
 
         // assert successful response
         $response->assertOk();
@@ -71,7 +71,7 @@ describe('index', function () {
         [$season3, $season4] = Season::factory()->count(2)->create(['season_type' => SeasonType::POST->value]);
 
         // get the regular seasons only
-        $response = $this->get(route('seasons.index', ['season_type' => 'Regular Season']));
+        $response = $this->get(route('admin.seasons.index', ['season_type' => 'Regular Season']));
 
         // assert successful response
         $response->assertOk();
@@ -94,7 +94,7 @@ describe('index', function () {
         $differentSeasonToNotFind = Season::factory()->create(['name' => 'somethingelse']);
 
         // get the season
-        $response = $this->get(route('seasons.index', ['q' => $q]));
+        $response = $this->get(route('admin.seasons.index', ['q' => $q]));
 
         // assert successful response
         $response->assertOk();
@@ -113,7 +113,7 @@ describe('index', function () {
 describe('creating a season', function () {
     test('shows create form', function () {
         // visit the create page
-        $response = $this->get(route('seasons.create'));
+        $response = $this->get(route('admin.seasons.create'));
 
         // assert successful response
         $response->assertOk();
@@ -140,10 +140,10 @@ describe('creating a season', function () {
         $this->assertDatabaseCount('seasons', 0);
 
         // post the season data
-        $response = $this->post(route('seasons.store'), $seasonData);
+        $response = $this->post(route('admin.seasons.store'), $seasonData);
 
         // should redirect to index
-        $response->assertRedirect(route('seasons.index'));
+        $response->assertRedirect(route('admin.seasons.index'));
 
         // there should be 1 season in the db
         $this->assertDatabaseCount('seasons', 1);
@@ -166,7 +166,7 @@ describe('creating a season', function () {
         $seasonData = Season::factory()->make()->toArray();
 
         // post the season data
-        $this->post(route('seasons.store'), $seasonData)->assertRedirect();
+        $this->post(route('admin.seasons.store'), $seasonData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Season created successfully!');
@@ -179,7 +179,7 @@ describe('viewing a season', function () {
         $season = Season::factory()->create();
 
         // visit the show page
-        $response = $this->get(route('seasons.show', $season));
+        $response = $this->get(route('admin.seasons.show', $season));
 
         // assert successful response
         $response->assertOk();
@@ -198,7 +198,7 @@ describe('updating season', function () {
         $season = Season::factory()->create();
 
         // visit the edit page
-        $response = $this->get(route('seasons.edit', $season));
+        $response = $this->get(route('admin.seasons.edit', $season));
 
         // assert successful response
         $response->assertOk();
@@ -244,10 +244,10 @@ describe('updating season', function () {
         ];
 
         // patch the season data
-        $response = $this->patch(route('seasons.update', $season), $updateData);
+        $response = $this->patch(route('admin.seasons.update', $season), $updateData);
 
         // should redirect to index
-        $response->assertRedirect(route('seasons.index'));
+        $response->assertRedirect(route('admin.seasons.index'));
 
         // verify season was updated
         $season->refresh();
@@ -278,7 +278,7 @@ describe('updating season', function () {
         ];
 
         // patch the season data
-        $this->patch(route('seasons.update', $season), $updateData)->assertRedirect();
+        $this->patch(route('admin.seasons.update', $season), $updateData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Season updated successfully!');
@@ -294,10 +294,10 @@ describe('deleting a season', function () {
         $this->assertDatabaseCount('seasons', 1);
 
         // delete the season
-        $response = $this->delete(route('seasons.destroy', $season));
+        $response = $this->delete(route('admin.seasons.destroy', $season));
 
         // should redirect to index
-        $response->assertRedirect(route('seasons.index'));
+        $response->assertRedirect(route('admin.seasons.index'));
 
         // there should be 0 seasons in the db
         $this->assertDatabaseCount('seasons', 0);
@@ -311,7 +311,7 @@ describe('deleting a season', function () {
         $season = Season::factory()->create();
 
         // delete the season
-        $this->delete(route('seasons.destroy', $season))->assertRedirect();
+        $this->delete(route('admin.seasons.destroy', $season))->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Season deleted successfully!');

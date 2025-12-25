@@ -2,18 +2,18 @@
     mainHeading="Create Team"
     mainDescription="Add a new team."
     :mainActions="[
-        ['text' => 'Back to Teams', 'route' => 'teams.index'],
+        ['text' => 'Back to Teams', 'route' => 'admin.teams.index'],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Teams', 'url' => route('teams.index')],
+            ['text' => 'Teams', 'url' => route('admin.teams.index')],
             ['text' => 'Create Team', 'active' => true],
         ]"
     />
     <x-form.admin.team
-        :action="route('teams.store')"
+        :action="route('admin.teams.store')"
         :method="'POST'"
         :team="null"
         :sports="$sports"

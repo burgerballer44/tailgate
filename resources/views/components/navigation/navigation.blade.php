@@ -15,10 +15,10 @@
                                     buttonClass="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium inline-flex items-center gap-x-1.5"
                                     linkClass="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                     :items="[
-                                        ['label' => 'Users', 'route' => 'users.index'],
-                                        ['label' => 'Teams', 'route' => 'teams.index'],
-                                        ['label' => 'Seasons', 'route' => 'seasons.index'],
-                                        ['label' => 'Groups', 'route' => 'groups.index'],
+                                        ['label' => 'Users', 'route' => 'admin.users.index'],
+                                        ['label' => 'Teams', 'route' => 'admin.teams.index'],
+                                        ['label' => 'Seasons', 'route' => 'admin.seasons.index'],
+                                        ['label' => 'Groups', 'route' => 'admin.groups.index'],
                                     ]"
                                 ></x-navigation.dropdown-nav-links>
                             @endif

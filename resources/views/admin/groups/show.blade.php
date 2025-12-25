@@ -2,15 +2,15 @@
     mainHeading="Group: {{ $group->name }}"
     mainDescription="Details of the group including members and players."
     :mainActions="[
-        ['text' => 'Edit Group', 'route' => 'groups.edit', 'params' => ['group' => $group->ulid]],
-        ['text' => 'Add Member', 'route' => 'groups.members.create', 'params' => ['group' => $group->ulid]],
-        ['text' => 'Follow Team', 'route' => 'groups.follow-team.create', 'params' => ['group' => $group->ulid]],
+        ['text' => 'Edit Group', 'route' => 'admin.groups.edit', 'params' => ['group' => $group->ulid]],
+        ['text' => 'Add Member', 'route' => 'admin.groups.members.create', 'params' => ['group' => $group->ulid]],
+        ['text' => 'Follow Team', 'route' => 'admin.groups.follow-team.create', 'params' => ['group' => $group->ulid]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Groups', 'url' => route('groups.index')],
+            ['text' => 'Groups', 'url' => route('admin.groups.index')],
             ['text' => $group->name, 'active' => true],
         ]"
     />
@@ -51,7 +51,7 @@
                 <h2 class="text-lg font-semibold">Following</h2>
                 <form
                     method="POST"
-                    action="{{ route('groups.follow.destroy', [$group, $group->follow]) }}"
+                    action="{{ route('admin.groups.follow.destroy', [$group, $group->follow]) }}"
                     class="inline"
                 >
                     @csrf
@@ -84,7 +84,7 @@
     <div class="mt-8">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-lg font-semibold">Members</h2>
-            <a href="{{ route('groups.members.create', $group) }}" class="btn btn-primary">Add Member</a>
+            <a href="{{ route('admin.groups.members.create', $group) }}" class="btn btn-primary">Add Member</a>
         </div>
         <x-tables.full-width
             heading="Members"
@@ -94,18 +94,18 @@
             :rowActions="[
                 [
                     'label' => 'Show',
-                    'route' => 'groups.members.show',
+                    'route' => 'admin.groups.members.show',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
                 ],
                 [
                     'label' => 'Edit',
-                    'route' => 'groups.members.edit',
+                    'route' => 'admin.groups.members.edit',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
                 ],
                 [
                     'label' => 'Delete',
                     'type' => 'form',
-                    'route' => 'groups.members.destroy',
+                    'route' => 'admin.groups.members.destroy',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
                     'confirm' => 'Are you sure you want to delete this member?'
                 ]
@@ -124,18 +124,18 @@
             :rowActions="[
                 [
                     'label' => 'Show',
-                    'route' => 'groups.members.players.show',
+                    'route' => 'admin.groups.members.players.show',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'member.ulid', 'player' => 'ulid'],
                 ],
                 [
                     'label' => 'Edit',
-                    'route' => 'groups.members.players.edit',
+                    'route' => 'admin.groups.members.players.edit',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'member.ulid', 'player' => 'ulid'],
                 ],
                 [
                     'label' => 'Delete',
                     'type' => 'form',
-                    'route' => 'groups.members.players.destroy',
+                    'route' => 'admin.groups.members.players.destroy',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'member.ulid', 'player' => 'ulid'],
                     'confirm' => 'Are you sure you want to delete this player?'
                 ]
@@ -160,13 +160,13 @@
             :rowActions="[
                 [
                     'label' => 'Edit',
-                    'route' => 'groups.members.players.scores.edit',
+                    'route' => 'admin.groups.members.players.scores.edit',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'player.member.ulid', 'player' => 'player.ulid', 'score' => 'ulid'],
                 ],
                 [
                     'label' => 'Delete',
                     'type' => 'form',
-                    'route' => 'groups.members.players.scores.destroy',
+                    'route' => 'admin.groups.members.players.scores.destroy',
                     'routeParams' => ['group' => $group->ulid, 'member' => 'player.member.ulid', 'player' => 'player.ulid', 'score' => 'ulid'],
                     'confirm' => 'Are you sure you want to delete this score?'
                 ]

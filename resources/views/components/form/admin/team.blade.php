@@ -99,7 +99,7 @@
             {{ $buttons }}
         @else
             <x-buttons.cancel-button>
-                <a href="{{ route('teams.index') }}">{{ __('Cancel') }}</a>
+                <a href="{{ route('admin.teams.index') }}">{{ __('Cancel') }}</a>
             </x-buttons.cancel-button>
 
             <x-buttons.primary-button class="ms-4">

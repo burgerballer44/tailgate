@@ -14,7 +14,7 @@ describe('games index', function () {
         $season = Season::factory()->create();
 
         // visit the index page
-        $response = $this->get(route('seasons.games.index', $season));
+        $response = $this->get(route('admin.seasons.games.index', $season));
 
         // assert successful response
         $response->assertOk();
@@ -34,7 +34,7 @@ describe('creating a game', function () {
         $season = Season::factory()->create();
 
         // visit the create page
-        $response = $this->get(route('seasons.games.create', $season));
+        $response = $this->get(route('admin.seasons.games.create', $season));
 
         // assert successful response
         $response->assertOk();
@@ -69,10 +69,10 @@ describe('creating a game', function () {
         $this->assertDatabaseCount('games', 0);
 
         // post the game data
-        $response = $this->post(route('seasons.games.store', $season), $gameData);
+        $response = $this->post(route('admin.seasons.games.store', $season), $gameData);
 
         // should redirect to index
-        $response->assertRedirect(route('seasons.games.index', $season));
+        $response->assertRedirect(route('admin.seasons.games.index', $season));
 
         // there should be 1 game in the db
         $this->assertDatabaseCount('games', 1);
@@ -106,7 +106,7 @@ describe('creating a game', function () {
         ];
 
         // post the game data
-        $this->post(route('seasons.games.store', $season), $gameData)->assertRedirect();
+        $this->post(route('admin.seasons.games.store', $season), $gameData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Game created successfully!');
@@ -130,7 +130,7 @@ describe('creating a game', function () {
         ];
 
         // post the game data
-        $this->post(route('seasons.games.store', $season), $gameData)
+        $this->post(route('admin.seasons.games.store', $season), $gameData)
             ->assertSessionHasErrors('away_team_id');
     });
 });
@@ -143,7 +143,7 @@ describe('viewing a game', function () {
         $game = Game::factory()->create(['season_id' => $season->id]);
 
         // visit the show page
-        $response = $this->get(route('seasons.games.show', [$season, $game]));
+        $response = $this->get(route('admin.seasons.games.show', [$season, $game]));
 
         // assert successful response
         $response->assertOk();
@@ -165,7 +165,7 @@ describe('updating a game', function () {
         $game = Game::factory()->create(['season_id' => $season->id]);
 
         // visit the edit page
-        $response = $this->get(route('seasons.games.edit', [$season, $game]));
+        $response = $this->get(route('admin.seasons.games.edit', [$season, $game]));
 
         // assert successful response
         $response->assertOk();
@@ -200,10 +200,10 @@ describe('updating a game', function () {
         ];
 
         // patch the game data
-        $response = $this->patch(route('seasons.games.update', [$season, $game]), $updateData);
+        $response = $this->patch(route('admin.seasons.games.update', [$season, $game]), $updateData);
 
         // should redirect
-        $response->assertRedirect(route('seasons.games.index', $season));
+        $response->assertRedirect(route('admin.seasons.games.index', $season));
 
         // verify game was updated
         $game->refresh();
@@ -237,7 +237,7 @@ describe('updating a game', function () {
         ];
 
         // patch the game data
-        $this->patch(route('seasons.games.update', [$season, $game]), $updateData)->assertRedirect();
+        $this->patch(route('admin.seasons.games.update', [$season, $game]), $updateData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Game updated successfully!');
@@ -263,7 +263,7 @@ describe('updating a game', function () {
         ];
 
         // patch the game data
-        $this->patch(route('seasons.games.update', [$season, $game]), $updateData)
+        $this->patch(route('admin.seasons.games.update', [$season, $game]), $updateData)
             ->assertSessionHasErrors('away_team_id');
     });
 });
@@ -279,10 +279,10 @@ describe('deleting a game', function () {
         $this->assertDatabaseCount('games', 1);
 
         // delete the game
-        $response = $this->delete(route('seasons.games.destroy', [$season, $game]));
+        $response = $this->delete(route('admin.seasons.games.destroy', [$season, $game]));
 
         // should redirect to index
-        $response->assertRedirect(route('seasons.games.index', $season));
+        $response->assertRedirect(route('admin.seasons.games.index', $season));
 
         // there should be 0 games in the db
         $this->assertDatabaseCount('games', 0);
@@ -298,7 +298,7 @@ describe('deleting a game', function () {
         $game = Game::factory()->create(['season_id' => $season->id]);
 
         // delete the game
-        $this->delete(route('seasons.games.destroy', [$season, $game]))->assertRedirect();
+        $this->delete(route('admin.seasons.games.destroy', [$season, $game]))->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Game deleted successfully!');

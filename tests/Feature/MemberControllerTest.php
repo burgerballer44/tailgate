@@ -14,7 +14,7 @@ describe('index', function () {
         $group = Group::factory()->create();
 
         // visit the index page
-        $response = $this->get(route('groups.members.index', $group));
+        $response = $this->get(route('admin.groups.members.index', $group));
 
         // assert successful response
         $response->assertOk();
@@ -34,7 +34,7 @@ describe('creating a member', function () {
         $group = Group::factory()->create();
 
         // visit the create page
-        $response = $this->get(route('groups.members.create', $group));
+        $response = $this->get(route('admin.groups.members.create', $group));
 
         // assert successful response
         $response->assertOk();
@@ -60,10 +60,10 @@ describe('creating a member', function () {
         $this->assertDatabaseCount('members', 1);
 
         // post the member data
-        $response = $this->post(route('groups.members.store', $group), $memberData);
+        $response = $this->post(route('admin.groups.members.store', $group), $memberData);
 
         // should redirect to index
-        $response->assertRedirect(route('groups.members.index', $group));
+        $response->assertRedirect(route('admin.groups.members.index', $group));
 
         // there should be 2 members in the db
         $this->assertDatabaseCount('members', 2);
@@ -87,7 +87,7 @@ describe('creating a member', function () {
         ];
 
         // post the member data
-        $this->post(route('groups.members.store', $group), $memberData)->assertRedirect();
+        $this->post(route('admin.groups.members.store', $group), $memberData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Member added successfully!');
@@ -101,7 +101,7 @@ describe('viewing a member', function () {
         $member = Member::factory()->create(['group_id' => $group->id]);
 
         // visit the show page
-        $response = $this->get(route('groups.members.show', [$group, $member]));
+        $response = $this->get(route('admin.groups.members.show', [$group, $member]));
 
         // assert successful response
         $response->assertOk();
@@ -122,7 +122,7 @@ describe('updating member', function () {
         $member = Member::factory()->create(['group_id' => $group->id]);
 
         // visit the edit page
-        $response = $this->get(route('groups.members.edit', [$group, $member]));
+        $response = $this->get(route('admin.groups.members.edit', [$group, $member]));
 
         // assert successful response
         $response->assertOk();
@@ -146,10 +146,10 @@ describe('updating member', function () {
         ];
 
         // patch the member data
-        $response = $this->patch(route('groups.members.update', [$group, $member]), $updateData);
+        $response = $this->patch(route('admin.groups.members.update', [$group, $member]), $updateData);
 
         // should redirect to index
-        $response->assertRedirect(route('groups.members.index', $group));
+        $response->assertRedirect(route('admin.groups.members.index', $group));
 
         // verify member was updated
         $member->refresh();
@@ -167,7 +167,7 @@ describe('updating member', function () {
         ];
 
         // patch the member data
-        $this->patch(route('groups.members.update', [$group, $member]), $updateData)->assertRedirect();
+        $this->patch(route('admin.groups.members.update', [$group, $member]), $updateData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Member updated successfully!');
@@ -184,10 +184,10 @@ describe('deleting a member', function () {
         $this->assertDatabaseCount('members', 2);
 
         // delete the member
-        $response = $this->delete(route('groups.members.destroy', [$group, $member]));
+        $response = $this->delete(route('admin.groups.members.destroy', [$group, $member]));
 
         // should redirect to index
-        $response->assertRedirect(route('groups.members.index', $group));
+        $response->assertRedirect(route('admin.groups.members.index', $group));
 
         // there should be 1 member in the db
         $this->assertDatabaseCount('members', 1);
@@ -202,7 +202,7 @@ describe('deleting a member', function () {
         $member = Member::factory()->create(['group_id' => $group->id]);
 
         // delete the member
-        $this->delete(route('groups.members.destroy', [$group, $member]))->assertRedirect();
+        $this->delete(route('admin.groups.members.destroy', [$group, $member]))->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Member removed successfully!');

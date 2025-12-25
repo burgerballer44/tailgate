@@ -15,7 +15,7 @@ describe('index', function () {
         $group2 = Group::factory()->create();
 
         // visit the index page
-        $response = $this->get(route('groups.index'));
+        $response = $this->get(route('admin.groups.index'));
 
         // assert successful response
         $response->assertOk();
@@ -49,7 +49,7 @@ describe('index', function () {
         Group::factory()->create(['owner_id' => $user2->id]);
 
         // get the groups owned by user1 only
-        $response = $this->get(route('groups.index') . '?owner_id=' . $user1->id);
+        $response = $this->get(route('admin.groups.index') . '?owner_id=' . $user1->id);
 
         // assert successful response
         $response->assertOk();
@@ -71,7 +71,7 @@ describe('index', function () {
         $user = User::factory()->create();
 
         // search for groups owned by this user
-        $response = $this->get(route('groups.index') . '?owner_id=' . $user->id);
+        $response = $this->get(route('admin.groups.index') . '?owner_id=' . $user->id);
 
         // assert successful response
         $response->assertOk();
@@ -94,7 +94,7 @@ describe('index', function () {
         $differentGroupToNotFind = Group::factory()->create(['name' => 'somethingelse']);
 
         // get the group
-        $response = $this->get(route('groups.index') . '?q=' . $q);
+        $response = $this->get(route('admin.groups.index') . '?q=' . $q);
 
         // assert successful response
         $response->assertOk();
@@ -122,7 +122,7 @@ describe('index', function () {
         $differentGroupToNotFind->save();
 
         // get the group
-        $response = $this->get(route('groups.index') . '?q=' . $q);
+        $response = $this->get(route('admin.groups.index') . '?q=' . $q);
 
         // assert successful response
         $response->assertOk();
@@ -140,7 +140,7 @@ describe('index', function () {
 describe('creating a group', function () {
     test('shows create form', function () {
         // visit the create page
-        $response = $this->get(route('groups.create'));
+        $response = $this->get(route('admin.groups.create'));
 
         // assert successful response
         $response->assertOk();
@@ -164,10 +164,10 @@ describe('creating a group', function () {
         $this->assertDatabaseCount('groups', 0);
 
         // post the group data
-        $response = $this->post(route('groups.store'), $groupData);
+        $response = $this->post(route('admin.groups.store'), $groupData);
 
         // should redirect to index
-        $response->assertRedirect(route('groups.index'));
+        $response->assertRedirect(route('admin.groups.index'));
 
         // there should be 1 group in the db
         $this->assertDatabaseCount('groups', 1);
@@ -188,7 +188,7 @@ describe('creating a group', function () {
         ];
 
         // post the group data
-        $this->post(route('groups.store'), $groupData)->assertRedirect();
+        $this->post(route('admin.groups.store'), $groupData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Group created successfully!');
@@ -201,7 +201,7 @@ describe('viewing a group', function () {
         $group = Group::factory()->create();
 
         // visit the show page
-        $response = $this->get(route('groups.show', $group));
+        $response = $this->get(route('admin.groups.show', $group));
 
         // assert successful response
         $response->assertOk();
@@ -220,7 +220,7 @@ describe('updating group', function () {
         $group = Group::factory()->create();
 
         // visit the edit page
-        $response = $this->get(route('groups.edit', $group));
+        $response = $this->get(route('admin.groups.edit', $group));
 
         // assert successful response
         $response->assertOk();
@@ -246,10 +246,10 @@ describe('updating group', function () {
         ];
 
         // patch the group data
-        $response = $this->patch(route('groups.update', $group), $updateData);
+        $response = $this->patch(route('admin.groups.update', $group), $updateData);
 
         // should redirect to index
-        $response->assertRedirect(route('groups.index'));
+        $response->assertRedirect(route('admin.groups.index'));
 
         // verify group was updated
         $group->refresh();
@@ -267,7 +267,7 @@ describe('updating group', function () {
         ];
 
         // patch the group data
-        $this->patch(route('groups.update', $group), $updateData)->assertRedirect();
+        $this->patch(route('admin.groups.update', $group), $updateData)->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Group updated successfully!');
@@ -283,10 +283,10 @@ describe('deleting a group', function () {
         $this->assertDatabaseCount('groups', 1);
 
         // delete the group
-        $response = $this->delete(route('groups.destroy', $group));
+        $response = $this->delete(route('admin.groups.destroy', $group));
 
         // should redirect to index
-        $response->assertRedirect(route('groups.index'));
+        $response->assertRedirect(route('admin.groups.index'));
 
         // there should be 0 groups in the db
         $this->assertDatabaseCount('groups', 0);
@@ -300,7 +300,7 @@ describe('deleting a group', function () {
         $group = Group::factory()->create();
 
         // delete the group
-        $this->delete(route('groups.destroy', $group))->assertRedirect();
+        $this->delete(route('admin.groups.destroy', $group))->assertRedirect();
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Group deleted successfully!');

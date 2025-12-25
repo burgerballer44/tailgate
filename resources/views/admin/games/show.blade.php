@@ -2,17 +2,17 @@
     mainHeading="Game Details for {!! $season->name !!}"
     mainDescription="Details for this game including teams, scores, and date/time."
     :mainActions="[
-        ['text' => 'Back to Games', 'route' => 'seasons.games.index', 'params' => ['season' => $season]],
-        ['text' => 'Back to Season', 'route' => 'seasons.show', 'params' => ['season' => $season]],
-        ['text' => 'Edit Game', 'route' => 'seasons.games.edit', 'params' => ['season' => $season, 'game' => $game]],
+        ['text' => 'Back to Games', 'route' => 'admin.seasons.games.index', 'params' => ['season' => $season]],
+        ['text' => 'Back to Season', 'route' => 'admin.seasons.show', 'params' => ['season' => $season]],
+        ['text' => 'Edit Game', 'route' => 'admin.seasons.games.edit', 'params' => ['season' => $season, 'game' => $game]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Seasons', 'url' => route('seasons.index')],
-            ['text' => $season->name, 'url' => route('seasons.show', $season)],
-            ['text' => 'Games', 'url' => route('seasons.games.index', $season)],
+            ['text' => 'Seasons', 'url' => route('admin.seasons.index')],
+            ['text' => $season->name, 'url' => route('admin.seasons.show', $season)],
+            ['text' => 'Games', 'url' => route('admin.seasons.games.index', $season)],
             ['text' => 'Game Details', 'active' => true],
         ]"
     />

@@ -2,8 +2,8 @@
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Groups', 'url' => route('groups.index')],
-            ['text' => $group->name, 'url' => route('groups.show', $group)],
+            ['text' => 'Groups', 'url' => route('admin.groups.index')],
+            ['text' => $group->name, 'url' => route('admin.groups.show', $group)],
             ['text' => 'Follow Team', 'active' => true],
         ]"
     />
@@ -12,7 +12,7 @@
         :group="$group"
         :teams="$teams"
         :seasons="$seasons"
-        :action="route('groups.follow-team', $group)"
+        :action="route('admin.groups.follow-team', $group)"
         :method="'POST'"
     />
 </x-layouts.app>

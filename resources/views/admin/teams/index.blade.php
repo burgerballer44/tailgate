@@ -2,7 +2,7 @@
     mainHeading="Teams"
     mainDescription="A list of all the teams including their organization, designation, mascot and sport."
     :mainActions="[
-        ['text' => 'Add Team', 'route' => 'teams.create'],
+        ['text' => 'Add Team', 'route' => 'admin.teams.create'],
     ]"
 >
     <x-breadcrumb
@@ -35,7 +35,7 @@
         heading="Teams"
         description="A list of all the teams including their organization, designation, mascot and sport."
         :tableActions="[
-            ['route' => 'teams.create', 'text' => 'Add Team']
+            ['route' => 'admin.teams.create', 'text' => 'Add Team']
         ]"
         :headers="['Organization', 'Designation', 'Mascot', 'Type', 'Sports', 'Created', 'Actions']"
         :rows="$teams"
@@ -43,18 +43,18 @@
         :rowActions="[
             [
                 'label' => 'Show',
-                'route' => 'teams.show',
+                'route' => 'admin.teams.show',
                 'routeParams' => ['team' => 'ulid'],
             ],
             [
                 'label' => 'Edit',
-                'route' => 'teams.edit',
+                'route' => 'admin.teams.edit',
                 'routeParams' => ['team' => 'ulid'],
             ],
             [
                 'label' => 'Delete',
                 'type' => 'form',
-                'route' => 'teams.destroy',
+                'route' => 'admin.teams.destroy',
                 'routeParams' => ['team' => 'ulid'],
                 'confirm' => 'Are you sure you want to delete this team?'
             ]

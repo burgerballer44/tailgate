@@ -2,7 +2,7 @@
     mainHeading="Groups"
     mainDescription="A list of all the groups including their name, owner, and limits."
     :mainActions="[
-        ['text' => 'Add Group', 'route' => 'groups.create'],
+        ['text' => 'Add Group', 'route' => 'admin.groups.create'],
     ]"
 >
     <x-breadcrumb
@@ -29,7 +29,7 @@
         heading="Groups"
         description="A list of all the groups including their name, owner, and limits."
         :tableActions="[
-            ['route' => 'groups.create', 'text' => 'Add Group']
+            ['route' => 'admin.groups.create', 'text' => 'Add Group']
         ]"
         :headers="['Name', 'Invite Code', 'Owner', 'Member Limit', 'Player Limit', 'Created', 'Actions']"
         :rows="$groups"
@@ -37,18 +37,18 @@
         :rowActions="[
             [
                 'label' => 'Show',
-                'route' => 'groups.show',
+                'route' => 'admin.groups.show',
                 'routeParams' => ['group' => 'ulid'],
             ],
             [
                 'label' => 'Edit',
-                'route' => 'groups.edit',
+                'route' => 'admin.groups.edit',
                 'routeParams' => ['group' => 'ulid'],
             ],
             [
                 'label' => 'Delete',
                 'type' => 'form',
-                'route' => 'groups.destroy',
+                'route' => 'admin.groups.destroy',
                 'routeParams' => ['group' => 'ulid'],
                 'confirm' => 'Are you sure you want to delete this group?'
             ]

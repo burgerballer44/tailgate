@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Game;
 use App\Models\Season;
 use Illuminate\Http\Request;
@@ -51,7 +52,7 @@ class GameController extends Controller implements HasMiddleware
 
         $this->setFlashAlert('success', 'Game created successfully!');
 
-        return redirect()->route('seasons.games.index', $season);
+        return redirect()->route('admin.seasons.games.index', $season);
     }
 
     public function show(Season $season, Game $game): View
@@ -77,7 +78,7 @@ class GameController extends Controller implements HasMiddleware
 
         $this->setFlashAlert('success', 'Game updated successfully!');
 
-        return redirect()->route('seasons.games.index', $season);
+        return redirect()->route('admin.seasons.games.index', $season);
     }
 
     public function destroy(Season $season, Game $game): RedirectResponse
@@ -86,6 +87,6 @@ class GameController extends Controller implements HasMiddleware
 
         $this->setFlashAlert('success', 'Game deleted successfully!');
 
-        return redirect()->route('seasons.games.index', $season);
+        return redirect()->route('admin.seasons.games.index', $season);
     }
 }

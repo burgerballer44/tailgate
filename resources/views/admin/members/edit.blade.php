@@ -2,10 +2,10 @@
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Groups', 'url' => route('groups.index')],
-            ['text' => $group->name, 'url' => route('groups.show', $group)],
-            ['text' => 'Members', 'url' => route('groups.members.index', $group)],
-            ['text' => $member->user->name, 'url' => route('groups.members.show', [$group, $member])],
+            ['text' => 'Groups', 'url' => route('admin.groups.index')],
+            ['text' => $group->name, 'url' => route('admin.groups.show', $group)],
+            ['text' => 'Members', 'url' => route('admin.groups.members.index', $group)],
+            ['text' => $member->user->name, 'url' => route('admin.groups.members.show', [$group, $member])],
             ['text' => 'Edit', 'active' => true],
         ]"
     />
@@ -14,7 +14,7 @@
         :member="$member"
         :group="$group"
         :users="$users ?? collect()"
-        :action="route('groups.members.update', [$group, $member])"
+        :action="route('admin.groups.members.update', [$group, $member])"
         :method="'PUT'"
     />
 </x-layouts.app>

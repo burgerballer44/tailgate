@@ -2,20 +2,20 @@
     mainHeading="Edit Season"
     mainDescription="Update the details of the season."
     :mainActions="[
-        ['text' => 'Back to Seasons', 'route' => 'seasons.index'],
-        ['text' => 'View Season', 'route' => 'seasons.show', 'params' => ['season' => $season]],
+        ['text' => 'Back to Seasons', 'route' => 'admin.seasons.index'],
+        ['text' => 'View Season', 'route' => 'admin.seasons.show', 'params' => ['season' => $season]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Seasons', 'url' => route('seasons.index')],
-            ['text' => $season->name, 'url' => route('seasons.show', $season)],
+            ['text' => 'Seasons', 'url' => route('admin.seasons.index')],
+            ['text' => $season->name, 'url' => route('admin.seasons.show', $season)],
             ['text' => 'Edit Season', 'active' => true],
         ]"
     />
     <x-form.admin.season
-        :action="route('seasons.update', $season)"
+        :action="route('admin.seasons.update', $season)"
         :method="'PUT'"
         :season="$season"
         :sports="$sports"
@@ -23,7 +23,7 @@
     >
         <x-slot name="buttons">
             <x-buttons.cancel-button>
-                <a href="{{ route('seasons.show', $season) }}">{{ __('Cancel') }}</a>
+                <a href="{{ route('admin.seasons.show', $season) }}">{{ __('Cancel') }}</a>
             </x-buttons.cancel-button>
 
             <x-buttons.primary-button class="ms-4">

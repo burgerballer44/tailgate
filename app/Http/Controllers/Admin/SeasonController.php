@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Season;
 use App\Models\Sport;
 use App\Models\SeasonType;
@@ -41,7 +42,7 @@ class SeasonController extends Controller
 
         $this->setFlashAlert('success', 'Season created successfully!');
 
-        return redirect()->route('seasons.index');
+        return redirect()->route('admin.seasons.index');
     }
 
     public function show(Season $season): View
@@ -66,7 +67,7 @@ class SeasonController extends Controller
 
         $this->setFlashAlert('success', 'Season updated successfully!');
 
-        return redirect()->route('seasons.index');
+        return redirect()->route('admin.seasons.index');
     }
 
     public function destroy(Season $season): RedirectResponse
@@ -75,6 +76,6 @@ class SeasonController extends Controller
 
         $this->setFlashAlert('success', 'Season deleted successfully!');
 
-        return redirect()->route('seasons.index');
+        return redirect()->route('admin.seasons.index');
     }
 }

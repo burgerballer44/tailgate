@@ -2,18 +2,18 @@
     mainHeading="Player: {{ $player->player_name }}"
     mainDescription="Details of the player."
     :mainActions="[
-        ['text' => 'Edit Player', 'route' => 'groups.members.players.edit', 'params' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid]],
-        ['text' => 'Submit Score', 'route' => 'groups.members.players.submit-score.create', 'params' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid]],
+        ['text' => 'Edit Player', 'route' => 'admin.groups.members.players.edit', 'params' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid]],
+        ['text' => 'Submit Score', 'route' => 'admin.groups.members.players.submit-score.create', 'params' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Groups', 'url' => route('groups.index')],
-            ['text' => $group->name, 'url' => route('groups.show', $group)],
-            ['text' => 'Members', 'url' => route('groups.members.index', $group)],
-            ['text' => $member->user?->name ?? 'Unknown', 'url' => route('groups.members.show', [$group, $member])],
-            ['text' => 'Players', 'url' => route('groups.members.players.index', [$group, $member])],
+            ['text' => 'Groups', 'url' => route('admin.groups.index')],
+            ['text' => $group->name, 'url' => route('admin.groups.show', $group)],
+            ['text' => 'Members', 'url' => route('admin.groups.members.index', $group)],
+            ['text' => $member->user?->name ?? 'Unknown', 'url' => route('admin.groups.members.show', [$group, $member])],
+            ['text' => 'Players', 'url' => route('admin.groups.members.players.index', [$group, $member])],
             ['text' => $player->player_name, 'active' => true],
         ]"
     />
@@ -46,13 +46,13 @@
             :rowActions="[
                 [
                     'label' => 'Edit',
-                    'route' => 'groups.members.players.scores.edit',
+                    'route' => 'admin.groups.members.players.scores.edit',
                     'routeParams' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid, 'score' => 'ulid'],
                 ],
                 [
                     'label' => 'Delete',
                     'type' => 'form',
-                    'route' => 'groups.members.players.scores.destroy',
+                    'route' => 'admin.groups.members.players.scores.destroy',
                     'routeParams' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid, 'score' => 'ulid'],
                     'confirm' => 'Are you sure you want to delete this score?'
                 ]

@@ -2,7 +2,7 @@
     mainHeading="Seasons"
     mainDescription="A list of all the seasons including their name, sport, season type, and dates."
     :mainActions="[
-        ['text' => 'Add Season', 'route' => 'seasons.create'],
+        ['text' => 'Add Season', 'route' => 'admin.seasons.create'],
     ]"
 >
     <x-breadcrumb
@@ -37,7 +37,7 @@
         heading="Seasons"
         description="A list of all the seasons including their name, sport, season type, and dates."
         :tableActions="[
-            ['route' => 'seasons.create', 'text' => 'Add Season']
+            ['route' => 'admin.seasons.create', 'text' => 'Add Season']
         ]"
         :headers="['Name', 'Sport', 'Season Type', 'Active', 'Start Date', 'End Date', 'Created', 'Actions']"
         :rows="$seasons"
@@ -45,18 +45,18 @@
         :rowActions="[
             [
                 'label' => 'Show',
-                'route' => 'seasons.show',
+                'route' => 'admin.seasons.show',
                 'routeParams' => ['season' => 'ulid'],
             ],
             [
                 'label' => 'Edit',
-                'route' => 'seasons.edit',
+                'route' => 'admin.seasons.edit',
                 'routeParams' => ['season' => 'ulid'],
             ],
             [
                 'label' => 'Delete',
                 'type' => 'form',
-                'route' => 'seasons.destroy',
+                'route' => 'admin.seasons.destroy',
                 'routeParams' => ['season' => 'ulid'],
                 'confirm' => 'Are you sure you want to delete this season?'
             ]

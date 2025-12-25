@@ -2,14 +2,14 @@
     mainHeading="Members of {{ $group->name }}"
     mainDescription="A list of all the members in this group."
     :mainActions="[
-        ['text' => 'Add Member', 'route' => 'groups.members.create', 'params' => ['group' => $group->ulid]],
+        ['text' => 'Add Member', 'route' => 'admin.groups.members.create', 'params' => ['group' => $group->ulid]],
     ]"
 >
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
-            ['text' => 'Groups', 'url' => route('groups.index')],
-            ['text' => $group->name, 'url' => route('groups.show', $group)],
+            ['text' => 'Groups', 'url' => route('admin.groups.index')],
+            ['text' => $group->name, 'url' => route('admin.groups.show', $group)],
             ['text' => 'Members', 'active' => true],
         ]"
     />
@@ -19,7 +19,7 @@
         heading="Members"
         description="A list of all the members in this group."
         :tableActions="[
-            ['route' => 'groups.members.create', 'params' => ['group' => $group->ulid], 'text' => 'Add Member']
+            ['route' => 'admin.groups.members.create', 'params' => ['group' => $group->ulid], 'text' => 'Add Member']
         ]"
         :headers="['User', 'Role', 'Joined', 'Actions']"
         :rows="$members"
@@ -27,18 +27,18 @@
         :rowActions="[
             [
                 'label' => 'Show',
-                'route' => 'groups.members.show',
+                'route' => 'admin.groups.members.show',
                 'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
             ],
             [
                 'label' => 'Edit',
-                'route' => 'groups.members.edit',
+                'route' => 'admin.groups.members.edit',
                 'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
             ],
             [
                 'label' => 'Delete',
                 'type' => 'form',
-                'route' => 'groups.members.destroy',
+                'route' => 'admin.groups.members.destroy',
                 'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
                 'confirm' => 'Are you sure you want to delete this member?'
             ]
