@@ -47,7 +47,8 @@ class MemberController extends Controller
     {
         return view('admin.members.show', [
             'group' => $group,
-            'member' => $member->load(['user', 'players']),
+            'member' => $member->load('user'),
+            'players' => $member->players()->paginate(),
         ]);
     }
 

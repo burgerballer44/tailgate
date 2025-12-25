@@ -23,6 +23,7 @@ class UpdatePlayerRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'player_name' => ['required', 'string'],
             'member_id' => ['nullable', 'exists:members,id'],
         ];
     }

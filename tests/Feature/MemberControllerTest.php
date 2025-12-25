@@ -138,11 +138,11 @@ describe('updating member', function () {
     test('updates a member', function () {
         // create a group and member
         $group = Group::factory()->create();
-        $member = Member::factory()->create(['group_id' => $group->id, 'role' => 'member']);
+        $member = Member::factory()->create(['group_id' => $group->id, 'role' => 'Group-Member']);
 
         // update data
         $updateData = [
-            'role' => 'admin',
+            'role' => 'Group-Admin',
         ];
 
         // patch the member data
@@ -163,7 +163,7 @@ describe('updating member', function () {
 
         // update data
         $updateData = [
-            'role' => 'admin',
+            'role' => 'Group-Admin',
         ];
 
         // patch the member data

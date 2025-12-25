@@ -41,7 +41,7 @@
         <x-tables.full-width
             heading="Scores"
             :headers="['Game', 'Home Prediction', 'Away Prediction', 'Submitted At', 'Actions']"
-            :rows="$player->scores"
+            :rows="$scores"
             :columns="['game.homeTeam.name . \' vs \' . game.awayTeam.name', 'home_team_prediction', 'away_team_prediction', 'created_at']"
             :rowActions="[
                 [
@@ -60,7 +60,7 @@
         ></x-tables.full-width>
 
         <div class="mt-4">
-            {{ $player->scores->links() }}
+            {{ $scores->links() }}
         </div>
     </div>
 </x-layouts.app>

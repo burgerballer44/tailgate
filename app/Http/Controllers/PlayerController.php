@@ -53,7 +53,8 @@ class PlayerController extends Controller
         return view('admin.players.show', [
             'group' => $group,
             'member' => $member,
-            'player' => $player->load(['member.user', 'scores.game.homeTeam', 'scores.game.awayTeam']),
+            'player' => $player->load('member.user'),
+            'scores' => $player->scores()->with(['game.homeTeam', 'game.awayTeam'])->paginate(),
         ]);
     }
 

@@ -44,7 +44,7 @@
         <x-tables.full-width
             heading="Players"
             :headers="['Player Name', 'Created', 'Actions']"
-            :rows="$member->players"
+            :rows="$players"
             :columns="['player_name', 'created_at']"
             :rowActions="[
                 [
@@ -68,7 +68,7 @@
         ></x-tables.full-width>
 
         <div class="mt-4">
-            {{ $member->players->links() }}
+            {{ $players->links() }}
         </div>
     </div>
 </x-layouts.app>

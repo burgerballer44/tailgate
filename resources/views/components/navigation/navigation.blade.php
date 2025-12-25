@@ -9,10 +9,19 @@
                     <div class="flex items-baseline space-x-4">
                         @auth
                             <x-navigation.nav-link route="dashboard">Dashboard</x-navigation.nav-link>
-                            <x-navigation.nav-link route="users.index">Users</x-navigation.nav-link>
-                            <x-navigation.nav-link route="teams.index">Teams</x-navigation.nav-link>
-                            <x-navigation.nav-link route="seasons.index">Seasons</x-navigation.nav-link>
-                            <x-navigation.nav-link route="groups.index">Groups</x-navigation.nav-link>
+                            @if (Auth::user()->role === 'Admin')
+                                <x-navigation.dropdown-nav-links
+                                    label="Admin"
+                                    buttonClass="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium inline-flex items-center gap-x-1.5"
+                                    linkClass="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                                    :items="[
+                                        ['label' => 'Users', 'route' => 'users.index'],
+                                        ['label' => 'Teams', 'route' => 'teams.index'],
+                                        ['label' => 'Seasons', 'route' => 'seasons.index'],
+                                        ['label' => 'Groups', 'route' => 'groups.index'],
+                                    ]"
+                                ></x-navigation.dropdown-nav-links>
+                            @endif
                         @else
                             <x-navigation.nav-link route="home">Home</x-navigation.nav-link>
                         @endauth
