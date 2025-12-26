@@ -6,7 +6,7 @@ use App\Models\UserStatus;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
-    $this->user = signInRegularUser();
+    $this->user = signInAdminUser();
 });
 
 describe('index', function () {
@@ -59,7 +59,7 @@ describe('index', function () {
         // assert users are filtered
         $response->assertViewHas('users');
         $users = $response->viewData('users');
-        expect($users->count())->toBe(2);
+        expect($users->count())->toBe(3); // includes signed in user
     });
 
     test('users can be filtered by status', function () {

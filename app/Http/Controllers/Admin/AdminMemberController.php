@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Group\StoreMemberRequest;
 use App\Http\Requests\Group\UpdateMemberRequest;
 
-class MemberController extends Controller
+class AdminMemberController extends Controller
 {
     public function __construct(
         private MemberService $memberService

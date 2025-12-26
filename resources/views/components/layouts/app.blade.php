@@ -23,12 +23,9 @@
                 {{-- right side actions --}}
                 <div class="flex space-x-3">
                     @foreach ($mainActions as $mainAction)
-                        <a
-                            href="{{ route($mainAction['route'], $mainAction['params'] ?? []) }}"
-                            class="bg-carolina hover:bg-navy focus-visible:outline-navy rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                        >
+                        <x-buttons.nav-button :route="$mainAction['route']" :params="$mainAction['params'] ?? []">
                             {{ $mainAction['text'] }}
-                        </a>
+                        </x-buttons.nav-button>
                     @endforeach
                 </div>
             </header>

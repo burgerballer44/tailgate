@@ -6,7 +6,7 @@ use App\Models\TeamType;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
-    $this->user = signInRegularUser();
+    $this->user = signInAdminUser();
 });
 
 describe('index', function () {

@@ -16,7 +16,7 @@ use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 
-class GroupController extends Controller
+class AdminGroupController extends Controller
 {
     public function __construct(
         private GroupService $groupService

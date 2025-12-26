@@ -14,7 +14,7 @@ test('email verification screen can be rendered', function () {
 });
 
 test('email can be verified', function () {
-    $user = signInRegularUser(User::factory()->unverified()->create());
+    $user = signInAdminUser(User::factory()->unverified()->create());
 
     Event::fake();
 
@@ -31,7 +31,7 @@ test('email can be verified', function () {
 });
 
 test('verifying an email address activates the user', function () {
-    $user = signInRegularUser(User::factory()->pending()->unverified()->create());
+    $user = signInAdminUser(User::factory()->pending()->unverified()->create());
 
     // the user status should start off as pending
     expect($user->status)->toBe(UserStatus::PENDING);
@@ -49,7 +49,7 @@ test('verifying an email address activates the user', function () {
 });
 
 test('email is not verified with invalid hash', function () {
-    $user = signInRegularUser(User::factory()->unverified()->create());
+    $user = signInAdminUser(User::factory()->unverified()->create());
 
     $verificationUrl = URL::temporarySignedRoute(
         'verification.verify',

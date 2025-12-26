@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Hash;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('password can be updated', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
 
     $this->from('/profile')->put('/password', [
         'current_password' => 'password',
@@ -19,7 +19,7 @@ test('password can be updated', function () {
 });
 
 test('correct password must be provided to update password', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
 
     $this->from('/profile')->put('/password', [
         'current_password' => 'wrong-password',

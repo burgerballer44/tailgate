@@ -16,6 +16,35 @@ class StoreGroupRequest extends FormRequest
     }
 
     /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'name' => 'Group Name',
+            'owner_id' => 'Owner ID',
+        ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * Automatically set the owner_id to the currently authenticated user's ID
+     * if it's not already provided in the request. This ensures that groups
+     * are always created with the correct ownership.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (!$this->has('owner_id')) {
+            $this->merge([
+                'owner_id' => $this->user()->id,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>

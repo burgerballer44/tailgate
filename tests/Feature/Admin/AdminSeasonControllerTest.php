@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
 
 beforeEach(function () {
-    $this->user = signInRegularUser();
+    $this->user = signInAdminUser();
 });
 
 describe('index', function () {

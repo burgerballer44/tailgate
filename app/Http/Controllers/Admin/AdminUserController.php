@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 
-class UserController extends Controller
+class AdminUserController extends Controller
 {
     public function __construct(
         private UserService $userService

@@ -375,3 +375,58 @@ describe('query groups', function () {
         });
     });
 });
+
+describe('find group by invite code', function () {
+    test('returns group when invite code exists', function () {
+        // create a group
+        $group = Group::factory()->create();
+
+        // try to find the group by invite code
+        $foundGroup = $this->service->findByInviteCode($group->invite_code);
+
+        // verify the correct group is returned
+        expect($foundGroup)->toBeInstanceOf(Group::class);
+        expect($foundGroup->id)->toBe($group->id);
+        expect($foundGroup->invite_code)->toBe($group->invite_code);
+    });
+
+    test('returns null when invite code does not exist', function () {
+        // try to find a group with a non-existent invite code
+        $foundGroup = $this->service->findByInviteCode('nonexistentcode');
+
+        // verify null is returned
+        expect($foundGroup)->toBeNull();
+    });
+});
+
+describe('is user already member', function () {
+    test('returns true when user is a member', function () {
+        // create a group and user
+        $group = Group::factory()->create();
+        $user = User::factory()->create();
+
+        // add user as member
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $user->id,
+        ]);
+
+        // check if user is already a member
+        $isMember = GroupService::isUserAlreadyMember($group, $user->id);
+
+        // verify returns true
+        expect($isMember)->toBeTrue();
+    });
+
+    test('returns false when user is not a member', function () {
+        // create a group and user
+        $group = Group::factory()->create();
+        $user = User::factory()->create();
+
+        // check if user is already a member (should not be)
+        $isMember = GroupService::isUserAlreadyMember($group, $user->id);
+
+        // verify returns false
+        expect($isMember)->toBeFalse();
+    });
+});

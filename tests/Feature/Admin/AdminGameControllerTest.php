@@ -5,7 +5,7 @@ use App\Models\Season;
 use App\Models\Team;
 
 beforeEach(function () {
-    $this->user = signInRegularUser();
+    $this->user = signInAdminUser();
 });
 
 describe('games index', function () {

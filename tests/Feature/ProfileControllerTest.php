@@ -5,12 +5,12 @@ use App\Models\UserRole;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('profile page is displayed', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
     $this->get('/profile')->assertOk();
 });
 
 test('profile information can be updated', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
 
     $this->patch('/profile', [
         'name' => 'Test User',
@@ -28,7 +28,7 @@ test('profile information can be updated', function () {
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
 
     $this->patch('/profile', [
         'name' => 'Test User',
@@ -41,7 +41,7 @@ test('email verification status is unchanged when the email address is unchanged
 });
 
 test('user can delete their account', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
 
     $this->delete('/profile', ['password' => 'password'])
         ->assertSessionHasNoErrors()
@@ -53,7 +53,7 @@ test('user can delete their account', function () {
 });
 
 test('correct password must be provided to delete account', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
 
     $this->from('/profile')->delete('/profile', ['password' => 'wrong-password'])
         ->assertSessionHasErrorsIn('userDeletion', 'password')
@@ -63,7 +63,7 @@ test('correct password must be provided to delete account', function () {
 });
 
 test('profile update resets email_verified_at when email is changed ensuring that must be verified again', function () {
-    $user = signInRegularUser();
+    $user = signInAdminUser();
 
     expect($user->email_verified_at)->not->toBeNull();
 

@@ -16,7 +16,7 @@ use App\Http\Requests\Season\AddGameRequest;
 use App\Http\Requests\Season\UpdateGameRequest;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
-class GameController extends Controller implements HasMiddleware
+class AdminGameController extends Controller implements HasMiddleware
 {
     public static function middleware(): array
     {

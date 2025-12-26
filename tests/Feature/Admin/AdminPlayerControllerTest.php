@@ -5,7 +5,7 @@ use App\Models\Member;
 use App\Models\Player;
 
 beforeEach(function () {
-    $this->user = signInRegularUser();
+    $this->user = signInAdminUser();
 });
 
 describe('index', function () {

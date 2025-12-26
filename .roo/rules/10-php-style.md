@@ -40,5 +40,6 @@
 
 - Follow **DRY** (Don't Repeat Yourself) and **KISS** (Keep It Simple, Stupid) principles.
 - Apply **YAGNI** (You Aren't Gonna Need It) to avoid overengineering.
-- Document complex logic with PHPDoc and inline comments.
+- Document logic with PHPDoc and inline comments.
 - Comments should explain "why" in addition to "what" the code does.
+- The goal of the comments should be to explain what is happening to a developer as if they were new.

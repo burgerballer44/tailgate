@@ -190,56 +190,148 @@ These enhancements would make seasons more dynamic and user-friendly, reducing a
 The group system in Tar Heel Tailgate allows users to create leagues with members, players, and followed teams in seasons. Groups have owners, invite codes, and limits on members/players. However, it's basic and could be enhanced for better community building, management, and engagement:
 
 Missing or Improvable Features
+
 1. Group Discovery and Browsing
-Current State: Groups accessed via invite codes or admin views.
-Improvement: Public group directory with search, categories (e.g., "NCAA Fans", "Friends League"). Featured/popular groups.
+   Current State: Groups accessed via invite codes or admin views.
+   Improvement: Public group directory with search, categories (e.g., "NCAA Fans", "Friends League"). Featured/popular groups.
 2. Enhanced Invitation System
-Current State: Invite codes only.
-Improvement: Email invitations with accept/decline. Bulk invites. Join requests for private groups. Social sharing of invite links.
+   Current State: Invite codes only.
+   Improvement: Email invitations with accept/decline. Bulk invites. Join requests for private groups. Social sharing of invite links.
 3. Group Roles and Permissions
-Current State: Admin/Member roles.
-Improvement: More granular permissions (e.g., Moderator, Score Manager). Custom roles. Transfer ownership.
+   Current State: Admin/Member roles.
+   Improvement: More granular permissions (e.g., Moderator, Score Manager). Custom roles. Transfer ownership.
 4. Group Settings and Customization
-Current State: Basic limits.
-Improvement: Group avatars, descriptions, rules. Privacy settings (public/private). Custom scoring rules. Themes.
+   Current State: Basic limits.
+   Improvement: Group avatars, descriptions, rules. Privacy settings (public/private). Custom scoring rules. Themes.
 5. Group Communication
-Current State: None.
-Improvement: In-app messaging, announcements, group chat. Email notifications for group activity.
+   Current State: None.
+   Improvement: In-app messaging, announcements, group chat. Email notifications for group activity.
 6. Multiple Team Following
-Current State: Service limits to one follow per group (bug).
-Improvement: Allow groups to follow multiple teams/seasons. Fix service to support hasMany follows.
+   Current State: Service limits to one follow per group (bug).
+   Improvement: Allow groups to follow multiple teams/seasons. Fix service to support hasMany follows.
 7. Group Analytics and Insights
-Current State: None.
-Improvement: Member activity, prediction stats, engagement metrics. Admin dashboards for group health.
+   Current State: None.
+   Improvement: Member activity, prediction stats, engagement metrics. Admin dashboards for group health.
 8. Group Templates and Quick Setup
-Current State: Manual creation.
-Improvement: Pre-made templates (e.g., "March Madness Pool", "Season Long League"). Auto-follow popular teams.
+   Current State: Manual creation.
+   Improvement: Pre-made templates (e.g., "March Madness Pool", "Season Long League"). Auto-follow popular teams.
 9. Group Moderation Tools
-Current State: Basic admin controls.
-Improvement: Member management (ban/kick), content moderation, activity logs. Dispute resolution.
+   Current State: Basic admin controls.
+   Improvement: Member management (ban/kick), content moderation, activity logs. Dispute resolution.
 10. Group Events and Challenges
+
 - **Current State**: Static groups.
 - **Improvement**: Time-limited events, prediction challenges, tournaments. Group milestones and celebrations.
 
 11. Group Social Features
+
 - **Current State**: Isolated.
 - **Improvement**: Group forums, polls, shared predictions. User profiles within groups. Group badges/achievements.
 
 12. Group Archiving and History
+
 - **Current State**: No archiving.
 - **Improvement**: Archive ended groups, maintain historical leaderboards. Allow reactivation.
 
 13. Group Integration with External Platforms
+
 - **Current State**: Standalone.
 - **Improvement**: Discord/Slack integration, social media sharing of results.
 
 14. Group Monetization (Future)
+
 - **Current State**: None.
 - **Improvement**: Premium groups, sponsored leagues, entry fees with prizes.
 
 15. Group Mobile Experience
+
 - **Current State**: Web-only.
 - **Improvement**: Ensure responsive design, push notifications for group activity.
 
 These enhancements would transform groups from simple containers into vibrant communities, increasing user retention and engagement. Priority: fix multiple follows bug, add discovery/invitations for growth; communication and social features for engagement.
 
+Based on the application's purpose as a sports prediction league system, implementing regular user functionality involves creating a user-friendly interface for joining groups, managing players, submitting predictions, and viewing results. Since the admin backend is complete, focus on the user journey from registration to active participation.
+
+### What to Do First
+
+Start by designing the user flow and dashboard, as these define the core experience. Prioritize the dashboard since it's already mentioned in routes and serves as the entry point after login. This will help identify required controllers, views, and features iteratively.
+
+### Adjusted Detailed List of Steps to Implement Regular User Functionality
+
+Prioritized for private groups, with confirmation flows.
+
+1. **Design User Dashboard (High Priority - Foundation)**
+    - Update `resources/views/dashboard.blade.php` for personalized content.
+    - Show user's groups (owned and joined), with actions like "Create Group" or "Join Group".
+    - Display upcoming games in followed seasons (if user has groups), with prediction status.
+    - Include prompts: "No groups yet? Create one or enter an invite code to join!"
+    - Add a form for entering invite codes directly on the dashboard.
+
+2. **Implement Group Creation (Core User Onboarding)**
+    - Create routes for group creation (e.g., `/groups/create`).
+    - Add `GroupController` methods for users to create groups (auto-add as owner/admin).
+    - Display invite code prominently after creation for sharing.
+    - Include group settings: name, member/player limits.
+
+3. **Build Invite-Based Group Joining (Private Access)**
+    - Add routes for joining via invite code (e.g., `/groups/join`).
+    - Create a form for users to enter invite code and submit a join request.
+    - Validate code, check group limits, and create a pending member request (new status or flag).
+    - Notify group owner of join request (flash message or email).
+    - Prevent duplicate requests or joins.
+
+4. **Develop Owner Confirmation for Joins (Group Management)**
+    - Extend `GroupController` with owner views for pending join requests.
+    - Allow owners to approve/reject requests, adding approved users as members.
+    - Handle rejections gracefully, with user notifications.
+    - Enforce group limits during confirmation.
+
+5. **Build Group Management for Users (User Ownership/Admin)**
+    - Add views for owners/admins to manage members: view list, promote/demote roles, remove members.
+    - Display group details: invite code, current members, limits.
+    - Allow updating group settings (name, limits) for owners.
+
+6. **Develop Player Management (Prediction Setup)**
+    - Create routes and controller methods for users to add/edit/delete players in their groups.
+    - Enforce limits per member (from group settings).
+    - Display players per group, with links to submit predictions.
+
+7. **Implement Prediction Submission (Core Gameplay)**
+    - Add routes for viewing available games and submitting predictions.
+    - Filter games by group follows and season activity.
+    - Validate predictions: game not started, user has player in group, no duplicates.
+    - Use existing score submission logic adapted for user interface.
+
+8. **Create Standings and Results Views (Engagement)**
+    - Build views for group standings: rank players by prediction accuracy.
+    - Show individual player stats: predictions made, correct/incorrect counts.
+    - Display game results with user predictions highlighted.
+
+9. **Add Notifications and Activity Feeds (Retention)**
+    - Implement flash messages for actions (e.g., "Join request sent!", "Prediction submitted!").
+    - Add a user activity feed on dashboard: recent predictions, group updates, join request status.
+    - Email notifications for join requests, confirmations, or game results.
+
+10. **Polish UI/UX and Testing (Quality Assurance)**
+    - Ensure responsive design.
+    - Add form validation, error handling, and loading states.
+    - Write feature tests for user flows (e.g., creating group, requesting join, submitting prediction).
+    - Test edge cases: invalid codes, full groups, unconfirmed joins.
+
+11. **Advanced Features (Post-MVP)**
+    - Leaderboards within groups.
+    - Social features: share predictions within group.
+    - Mobile app or API endpoints.
+
+### Dashboard Content and User Prompts
+
+- **Welcome Message**: Personalized greeting.
+- **Quick Stats**: Groups joined, predictions made, accuracy.
+- **Active Groups Section**: List groups with roles, member counts, upcoming games/predictions.
+- **Call-to-Actions**:
+    - If no groups: "Create a group to start!" or "Have an invite code? Join now!" with inline form.
+    - If groups exist: "Submit predictions" or "Manage your groups".
+- **Pending Actions**: Show join requests sent (status: pending/approved/rejected).
+- **Recent Activity**: Last predictions, group events.
+
+This flow emphasizes privacy and owner control, guiding users to create or be invited into groups for predictions.

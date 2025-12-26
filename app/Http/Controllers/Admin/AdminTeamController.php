@@ -14,7 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Team\StoreTeamRequest;
 use App\Http\Requests\Team\UpdateTeamRequest;
 
-class TeamController extends Controller
+class AdminTeamController extends Controller
 {
     public function __construct(
         private TeamService $teamService

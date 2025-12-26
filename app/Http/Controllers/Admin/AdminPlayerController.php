@@ -17,7 +17,7 @@ use App\Http\Requests\Group\UpdatePlayerRequest;
 use App\Http\Requests\Group\SubmitScoreRequest;
 use App\Http\Requests\Group\UpdateScoreRequest;
 
-class PlayerController extends Controller
+class AdminPlayerController extends Controller
 {
     public function __construct(
         private PlayerService $playerService

@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Season\StoreSeasonRequest;
 use App\Http\Requests\Season\UpdateSeasonRequest;
 
-class SeasonController extends Controller
+class AdminSeasonController extends Controller
 {
     public function __construct(
         private SeasonService $seasonService

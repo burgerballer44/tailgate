@@ -73,6 +73,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the members for the user.
+     */
+    public function members()
+    {
+        return $this->hasMany(Member::class);
+    }
+
+    /**
      * Activate the user by setting their status to ACTIVE.
      *
      * @return void

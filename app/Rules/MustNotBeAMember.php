@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use Closure;
+use App\Services\GroupService;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -33,8 +34,8 @@ class MustNotBeAMember implements DataAwareRule, ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $group = request()->route('group');
-
-        if ($group->members->contains('user_id', $this->data['user_id'])) {
+        
+        if (GroupService::isUserAlreadyMember($group, $this->data['user_id'])) {
             $fail('The user is already a member of the group.');
         }
     }
