@@ -61,4 +61,9 @@
             </x-buttons.primary-button>
         </div>
     </form>
+
+    <p class="mt-4 text-center text-sm text-gray-600">
+        Don't have an account?
+        <a href="{{ route('register') }}" class="text-carolina hover:text-navy font-medium">Register here</a>
+    </p>
 </x-layouts.guest>
