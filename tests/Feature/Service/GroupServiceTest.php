@@ -430,3 +430,40 @@ describe('is user already member', function () {
         expect($isMember)->toBeFalse();
     });
 });
+
+describe('is group member limit reached', function () {
+    test('returns true when limit is reached', function () {
+        // create a group
+        $group = Group::factory()->create();
+
+        // set member limit to 2
+        $group->update(['member_limit' => 2]);
+
+        // add 2 members (owner is already a member, so add 1 more)
+        Member::factory()->create(['group_id' => $group->id]);
+
+        // check if limit is reached
+        $isLimitReached = GroupService::isGroupMemberLimitReached($group);
+
+        // verify returns true
+        expect($isLimitReached)->toBeTrue();
+    });
+
+    test('returns false when limit is not reached', function () {
+        // create a group
+        $group = Group::factory()->create();
+
+        // set member limit to 3
+        $group->update(['member_limit' => 3]);
+
+        // owner is already a member, no need to add more
+
+        // check if limit is reached
+        $isLimitReached = GroupService::isGroupMemberLimitReached($group);
+
+        // verify returns false
+        expect($isLimitReached)->toBeFalse();
+    });
+
+
+});

@@ -213,4 +213,15 @@ class GroupService
     {
         return $group->members()->where('user_id', $userId)->exists();
     }
+
+    /**
+     * Check if the group has reached its member limit.
+     *
+     * @param Group $group The group to check.
+     * @return bool True if the member limit is reached, false otherwise.
+     */
+    public static function isGroupMemberLimitReached(Group $group): bool
+    {
+        return $group->members()->count() >= $group->member_limit;
+    }
 }

@@ -111,6 +111,14 @@ class GroupController extends Controller
             return redirect()->back();
         }
 
+        // check if the group has reached its member limit
+        if (GroupService::isGroupMemberLimitReached($group)) {
+            $this->setFlashAlert('error', 'Group member limit reached.');
+            return redirect()->back();
+        }
+
+        // TODO: owner approval logic can be added here later
+
         // add the user as a member of the group with the default member role
         // Note: This is direct joining for now; owner confirmation can be added later
         $memberData = ValidatedMemberData::fromArray([

@@ -113,4 +113,19 @@ describe('requestJoin', function () {
         $response->assertRedirect();
         expect(session('alert')['message'])->toBe('You are already a member of this group.');
     });
+
+    test('fails if member limit reached', function () {
+        $group = Group::factory()->create();
+
+        // Set member limit to 1 (owner is already a member)
+        $group->update(['member_limit' => 1]);
+
+        // Try to join
+        $response = $this->post(route('groups.request-join'), [
+            'invite_code' => $group->invite_code,
+        ]);
+
+        $response->assertRedirect();
+        expect(session('alert')['message'])->toBe('Group member limit reached.');
+    });
 });
