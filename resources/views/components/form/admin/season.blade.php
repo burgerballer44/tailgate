@@ -77,7 +77,7 @@
             name="active"
             value="1"
             {{ old('active', $season?->active) ? 'checked' : '' }}
-            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+            class="text-navy-600 focus:ring-navy-500 rounded border-gray-300 shadow-sm"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('active')" />
     </div>

@@ -83,7 +83,7 @@
                         name="sports[]"
                         value="{{ $sport }}"
                         {{ in_array($sport, old('sports', $teamSports ?? [])) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                        class="text-navy-600 focus:ring-navy-500 rounded border-gray-300 shadow-sm"
                     />
                     <label for="sport_{{ $sport }}" class="ml-2 text-sm">{{ ucfirst($sport) }}</label>
                 </div>
