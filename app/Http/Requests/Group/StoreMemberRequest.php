@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedMemberData;
 use App\Http\Requests\FormRequest;
 use App\Models\GroupRole;
+use App\Models\MemberStatus;
 use App\Rules\GroupMemberLimit;
 use App\Rules\MustNotBeAMember;
 use Illuminate\Validation\Rules\Enum;
@@ -29,6 +30,7 @@ class StoreMemberRequest extends FormRequest
         return [
             'user_id' => ['required', 'exists:users,id', new MustNotBeAMember, new GroupMemberLimit],
             'role' => ['required', new Enum(GroupRole::class)],
+            'status' => ['required', new Enum(MemberStatus::class)],
         ];
     }
 

@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\Group;
+use App\Models\Member;
+use App\Models\GroupRole;
+use App\Models\MemberStatus;
 
 beforeEach(function () {
     $this->user = signInRegularUser();
@@ -68,6 +71,8 @@ describe('requestJoin', function () {
         $this->assertDatabaseHas('members', [
             'user_id' => $this->user->id,
             'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
     });
 
@@ -100,12 +105,12 @@ describe('requestJoin', function () {
     test('fails if already a member', function () {
         $group = Group::factory()->create();
 
-        // Join once
+        // join once
         $this->post(route('groups.request-join'), [
             'invite_code' => $group->invite_code,
         ]);
 
-        // Try to join again
+        // try to join again
         $response = $this->post(route('groups.request-join'), [
             'invite_code' => $group->invite_code,
         ]);
@@ -117,15 +122,160 @@ describe('requestJoin', function () {
     test('fails if member limit reached', function () {
         $group = Group::factory()->create();
 
-        // Set member limit to 1 (owner is already a member)
+        // set member limit to 1 (owner is already a member)
         $group->update(['member_limit' => 1]);
 
-        // Try to join
+        // try to join
         $response = $this->post(route('groups.request-join'), [
             'invite_code' => $group->invite_code,
         ]);
 
         $response->assertRedirect();
         expect(session('alert')['message'])->toBe('Group member limit reached.');
+    });
+});
+
+describe('show', function () {
+    test('shows group details for member', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => \App\Models\MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertOk();
+        $response->assertViewIs('groups.show');
+        $response->assertViewHas('group', $group);
+    });
+
+    test('denies access to non-members', function () {
+        $group = Group::factory()->create();
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertForbidden();
+    });
+});
+
+describe('edit', function () {
+    test('shows edit form for owner', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+
+        $response = $this->get(route('groups.edit', $group));
+
+        $response->assertOk();
+        $response->assertViewIs('groups.edit');
+        $response->assertViewHas('group', $group);
+    });
+
+    test('shows edit form for admin', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
+            'status' => \App\Models\MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->get(route('groups.edit', $group));
+
+        $response->assertOk();
+        $response->assertViewIs('groups.edit');
+    });
+
+    test('denies access to regular members', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => \App\Models\GroupRole::GROUP_MEMBER->value,
+            'status' => \App\Models\MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->get(route('groups.edit', $group));
+
+        $response->assertForbidden();
+    });
+});
+
+describe('update', function () {
+    test('updates group for owner', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id, 'name' => 'Old Name']);
+
+        $response = $this->patch(route('groups.update', $group), [
+            'name' => 'New Name',
+            'owner_id' => $this->user->id,
+        ]);
+
+        $response->assertRedirect(route('groups.show', $group));
+        $group->refresh();
+        expect($group->name)->toBe('New Name');
+    });
+
+    test('flashes success message on update', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+
+        $this->patch(route('groups.update', $group), ['name' => 'Updated Name', 'owner_id' => $this->user->id])->assertRedirect();
+
+        expect(session('alert')['message'])->toBe('Group updated successfully!');
+    });
+});
+
+describe('approveMember', function () {
+    test('approves pending member for owner', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $pendingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $response = $this->post(route('groups.approve-member', [$group, $pendingMember]));
+
+        $response->assertRedirect();
+        $pendingMember->refresh();
+        expect($pendingMember->status)->toBe(\App\Models\MemberStatus::APPROVED->value);
+    });
+
+    test('flashes success message on approval', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $pendingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $this->post(route('groups.approve-member', [$group, $pendingMember]))->assertRedirect();
+
+        expect(session('alert')['message'])->toBe('Member approved successfully!');
+    });
+});
+
+describe('rejectMember', function () {
+    test('rejects pending member for owner', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $pendingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $this->assertDatabaseHas('members', ['id' => $pendingMember->id]);
+
+        $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
+
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('members', ['id' => $pendingMember->id]);
+    });
+
+    test('flashes success message on rejection', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $pendingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $this->post(route('groups.reject-member', [$group, $pendingMember]))->assertRedirect();
+
+        expect(session('alert')['message'])->toBe('Join request rejected.');
     });
 });

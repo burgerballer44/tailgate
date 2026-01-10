@@ -21,9 +21,9 @@
         :tableActions="[
             ['route' => 'admin.groups.members.create', 'params' => ['group' => $group->ulid], 'text' => 'Add Member']
         ]"
-        :headers="['User', 'Role', 'Joined', 'Actions']"
+        :headers="['User', 'Role', 'Status', 'Joined', 'Actions']"
         :rows="$members"
-        :columns="['user.name', 'role', 'created_at']"
+        :columns="['user.name', 'role', 'status', 'created_at']"
         :rowActions="[
             [
                 'label' => 'Show',

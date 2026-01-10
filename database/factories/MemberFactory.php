@@ -2,9 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupRole;
-use App\Models\User;
+use App\Models\MemberStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,6 +24,7 @@ class MemberFactory extends Factory
             'group_id' => Group::factory(),
             'user_id' => User::factory(),
             'role' => fake()->randomElement(GroupRole::cases())->value,
+            'status' => MemberStatus::APPROVED->value,
         ];
     }
 }

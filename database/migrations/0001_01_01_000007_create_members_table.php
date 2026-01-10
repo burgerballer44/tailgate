@@ -17,7 +17,7 @@ return new class extends Migration
             $table->ulid('ulid')->index();
             $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('user_id');
-            $table->enum('role', GroupRole::values());
+            $table->enum('role', GroupRole::values())->default(GroupRole::GROUP_MEMBER->value);
             $table->timestamps();
 
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');

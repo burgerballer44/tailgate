@@ -1,8 +1,9 @@
 <?php
 
+use App\Models\User;
 use App\Models\Group;
 use App\Models\Member;
-use App\Models\User;
+use App\Models\MemberStatus;
 
 beforeEach(function () {
     $this->user = signInAdminUser();
@@ -54,6 +55,7 @@ describe('creating a member', function () {
         $memberData = [
             'user_id' => $user->id,
             'role' => 'Group-Member',
+            'status' => MemberStatus::APPROVED->value,
         ];
 
         // there should be 1 member in the db (owner)
@@ -73,6 +75,7 @@ describe('creating a member', function () {
             'user_id' => $memberData['user_id'],
             'group_id' => $group->id,
             'role' => $memberData['role'],
+            'status' => $memberData['status'],
         ]);
     });
 
@@ -84,6 +87,7 @@ describe('creating a member', function () {
         $memberData = [
             'user_id' => $user->id,
             'role' => 'Group-Member',
+            'status' => 'Approved',
         ];
 
         // post the member data

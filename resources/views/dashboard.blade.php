@@ -5,7 +5,7 @@
     <div class="space-y-6">
         {{-- Groups --}}
         @if ($groups->isNotEmpty())
-            <div class="overflow-hidden bg-white shadow sm:rounded-md">
+            <div class="bg-white shadow sm:rounded-md">
                 {{-- Groups Section Header --}}
                 <div class="border-b border-gray-200 px-4 py-5 sm:px-6 dark:border-white/10">
                     <div class="-mt-4 -ml-4 flex flex-wrap items-center justify-between sm:flex-nowrap">
@@ -40,17 +40,20 @@
                                             </div>
                                         --}}
                                         <div>
-                                            <div class="text-sm font-medium text-gray-900">{{ $group->name }}</div>
+                                            <div class="text-sm font-medium text-gray-900">
+                                                <a href="{{ route('groups.show', $group) }}">
+                                                    {{ $group->name }}
+                                                </a>
+                                            </div>
                                             {{-- <div class="text-sm text-gray-500">Owner: {{ $group->owner->name }}</div> --}}
                                         </div>
                                     </div>
                                     <div class="flex space-x-2">
-                                        <a href="#" class="text-navy-600 hover:text-navy-900 text-sm font-medium">
-                                            View Details
-                                        </a>
-                                        <a href="#" class="text-navy-600 hover:text-navy-900 text-sm font-medium">
-                                            Manage
-                                        </a>
+                                        <x-tables.row-actions-dropdown
+                                            :items="[
+                                                ['label' => 'View Group', 'href' => route('groups.show', $group)],
+                                            ]"
+                                        />
                                     </div>
                                 </div>
                             </div>

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedMemberData;
 use App\Http\Requests\FormRequest;
 use App\Models\GroupRole;
+use App\Models\MemberStatus;
 use App\Rules\GroupAdminMinimum;
 use Illuminate\Validation\Rules\Enum;
 
@@ -27,6 +28,7 @@ class UpdateMemberRequest extends FormRequest
     {
         return [
             'role' => ['required', new Enum(GroupRole::class), new GroupAdminMinimum],
+            'status' => ['nullable', new Enum(MemberStatus::class)],
         ];
     }
 

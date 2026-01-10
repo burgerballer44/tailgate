@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\Member;
 use App\Models\GroupRole;
+use App\Models\MemberStatus;
 use App\Services\GroupService;
+use App\Services\MemberService;
 use App\DTO\ValidatedMemberData;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\UpdateGroupRequest;
 
 /**
  * GroupController handles user-facing group operations.
@@ -27,7 +31,8 @@ class GroupController extends Controller
      * keeping the controller focused on HTTP request/response handling.
      */
     public function __construct(
-        private GroupService $groupService
+        private GroupService $groupService,
+        private MemberService $memberService
     ) {}
 
     /**
@@ -117,13 +122,11 @@ class GroupController extends Controller
             return redirect()->back();
         }
 
-        // TODO: owner approval logic can be added here later
-
-        // add the user as a member of the group with the default member role
-        // Note: This is direct joining for now; owner confirmation can be added later
+        // add the user as a pending member of the group
         $memberData = ValidatedMemberData::fromArray([
             'user_id' => $request->user()->id,
             'role' => GroupRole::GROUP_MEMBER,
+            'status' => MemberStatus::PENDING,
         ]);
 
         $this->groupService->addMember($group, $memberData);
@@ -132,5 +135,168 @@ class GroupController extends Controller
         $this->setFlashAlert('success', 'Successfully joined the group!');
 
         return redirect()->route('dashboard');
+    }
+
+    /**
+     * Display the specified group details.
+     *
+     * This method shows detailed information about a group, including members,
+     * pending join requests, and other group data. Any member can view details.
+     *
+     * @param Group $group The group to display
+     * @return View Returns the group details view
+     */
+    public function show(Group $group): View
+    {
+        // Ensure user is a member of the group
+        $user = request()->user();
+        $member = $group->members()->where('user_id', $user->id)->first();
+
+        if (!$member) {
+            abort(403, 'You are not a member of this group.');
+        }
+
+        $group->load([
+            'members.user',
+            'owner',
+        ]);
+
+        return view('groups.show', [
+            'group' => $group,
+            'userMember' => $member,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified group.
+     *
+     * This method displays the group management form where owners and admins
+     * can manage group settings, approve/reject join requests, and manage members.
+     *
+     * @param Group $group The group to edit
+     * @return View Returns the group edit view
+     */
+    public function edit(Group $group): View
+    {
+        // Ensure user is owner or admin
+        $user = request()->user();
+        $member = $group->members()->where('user_id', $user->id)->first();
+
+        if (!$member || !in_array($member->role, [GroupRole::GROUP_ADMIN->value])) {
+            if ($group->owner_id !== $user->id) {
+                abort(403, 'You do not have permission to manage this group.');
+            }
+        }
+
+        $group->load([
+            'members.user',
+            'owner',
+        ]);
+
+        return view('groups.edit', [
+            'group' => $group,
+        ]);
+    }
+
+    /**
+     * Update the specified group.
+     *
+     * This method processes updates to group settings. Only owners and admins can update.
+     *
+     * @param UpdateGroupRequest $request The validated update request
+     * @param Group $group The group to update
+     * @return RedirectResponse Redirects back with success message
+     */
+    public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
+    {
+        // Ensure user is owner or admin
+        $user = request()->user();
+        $member = $group->members()->where('user_id', $user->id)->first();
+
+        if (!$member || !in_array($member->role, [GroupRole::GROUP_ADMIN->value])) {
+            if ($group->owner_id !== $user->id) {
+                abort(403, 'You do not have permission to manage this group.');
+            }
+        }
+
+        $this->groupService->update($group, $request->toDTO());
+
+        $this->setFlashAlert('success', 'Group updated successfully!');
+
+        return redirect()->route('groups.show', $group);
+    }
+
+    /**
+     * Approve a pending member join request.
+     *
+     * This method approves a pending join request, changing the member's status to approved.
+     * Only group owners and admins can approve requests.
+     *
+     * @param Group $group The group
+     * @param Member $member The pending member to approve
+     * @return RedirectResponse Redirects back with success message
+     */
+    public function approveMember(Group $group, Member $member): RedirectResponse
+    {
+        // Ensure user is owner or admin
+        $user = request()->user();
+        $userMember = $group->members()->where('user_id', $user->id)->first();
+
+        if (!$userMember || !in_array($userMember->role, [GroupRole::GROUP_ADMIN->value])) {
+            if ($group->owner_id !== $user->id) {
+                abort(403, 'You do not have permission to manage this group.');
+            }
+        }
+
+        // Ensure member belongs to this group and is pending
+        if ($member->group_id !== $group->id || $member->status !== MemberStatus::PENDING->value) {
+            abort(404, 'Invalid member or not pending.');
+        }
+
+        $memberData = ValidatedMemberData::fromArray([
+            'user_id' => $member->user_id,
+            'role' => GroupRole::from($member->role),
+            'status' => MemberStatus::APPROVED,
+        ]);
+
+        $this->memberService->update($member, $memberData);
+
+        $this->setFlashAlert('success', 'Member approved successfully!');
+
+        return redirect()->back();
+    }
+
+    /**
+     * Reject a pending member join request.
+     *
+     * This method rejects a pending join request, either by deleting the member
+     * or changing status to rejected. Only group owners and admins can reject requests.
+     *
+     * @param Group $group The group
+     * @param Member $member The pending member to reject
+     * @return RedirectResponse Redirects back with success message
+     */
+    public function rejectMember(Group $group, Member $member): RedirectResponse
+    {
+        // Ensure user is owner or admin
+        $user = request()->user();
+        $userMember = $group->members()->where('user_id', $user->id)->first();
+
+        if (!$userMember || !in_array($userMember->role, [GroupRole::GROUP_ADMIN->value])) {
+            if ($group->owner_id !== $user->id) {
+                abort(403, 'You do not have permission to manage this group.');
+            }
+        }
+
+        // Ensure member belongs to this group and is pending
+        if ($member->group_id !== $group->id || $member->status !== MemberStatus::PENDING->value) {
+            abort(404, 'Invalid member or not pending.');
+        }
+
+        $this->memberService->delete($member);
+
+        $this->setFlashAlert('success', 'Join request rejected.');
+
+        return redirect()->back();
     }
 }

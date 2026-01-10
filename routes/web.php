@@ -77,6 +77,11 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [GroupController::class, 'store'])->name('store');
             Route::get('join', [GroupController::class, 'join'])->name('join');
             Route::post('join', [GroupController::class, 'requestJoin'])->name('request-join');
+            Route::get('{group}', [GroupController::class, 'show'])->name('show');
+            Route::get('{group}/edit', [GroupController::class, 'edit'])->name('edit');
+            Route::patch('{group}', [GroupController::class, 'update'])->name('update');
+            Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])->name('approve-member');
+            Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])->name('reject-member');
         });
 
         // This is the admin area.

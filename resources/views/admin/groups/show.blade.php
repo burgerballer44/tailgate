@@ -88,9 +88,9 @@
         </div>
         <x-tables.full-width
             heading="Members"
-            :headers="['User', 'Role', 'Joined', 'Actions']"
+            :headers="['User', 'Role', 'Status', 'Joined', 'Actions']"
             :rows="$group->members"
-            :columns="['user.name', 'role', 'created_at']"
+            :columns="['user.name', 'role', 'status', 'created_at']"
             :rowActions="[
                 [
                     'label' => 'Show',

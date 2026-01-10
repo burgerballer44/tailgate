@@ -27,6 +27,10 @@
                 'value' => $member->role,
             ],
             [
+                'label' => 'Status',
+                'value' => $member->status,
+            ],
+            [
                 'label' => 'Joined',
                 'value' => $member->created_at?->format('F j, Y, g:i a') ?? 'N/A',
             ],
