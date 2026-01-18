@@ -82,6 +82,7 @@ Route::middleware('auth')->group(function () {
             Route::patch('{group}', [GroupController::class, 'update'])->name('update');
             Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])->name('approve-member');
             Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])->name('reject-member');
+            Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])->name('remove-member');
         });
 
         // This is the admin area.

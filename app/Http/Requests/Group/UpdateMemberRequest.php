@@ -4,13 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedMemberData;
 use App\Http\Requests\FormRequest;
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
-use App\Rules\GroupAdminMinimum;
-use Illuminate\Validation\Rules\Enum;
+use App\Http\Requests\Traits\MemberValidationRulesTrait;
 
 class UpdateMemberRequest extends FormRequest
 {
+    use MemberValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,10 +25,7 @@ class UpdateMemberRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'role' => ['required', new Enum(GroupRole::class), new GroupAdminMinimum],
-            'status' => ['nullable', new Enum(MemberStatus::class)],
-        ];
+        return $this->updateMemberRules();
     }
 
     /**

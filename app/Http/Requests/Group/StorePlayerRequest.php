@@ -4,11 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedPlayerData;
 use App\Http\Requests\FormRequest;
-use App\Rules\PlayerLimit;
-use App\Rules\UniqueUsernamePerGroup;
+use App\Http\Requests\Traits\PlayerValidationRulesTrait;
 
 class StorePlayerRequest extends FormRequest
 {
+    use PlayerValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -24,9 +25,7 @@ class StorePlayerRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'player_name' => ['required', 'string', new PlayerLimit, new UniqueUsernamePerGroup],
-        ];
+        return $this->storeRules();
     }
 
     /**

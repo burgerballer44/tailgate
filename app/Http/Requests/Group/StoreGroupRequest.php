@@ -4,9 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
+use App\Http\Requests\Traits\GroupValidationRulesTrait;
 
 class StoreGroupRequest extends FormRequest
 {
+    use GroupValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -51,10 +54,7 @@ class StoreGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => 'required|string|max:255',
-            'owner_id' => ['required', 'exists:users,id'],
-        ];
+        return $this->storeRules();
     }
 
     /**

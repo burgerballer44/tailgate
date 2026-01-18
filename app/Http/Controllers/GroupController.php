@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Group\StoreGroupRequest;
-use App\Http\Requests\Group\UpdateGroupRequest;
+use App\Http\Requests\Group\UserUpdateGroupRequest;
 
 /**
  * GroupController handles user-facing group operations.
@@ -203,11 +203,11 @@ class GroupController extends Controller
      *
      * This method processes updates to group settings. Only owners and admins can update.
      *
-     * @param UpdateGroupRequest $request The validated update request
+     * @param UserUpdateGroupRequest $request The validated update request
      * @param Group $group The group to update
      * @return RedirectResponse Redirects back with success message
      */
-    public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
+    public function update(UserUpdateGroupRequest $request, Group $group): RedirectResponse
     {
         // Ensure user is owner or admin
         $user = request()->user();
@@ -219,7 +219,8 @@ class GroupController extends Controller
             }
         }
 
-        $this->groupService->update($group, $request->toDTO());
+        // the owner_id is required in the DTO for validation purposes
+        $this->groupService->update($group, $request->toDTO($group->owner_id));
 
         $this->setFlashAlert('success', 'Group updated successfully!');
 
@@ -296,6 +297,45 @@ class GroupController extends Controller
         $this->memberService->delete($member);
 
         $this->setFlashAlert('success', 'Join request rejected.');
+
+        return redirect()->back();
+    }
+
+    /**
+     * Remove an approved member from the group.
+     *
+     * This method removes an approved member from the group. Only group owners and admins can remove members.
+     * Cannot remove the owner or the last admin.
+     *
+     * @param Group $group The group
+     * @param Member $member The member to remove
+     * @return RedirectResponse Redirects back with success message
+     */
+    public function removeMember(Group $group, Member $member): RedirectResponse
+    {
+        // Ensure user is owner or admin
+        $user = request()->user();
+        $userMember = $group->members()->where('user_id', $user->id)->first();
+
+        if (!$userMember || !in_array($userMember->role, [GroupRole::GROUP_ADMIN->value])) {
+            if ($group->owner_id !== $user->id) {
+                abort(403, 'You do not have permission to manage this group.');
+            }
+        }
+
+        // Ensure member belongs to this group and is approved
+        if ($member->group_id !== $group->id || $member->status !== MemberStatus::APPROVED->value) {
+            abort(404, 'Invalid member or not approved.');
+        }
+
+        // Cannot remove the owner
+        if ($member->user_id === $group->owner_id) {
+            abort(403, 'Cannot remove the group owner.');
+        }
+
+        $this->memberService->delete($member);
+
+        $this->setFlashAlert('success', 'Member removed from group.');
 
         return redirect()->back();
     }

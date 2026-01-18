@@ -4,10 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedScoreData;
 use App\Http\Requests\FormRequest;
-use App\Rules\GameTimeNotPassedForUpdate;
+use App\Http\Requests\Traits\ScoreValidationRulesTrait;
 
 class UpdateScoreRequest extends FormRequest
 {
+    use ScoreValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -23,11 +25,7 @@ class UpdateScoreRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'score_id' => ['required', new GameTimeNotPassedForUpdate],
-            'home_team_prediction' => ['required', 'integer', 'min:0'],
-            'away_team_prediction' => ['required', 'integer', 'min:0'],
-        ];
+        return $this->updateRules();
     }
 
     /**

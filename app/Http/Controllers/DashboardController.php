@@ -30,16 +30,8 @@ class DashboardController extends Controller
         // get the authenticated user
         $user = $request->user();
 
-        // Retrieve all groups the user belongs to through their memberships
-        // We use eager loading ('with') to also fetch the group owner information
-        // in a single query to avoid N+1 problems when displaying group details
-        $members = $user->members()->with('group.owner')->get();
-
-        // Extract just the group objects from the memberships
-        // This gives us a clean collection of groups the user is part of
-        $groups = $members->map(function ($member) {
-            return $member->group;
-        });
+        // retrieve all groups the user can access: groups they own or are members of
+        $groups = $user->getAccessibleGroups();
 
         // Return the dashboard view with the data needed for display
         // Currently we pass groups and user data; this will expand as we add

@@ -2,16 +2,14 @@
 
 namespace App\Http\Requests\User;
 
-use App\Models\User;
-use App\Models\UserRole;
-use App\Models\UserStatus;
 use App\DTO\ValidatedUserData;
-use Illuminate\Validation\Rules\Enum;
-use Illuminate\Validation\Rules\Password;
 use App\Http\Requests\FormRequest;
+use App\Http\Requests\Traits\UserValidationRulesTrait;
 
 class StoreUserRequest extends FormRequest
 {
+    use UserValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -27,12 +25,7 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'status' => ['required', new Enum(UserStatus::class)],
-            'role' => ['required', new Enum(UserRole::class)],
-        ];
+        return $this->storeRules();
     }
 
     /**

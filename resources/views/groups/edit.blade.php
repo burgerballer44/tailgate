@@ -33,97 +33,33 @@
                         </div>
 
                         <div class="flex justify-end">
-                            <button
-                                type="submit"
-                                class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none"
-                            >
-                                Update Group
-                            </button>
+                            <x-buttons.primary-button>Update Group</x-buttons.primary-button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
 
-        {{-- Pending Join Requests --}}
-        @php
-            $pendingMembers = $group->members->where('status', \App\Models\MemberStatus::PENDING->value);
-        @endphp
-
-        @if ($pendingMembers->isNotEmpty())
-            <div class="overflow-hidden bg-white shadow sm:rounded-md">
-                <div class="px-4 py-5 sm:px-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900">Pending Join Requests</h3>
-                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Review and approve new member requests.</p>
-                </div>
-                <ul role="list" class="divide-y divide-gray-200">
-                    @foreach ($pendingMembers as $member)
-                        <li>
-                            <div class="px-4 py-4 sm:px-6">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <div class="h-10 w-10 flex-shrink-0">
-                                            <div
-                                                class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300"
-                                            >
-                                                <span class="text-sm font-medium text-gray-700">
-                                                    {{ substr($member->user->name, 0, 2) }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900">
-                                                {{ $member->user->name }}
-                                            </div>
-                                            <div class="text-sm text-gray-500">Requested to join</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex space-x-2">
-                                        <form
-                                            action="{{ route('groups.approve-member', [$group, $member]) }}"
-                                            method="POST"
-                                            class="inline"
-                                        >
-                                            @csrf
-                                            <button
-                                                type="submit"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-green-600 px-3 py-2 text-sm leading-4 font-medium text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
-                                            >
-                                                Approve
-                                            </button>
-                                        </form>
-                                        <form
-                                            action="{{ route('groups.reject-member', [$group, $member]) }}"
-                                            method="POST"
-                                            class="inline"
-                                        >
-                                            @csrf
-                                            <button
-                                                type="submit"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-3 py-2 text-sm leading-4 font-medium text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
-                                            >
-                                                Reject
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        {{-- Current Members --}}
-        <div class="overflow-hidden bg-white shadow sm:rounded-md">
+        {{-- Members --}}
+        <div class="bg-white shadow sm:rounded-md">
             <div class="px-4 py-5 sm:px-6">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Current Members</h3>
-                <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage existing group members.</p>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Members</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage group members and join requests.</p>
             </div>
             <ul role="list" class="divide-y divide-gray-200">
-                @foreach ($group->members->where('status', \App\Models\MemberStatus::APPROVED->value) as $member)
+                @foreach ($group->members as $member)
+                    @php
+                        $dropdownItems = [];
+                        if ($member->isPending()) {
+                            $dropdownItems[] = ['label' => 'Approve', 'href' => route('groups.approve-member', [$group, $member]), 'method' => 'POST'];
+                            $dropdownItems[] = ['label' => 'Reject', 'href' => route('groups.reject-member', [$group, $member]), 'method' => 'POST', 'confirm' => 'Are you sure you want to reject this join request?'];
+                        } elseif ($member->canBeRemovedBy(request()->user())) {
+                            $dropdownItems[] = ['label' => 'Remove', 'href' => route('groups.remove-member', [$group, $member]), 'method' => 'DELETE', 'confirm' => 'Are you sure you want to remove this member?'];
+                        }
+                    @endphp
+
                     <li>
-                        <div class="px-4 py-4 sm:px-6">
+                        <div class="{{ $member->isPending() ? 'bg-yellow-50' : '' }} px-4 py-4 sm:px-6">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
                                     <div class="h-10 w-10 flex-shrink-0">
@@ -137,20 +73,20 @@
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900">{{ $member->user->name }}</div>
-                                        <div class="text-sm text-gray-500">{{ $member->role }}</div>
+                                        <div class="text-sm text-gray-500">
+                                            @if ($member->isPending())
+                                                Requested to join
+                                            @else
+                                                {{ $member->role }}
+                                                @if ($member->isOwner())
+                                                    (Owner)
+                                                @endif
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                                @if ($group->owner_id !== $member->user_id && $group->admin->count() > 1)
-                                    <form action="#" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button
-                                            type="submit"
-                                            class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-3 py-2 text-sm leading-4 font-medium text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
-                                        >
-                                            Remove
-                                        </button>
-                                    </form>
+                                @if (! empty($dropdownItems))
+                                    <x-tables.row-actions-dropdown :items="$dropdownItems" />
                                 @endif
                             </div>
                         </div>

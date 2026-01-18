@@ -41,19 +41,29 @@
                                         --}}
                                         <div>
                                             <div class="text-sm font-medium text-gray-900">
-                                                <a href="{{ route('groups.show', $group) }}">
+                                                @if ($user->canAccessGroup($group))
+                                                    <a href="{{ route('groups.show', $group) }}">
+                                                        {{ $group->name }}
+                                                    </a>
+                                                @else
                                                     {{ $group->name }}
-                                                </a>
+                                                @endif
                                             </div>
+                                            @if (! $user->canAccessGroup($group))
+                                                <div class="text-sm text-yellow-600">Membership Pending Approval</div>
+                                            @endif
+
                                             {{-- <div class="text-sm text-gray-500">Owner: {{ $group->owner->name }}</div> --}}
                                         </div>
                                     </div>
                                     <div class="flex space-x-2">
-                                        <x-tables.row-actions-dropdown
-                                            :items="[
-                                                ['label' => 'View Group', 'href' => route('groups.show', $group)],
-                                            ]"
-                                        />
+                                        @if ($user->canAccessGroup($group))
+                                            <x-tables.row-actions-dropdown
+                                                :items="[
+                                                    ['label' => 'View Group', 'href' => route('groups.show', $group)],
+                                                ]"
+                                            />
+                                        @endif
                                     </div>
                                 </div>
                             </div>

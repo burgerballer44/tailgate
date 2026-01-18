@@ -6,7 +6,7 @@ use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
 
-class UpdateGroupRequest extends FormRequest
+class UserUpdateGroupRequest extends FormRequest
 {
     use GroupValidationRulesTrait;
 
@@ -25,7 +25,7 @@ class UpdateGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->adminUpdateRules();
+        return $this->baseRules();
     }
 
     /**
@@ -34,8 +34,11 @@ class UpdateGroupRequest extends FormRequest
      *
      * @return ValidatedGroupData The validated group data transfer object.
      */
-    public function toDTO(): ValidatedGroupData
+    public function toDTO(int $ownerId): ValidatedGroupData
     {
-        return ValidatedGroupData::fromArray($this->validated());
+        $data = $this->validated();
+        $data['owner_id'] = $ownerId;
+
+        return ValidatedGroupData::fromArray($data);
     }
 }

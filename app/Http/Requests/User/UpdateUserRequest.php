@@ -2,15 +2,14 @@
 
 namespace App\Http\Requests\User;
 
-use App\Models\UserRole;
-use App\Models\UserStatus;
 use App\DTO\ValidatedUserData;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
 use App\Http\Requests\FormRequest;
+use App\Http\Requests\Traits\UserValidationRulesTrait;
 
 class UpdateUserRequest  extends FormRequest
 {
+    use UserValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -28,12 +27,7 @@ class UpdateUserRequest  extends FormRequest
     {
         $user = request()->route('user');
 
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user)],
-            'status' => ['required', new Enum(UserStatus::class)],
-            'role' => ['required', new Enum(UserRole::class)],
-        ];
+        return $this->updateRules($user);
     }
 
     /**
