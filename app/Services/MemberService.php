@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Member;
 use App\Models\Group;
 use App\Models\GroupRole;
+use App\Models\MemberStatus;
 use App\DTO\ValidatedMemberData;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 
@@ -23,6 +24,7 @@ class MemberService
         $memberData = [
             'user_id' => $data->user_id,
             'role' => $data->role?->value ?? GroupRole::GROUP_MEMBER->value,
+            'status' => $data->status?->value ?? MemberStatus::APPROVED->value,
         ];
 
         return $group->members()->create($memberData);
@@ -42,6 +44,10 @@ class MemberService
 
         if ($data->role !== null) {
             $updateData['role'] = $data->role->value;
+        }
+
+        if ($data->status !== null) {
+            $updateData['status'] = $data->status->value;
         }
 
         $member->fill($updateData);

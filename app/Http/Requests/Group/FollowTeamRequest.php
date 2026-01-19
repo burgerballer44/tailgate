@@ -4,10 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedFollowData;
 use App\Http\Requests\FormRequest;
-use App\Rules\SeasonIsActive;
+use App\Http\Requests\Traits\FollowValidationRulesTrait;
 
 class FollowTeamRequest extends FormRequest
 {
+    use FollowValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -23,10 +25,7 @@ class FollowTeamRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'team_id' => ['required', 'exists:teams,id'],
-            'season_id' => ['required', 'exists:seasons,id', new SeasonIsActive],
-        ];
+        return $this->storeRules();
     }
 
     /**

@@ -2,15 +2,15 @@
 
 namespace App\Http\Requests\Season;
 
-use App\Models\SeasonType;
-use App\Models\Sport;
 use App\Models\Common\DateOrString;
 use App\DTO\ValidatedSeasonData;
-use Illuminate\Validation\Rules\Enum;
 use App\Http\Requests\FormRequest;
+use App\Http\Requests\Traits\SeasonValidationRulesTrait;
 
 class StoreSeasonRequest extends FormRequest
 {
+    use SeasonValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,16 +26,7 @@ class StoreSeasonRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => ['required', 'string', 'max:255'],
-            'sport' => ['required', new Enum(Sport::class)],
-            'season_type' => ['required', new Enum(SeasonType::class)],
-            'season_start' => ['required', 'date'],
-            'season_end' => ['required', 'date', 'after:season_start'],
-            'active' => ['required', 'boolean'],
-            'active_date' => ['required', 'date'],
-            'inactive_date' => ['required', 'date'],
-        ];
+        return $this->storeRules();
     }
 
     /**

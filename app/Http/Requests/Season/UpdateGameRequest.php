@@ -6,9 +6,12 @@ use App\DTO\ValidatedGameData;
 use App\Models\Common\DateOrString;
 use App\Models\Common\TimeOrString;
 use App\Http\Requests\FormRequest;
+use App\Http\Requests\Traits\GameValidationRulesTrait;
 
 class UpdateGameRequest extends FormRequest
 {
+    use GameValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -35,15 +38,7 @@ class UpdateGameRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'season_id' => ['required', 'exists:seasons,id'],
-            'home_team_id' => ['required', 'exists:teams,id'],
-            'away_team_id' => ['required', 'exists:teams,id', 'different:home_team_id'],
-            'home_team_score' => ['required', 'integer', 'min:0'],
-            'away_team_score' => ['required', 'integer', 'min:0'],
-            'start_date' => ['required', 'string', 'max:255'],
-            'start_time' => ['required', 'string', 'max:255'],
-        ];
+        return $this->updateRules();
     }
 
     /**

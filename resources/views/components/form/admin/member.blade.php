@@ -30,6 +30,17 @@
         <x-inputs.input-error class="mt-2" :messages="$errors->get('role')" />
     </div>
 
+    <div class="mt-4">
+        <x-form.select
+            name="status"
+            label="Status"
+            :required="true"
+            :value="old('status', $member?->status ?? \App\Models\MemberStatus::APPROVED->value)"
+            :options="['' => ''] + collect(\App\Models\MemberStatus::cases())->mapWithKeys(fn($status) => [$status->value => $status->value])->toArray()"
+        />
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('status')" />
+    </div>
+
     {{-- buttons --}}
     <div class="mt-4 flex items-center justify-end">
         @isset($buttons)

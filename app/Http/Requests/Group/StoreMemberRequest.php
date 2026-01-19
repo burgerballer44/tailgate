@@ -4,13 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedMemberData;
 use App\Http\Requests\FormRequest;
-use App\Models\GroupRole;
-use App\Rules\GroupMemberLimit;
-use App\Rules\MustNotBeAMember;
-use Illuminate\Validation\Rules\Enum;
+use App\Http\Requests\Traits\MemberValidationRulesTrait;
 
 class StoreMemberRequest extends FormRequest
 {
+    use MemberValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -26,10 +25,7 @@ class StoreMemberRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'user_id' => ['required', 'exists:users,id', new MustNotBeAMember, new GroupMemberLimit],
-            'role' => ['required', new Enum(GroupRole::class)],
-        ];
+        return $this->createMemberRules();
     }
 
     /**

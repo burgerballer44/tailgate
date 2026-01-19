@@ -4,6 +4,7 @@ use App\Models\Member;
 use App\Models\Group;
 use App\Models\User;
 use App\Models\GroupRole;
+use App\Models\MemberStatus;
 use App\Services\MemberService;
 use App\DTO\ValidatedMemberData;
 
@@ -37,6 +38,7 @@ describe('create a member for group', function () {
             'group_id' => $group->id,
             'user_id' => $user->id,
             'role' => $data->role->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         expect($member)->toBeInstanceOf(Member::class);
@@ -58,8 +60,35 @@ describe('create a member for group', function () {
         // try to create the member
         $member = $this->service->createForGroup($group, $data);
 
-        // verify member has default role
+        // verify member has default role and status
         expect($member->role)->toBe(GroupRole::GROUP_MEMBER->value);
+        expect($member->status)->toBe(MemberStatus::APPROVED->value);
+    });
+
+    test('with custom status', function () {
+        // create group and user
+        $group = Group::factory()->create();
+        $user = User::factory()->create();
+
+        // member data with pending status
+        $data = ValidatedMemberData::fromArray([
+            'user_id' => $user->id,
+            'role' => GroupRole::GROUP_MEMBER,
+            'status' => MemberStatus::PENDING,
+        ]);
+
+        // try to create the member
+        $member = $this->service->createForGroup($group, $data);
+
+        // verify member has pending status
+        expect($member->status)->toBe(MemberStatus::PENDING->value);
+
+        // verify in database
+        $this->assertDatabaseHas('members', [
+            'group_id' => $group->id,
+            'user_id' => $user->id,
+            'status' => MemberStatus::PENDING->value,
+        ]);
     });
 });
 
@@ -68,11 +97,13 @@ describe('update a member', function () {
         // create existing member
         $member = Member::factory()->create([
             'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         // data to update to
         $data = ValidatedMemberData::fromArray([
             'role' => GroupRole::GROUP_ADMIN,
+            'status' => MemberStatus::PENDING,
         ]);
 
         // try to update the member
@@ -82,6 +113,7 @@ describe('update a member', function () {
         $this->assertDatabaseHas('members', [
             'id' => $member->id,
             'role' => $data->role->value,
+            'status' => $data->status->value,
         ]);
 
         // verify returned member is the same instance
@@ -89,22 +121,41 @@ describe('update a member', function () {
 
         // verify updated data
         expect($member->role)->toBe($data->role->value);
+        expect($member->status)->toBe($data->status->value);
     });
 
-    test('does not update when role is null', function () {
+    test('does not update role when role is null', function () {
         // create existing member
         $member = Member::factory()->create([
             'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         // data with null role
-        $data = ValidatedMemberData::fromArray([]);
+        $data = ValidatedMemberData::fromArray(['status' => MemberStatus::APPROVED->value]);
 
         // try to update the member
         $updatedMember = $this->service->update($member, $data);
 
         // verify role unchanged
         expect($updatedMember->role)->toBe(GroupRole::GROUP_MEMBER->value);
+    });
+
+    test('does not update status when status is null', function () {
+        // create existing member
+        $member = Member::factory()->create([
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+    
+        // data with null status
+        $data = ValidatedMemberData::fromArray(['role' => GroupRole::GROUP_ADMIN->value]);
+    
+        // try to update the member
+        $updatedMember = $this->service->update($member, $data);
+    
+        // verify status unchanged
+        expect($updatedMember->status)->toBe(MemberStatus::APPROVED->value);
     });
 });
 

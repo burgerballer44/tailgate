@@ -31,6 +31,7 @@ class Member extends Model
     protected $fillable = [
         'user_id',
         'role',
+        'status',
     ];
 
     /**
@@ -83,5 +84,37 @@ class Member extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * Check if the member is pending approval.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === MemberStatus::PENDING->value;
+    }
+
+    /**
+     * Check if the member is approved.
+     */
+    public function isApproved(): bool
+    {
+        return $this->status === MemberStatus::APPROVED->value;
+    }
+
+    /**
+     * Check if the member is the owner of the group.
+     */
+    public function isOwner(): bool
+    {
+        return $this->user_id === $this->group->owner_id;
+    }
+
+    /**
+     * Check if the member can be removed by the given user.
+     */
+    public function canBeRemovedBy(User $user): bool
+    {
+        return $this->isApproved() && !$this->isOwner();
     }
 }

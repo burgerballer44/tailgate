@@ -4,9 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedPlayerData;
 use App\Http\Requests\FormRequest;
+use App\Http\Requests\Traits\PlayerValidationRulesTrait;
 
 class UpdatePlayerRequest extends FormRequest
 {
+    use PlayerValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -22,10 +25,7 @@ class UpdatePlayerRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'player_name' => ['required', 'string'],
-            'member_id' => ['nullable', 'exists:members,id'],
-        ];
+        return $this->updateRules();
     }
 
     /**

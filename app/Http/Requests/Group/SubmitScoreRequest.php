@@ -4,12 +4,12 @@ namespace App\Http\Requests\Group;
 
 use App\DTO\ValidatedScoreData;
 use App\Http\Requests\FormRequest;
-use App\Rules\GameMustExistInSeasonGroupFollows;
-use App\Rules\GameTimeNotPassed;
-use App\Rules\NoScoreSubmitted;
+use App\Http\Requests\Traits\ScoreValidationRulesTrait;
 
 class SubmitScoreRequest extends FormRequest
 {
+    use ScoreValidationRulesTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -25,12 +25,7 @@ class SubmitScoreRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'player_id' => ['required', 'exists:players,id'],
-            'game_id' => ['required', 'exists:games,id', new GameMustExistInSeasonGroupFollows, new GameTimeNotPassed, new NoScoreSubmitted],
-            'home_team_prediction' => ['required', 'integer', 'min:0'],
-            'away_team_prediction' => ['required', 'integer', 'min:0'],
-        ];
+        return $this->storeRules();
     }
 
     /**

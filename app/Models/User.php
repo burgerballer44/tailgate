@@ -9,6 +9,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\Group;
+use App\Models\MemberStatus;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -78,6 +80,47 @@ class User extends Authenticatable implements MustVerifyEmail
     public function members()
     {
         return $this->hasMany(Member::class);
+    }
+
+    /**
+     * Get all groups the user can access: groups they own or are members of.
+     */
+    public function getAccessibleGroups()
+    {
+        return Group::where('owner_id', $this->id)
+            ->orWhereHas('members', function ($query) {
+                $query->where('user_id', $this->id);
+            })
+            ->with('owner')
+            ->with(['members' => function ($query) {
+                $query->where('user_id', $this->id);
+            }])
+            ->get();
+    }
+
+    /**
+     * Check if the user is the owner of the given group.
+     */
+    public function isOwnerOf(Group $group): bool
+    {
+        return $group->owner_id === $this->id;
+    }
+
+    /**
+     * Get the user's membership status for the given group.
+     */
+    public function getMembershipStatus(Group $group): ?string
+    {
+        $membership = $group->members->first(fn($member) => $member->user_id === $this->id);
+        return $membership?->status;
+    }
+
+    /**
+     * Check if the user can access the given group.
+     */
+    public function canAccessGroup(Group $group): bool
+    {
+        return $this->isOwnerOf($group) || $this->getMembershipStatus($group) === MemberStatus::APPROVED->value;
     }
 
     /**
