@@ -64,14 +64,14 @@ function signInRegularUser(?User $user = null): User
 }
 
 /**
- * Sign in and act as a admin user.
+ * Sign in and act as a developer user.
  */
-function signInAdminUser(?User $user = null): User
+function signInDeveloperUser(?User $user = null): User
 {
     // create user if not provided
     $user = $user ?: User::factory()->create([
-        'name' => 'Admin User',
-        'role' => UserRole::ADMIN->value,
+        'name' => 'Developer User',
+        'role' => UserRole::DEVELOPER->value,
     ]);
 
     actingAs($user);

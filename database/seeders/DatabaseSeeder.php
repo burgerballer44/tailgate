@@ -28,14 +28,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Admin User from environment variables first
-        $adminUser = User::factory()->create([
-            'name' => env('ADMIN_NAME', 'Admin User'),
-            'email' => env('ADMIN_EMAIL', 'admin@example.com'),
+        // Create Developer User from environment variables first
+        $developerUser = User::factory()->create([
+            'name' => env('DEVELOPER_NAME', 'Developer User'),
+            'email' => env('DEVELOPER_EMAIL', 'developer@example.com'),
             'email_verified_at' => now(),
-            'password' => Hash::make(env('ADMIN_PASSWORD', 'password')),
+            'password' => Hash::make(env('DEVELOPER_PASSWORD', 'password')),
             'status' => UserStatus::ACTIVE->value,
-            'role' => UserRole::ADMIN->value,
+            'role' => UserRole::DEVELOPER->value,
         ]);
 
         // Create Users

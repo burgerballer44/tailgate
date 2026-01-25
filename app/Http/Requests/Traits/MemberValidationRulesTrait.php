@@ -44,8 +44,8 @@ trait MemberValidationRulesTrait
      */
     protected function updateMemberRules(): array
     {
-        return [
+        return array_merge($this->baseMemberRules(), [
             'role' => ['required', new Enum(GroupRole::class), new GroupAdminMinimum],
-        ];
+        ]);
     }
 }

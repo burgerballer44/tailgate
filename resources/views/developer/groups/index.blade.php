@@ -1,0 +1,61 @@
+<x-layouts.app
+    mainHeading="Groups"
+    mainDescription="A list of all the groups including their name, owner, and limits."
+    :mainActions="[
+        ['text' => 'Add Group', 'route' => 'developer.groups.create'],
+    ]"
+>
+    <x-breadcrumb
+        :breadcrumbs="[
+            ['text' => 'Home', 'url' => route('dashboard')],
+            ['text' => 'Groups', 'active' => true],
+        ]"
+    />
+    {{-- query --}}
+    <x-form.query-filters>
+        <x-form.query-search label="Search by name" :error="$errors->get('q')" />
+
+        <x-form.select
+            name="owner_id"
+            label="Owner"
+            :value="old('owner_id', request()->input('owner_id'))"
+            placeholder="All Owners"
+            :options="$users->mapWithKeys(fn($user) => [$user->id => $user->name])->toArray()"
+        />
+    </x-form.query-filters>
+
+    {{-- table --}}
+    <x-tables.full-width
+        heading="Groups"
+        description="A list of all the groups including their name, owner, and limits."
+        :tableActions="[
+            ['route' => 'developer.groups.create', 'text' => 'Add Group']
+        ]"
+        :headers="['Name', 'Invite Code', 'Owner', 'Member Limit', 'Player Limit', 'Created', 'Actions']"
+        :rows="$groups"
+        :columns="['name', 'invite_code', 'owner.name', 'member_limit', 'player_limit', 'created_at']"
+        :rowActions="[
+            [
+                'label' => 'Show',
+                'route' => 'developer.groups.show',
+                'routeParams' => ['group' => 'ulid'],
+            ],
+            [
+                'label' => 'Edit',
+                'route' => 'developer.groups.edit',
+                'routeParams' => ['group' => 'ulid'],
+            ],
+            [
+                'label' => 'Delete',
+                'type' => 'form',
+                'route' => 'developer.groups.destroy',
+                'routeParams' => ['group' => 'ulid'],
+                'confirm' => 'Are you sure you want to delete this group?'
+            ]
+        ]"
+    ></x-tables.full-width>
+
+    <div class="mt-4">
+        {{ $groups->links() }}
+    </div>
+</x-layouts.app>

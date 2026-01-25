@@ -5,17 +5,17 @@ use App\Models\UserRole;
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('profile page is displayed', function () {
-    $user = signInAdminUser();
+    $user = signInDeveloperUser();
     $this->get('/profile')->assertOk();
 });
 
 test('profile information can be updated', function () {
-    $user = signInAdminUser();
+    $user = signInDeveloperUser();
 
     $this->patch('/profile', [
         'name' => 'Test User',
         'email' => 'test@example.com',
-        'role' => UserRole::ADMIN->value,
+        'role' => UserRole::DEVELOPER->value,
     ])
         ->assertSessionHasNoErrors()
         ->assertRedirect('/profile');
@@ -24,11 +24,11 @@ test('profile information can be updated', function () {
 
     expect($user->name)->toBe('Test User');
     expect($user->email)->toBe('test@example.com');
-    expect($user->role)->toBe(UserRole::ADMIN->value);
+    expect($user->role)->toBe(UserRole::DEVELOPER->value);
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = signInAdminUser();
+    $user = signInDeveloperUser();
 
     $this->patch('/profile', [
         'name' => 'Test User',
@@ -41,7 +41,7 @@ test('email verification status is unchanged when the email address is unchanged
 });
 
 test('user can delete their account', function () {
-    $user = signInAdminUser();
+    $user = signInDeveloperUser();
 
     $this->delete('/profile', ['password' => 'password'])
         ->assertSessionHasNoErrors()
@@ -53,7 +53,7 @@ test('user can delete their account', function () {
 });
 
 test('correct password must be provided to delete account', function () {
-    $user = signInAdminUser();
+    $user = signInDeveloperUser();
 
     $this->from('/profile')->delete('/profile', ['password' => 'wrong-password'])
         ->assertSessionHasErrorsIn('userDeletion', 'password')
@@ -63,7 +63,7 @@ test('correct password must be provided to delete account', function () {
 });
 
 test('profile update resets email_verified_at when email is changed ensuring that must be verified again', function () {
-    $user = signInAdminUser();
+    $user = signInDeveloperUser();
 
     expect($user->email_verified_at)->not->toBeNull();
 

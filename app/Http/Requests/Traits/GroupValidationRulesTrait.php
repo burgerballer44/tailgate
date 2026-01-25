@@ -25,7 +25,7 @@ trait GroupValidationRulesTrait
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
-    public function adminUpdateRules(): array
+    public function developerUpdateRules(): array
     {
         return array_merge($this->baseRules(), [
             'owner_id' => ['required', new UserMustBeAMember],

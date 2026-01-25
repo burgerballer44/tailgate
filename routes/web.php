@@ -9,13 +9,13 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Http\Controllers\Admin\AdminGameController;
-use App\Http\Controllers\Admin\AdminGroupController;
-use App\Http\Controllers\Admin\AdminMemberController;
-use App\Http\Controllers\Admin\AdminPlayerController;
-use App\Http\Controllers\Admin\AdminSeasonController;
-use App\Http\Controllers\Admin\AdminTeamController;
-use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Developer\DeveloperGameController;
+use App\Http\Controllers\Developer\DeveloperGroupController;
+use App\Http\Controllers\Developer\DeveloperMemberController;
+use App\Http\Controllers\Developer\DeveloperPlayerController;
+use App\Http\Controllers\Developer\DeveloperSeasonController;
+use App\Http\Controllers\Developer\DeveloperTeamController;
+use App\Http\Controllers\Developer\DeveloperUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ProfileController;
@@ -85,33 +85,33 @@ Route::middleware('auth')->group(function () {
             Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])->name('remove-member');
         });
 
-        // This is the admin area.
-        // Only users with admin privileges can access these routes.
+        // This is the developer area.
+        // Only users with developer privileges can access these routes.
         // These routes are all inntended for managing the application data outside of normal user interactions.
-        Route::prefix('admin')->name('admin.')->middleware('role:Admin')->group(function () {
-            Route::resource('users', AdminUserController::class);
+        Route::prefix('developer')->name('developer.')->middleware('role:Developer')->group(function () {
+            Route::resource('users', DeveloperUserController::class);
 
-            Route::resource('teams', AdminTeamController::class);
+            Route::resource('teams', DeveloperTeamController::class);
 
-            Route::resource('seasons', AdminSeasonController::class);
+            Route::resource('seasons', DeveloperSeasonController::class);
 
-            Route::resource('seasons.games', AdminGameController::class);
+            Route::resource('seasons.games', DeveloperGameController::class);
 
-            Route::resource('groups', AdminGroupController::class);
+            Route::resource('groups', DeveloperGroupController::class);
 
-            Route::get('groups/{group}/follow-team', [AdminGroupController::class, 'createFollowTeam'])->name('groups.follow-team.create');
-            Route::post('groups/{group}/follow-team', [AdminGroupController::class, 'followTeam'])->name('groups.follow-team');
-            Route::delete('groups/{group}/follow/{follow}', [AdminGroupController::class, 'removeFollow'])->name('groups.follow.destroy');
+            Route::get('groups/{group}/follow-team', [DeveloperGroupController::class, 'createFollowTeam'])->name('groups.follow-team.create');
+            Route::post('groups/{group}/follow-team', [DeveloperGroupController::class, 'followTeam'])->name('groups.follow-team');
+            Route::delete('groups/{group}/follow/{follow}', [DeveloperGroupController::class, 'removeFollow'])->name('groups.follow.destroy');
 
-            Route::resource('groups.members', AdminMemberController::class);
+            Route::resource('groups.members', DeveloperMemberController::class);
 
-            Route::resource('groups.members.players', AdminPlayerController::class);
+            Route::resource('groups.members.players', DeveloperPlayerController::class);
 
-            Route::get('groups/{group}/members/{member}/players/{player}/submit-score', [AdminPlayerController::class, 'createScore'])->name('groups.members.players.submit-score.create');
-            Route::post('groups/{group}/members/{member}/players/{player}/submit-score', [AdminPlayerController::class, 'submitScore'])->name('groups.members.players.submit-score');
-            Route::get('groups/{group}/members/{member}/players/{player}/scores/{score}/edit', [AdminPlayerController::class, 'editScore'])->name('groups.members.players.scores.edit');
-            Route::patch('groups/{group}/members/{member}/players/{player}/scores/{score}', [AdminPlayerController::class, 'updateScore'])->name('groups.members.players.scores.update');
-            Route::delete('groups/{group}/members/{member}/players/{player}/scores/{score}', [AdminPlayerController::class, 'destroyScore'])->name('groups.members.players.scores.destroy');
+            Route::get('groups/{group}/members/{member}/players/{player}/submit-score', [DeveloperPlayerController::class, 'createScore'])->name('groups.members.players.submit-score.create');
+            Route::post('groups/{group}/members/{member}/players/{player}/submit-score', [DeveloperPlayerController::class, 'submitScore'])->name('groups.members.players.submit-score');
+            Route::get('groups/{group}/members/{member}/players/{player}/scores/{score}/edit', [DeveloperPlayerController::class, 'editScore'])->name('groups.members.players.scores.edit');
+            Route::patch('groups/{group}/members/{member}/players/{player}/scores/{score}', [DeveloperPlayerController::class, 'updateScore'])->name('groups.members.players.scores.update');
+            Route::delete('groups/{group}/members/{member}/players/{player}/scores/{score}', [DeveloperPlayerController::class, 'destroyScore'])->name('groups.members.players.scores.destroy');
         });
     });
 });

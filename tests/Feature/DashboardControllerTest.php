@@ -6,7 +6,7 @@ use App\Models\MemberStatus;
 use App\Models\User;
 
 beforeEach(function () {
-    $this->user = signInAdminUser();
+    $this->user = signInDeveloperUser();
 });
 
 describe('index', function () {

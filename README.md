@@ -335,3 +335,9 @@ Prioritized for private groups, with confirmation flows.
 - **Recent Activity**: Last predictions, group events.
 
 This flow emphasizes privacy and owner control, guiding users to create or be invited into groups for predictions.
+
+
+
+Please read the code of this application and figure out what it does. The developer section is considered "finished enough". Look at how the dashboard groupcontroller works. It is unfinished and the goal to complete the functionality for a normal user. The goal is to build a minimum viable product first with major features/additions kept in mind.
+
+What are the next steps for this application? Create a list of todos in order of how they should be completed in and why. Keep 

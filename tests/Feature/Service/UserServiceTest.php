@@ -56,7 +56,7 @@ describe('update user profile', function () {
             'email' => 'updated@example.com',
             'password' => '',
             'status' => UserStatus::PENDING->value,
-            'role' => UserRole::ADMIN->value,
+            'role' => UserRole::DEVELOPER->value,
         ]);
 
         // ensure updated user does not exist

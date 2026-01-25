@@ -9,5 +9,5 @@ enum UserRole: string
     use EnumToArray;
 
     case REGULAR = 'Regular'; // the average user, normal people who sign up
-    case ADMIN = 'Admin'; // an important person who can do whatever
+    case DEVELOPER = 'Developer'; // an important person who can do whatever
 }
