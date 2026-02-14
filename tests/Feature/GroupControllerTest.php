@@ -157,6 +157,18 @@ describe('show', function () {
 
         $response->assertForbidden();
     });
+
+    test('denies access to pending members', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+        $group = $member->group;
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertForbidden();
+    });
 });
 
 describe('edit', function () {
@@ -198,6 +210,20 @@ describe('edit', function () {
 
         $response->assertForbidden();
     });
+
+    test('denies access to pending admins', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $response = $this->get(route('groups.edit', $group));
+
+        $response->assertForbidden();
+    });
 });
 
 describe('update', function () {
@@ -214,12 +240,44 @@ describe('update', function () {
         expect($group->owner_id)->toBe($this->user->id); // owner should not change
     });
 
+    test('updates group for admin', function () {
+        $group = Group::factory()->create(['name' => 'Old Name']);
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
+            'status' => \App\Models\MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->patch(route('groups.update', $group), [
+            'name' => 'New Name',
+        ]);
+
+        $response->assertRedirect(route('groups.show', $group));
+        $group->refresh();
+        expect($group->name)->toBe('New Name');
+    });
+
     test('flashes success message on update', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
 
         $this->patch(route('groups.update', $group), ['name' => 'Updated Name'])->assertRedirect();
 
         expect(session('alert')['message'])->toBe('Group updated successfully!');
+    });
+
+    test('denies update to pending admins', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $response = $this->patch(route('groups.update', $group), ['name' => 'New Name']);
+
+        $response->assertForbidden();
     });
 });
 
@@ -298,6 +356,18 @@ describe('approveMember', function () {
         $this->post(route('groups.approve-member', [$group, $pendingMember]))->assertRedirect();
 
         expect(session('alert')['message'])->toBe('Member approved successfully!');
+    });
+
+    test('returns 404 when trying to approve non-pending member', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $approvedMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->post(route('groups.approve-member', [$group, $approvedMember]));
+
+        $response->assertNotFound();
     });
 });
 
@@ -378,6 +448,36 @@ describe('rejectMember', function () {
         $this->post(route('groups.reject-member', [$group, $pendingMember]))->assertRedirect();
 
         expect(session('alert')['message'])->toBe('Join request rejected.');
+    });
+
+    test('denies rejection to pending admins', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+        $pendingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
+
+        $response->assertForbidden();
+    });
+
+    test('returns 404 when trying to reject non-pending member', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $approvedMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->post(route('groups.reject-member', [$group, $approvedMember]));
+
+        $response->assertNotFound();
     });
 });
 
@@ -472,5 +572,17 @@ describe('removeMember', function () {
         $this->delete(route('groups.remove-member', [$group, $approvedMember]))->assertRedirect();
 
         expect(session('alert')['message'])->toBe('Member removed from group.');
+    });
+
+    test('returns 404 when trying to remove non-approved member', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $pendingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => \App\Models\MemberStatus::PENDING->value,
+        ]);
+
+        $response = $this->delete(route('groups.remove-member', [$group, $pendingMember]));
+
+        $response->assertNotFound();
     });
 });

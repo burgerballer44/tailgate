@@ -16,9 +16,9 @@
                                     linkClass="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                     :items="[
                                         ['label' => 'Users', 'route' => 'developer.users.index'],
+                                        ['label' => 'Groups', 'route' => 'developer.groups.index'],
                                         ['label' => 'Teams', 'route' => 'developer.teams.index'],
                                         ['label' => 'Seasons', 'route' => 'developer.seasons.index'],
-                                        ['label' => 'Groups', 'route' => 'developer.groups.index'],
                                     ]"
                                 ></x-navigation.dropdown-nav-links>
                             @endif

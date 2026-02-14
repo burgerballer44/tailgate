@@ -111,6 +111,14 @@ class Member extends Model
     }
 
     /**
+     * Check if the member has admin role.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === GroupRole::GROUP_ADMIN->value;
+    }
+
+    /**
      * Check if the member can be removed by the given user.
      */
     public function canBeRemovedBy(User $user): bool

@@ -73,16 +73,25 @@ Route::middleware('auth')->group(function () {
 
         // groups
         Route::prefix('groups')->name('groups.')->group(function () {
+            // these routes are for creating and joining groups, so they don't require any group membership
             Route::get('create', [GroupController::class, 'create'])->name('create');
             Route::post('/', [GroupController::class, 'store'])->name('store');
             Route::get('join', [GroupController::class, 'join'])->name('join');
             Route::post('join', [GroupController::class, 'requestJoin'])->name('request-join');
-            Route::get('{group}', [GroupController::class, 'show'])->name('show');
-            Route::get('{group}/edit', [GroupController::class, 'edit'])->name('edit');
-            Route::patch('{group}', [GroupController::class, 'update'])->name('update');
-            Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])->name('approve-member');
-            Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])->name('reject-member');
-            Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])->name('remove-member');
+
+            // these routes require the user to be an approved member of the group
+            Route::middleware('group.member')->group(function () {
+                Route::get('{group}', [GroupController::class, 'show'])->name('show');
+            });
+
+            // these routes require the user to be an approved admin of the group
+            Route::middleware('group.admin')->group(function () {
+                Route::get('{group}/edit', [GroupController::class, 'edit'])->name('edit');
+                Route::patch('{group}', [GroupController::class, 'update'])->name('update');
+                Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])->name('approve-member');
+                Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])->name('reject-member');
+                Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])->name('remove-member');
+            });
         });
 
         // This is the developer area.

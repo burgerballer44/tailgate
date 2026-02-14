@@ -3,7 +3,11 @@
     mainDescription="Group details and member information."
     :mainActions="collect([
         ['text' => 'Back to Dashboard', 'route' => 'dashboard'],
-        $userMember->role === \App\Models\GroupRole::GROUP_ADMIN->value || $group->owner_id === auth()->id() ? ['text' => 'Manage Group', 'route' => 'groups.edit', 'params' => ['group' => $group]] : null,
+        $group->isAdminOrOwner(auth()->user()) ? [
+            'text' => 'Manage Group',
+            'route' => 'groups.edit',
+            'params' => ['group' => $group]
+        ] : null,
     ])->filter()->values()->toArray()"
 >
     <div class="space-y-6">
@@ -65,7 +69,7 @@
                                         <div class="text-sm text-gray-500">{{ $member->role }}</div>
                                     </div>
                                 </div>
-                                @if ($member->status === \App\Models\MemberStatus::PENDING->value)
+                                @if ($member->isPending())
                                     <span
                                         class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800"
                                     >

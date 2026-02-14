@@ -148,23 +148,7 @@ class GroupController extends Controller
      */
     public function show(Group $group): View
     {
-        // Ensure user is a member of the group
-        $user = request()->user();
-        $member = $group->members()->where('user_id', $user->id)->first();
-
-        if (!$member) {
-            abort(403, 'You are not a member of this group.');
-        }
-
-        $group->load([
-            'members.user',
-            'owner',
-        ]);
-
-        return view('groups.show', [
-            'group' => $group,
-            'userMember' => $member,
-        ]);
+        return view('groups.show', ['group' => $group]);
     }
 
     /**
@@ -178,24 +162,7 @@ class GroupController extends Controller
      */
     public function edit(Group $group): View
     {
-        // Ensure user is owner or admin
-        $user = request()->user();
-        $member = $group->members()->where('user_id', $user->id)->first();
-
-        if (!$member || !in_array($member->role, [GroupRole::GROUP_ADMIN->value])) {
-            if ($group->owner_id !== $user->id) {
-                abort(403, 'You do not have permission to manage this group.');
-            }
-        }
-
-        $group->load([
-            'members.user',
-            'owner',
-        ]);
-
-        return view('groups.edit', [
-            'group' => $group,
-        ]);
+        return view('groups.edit', ['group' => $group]);
     }
 
     /**
@@ -209,16 +176,6 @@ class GroupController extends Controller
      */
     public function update(UserUpdateGroupRequest $request, Group $group): RedirectResponse
     {
-        // Ensure user is owner or admin
-        $user = request()->user();
-        $member = $group->members()->where('user_id', $user->id)->first();
-
-        if (!$member || !in_array($member->role, [GroupRole::GROUP_ADMIN->value])) {
-            if ($group->owner_id !== $user->id) {
-                abort(403, 'You do not have permission to manage this group.');
-            }
-        }
-
         // the owner_id is required in the DTO for validation purposes
         $this->groupService->update($group, $request->toDTO($group->owner_id));
 
@@ -239,17 +196,7 @@ class GroupController extends Controller
      */
     public function approveMember(Group $group, Member $member): RedirectResponse
     {
-        // Ensure user is owner or admin
-        $user = request()->user();
-        $userMember = $group->members()->where('user_id', $user->id)->first();
-
-        if (!$userMember || !in_array($userMember->role, [GroupRole::GROUP_ADMIN->value])) {
-            if ($group->owner_id !== $user->id) {
-                abort(403, 'You do not have permission to manage this group.');
-            }
-        }
-
-        // Ensure member belongs to this group and is pending
+        // ensure member belongs to this group and is pending
         if ($member->group_id !== $group->id || $member->status !== MemberStatus::PENDING->value) {
             abort(404, 'Invalid member or not pending.');
         }
@@ -279,17 +226,7 @@ class GroupController extends Controller
      */
     public function rejectMember(Group $group, Member $member): RedirectResponse
     {
-        // Ensure user is owner or admin
-        $user = request()->user();
-        $userMember = $group->members()->where('user_id', $user->id)->first();
-
-        if (!$userMember || !in_array($userMember->role, [GroupRole::GROUP_ADMIN->value])) {
-            if ($group->owner_id !== $user->id) {
-                abort(403, 'You do not have permission to manage this group.');
-            }
-        }
-
-        // Ensure member belongs to this group and is pending
+        // ensure member belongs to this group and is pending
         if ($member->group_id !== $group->id || $member->status !== MemberStatus::PENDING->value) {
             abort(404, 'Invalid member or not pending.');
         }
@@ -313,22 +250,12 @@ class GroupController extends Controller
      */
     public function removeMember(Group $group, Member $member): RedirectResponse
     {
-        // Ensure user is owner or admin
-        $user = request()->user();
-        $userMember = $group->members()->where('user_id', $user->id)->first();
-
-        if (!$userMember || !in_array($userMember->role, [GroupRole::GROUP_ADMIN->value])) {
-            if ($group->owner_id !== $user->id) {
-                abort(403, 'You do not have permission to manage this group.');
-            }
-        }
-
-        // Ensure member belongs to this group and is approved
+        // ensure member belongs to this group and is approved
         if ($member->group_id !== $group->id || $member->status !== MemberStatus::APPROVED->value) {
             abort(404, 'Invalid member or not approved.');
         }
 
-        // Cannot remove the owner
+        // cannot remove the owner
         if ($member->user_id === $group->owner_id) {
             abort(403, 'Cannot remove the group owner.');
         }

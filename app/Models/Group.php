@@ -129,4 +129,18 @@ class Group extends Model
     {
         return $this->hasManyThrough(Player::class, Member::class);
     }
+
+    /**
+     * Check if the given user is an admin or the owner of the group.
+     */
+    public function isAdminOrOwner(User $user): bool
+    {
+        if ($this->owner_id === $user->id) {
+            return true;
+        }
+
+        $member = $this->members()->where('user_id', $user->id)->first();
+
+        return $member && $member->isAdmin();
+    }
 }
