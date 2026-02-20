@@ -16,6 +16,8 @@ class Group extends Model
 {
     use HasFactory;
 
+    // TODO: move these to an enum
+
     // the length of the invite code generated for a group upon creation
     public const LENGTH_INVITE_CODE = 10;
 
@@ -142,5 +144,13 @@ class Group extends Model
         $member = $this->members()->where('user_id', $user->id)->first();
 
         return $member && $member->isAdmin();
+    }
+
+    /**
+     * Check if the group is following a team.
+     */
+    public function isFollowingTeam(): bool
+    {
+        return $this->follow()->exists();
     }
 }

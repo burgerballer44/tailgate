@@ -29,4 +29,16 @@ class SeasonFactory extends Factory
             'inactive_date' => fake()->date('Y-m-d'),
         ];
     }
+
+    /**
+     * Indicate that the season is active.
+     */
+    public function active(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'active' => true,
+            'active_date' => now()->format('Y-m-d'),
+            'inactive_date' => '2099-12-28',
+        ]);
+    }
 }

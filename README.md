@@ -4,10 +4,6 @@ The DashboardController displays a user's accessible groups (owned or joined), w
 
 To complete the MVP for normal users, focusing on core functionality first while planning major additions, here is the prioritized list of next steps in order of completion:
 
-1. **Add Group Follow/Unfollow for Admins (High Priority - Core Functionality)**
-    - Add routes/views in GroupController (reuse developer logic: groups/{group}/follow-team create/post/delete).
-    - Why: Prerequisite for games/predictions. Services/DTO ready; unblocks flow.
-
 2. **Implement Player CRUD for Members (High Priority - Core Functionality)**
     - Routes: groups/{group}/players (scoped to own member; authorize).
     - Reuse PlayerService, developer views/forms.

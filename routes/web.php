@@ -91,6 +91,9 @@ Route::middleware('auth')->group(function () {
                 Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])->name('approve-member');
                 Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])->name('reject-member');
                 Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])->name('remove-member');
+                Route::get('{group}/follow-team', [GroupController::class, 'createFollowTeam'])->name('follow-team.create');
+                Route::post('{group}/follow-team', [GroupController::class, 'followTeam'])->name('follow-team');
+                Route::delete('{group}/follow/{follow}', [GroupController::class, 'removeFollow'])->name('follow.destroy');
             });
         });
 

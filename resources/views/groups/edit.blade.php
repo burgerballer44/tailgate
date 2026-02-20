@@ -40,6 +40,47 @@
             </div>
         </div>
 
+        {{-- Follows --}}
+        <div class="overflow-hidden bg-white shadow sm:rounded-md">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Followed Team</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage the team this group is following.</p>
+            </div>
+            <div class="border-t border-gray-200 px-4 py-5 sm:px-6">
+                @if ($group->isFollowingTeam())
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ $group->follow->team->designation }} ({{ $group->follow->team->mascot }})
+                            </div>
+                            <div class="text-sm text-gray-500">{{ $group->follow->season->name }}</div>
+                        </div>
+                        <form
+                            action="{{ route('groups.follow.destroy', ['group' => $group, 'follow' => $group->follow]) }}"
+                            method="POST"
+                            class="inline"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            <x-buttons.danger-button
+                                type="submit"
+                                confirm="Are you sure you want to unfollow this team?"
+                            >
+                                Unfollow Team
+                            </x-buttons.danger-button>
+                        </form>
+                    </div>
+                @else
+                    <div>
+                        <p class="mb-4 text-sm text-gray-500">No team followed yet.</p>
+                        <x-buttons.primary-button>
+                            <a href="{{ route('groups.follow-team.create', $group) }}">Follow a Team</a>
+                        </x-buttons.primary-button>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         {{-- Members --}}
         <div class="bg-white shadow sm:rounded-md">
             <div class="px-4 py-5 sm:px-6">

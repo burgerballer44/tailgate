@@ -26,13 +26,15 @@ class SeasonIsActive implements ValidationRule
         }
 
         $today = (new \DateTime('today'))->format('Y-m-d');
+        $seasonActive = $season->active_date->format('Y-m-d');
+        $seasonInactive = $season->inactive_date->format('Y-m-d');
 
-        if ($season->active_date && $today < $season->active_date) {
+        if ($season->active_date && $today < $seasonActive) {
             $fail('Season has not started yet.');
             return;
         }
 
-        if ($season->inactive_date && $today > $season->inactive_date) {
+        if ($season->inactive_date && $today > $seasonInactive) {
             $fail('Season has ended.');
             return;
         }

@@ -1,8 +1,11 @@
 <?php
 
+use App\Models\Follow;
 use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
+use App\Models\Season;
+use App\Models\Team;
 use App\Models\User;
 
 describe('isAdminOrOwner', function () {
@@ -41,5 +44,19 @@ describe('isAdminOrOwner', function () {
         $nonMemberUser = User::factory()->create();
 
         expect($group->isAdminOrOwner($nonMemberUser))->toBeFalse();
+    });
+});
+
+describe('isFollowingTeam', function () {
+    test('returns true when group has a follow', function () {
+        $follow = Follow::factory()->create();
+
+        expect($follow->group->isFollowingTeam())->toBeTrue();
+    });
+
+    test('returns false when group has no follow', function () {
+        $group = Group::factory()->create();
+
+        expect($group->isFollowingTeam())->toBeFalse();
     });
 });

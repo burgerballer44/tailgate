@@ -6,6 +6,9 @@ use App\Models\Group;
 use App\Models\Member;
 use App\Models\GroupRole;
 use App\Models\MemberStatus;
+use App\Models\Team;
+use App\Models\Season;
+use App\Models\Follow;
 use App\Services\GroupService;
 use App\Services\MemberService;
 use App\DTO\ValidatedMemberData;
@@ -14,6 +17,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UserUpdateGroupRequest;
+use App\Http\Requests\Group\FollowTeamRequest;
 
 /**
  * GroupController handles user-facing group operations.
@@ -148,6 +152,8 @@ class GroupController extends Controller
      */
     public function show(Group $group): View
     {
+        $group->load(['follow.team', 'follow.season']);
+
         return view('groups.show', ['group' => $group]);
     }
 
@@ -162,6 +168,8 @@ class GroupController extends Controller
      */
     public function edit(Group $group): View
     {
+        $group->load(['follow.team', 'follow.season']);
+
         return view('groups.edit', ['group' => $group]);
     }
 
@@ -265,5 +273,63 @@ class GroupController extends Controller
         $this->setFlashAlert('success', 'Member removed from group.');
 
         return redirect()->back();
+    }
+
+    /**
+     * Show the form for following a team.
+     *
+     * This method displays the form where group admins can choose a team and season to follow.
+     *
+     * @param Group $group The group to follow a team for
+     * @return View Returns the follow team view
+     */
+    public function createFollowTeam(Group $group): View
+    {
+        $teams = Team::all();
+        $seasons = Season::all();
+
+        return view('groups.follow-team', compact('group', 'teams', 'seasons'));
+    }
+
+    /**
+     * Follow a team for the group.
+     *
+     * This method processes the follow team request and creates the follow relationship.
+     *
+     * @param FollowTeamRequest $request The validated request containing team and season data
+     * @param Group $group The group to follow the team
+     * @return RedirectResponse Redirects back with success/error messages
+     */
+    public function followTeam(FollowTeamRequest $request, Group $group): RedirectResponse
+    {
+        try {
+            $this->groupService->followTeam($group, $request->toDTO());
+
+            $this->setFlashAlert('success', 'Team followed successfully!');
+
+            return redirect()->route('groups.show', $group);
+        } catch (\Exception $e) {
+            $this->setFlashAlert('error', $e->getMessage());
+
+            return redirect()->back();
+        }
+    }
+
+    /**
+     * Remove a follow relationship.
+     *
+     * This method removes the follow relationship for the group.
+     *
+     * @param Group $group The group to unfollow
+     * @param Follow $follow The follow to remove
+     * @return RedirectResponse Redirects back with success message
+     */
+    public function removeFollow(Group $group, Follow $follow): RedirectResponse
+    {
+        $this->groupService->removeFollow($group);
+
+        $this->setFlashAlert('success', 'Follow removed successfully!');
+
+        return redirect()->route('groups.show', $group);
     }
 }
