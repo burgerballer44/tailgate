@@ -77,6 +77,15 @@ describe('creating a member', function () {
             'role' => $memberData['role'],
             'status' => $memberData['status'],
         ]);
+
+        // retrieve the created member to get the associated player
+        $member = Member::where('user_id', $memberData['user_id'])->where('group_id', $group->id)->first();
+
+        // the player should be created with the member
+        $this->assertDatabaseHas('players', [
+            'member_id' => $member->id,
+            'player_name' => $user->name,
+        ]);
     });
 
     test('flashes success message on store', function () {

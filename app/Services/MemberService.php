@@ -2,15 +2,22 @@
 
 namespace App\Services;
 
-use App\Models\Member;
+use App\DTO\ValidatedMemberData;
+use App\DTO\ValidatedPlayerData;
 use App\Models\Group;
 use App\Models\GroupRole;
+use App\Models\Member;
 use App\Models\MemberStatus;
-use App\DTO\ValidatedMemberData;
+use App\Models\User;
+use App\Services\PlayerService;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class MemberService
 {
+    public function __construct(
+        private PlayerService $playerService
+    ) {}
+
     /**
      * Create a new member for a specific group.
      * This method handles member creation logic within a group context.
@@ -27,7 +34,20 @@ class MemberService
             'status' => $data->status?->value ?? MemberStatus::APPROVED->value,
         ];
 
-        return $group->members()->create($memberData);
+        $member = $group->members()->create($memberData);
+
+        // retrieve the user to get their name for the player
+        $user = User::find($data->user_id);
+
+        // create a ValidatedPlayerData DTO for the player service
+        $playerData = ValidatedPlayerData::fromArray([
+            'player_name' => $user->name,
+        ]);
+
+        // create a new player associated with the member using the PlayerService
+        $this->playerService->createForMember($member, $playerData);
+
+        return $member;
     }
 
     /**

@@ -1,15 +1,16 @@
 <?php
 
-use App\Models\Member;
-use App\Models\Group;
-use App\Models\User;
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
-use App\Services\MemberService;
 use App\DTO\ValidatedMemberData;
+use App\Models\Group;
+use App\Models\GroupRole;
+use App\Models\Member;
+use App\Models\MemberStatus;
+use App\Models\User;
+use App\Services\MemberService;
+use App\Services\PlayerService;
 
 beforeEach(function () {
-    $this->service = new MemberService();
+    $this->service = new MemberService(new PlayerService());
 });
 
 describe('create a member for group', function () {

@@ -18,7 +18,7 @@ use App\DTO\ValidatedPlayerData;
 use App\DTO\ValidatedFollowData;
 
 beforeEach(function () {
-    $this->service = new GroupService(new MemberService(), new PlayerService());
+    $this->service = new GroupService(new MemberService(new PlayerService()), new PlayerService());
 });
 
 describe('create a group', function () {
