@@ -9,8 +9,9 @@ use App\Models\MemberStatus;
 use App\Models\Team;
 use App\Models\Season;
 use App\Models\Follow;
-use App\Services\GroupService;
-use App\Services\MemberService;
+use App\Services\Contracts\GroupCommandInterface;
+use App\Services\Contracts\GroupQueryInterface;
+use App\Services\Contracts\MemberCommandInterface;
 use App\DTO\ValidatedMemberData;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
@@ -35,8 +36,9 @@ class GroupController extends Controller
      * keeping the controller focused on HTTP request/response handling.
      */
     public function __construct(
-        private GroupService $groupService,
-        private MemberService $memberService
+        private GroupCommandInterface $groupCommandService,
+        private GroupQueryInterface $groupQueryService,
+        private MemberCommandInterface $memberCommandService
     ) {}
 
     /**
@@ -66,7 +68,7 @@ class GroupController extends Controller
     public function store(StoreGroupRequest $request): RedirectResponse
     {
         // create the group
-        $group = $this->groupService->create($request->toDTO());
+        $group = $this->groupCommandService->create($request->toDTO());
 
         // set a success flash message that includes the invite code for the user to share
         $this->setFlashAlert('success', 'Group created successfully! Invite code: ' . $group->invite_code);
@@ -105,7 +107,7 @@ class GroupController extends Controller
         $request->validate(['invite_code' => 'required|string']);
 
         // find the group by invite code
-        $group = $this->groupService->findByInviteCode($request->invite_code);
+        $group = $this->groupQueryService->findByInviteCode($request->invite_code);
 
         // if no group found with that code, show error and redirect back
         if (!$group) {
@@ -115,13 +117,13 @@ class GroupController extends Controller
 
         // check if the current user is already a member of this group
         // this prevents duplicate memberships
-        if (GroupService::isUserAlreadyMember($group, $request->user()->id)) {
+        if ($this->groupQueryService->isUserAlreadyMember($group, $request->user()->id)) {
             $this->setFlashAlert('error', 'You are already a member of this group.');
             return redirect()->back();
         }
 
         // check if the group has reached its member limit
-        if (GroupService::isGroupMemberLimitReached($group)) {
+        if ($this->groupQueryService->isGroupMemberLimitReached($group)) {
             $this->setFlashAlert('error', 'Group member limit reached.');
             return redirect()->back();
         }
@@ -133,7 +135,7 @@ class GroupController extends Controller
             'status' => MemberStatus::PENDING,
         ]);
 
-        $this->groupService->addMember($group, $memberData);
+        $this->groupCommandService->addMember($group, $memberData);
 
         // show success message and redirect to dashboard
         $this->setFlashAlert('success', 'Successfully joined the group!');
@@ -185,7 +187,7 @@ class GroupController extends Controller
     public function update(UserUpdateGroupRequest $request, Group $group): RedirectResponse
     {
         // the owner_id is required in the DTO for validation purposes
-        $this->groupService->update($group, $request->toDTO($group->owner_id));
+        $this->groupCommandService->update($group, $request->toDTO($group->owner_id));
 
         $this->setFlashAlert('success', 'Group updated successfully!');
 
@@ -215,7 +217,7 @@ class GroupController extends Controller
             'status' => MemberStatus::APPROVED,
         ]);
 
-        $this->memberService->update($member, $memberData);
+        $this->memberCommandService->update($member, $memberData);
 
         $this->setFlashAlert('success', 'Member approved successfully!');
 
@@ -239,7 +241,7 @@ class GroupController extends Controller
             abort(404, 'Invalid member or not pending.');
         }
 
-        $this->memberService->delete($member);
+        $this->memberCommandService->delete($member);
 
         $this->setFlashAlert('success', 'Join request rejected.');
 
@@ -268,7 +270,7 @@ class GroupController extends Controller
             abort(403, 'Cannot remove the group owner.');
         }
 
-        $this->memberService->delete($member);
+        $this->memberCommandService->delete($member);
 
         $this->setFlashAlert('success', 'Member removed from group.');
 
@@ -303,7 +305,7 @@ class GroupController extends Controller
     public function followTeam(FollowTeamRequest $request, Group $group): RedirectResponse
     {
         try {
-            $this->groupService->followTeam($group, $request->toDTO());
+            $this->groupCommandService->followTeam($group, $request->toDTO());
 
             $this->setFlashAlert('success', 'Team followed successfully!');
 
@@ -326,7 +328,7 @@ class GroupController extends Controller
      */
     public function removeFollow(Group $group, Follow $follow): RedirectResponse
     {
-        $this->groupService->removeFollow($group);
+        $this->groupCommandService->removeFollow($group);
 
         $this->setFlashAlert('success', 'Follow removed successfully!');
 

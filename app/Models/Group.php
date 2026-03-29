@@ -68,9 +68,15 @@ class Group extends Model
     {
         static::creating(function ($group) {
             $group->ulid = Str::ulid();
-            $group->invite_code = substr(str_shuffle('23456789ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, self::LENGTH_INVITE_CODE);
-            $group->member_limit = self::INITIAL_MEMBER_LIMIT;
-            $group->player_limit = self::INITIAL_PLAYER_LIMIT;
+            if (!$group->invite_code) {
+                $group->invite_code = substr(str_shuffle('23456789ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, self::LENGTH_INVITE_CODE);
+            }
+            if (!$group->member_limit) {
+                $group->member_limit = self::INITIAL_MEMBER_LIMIT;
+            }
+            if (!$group->player_limit) {
+                $group->player_limit = self::INITIAL_PLAYER_LIMIT;
+            }
         });
 
         static::created(function ($group) {
@@ -86,7 +92,7 @@ class Group extends Model
      * Scope to filter groups based on the provided filters.
      */
     #[Scope]
-    protected function filter(Builder $builder, array $filters)
+    public static function filter(Builder $builder, array $filters)
     {
         if ($q = $filters['q'] ?? null) {
             $builder->where(function ($query) use ($q) {
@@ -97,6 +103,10 @@ class Group extends Model
 
         if (isset($filters['owner_id'])) {
             $builder->where('owner_id', $filters['owner_id']);
+        }
+
+        if (isset($filters['name'])) {
+            $builder->where('name', 'like', '%' . $filters['name'] . '%');
         }
 
         return $builder;

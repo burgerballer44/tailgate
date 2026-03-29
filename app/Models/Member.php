@@ -58,7 +58,7 @@ class Member extends Model
      * Scope to filter members based on the provided filters.
      */
     #[Scope]
-    protected function filter(Builder $builder, array $filters)
+    public static function filter(Builder $builder, array $filters)
     {
         if (isset($filters['user_id'])) {
             $builder->where('user_id', $filters['user_id']);
@@ -66,6 +66,10 @@ class Member extends Model
 
         if (isset($filters['group_id'])) {
             $builder->where('group_id', $filters['group_id']);
+        }
+
+        if (isset($filters['status'])) {
+            $builder->where('status', $filters['status']);
         }
 
         return $builder;

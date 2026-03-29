@@ -7,9 +7,9 @@ use App\Models\Member;
 use App\Models\Score;
 use App\DTO\ValidatedPlayerData;
 use App\DTO\ValidatedScoreData;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use App\Services\Contracts\PlayerCommandInterface;
 
-class PlayerService
+class PlayerCommandService implements PlayerCommandInterface
 {
     /**
      * Create a new player for a specific member.
@@ -63,18 +63,6 @@ class PlayerService
     public function delete(Player $player): void
     {
         $player->delete();
-    }
-
-    /**
-     * Filter players based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
-     *
-     * @param array $query An associative array of query parameters to filter players.
-     * @return Builder A query builder instance for the filtered players.
-     */
-    public function query(array $query)
-    {
-        return Player::filter($query ?? []);
     }
 
     /**

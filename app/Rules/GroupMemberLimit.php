@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Services\GroupService;
+use App\Services\Contracts\GroupQueryInterface;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -15,7 +15,7 @@ class GroupMemberLimit implements ValidationRule
     {
         $group = request()->route('group');
 
-        if (GroupService::isGroupMemberLimitReached($group)) {
+        if (app(GroupQueryInterface::class)->isGroupMemberLimitReached($group)) {
             $fail('Group member limit reached.');
         }
     }

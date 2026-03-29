@@ -6,8 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Game;
 use App\Models\Season;
 use Illuminate\Http\Request;
-use App\Services\GameService;
-use App\Services\SeasonService;
+use App\Services\Contracts\GameCommandInterface;
+use App\Services\Contracts\GameQueryInterface;
+use App\Services\Contracts\SeasonCommandInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controllers\Middleware;
@@ -26,15 +27,16 @@ class DeveloperGameController extends Controller implements HasMiddleware
     }
 
     public function __construct(
-        private GameService $gameService,
-        private SeasonService $seasonService
+        private GameCommandInterface $gameCommandService,
+        private GameQueryInterface $gameQueryService,
+        private SeasonCommandInterface $seasonCommandService
     ) {}
 
     public function index(Season $season, Request $request): View
     {
         return view('developer.games.index', [
             'season' => $season,
-            'games' => $this->gameService->query(['season_id' => $season->id])->paginate(),
+            'games' => $this->gameQueryService->query(['season_id' => $season->id])->paginate(),
         ]);
     }
 
@@ -42,13 +44,13 @@ class DeveloperGameController extends Controller implements HasMiddleware
     {
         return view('developer.games.create', [
             'season' => $season,
-            'teams' => $this->gameService->getAvailableTeamsForSeason($season),
+            'teams' => $this->gameQueryService->getAvailableTeamsForSeason($season),
         ]);
     }
 
     public function store(Season $season, AddGameRequest $request): RedirectResponse
     {
-        $game = $this->seasonService->addGame($season, $request->toDTO());
+        $game = $this->seasonCommandService->addGame($season, $request->toDTO());
 
         $this->setFlashAlert('success', 'Game created successfully!');
 
@@ -68,13 +70,13 @@ class DeveloperGameController extends Controller implements HasMiddleware
         return view('developer.games.edit', [
             'season' => $season,
             'game' => $game,
-            'teams' => $this->gameService->getAvailableTeamsForSeason($season),
+            'teams' => $this->gameQueryService->getAvailableTeamsForSeason($season),
         ]);
     }
 
     public function update(Season $season, Game $game, UpdateGameRequest $request): RedirectResponse
     {
-        $game = $this->gameService->update($game, $request->toDTO());
+        $this->gameCommandService->update($game, $request->toDTO());
 
         $this->setFlashAlert('success', 'Game updated successfully!');
 
@@ -83,7 +85,7 @@ class DeveloperGameController extends Controller implements HasMiddleware
 
     public function destroy(Season $season, Game $game): RedirectResponse
     {
-        $this->gameService->delete($game);
+        $this->gameCommandService->delete($game);
 
         $this->setFlashAlert('success', 'Game deleted successfully!');
 

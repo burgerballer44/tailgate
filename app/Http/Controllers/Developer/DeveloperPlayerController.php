@@ -8,7 +8,7 @@ use App\Models\Group;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Score;
-use App\Services\PlayerService;
+use App\Services\Contracts\PlayerCommandInterface;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +20,7 @@ use App\Http\Requests\Group\UpdateScoreRequest;
 class DeveloperPlayerController extends Controller
 {
     public function __construct(
-        private PlayerService $playerService
+        private PlayerCommandInterface $playerCommandService
     ) {}
 
     public function index(Request $request, Group $group, Member $member): View
@@ -42,7 +42,7 @@ class DeveloperPlayerController extends Controller
 
     public function store(StorePlayerRequest $request, Group $group, Member $member): RedirectResponse
     {
-        $this->playerService->createForMember($member, $request->toDTO());
+        $this->playerCommandService->createForMember($member, $request->toDTO());
 
         $this->setFlashAlert('success', 'Player added successfully!');
 
@@ -70,7 +70,7 @@ class DeveloperPlayerController extends Controller
 
     public function update(UpdatePlayerRequest $request, Group $group, Member $member, Player $player): RedirectResponse
     {
-        $this->playerService->update($player, $request->toDTO());
+        $this->playerCommandService->update($player, $request->toDTO());
 
         $this->setFlashAlert('success', 'Player updated successfully!');
 
@@ -79,7 +79,7 @@ class DeveloperPlayerController extends Controller
 
     public function destroy(Group $group, Member $member, Player $player): RedirectResponse
     {
-        $this->playerService->delete($player);
+        $this->playerCommandService->delete($player);
 
         $this->setFlashAlert('success', 'Player removed successfully!');
 
@@ -103,7 +103,7 @@ class DeveloperPlayerController extends Controller
 
     public function submitScore(SubmitScoreRequest $request, Group $group, Member $member, Player $player): RedirectResponse
     {
-        $this->playerService->submitScore($player, $request->toDTO());
+        $this->playerCommandService->submitScore($player, $request->toDTO());
 
         $this->setFlashAlert('success', 'Score submitted successfully!');
 
@@ -112,7 +112,7 @@ class DeveloperPlayerController extends Controller
 
     public function updateScore(UpdateScoreRequest $request, Group $group, Member $member, Player $player, Score $score): RedirectResponse
     {
-        $this->playerService->updateScore($score, $request->toDTO());
+        $this->playerCommandService->updateScore($score, $request->toDTO());
 
         $this->setFlashAlert('success', 'Score updated successfully!');
 
@@ -131,7 +131,7 @@ class DeveloperPlayerController extends Controller
 
     public function destroyScore(Group $group, Member $member, Player $player, Score $score): RedirectResponse
     {
-        $this->playerService->deleteScore($score);
+        $this->playerCommandService->deleteScore($score);
 
         $this->setFlashAlert('success', 'Score deleted successfully!');
 

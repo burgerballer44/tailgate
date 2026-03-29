@@ -9,13 +9,13 @@ use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\User;
-use App\Services\PlayerService;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use App\Services\Contracts\MemberCommandInterface;
+use App\Services\Contracts\PlayerCommandInterface;
 
-class MemberService
+class MemberCommandService implements MemberCommandInterface
 {
     public function __construct(
-        private PlayerService $playerService
+        private PlayerCommandInterface $playerCommandService
     ) {}
 
     /**
@@ -45,7 +45,7 @@ class MemberService
         ]);
 
         // create a new player associated with the member using the PlayerService
-        $this->playerService->createForMember($member, $playerData);
+        $this->playerCommandService->createForMember($member, $playerData);
 
         return $member;
     }
@@ -95,17 +95,5 @@ class MemberService
         }
 
         $member->delete();
-    }
-
-    /**
-     * Filter members based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
-     *
-     * @param array $query An associative array of query parameters to filter members.
-     * @return Builder A query builder instance for the filtered members.
-     */
-    public function query(array $query)
-    {
-        return Member::filter($query ?? []);
     }
 }

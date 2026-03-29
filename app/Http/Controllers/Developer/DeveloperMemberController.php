@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\User;
-use App\Services\MemberService;
+use App\Services\Contracts\MemberCommandInterface;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +16,7 @@ use App\Http\Requests\Group\UpdateMemberRequest;
 class DeveloperMemberController extends Controller
 {
     public function __construct(
-        private MemberService $memberService
+        private MemberCommandInterface $memberCommandService
     ) {}
 
     public function index(Request $request, Group $group): View
@@ -37,7 +37,7 @@ class DeveloperMemberController extends Controller
 
     public function store(StoreMemberRequest $request, Group $group): RedirectResponse
     {
-        $this->memberService->createForGroup($group, $request->toDTO());
+        $this->memberCommandService->createForGroup($group, $request->toDTO());
 
         $this->setFlashAlert('success', 'Member added successfully!');
 
@@ -64,7 +64,7 @@ class DeveloperMemberController extends Controller
 
     public function update(UpdateMemberRequest $request, Group $group, Member $member): RedirectResponse
     {
-        $this->memberService->update($member, $request->toDTO());
+        $this->memberCommandService->update($member, $request->toDTO());
 
         $this->setFlashAlert('success', 'Member updated successfully!');
 
@@ -73,7 +73,7 @@ class DeveloperMemberController extends Controller
 
     public function destroy(Group $group, Member $member): RedirectResponse
     {
-        $this->memberService->delete($member);
+        $this->memberCommandService->delete($member);
 
         $this->setFlashAlert('success', 'Member removed successfully!');
 

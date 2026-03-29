@@ -9,7 +9,8 @@ use App\Models\Group;
 use App\Models\Follow;
 use App\Models\Season;
 use Illuminate\Http\Request;
-use App\Services\GroupService;
+use App\Services\Contracts\GroupCommandInterface;
+use App\Services\Contracts\GroupQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Group\FollowTeamRequest;
@@ -19,13 +20,14 @@ use App\Http\Requests\Group\UpdateGroupRequest;
 class DeveloperGroupController extends Controller
 {
     public function __construct(
-        private GroupService $groupService
+        private GroupCommandInterface $groupCommandService,
+        private GroupQueryInterface $groupQueryService
     ) {}
 
     public function index(Request $request): View
     {
         return view('developer.groups.index', [
-            'groups' => $this->groupService->query($request->query())->paginate(),
+            'groups' => $this->groupQueryService->query($request->query())->paginate(),
             'users' => User::get(),
         ]);
     }
@@ -39,7 +41,7 @@ class DeveloperGroupController extends Controller
 
     public function store(StoreGroupRequest $request): RedirectResponse
     {
-        $this->groupService->create($request->toDTO());
+        $this->groupCommandService->create($request->toDTO());
 
         $this->setFlashAlert('success', 'Group created successfully!');
 
@@ -84,7 +86,7 @@ class DeveloperGroupController extends Controller
 
     public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
-        $this->groupService->update($group, $request->toDTO());
+        $this->groupCommandService->update($group, $request->toDTO());
 
         $this->setFlashAlert('success', 'Group updated successfully!');
 
@@ -93,7 +95,7 @@ class DeveloperGroupController extends Controller
 
     public function destroy(Group $group): RedirectResponse
     {
-        $this->groupService->delete($group);
+        $this->groupCommandService->delete($group);
 
         $this->setFlashAlert('success', 'Group deleted successfully!');
 
@@ -111,7 +113,7 @@ class DeveloperGroupController extends Controller
     public function followTeam(FollowTeamRequest $request, Group $group): RedirectResponse
     {
         try {
-            $this->groupService->followTeam($group, $request->toDTO());
+            $this->groupCommandService->followTeam($group, $request->toDTO());
 
             $this->setFlashAlert('success', 'Team followed successfully!');
 
@@ -125,7 +127,7 @@ class DeveloperGroupController extends Controller
 
     public function removeFollow(Group $group, Follow $follow): RedirectResponse
     {
-        $this->groupService->removeFollow($group);
+        $this->groupCommandService->removeFollow($group);
 
         $this->setFlashAlert('success', 'Follow removed successfully!');
 
