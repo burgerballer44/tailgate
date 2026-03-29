@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
-use App\Services\UserService;
+use App\Services\Contracts\UserCommandInterface;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
@@ -11,7 +11,7 @@ use Illuminate\Validation\Rules\Password;
 class PasswordController extends Controller
 {
     public function __construct(
-        private UserService $userService
+        private UserCommandInterface $userCommandService
     ) {}
 
     /**
@@ -24,7 +24,7 @@ class PasswordController extends Controller
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
-        $user = $this->userService->changePassword($request->user(), $validated['password']);
+        $user = $this->userCommandService->changePassword($request->user(), $validated['password']);
 
         $this->setFlashAlert('success', 'Password updated successfully!');
 

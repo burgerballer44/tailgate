@@ -83,22 +83,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get all groups the user can access: groups they own or are members of.
-     */
-    public function getAccessibleGroups()
-    {
-        return Group::where('owner_id', $this->id)
-            ->orWhereHas('members', function ($query) {
-                $query->where('user_id', $this->id);
-            })
-            ->with('owner')
-            ->with(['members' => function ($query) {
-                $query->where('user_id', $this->id);
-            }])
-            ->get();
-    }
-
-    /**
      * Check if the user is the owner of the given group.
      */
     public function isOwnerOf(Group $group): bool

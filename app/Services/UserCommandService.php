@@ -2,19 +2,18 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\UserStatus;
-use App\Models\UserRole;
-use Illuminate\Support\Str;
 use App\DTO\ValidatedUserData;
+use App\Models\User;
+use App\Services\Contracts\UserCommandInterface;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
-class UserService
+class UserCommandService implements UserCommandInterface
 {
     /**
      * Create a new user with the provided data.
-     * This method handles user creation logic, including password hashing. If password is null, a random password is generated.
+     * This method handles user creation logic, including password hashing.
+     * If password is null, a random password is generated.
      *
      * @param  ValidatedUserData  $data  Validated user data including name, email, password, status, role.
      * @return User The created user instance.
@@ -99,7 +98,6 @@ class UserService
         return $user;
     }
 
-
     /**
      * Delete a user from the system.
      * This method permanently removes the user.
@@ -134,17 +132,5 @@ class UserService
     public static function checkPassword(string $password, string $hashedPassword): bool
     {
         return Hash::check($password, $hashedPassword);
-    }
-
-    /**
-     * Filter users based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
-     *
-     * @param  array  $query  An associative array of query parameters to filter users.
-     * @return Builder A query builder instance for the filtered users.
-     */
-    public function query(array $query)
-    {
-        return User::filter($query);
     }
 }

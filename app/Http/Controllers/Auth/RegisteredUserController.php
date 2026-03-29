@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\DTO\ValidatedUserData;
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserRole;
-use Illuminate\View\View;
 use App\Models\UserStatus;
-use Illuminate\Http\Request;
-use App\Services\UserService;
-use App\DTO\ValidatedUserData;
-use Illuminate\Validation\Rules;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
+use App\Services\Contracts\UserCommandInterface;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules;
+use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
     public function __construct(
-        private UserService $userService
+        private UserCommandInterface $userCommandService
     ) {}
 
     /**
@@ -42,7 +42,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = $this->userService->create(ValidatedUserData::fromArray([
+        $user = $this->userCommandService->create(ValidatedUserData::fromArray([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,

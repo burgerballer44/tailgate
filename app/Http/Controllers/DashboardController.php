@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 
 /**
  * DashboardController handles the main user dashboard.
@@ -14,6 +15,8 @@ use Illuminate\Contracts\View\View;
  */
 class DashboardController extends Controller
 {
+    public function __construct(private UserQueryInterface $userQueryService) {}
+
     /**
      * Display the user dashboard.
      *
@@ -31,11 +34,8 @@ class DashboardController extends Controller
         $user = $request->user();
 
         // retrieve all groups the user can access: groups they own or are members of
-        $groups = $user->getAccessibleGroups();
+        $groups = $this->userQueryService->getAccessibleGroups($user);
 
-        // Return the dashboard view with the data needed for display
-        // Currently we pass groups and user data; this will expand as we add
-        // more dashboard features like upcoming games, recent predictions, etc.
         return view('dashboard', [
             'groups' => $groups,
             'user' => $user,

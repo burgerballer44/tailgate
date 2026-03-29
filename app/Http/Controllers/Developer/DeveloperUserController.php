@@ -7,7 +7,8 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
 use Illuminate\Http\Request;
-use App\Services\UserService;
+use App\Services\Contracts\UserCommandInterface;
+use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\User\StoreUserRequest;
@@ -16,13 +17,14 @@ use App\Http\Requests\User\UpdateUserRequest;
 class DeveloperUserController extends Controller
 {
     public function __construct(
-        private UserService $userService
+        private UserCommandInterface $userCommandService,
+        private UserQueryInterface $userQueryService
     ) {}
     
     public function index(Request $request): View
     {
         return view('developer.users.index', [
-            'users' => $this->userService->query($request->all())->paginate(),
+            'users' => $this->userQueryService->query($request->all())->paginate(),
             'statuses' => collect(UserStatus::cases())->pluck('value'),
             'roles' => collect(UserRole::cases())->pluck('value'),
         ]);
@@ -38,7 +40,7 @@ class DeveloperUserController extends Controller
 
     public function store(StoreUserRequest $request): RedirectResponse
     {
-        $this->userService->create($request->toDTO());
+        $this->userCommandService->create($request->toDTO());
 
         $this->setFlashAlert('success', 'User created successfully!');
 
@@ -61,7 +63,7 @@ class DeveloperUserController extends Controller
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $this->userService->updateProfile($user, $request->toDTO());
+        $this->userCommandService->updateProfile($user, $request->toDTO());
 
         $this->setFlashAlert('success', 'User updated successfully!');
 
@@ -70,7 +72,7 @@ class DeveloperUserController extends Controller
 
     public function destroy(User $user): RedirectResponse
     {
-        $this->userService->delete($user);
+        $this->userCommandService->delete($user);
 
         $this->setFlashAlert('success', 'User deleted successfully!');
 

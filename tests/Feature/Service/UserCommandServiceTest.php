@@ -4,11 +4,11 @@ use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
 use Illuminate\Support\Str;
-use App\Services\UserService;
+use App\Services\UserCommandService;
 use App\DTO\ValidatedUserData;
 
 beforeEach(function () {
-    $this->service = new UserService();
+    $this->service = new UserCommandService();
 });
 
 describe('create a user', function () {

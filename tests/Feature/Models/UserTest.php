@@ -5,6 +5,7 @@ use App\Models\UserStatus;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Services\UserQueryService;
 
 describe('activate', function () {
     test('a user can be activated', function () {
@@ -17,64 +18,6 @@ describe('activate', function () {
     });
 });
 
-describe('getAccessibleGroups', function () {
-    test('returns groups where user is owner', function () {
-        $user = User::factory()->create();
-        $ownedGroup = Group::factory()->create(['owner_id' => $user->id]);
-        $otherGroup = Group::factory()->create();
-
-        $groups = $user->getAccessibleGroups();
-
-        expect($groups)->toHaveCount(1);
-        expect($groups->first()->id)->toBe($ownedGroup->id);
-    });
-
-    test('returns groups where user is approved member', function () {
-        $user = User::factory()->create();
-        $group = Group::factory()->create();
-        Member::factory()->create([
-            'user_id' => $user->id,
-            'group_id' => $group->id,
-            'status' => MemberStatus::APPROVED,
-        ]);
-
-        $groups = $user->getAccessibleGroups();
-
-        expect($groups)->toHaveCount(1);
-        expect($groups->first()->id)->toBe($group->id);
-    });
-
-    test('returns groups where user is pending member', function () {
-        $user = User::factory()->create();
-        $group = Group::factory()->create();
-        Member::factory()->create([
-            'user_id' => $user->id,
-            'group_id' => $group->id,
-            'status' => MemberStatus::PENDING,
-        ]);
-
-        $groups = $user->getAccessibleGroups();
-
-        expect($groups)->toHaveCount(1);
-        expect($groups->first()->id)->toBe($group->id);
-    });
-
-    test('returns both owned and approved groups', function () {
-        $user = User::factory()->create();
-        $ownedGroup = Group::factory()->create(['owner_id' => $user->id]);
-        $approvedGroup = Group::factory()->create();
-        Member::factory()->create([
-            'user_id' => $user->id,
-            'group_id' => $approvedGroup->id,
-            'status' => MemberStatus::APPROVED,
-        ]);
-
-        $groups = $user->getAccessibleGroups();
-
-        expect($groups)->toHaveCount(2);
-        expect($groups->pluck('id'))->toContain($ownedGroup->id, $approvedGroup->id);
-    });
-});
 
 describe('isOwnerOf', function () {
     test('returns true when user is the owner of the group', function () {
@@ -102,7 +45,8 @@ describe('getMembershipStatus', function () {
             'status' => MemberStatus::APPROVED,
         ]);
 
-        $groups = $user->getAccessibleGroups();
+        $queryService = new UserQueryService();
+        $groups = $queryService->getAccessibleGroups($user);
         $groupWithMembership = $groups->first();
 
         expect($user->getMembershipStatus($groupWithMembership))->toBe('Approved');
@@ -133,7 +77,8 @@ describe('canAccessGroup', function () {
             'status' => MemberStatus::APPROVED,
         ]);
 
-        $groups = $user->getAccessibleGroups();
+        $queryService = new UserQueryService();
+        $groups = $queryService->getAccessibleGroups($user);
         $groupWithMembership = $groups->first();
 
         expect($user->canAccessGroup($groupWithMembership))->toBeTrue();
@@ -148,7 +93,8 @@ describe('canAccessGroup', function () {
             'status' => MemberStatus::PENDING,
         ]);
 
-        $groups = $user->getAccessibleGroups();
+        $queryService = new UserQueryService();
+        $groups = $queryService->getAccessibleGroups($user);
         $groupWithMembership = $groups->first();
 
         expect($user->canAccessGroup($groupWithMembership))->toBeFalse();

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Services\UserService;
+use App\Services\Contracts\UserCommandInterface;
 use Illuminate\Validation\Rules;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +15,7 @@ use Illuminate\Auth\Events\PasswordReset;
 class NewPasswordController extends Controller
 {
     public function __construct(
-        private UserService $userService
+        private UserCommandInterface $userCommandService
     ) {}
 
     /**
@@ -45,7 +45,7 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
-                $user = $this->userService->resetPassword($user, $request->password, Str::random(60));
+                $user = $this->userCommandService->resetPassword($user, $request->password, Str::random(60));
 
                 event(new PasswordReset($user));
             }
