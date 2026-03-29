@@ -2,14 +2,15 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use App\Models\Group;
 use App\Models\GroupRole;
+use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Member>
+ * @extends Factory<Member>
  */
 class MemberFactory extends Factory
 {

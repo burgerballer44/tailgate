@@ -1,14 +1,14 @@
 <?php
 
-use App\Models\Team;
-use App\Models\Sport;
-use App\Models\TeamType;
-use Illuminate\Support\Str;
-use App\Services\TeamCommandService;
 use App\DTO\ValidatedTeamData;
+use App\Models\Sport;
+use App\Models\Team;
+use App\Models\TeamType;
+use App\Services\TeamCommandService;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
-    $this->service = new TeamCommandService();
+    $this->service = new TeamCommandService;
 });
 
 describe('create a team', function () {
@@ -37,7 +37,7 @@ describe('create a team', function () {
         expect($team->mascot)->toBe($data['mascot']);
         expect($team->type)->toBe($data['type']);
         expect($team->sports->pluck('sport')->toArray())->toBe([Sport::BASKETBALL]);
-        expect(Str::isUlid((string)$team->ulid))->toBeTrue();
+        expect(Str::isUlid((string) $team->ulid))->toBeTrue();
     });
 });
 

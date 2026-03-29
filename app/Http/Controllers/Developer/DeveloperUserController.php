@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
-use Illuminate\Http\Request;
 use App\Services\Contracts\UserCommandInterface;
 use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\User\StoreUserRequest;
-use App\Http\Requests\User\UpdateUserRequest;
+use Illuminate\Http\Request;
 
 class DeveloperUserController extends Controller
 {
@@ -20,7 +20,7 @@ class DeveloperUserController extends Controller
         private UserCommandInterface $userCommandService,
         private UserQueryInterface $userQueryService
     ) {}
-    
+
     public function index(Request $request): View
     {
         return view('developer.users.index', [

@@ -15,13 +15,15 @@ class SeasonIsActive implements ValidationRule
     {
         $season = Season::where('id', $value)->first();
 
-        if (!$season) {
+        if (! $season) {
             $fail('Season not found.');
+
             return;
         }
 
-        if (!$season->active) {
+        if (! $season->active) {
             $fail('Season is not active.');
+
             return;
         }
 
@@ -31,11 +33,13 @@ class SeasonIsActive implements ValidationRule
 
         if ($season->active_date && $today < $seasonActive) {
             $fail('Season has not started yet.');
+
             return;
         }
 
         if ($season->inactive_date && $today > $seasonInactive) {
             $fail('Season has ended.');
+
             return;
         }
     }

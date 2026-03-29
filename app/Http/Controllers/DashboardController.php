@@ -25,7 +25,7 @@ class DashboardController extends Controller
      * The dashboard acts as the entry point after login, helping users understand
      * their current state in the application and guiding them toward next actions.
      *
-     * @param Request $request The incoming HTTP request containing user session data
+     * @param  Request  $request  The incoming HTTP request containing user session data
      * @return View Returns the dashboard view with user-specific data
      */
     public function index(Request $request): View

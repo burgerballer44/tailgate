@@ -7,6 +7,7 @@ use App\Models\MemberStatus;
 use App\Rules\GroupAdminMinimum;
 use App\Rules\GroupMemberLimit;
 use App\Rules\MustNotBeAMember;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Enum;
 
 trait MemberValidationRulesTrait
@@ -14,7 +15,7 @@ trait MemberValidationRulesTrait
     /**
      * Get the base validation rules for member fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function baseMemberRules(): array
     {
@@ -27,7 +28,7 @@ trait MemberValidationRulesTrait
     /**
      * Get the validation rules for creating a member.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function createMemberRules(): array
     {
@@ -40,7 +41,7 @@ trait MemberValidationRulesTrait
     /**
      * Get the validation rules for updating a member.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function updateMemberRules(): array
     {

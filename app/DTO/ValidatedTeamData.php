@@ -16,7 +16,7 @@ readonly class ValidatedTeamData
     ) {}
 
     public static function fromArray(array $data): self
-    {   
+    {
         // convert sports values to Sport enum instances
         $sports = [];
         if (isset($data['sports']) && is_array($data['sports'])) {

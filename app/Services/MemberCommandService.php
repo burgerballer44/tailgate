@@ -22,8 +22,8 @@ class MemberCommandService implements MemberCommandInterface
      * Create a new member for a specific group.
      * This method handles member creation logic within a group context.
      *
-     * @param Group $group The group to add the member to.
-     * @param ValidatedMemberData $data Validated member data including user_id and role.
+     * @param  Group  $group  The group to add the member to.
+     * @param  ValidatedMemberData  $data  Validated member data including user_id and role.
      * @return Member The created member instance.
      */
     public function createForGroup(Group $group, ValidatedMemberData $data): Member
@@ -54,8 +54,8 @@ class MemberCommandService implements MemberCommandInterface
      * Update a member's information.
      * This method modifies member details.
      *
-     * @param Member $member The member to update.
-     * @param ValidatedMemberData $data Validated data containing member information to update.
+     * @param  Member  $member  The member to update.
+     * @param  ValidatedMemberData  $data  Validated data containing member information to update.
      * @return Member The updated member instance.
      */
     public function update(Member $member, ValidatedMemberData $data): Member
@@ -80,7 +80,8 @@ class MemberCommandService implements MemberCommandInterface
      * Delete a member from the system.
      * This method permanently removes the member.
      *
-     * @param Member $member The member to delete.
+     * @param  Member  $member  The member to delete.
+     *
      * @throws \Exception If deleting would violate admin minimum requirements.
      */
     public function delete(Member $member): void
@@ -88,7 +89,7 @@ class MemberCommandService implements MemberCommandInterface
         $group = $member->group;
 
         if (
-            $group->admin->count() == \App\Models\Group::MIN_NUMBER_ADMINS &&
+            $group->admin->count() == Group::MIN_NUMBER_ADMINS &&
             $group->admin->first()->id == $member->id
         ) {
             throw new \Exception('Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.');

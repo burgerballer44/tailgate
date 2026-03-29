@@ -4,6 +4,7 @@ namespace App\Http\Requests\Traits;
 
 use App\Models\SeasonType;
 use App\Models\Sport;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Enum;
 
 trait SeasonValidationRulesTrait
@@ -11,7 +12,7 @@ trait SeasonValidationRulesTrait
     /**
      * Get the base validation rules for season fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function baseRules(): array
     {
@@ -27,7 +28,7 @@ trait SeasonValidationRulesTrait
     /**
      * Get the validation rules for storing a season.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function storeRules(): array
     {
@@ -41,7 +42,7 @@ trait SeasonValidationRulesTrait
     /**
      * Get the validation rules for updating a season.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function updateRules(): array
     {

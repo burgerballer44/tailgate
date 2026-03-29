@@ -6,13 +6,14 @@ use App\Rules\GameMustExistInSeasonGroupFollows;
 use App\Rules\GameTimeNotPassed;
 use App\Rules\GameTimeNotPassedForUpdate;
 use App\Rules\NoScoreSubmitted;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 trait ScoreValidationRulesTrait
 {
     /**
      * Get the base validation rules for score fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function baseRules(): array
     {
@@ -25,7 +26,7 @@ trait ScoreValidationRulesTrait
     /**
      * Get the validation rules for storing a score.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function storeRules(): array
     {
@@ -38,7 +39,7 @@ trait ScoreValidationRulesTrait
     /**
      * Get the validation rules for updating a score.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function updateRules(): array
     {

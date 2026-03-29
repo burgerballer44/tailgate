@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Group extends Model
 {
@@ -68,13 +68,13 @@ class Group extends Model
     {
         static::creating(function ($group) {
             $group->ulid = Str::ulid();
-            if (!$group->invite_code) {
+            if (! $group->invite_code) {
                 $group->invite_code = substr(str_shuffle('23456789ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, self::LENGTH_INVITE_CODE);
             }
-            if (!$group->member_limit) {
+            if (! $group->member_limit) {
                 $group->member_limit = self::INITIAL_MEMBER_LIMIT;
             }
-            if (!$group->player_limit) {
+            if (! $group->player_limit) {
                 $group->player_limit = self::INITIAL_PLAYER_LIMIT;
             }
         });
@@ -106,7 +106,7 @@ class Group extends Model
         }
 
         if (isset($filters['name'])) {
-            $builder->where('name', 'like', '%' . $filters['name'] . '%');
+            $builder->where('name', 'like', '%'.$filters['name'].'%');
         }
 
         return $builder;

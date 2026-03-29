@@ -1,14 +1,13 @@
 <?php
 
-use App\Models\Game;
-use App\Models\Team;
-use App\Models\Season;
-use App\Models\Sport;
-use App\Services\GameCommandService;
 use App\DTO\ValidatedGameData;
+use App\Models\Game;
+use App\Models\Season;
+use App\Models\Team;
+use App\Services\GameCommandService;
 
 beforeEach(function () {
-    $this->service = new GameCommandService();
+    $this->service = new GameCommandService;
 });
 
 describe('create a game', function () {
@@ -44,7 +43,7 @@ describe('create a game', function () {
         expect($game->away_team_id)->toBe($awayTeam->id);
         expect($game->home_team_score)->toBe(100);
         expect($game->away_team_score)->toBe(95);
-        expect(Str::isUlid((string)$game->ulid))->toBeTrue();
+        expect(Str::isUlid((string) $game->ulid))->toBeTrue();
     });
 });
 

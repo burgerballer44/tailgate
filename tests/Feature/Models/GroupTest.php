@@ -4,8 +4,6 @@ use App\Models\Follow;
 use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
-use App\Models\Season;
-use App\Models\Team;
 use App\Models\User;
 
 describe('isAdminOrOwner', function () {

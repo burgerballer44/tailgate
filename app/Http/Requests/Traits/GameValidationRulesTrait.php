@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests\Traits;
 
+use Illuminate\Contracts\Validation\ValidationRule;
+
 trait GameValidationRulesTrait
 {
     /**
      * Get the base validation rules for game fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function baseRules(): array
     {
@@ -25,7 +27,7 @@ trait GameValidationRulesTrait
     /**
      * Get the validation rules for storing a game.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function storeRules(): array
     {
@@ -35,7 +37,7 @@ trait GameValidationRulesTrait
     /**
      * Get the validation rules for updating a game.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function updateRules(): array
     {

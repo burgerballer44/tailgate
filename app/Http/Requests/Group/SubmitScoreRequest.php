@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedScoreData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\ScoreValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class SubmitScoreRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class SubmitScoreRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

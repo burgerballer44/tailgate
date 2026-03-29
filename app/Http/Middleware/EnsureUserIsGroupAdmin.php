@@ -27,7 +27,7 @@ class EnsureUserIsGroupAdmin
             ->where('role', GroupRole::GROUP_ADMIN->value)
             ->first();
 
-        if (!$member) {
+        if (! $member) {
             abort(403, 'You must be an approved group admin to perform this action.');
         }
 

@@ -13,8 +13,7 @@ abstract class FormRequest extends \Illuminate\Foundation\Http\FormRequest
     /**
      * Handle a failed validation attempt.
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
-     * @return \Illuminate\Http\RedirectResponse|void
+     * @return RedirectResponse|void
      */
     protected function failedValidation(Validator $validator)
     {

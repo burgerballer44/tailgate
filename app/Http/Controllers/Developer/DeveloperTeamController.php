@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Team;
+use App\Http\Requests\Team\StoreTeamRequest;
+use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Models\Sport;
+use App\Models\Team;
 use App\Models\TeamType;
-use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use App\Services\Contracts\TeamCommandInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Team\StoreTeamRequest;
-use App\Http\Requests\Team\UpdateTeamRequest;
+use Illuminate\Http\Request;
 
 class DeveloperTeamController extends Controller
 {

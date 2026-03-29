@@ -55,7 +55,6 @@ class DatabaseSeeder extends Seeder
             'role' => UserRole::REGULAR->value,
         ]);
 
-
         $userDeleted = User::factory()->create([
             'name' => 'UserDeleted',
             'email' => 'deleted@example.com',
@@ -350,7 +349,7 @@ class DatabaseSeeder extends Seeder
                 'away_team_id' => $i % 2 == 0 ? $teamWithGames2->id : $teamWithGames1->id,
                 'home_team_score' => rand(20, 35),
                 'away_team_score' => rand(20, 35),
-                'start_date' => '2024-09-'.str_pad($i*7, 2, '0', STR_PAD_LEFT),
+                'start_date' => '2024-09-'.str_pad($i * 7, 2, '0', STR_PAD_LEFT),
                 'start_time' => '19:00',
             ]);
         }
@@ -376,7 +375,7 @@ class DatabaseSeeder extends Seeder
                 'away_team_id' => $i % 2 == 0 ? $teamWithGames2->id : $teamWithGames1->id,
                 'home_team_score' => rand(15, 30),
                 'away_team_score' => rand(15, 30),
-                'start_date' => '2024-08-'.str_pad($i*5, 2, '0', STR_PAD_LEFT),
+                'start_date' => '2024-08-'.str_pad($i * 5, 2, '0', STR_PAD_LEFT),
                 'start_time' => '19:00',
             ]);
         }
@@ -389,7 +388,7 @@ class DatabaseSeeder extends Seeder
                 'away_team_id' => $i % 2 == 0 ? $teamWithGames2->id : $teamWithGames1->id,
                 'home_team_score' => rand(95, 125),
                 'away_team_score' => rand(95, 125),
-                'start_date' => '2025-05-'.str_pad($i*3, 2, '0', STR_PAD_LEFT),
+                'start_date' => '2025-05-'.str_pad($i * 3, 2, '0', STR_PAD_LEFT),
                 'start_time' => '20:00',
             ]);
         }
@@ -607,7 +606,7 @@ class DatabaseSeeder extends Seeder
             foreach ($names as $name) {
                 $player = Player::factory()->create([
                     'member_id' => $member->id,
-                    'player_name' => 'UserRegular'.($index+3).'-'.$name,
+                    'player_name' => 'UserRegular'.($index + 3).'-'.$name,
                 ]);
                 $bigGroupPlayers[] = $player;
             }

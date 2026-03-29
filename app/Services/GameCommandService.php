@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Game;
 use App\DTO\ValidatedGameData;
+use App\Models\Game;
 use App\Services\Contracts\GameCommandInterface;
 
 class GameCommandService implements GameCommandInterface

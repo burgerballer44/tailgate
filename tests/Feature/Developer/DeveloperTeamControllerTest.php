@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Team;
 use App\Models\Sport;
+use App\Models\Team;
 use App\Models\TeamType;
 use Illuminate\Support\Collection;
 
@@ -81,7 +81,7 @@ describe('index', function () {
         $teams = $response->viewData('teams');
         expect($teams->count())->toBe(2);
     });
-    
+
     test('lists of teams can be filtered by q for designation', function () {
         // thing to find
         $q = 'FindMe';
@@ -104,7 +104,7 @@ describe('index', function () {
         $teams = $response->viewData('teams');
         expect($teams->count())->toBe(1);
     });
-    
+
     test('lists of teams can be filtered by q for mascot', function () {
         // thing to find
         $q = 'FindMe';

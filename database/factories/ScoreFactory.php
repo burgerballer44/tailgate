@@ -4,10 +4,11 @@ namespace Database\Factories;
 
 use App\Models\Game;
 use App\Models\Player;
+use App\Models\Score;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Score>
+ * @extends Factory<Score>
  */
 class ScoreFactory extends Factory
 {

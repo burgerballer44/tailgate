@@ -1,15 +1,18 @@
 <?php
 
-use App\Models\Season;
-use App\Models\Sport;
-use App\Models\SeasonType;
-use Illuminate\Support\Carbon;
-use App\Services\SeasonCommandService;
-use App\DTO\ValidatedSeasonData;
 use App\DTO\ValidatedGameData;
+use App\DTO\ValidatedSeasonData;
+use App\Models\Game;
+use App\Models\Season;
+use App\Models\SeasonType;
+use App\Models\Sport;
+use App\Models\Team;
+use App\Services\Contracts\GameCommandInterface;
+use App\Services\SeasonCommandService;
+use Illuminate\Support\Carbon;
 
 beforeEach(function () {
-    $this->gameCommandService = mock(\App\Services\Contracts\GameCommandInterface::class);
+    $this->gameCommandService = mock(GameCommandInterface::class);
     $this->service = new SeasonCommandService($this->gameCommandService);
 });
 
@@ -43,7 +46,7 @@ describe('create a season', function () {
         expect($season->season_start)->toBe($data['season_start']);
         expect($season->season_end)->toBe($data['season_end']);
         expect($season->active)->toBe($data['active']);
-        expect(Str::isUlid((string)$season->ulid))->toBeTrue();
+        expect(Str::isUlid((string) $season->ulid))->toBeTrue();
     });
 });
 
@@ -111,8 +114,8 @@ describe('add game', function () {
         $season = Season::factory()->create();
 
         // create teams
-        $homeTeam = \App\Models\Team::factory()->create();
-        $awayTeam = \App\Models\Team::factory()->create();
+        $homeTeam = Team::factory()->create();
+        $awayTeam = Team::factory()->create();
 
         // game data
         $gameData = ValidatedGameData::fromArray([
@@ -126,7 +129,7 @@ describe('add game', function () {
         ]);
 
         // mock the game creation
-        $expectedGame = new \App\Models\Game([
+        $expectedGame = new Game([
             'season_id' => $season->id,
             'home_team_id' => $homeTeam->id,
             'away_team_id' => $awayTeam->id,
@@ -141,7 +144,7 @@ describe('add game', function () {
         $game = $this->service->addGame($season, $gameData);
 
         // verify game was created
-        expect($game)->toBeInstanceOf(\App\Models\Game::class);
+        expect($game)->toBeInstanceOf(Game::class);
         expect($game->season_id)->toBe($season->id);
         expect($game->home_team_id)->toBe($homeTeam->id);
         expect($game->away_team_id)->toBe($awayTeam->id);

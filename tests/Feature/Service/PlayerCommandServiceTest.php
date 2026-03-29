@@ -1,16 +1,16 @@
 <?php
 
-use App\Models\Player;
-use App\Models\Member;
-use App\Models\Score;
-use App\Models\Game;
-use Illuminate\Support\Str;
-use App\Services\PlayerCommandService;
 use App\DTO\ValidatedPlayerData;
 use App\DTO\ValidatedScoreData;
+use App\Models\Game;
+use App\Models\Member;
+use App\Models\Player;
+use App\Models\Score;
+use App\Services\PlayerCommandService;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
-    $this->service = new PlayerCommandService();
+    $this->service = new PlayerCommandService;
 });
 
 describe('create player for member', function () {
@@ -35,7 +35,7 @@ describe('create player for member', function () {
         expect($player)->toBeInstanceOf(Player::class);
         expect($player->player_name)->toBe($data['player_name']);
         expect($player->member_id)->toBe($member->id);
-        expect(Str::isUlid((string)$player->ulid))->toBeTrue();
+        expect(Str::isUlid((string) $player->ulid))->toBeTrue();
     });
 });
 

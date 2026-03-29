@@ -49,7 +49,7 @@ describe('index', function () {
         Group::factory()->create(['owner_id' => $user2->id]);
 
         // get the groups owned by user1 only
-        $response = $this->get(route('developer.groups.index') . '?owner_id=' . $user1->id);
+        $response = $this->get(route('developer.groups.index').'?owner_id='.$user1->id);
 
         // assert successful response
         $response->assertOk();
@@ -71,7 +71,7 @@ describe('index', function () {
         $user = User::factory()->create();
 
         // search for groups owned by this user
-        $response = $this->get(route('developer.groups.index') . '?owner_id=' . $user->id);
+        $response = $this->get(route('developer.groups.index').'?owner_id='.$user->id);
 
         // assert successful response
         $response->assertOk();
@@ -94,7 +94,7 @@ describe('index', function () {
         $differentGroupToNotFind = Group::factory()->create(['name' => 'somethingelse']);
 
         // get the group
-        $response = $this->get(route('developer.groups.index') . '?q=' . $q);
+        $response = $this->get(route('developer.groups.index').'?q='.$q);
 
         // assert successful response
         $response->assertOk();
@@ -122,7 +122,7 @@ describe('index', function () {
         $differentGroupToNotFind->save();
 
         // get the group
-        $response = $this->get(route('developer.groups.index') . '?q=' . $q);
+        $response = $this->get(route('developer.groups.index').'?q='.$q);
 
         // assert successful response
         $response->assertOk();

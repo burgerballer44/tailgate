@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreGroupRequest extends FormRequest
 {
@@ -40,7 +41,7 @@ class StoreGroupRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if (!$this->has('owner_id')) {
+        if (! $this->has('owner_id')) {
             $this->merge([
                 'owner_id' => $this->user()->id,
             ]);
@@ -50,7 +51,7 @@ class StoreGroupRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

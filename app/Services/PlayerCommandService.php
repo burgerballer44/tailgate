@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Player;
-use App\Models\Member;
-use App\Models\Score;
 use App\DTO\ValidatedPlayerData;
 use App\DTO\ValidatedScoreData;
+use App\Models\Member;
+use App\Models\Player;
+use App\Models\Score;
 use App\Services\Contracts\PlayerCommandInterface;
 
 class PlayerCommandService implements PlayerCommandInterface
@@ -15,8 +15,8 @@ class PlayerCommandService implements PlayerCommandInterface
      * Create a new player for a specific member.
      * This method handles player creation logic within a member context.
      *
-     * @param Member $member The member to add the player to.
-     * @param ValidatedPlayerData $data Validated player data including player_name.
+     * @param  Member  $member  The member to add the player to.
+     * @param  ValidatedPlayerData  $data  Validated player data including player_name.
      * @return Player The created player instance.
      */
     public function createForMember(Member $member, ValidatedPlayerData $data): Player
@@ -32,8 +32,8 @@ class PlayerCommandService implements PlayerCommandInterface
      * Update a player's information.
      * This method modifies player details.
      *
-     * @param Player $player The player to update.
-     * @param ValidatedPlayerData $data Validated data containing player information to update.
+     * @param  Player  $player  The player to update.
+     * @param  ValidatedPlayerData  $data  Validated data containing player information to update.
      * @return Player The updated player instance.
      */
     public function update(Player $player, ValidatedPlayerData $data): Player
@@ -58,7 +58,7 @@ class PlayerCommandService implements PlayerCommandInterface
      * Delete a player from the system.
      * This method permanently removes the player.
      *
-     * @param Player $player The player to delete.
+     * @param  Player  $player  The player to delete.
      */
     public function delete(Player $player): void
     {
@@ -69,8 +69,8 @@ class PlayerCommandService implements PlayerCommandInterface
      * Submit a score for a player.
      * This method handles score submission for a player.
      *
-     * @param Player $player The player to submit the score for.
-     * @param ValidatedScoreData $data Validated score data.
+     * @param  Player  $player  The player to submit the score for.
+     * @param  ValidatedScoreData  $data  Validated score data.
      * @return Score The created score instance.
      */
     public function submitScore(Player $player, ValidatedScoreData $data): Score
@@ -88,8 +88,8 @@ class PlayerCommandService implements PlayerCommandInterface
      * Update a score.
      * This method modifies an existing score.
      *
-     * @param Score $score The score to update.
-     * @param ValidatedScoreData $data Validated data containing score information to update.
+     * @param  Score  $score  The score to update.
+     * @param  ValidatedScoreData  $data  Validated data containing score information to update.
      * @return Score The updated score instance.
      */
     public function updateScore(Score $score, ValidatedScoreData $data): Score
@@ -109,7 +109,7 @@ class PlayerCommandService implements PlayerCommandInterface
      * Delete a score.
      * This method permanently removes a score.
      *
-     * @param Score $score The score to delete.
+     * @param  Score  $score  The score to delete.
      */
     public function deleteScore(Score $score): void
     {

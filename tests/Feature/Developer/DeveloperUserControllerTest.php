@@ -278,8 +278,8 @@ describe('updating user', function () {
         // verify roles and statuses are collections
         $statuses = $response->viewData('statuses');
         $roles = $response->viewData('roles');
-        expect($statuses)->toBeInstanceOf(\Illuminate\Support\Collection::class);
-        expect($roles)->toBeInstanceOf(\Illuminate\Support\Collection::class);
+        expect($statuses)->toBeInstanceOf(Collection::class);
+        expect($roles)->toBeInstanceOf(Collection::class);
     });
 
     test('updates a user', function () {
@@ -312,7 +312,6 @@ describe('updating user', function () {
         expect($user->status)->toBe($updateData['status']);
         expect($user->role)->toBe($updateData['role']);
     });
-
 
     test('flashes success message on update', function () {
         // create a user

@@ -2,8 +2,9 @@
 
 use App\Models\UserRole;
 use App\Models\UserStatus;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 test('registration screen can be rendered', function () {
     $this->get('/register')->assertStatus(200);

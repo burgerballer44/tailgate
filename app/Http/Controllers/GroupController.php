@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Group;
-use App\Models\Member;
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
-use App\Models\Team;
-use App\Models\Season;
+use App\DTO\ValidatedMemberData;
+use App\Http\Requests\Group\FollowTeamRequest;
+use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\UserUpdateGroupRequest;
 use App\Models\Follow;
+use App\Models\Group;
+use App\Models\GroupRole;
+use App\Models\Member;
+use App\Models\MemberStatus;
+use App\Models\Season;
+use App\Models\Team;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
-use App\DTO\ValidatedMemberData;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Group\StoreGroupRequest;
-use App\Http\Requests\Group\UserUpdateGroupRequest;
-use App\Http\Requests\Group\FollowTeamRequest;
+use Illuminate\Http\Request;
 
 /**
  * GroupController handles user-facing group operations.
@@ -62,7 +62,7 @@ class GroupController extends Controller
      * to create the group with validated data, then redirects the user back to
      * their dashboard with a success message that includes the invite code for sharing.
      *
-     * @param StoreGroupRequest $request The validated request containing group data
+     * @param  StoreGroupRequest  $request  The validated request containing group data
      * @return RedirectResponse Redirects to dashboard with success message
      */
     public function store(StoreGroupRequest $request): RedirectResponse
@@ -71,7 +71,7 @@ class GroupController extends Controller
         $group = $this->groupCommandService->create($request->toDTO());
 
         // set a success flash message that includes the invite code for the user to share
-        $this->setFlashAlert('success', 'Group created successfully! Invite code: ' . $group->invite_code);
+        $this->setFlashAlert('success', 'Group created successfully! Invite code: '.$group->invite_code);
 
         // redirect back to dashboard so user can see their new group
         return redirect()->route('dashboard');
@@ -98,7 +98,7 @@ class GroupController extends Controller
      * if everything is valid. Currently uses direct joining, but can be extended
      * with owner confirmation logic later.
      *
-     * @param Request $request The HTTP request containing the invite code
+     * @param  Request  $request  The HTTP request containing the invite code
      * @return RedirectResponse Redirects back with success/error messages
      */
     public function requestJoin(Request $request): RedirectResponse
@@ -110,8 +110,9 @@ class GroupController extends Controller
         $group = $this->groupQueryService->findByInviteCode($request->invite_code);
 
         // if no group found with that code, show error and redirect back
-        if (!$group) {
+        if (! $group) {
             $this->setFlashAlert('error', 'Invalid invite code.');
+
             return redirect()->back();
         }
 
@@ -119,12 +120,14 @@ class GroupController extends Controller
         // this prevents duplicate memberships
         if ($this->groupQueryService->isUserAlreadyMember($group, $request->user()->id)) {
             $this->setFlashAlert('error', 'You are already a member of this group.');
+
             return redirect()->back();
         }
 
         // check if the group has reached its member limit
         if ($this->groupQueryService->isGroupMemberLimitReached($group)) {
             $this->setFlashAlert('error', 'Group member limit reached.');
+
             return redirect()->back();
         }
 
@@ -149,7 +152,7 @@ class GroupController extends Controller
      * This method shows detailed information about a group, including members,
      * pending join requests, and other group data. Any member can view details.
      *
-     * @param Group $group The group to display
+     * @param  Group  $group  The group to display
      * @return View Returns the group details view
      */
     public function show(Group $group): View
@@ -165,7 +168,7 @@ class GroupController extends Controller
      * This method displays the group management form where owners and admins
      * can manage group settings, approve/reject join requests, and manage members.
      *
-     * @param Group $group The group to edit
+     * @param  Group  $group  The group to edit
      * @return View Returns the group edit view
      */
     public function edit(Group $group): View
@@ -180,8 +183,8 @@ class GroupController extends Controller
      *
      * This method processes updates to group settings. Only owners and admins can update.
      *
-     * @param UserUpdateGroupRequest $request The validated update request
-     * @param Group $group The group to update
+     * @param  UserUpdateGroupRequest  $request  The validated update request
+     * @param  Group  $group  The group to update
      * @return RedirectResponse Redirects back with success message
      */
     public function update(UserUpdateGroupRequest $request, Group $group): RedirectResponse
@@ -200,8 +203,8 @@ class GroupController extends Controller
      * This method approves a pending join request, changing the member's status to approved.
      * Only group owners and admins can approve requests.
      *
-     * @param Group $group The group
-     * @param Member $member The pending member to approve
+     * @param  Group  $group  The group
+     * @param  Member  $member  The pending member to approve
      * @return RedirectResponse Redirects back with success message
      */
     public function approveMember(Group $group, Member $member): RedirectResponse
@@ -230,8 +233,8 @@ class GroupController extends Controller
      * This method rejects a pending join request, either by deleting the member
      * or changing status to rejected. Only group owners and admins can reject requests.
      *
-     * @param Group $group The group
-     * @param Member $member The pending member to reject
+     * @param  Group  $group  The group
+     * @param  Member  $member  The pending member to reject
      * @return RedirectResponse Redirects back with success message
      */
     public function rejectMember(Group $group, Member $member): RedirectResponse
@@ -254,8 +257,8 @@ class GroupController extends Controller
      * This method removes an approved member from the group. Only group owners and admins can remove members.
      * Cannot remove the owner or the last admin.
      *
-     * @param Group $group The group
-     * @param Member $member The member to remove
+     * @param  Group  $group  The group
+     * @param  Member  $member  The member to remove
      * @return RedirectResponse Redirects back with success message
      */
     public function removeMember(Group $group, Member $member): RedirectResponse
@@ -282,7 +285,7 @@ class GroupController extends Controller
      *
      * This method displays the form where group admins can choose a team and season to follow.
      *
-     * @param Group $group The group to follow a team for
+     * @param  Group  $group  The group to follow a team for
      * @return View Returns the follow team view
      */
     public function createFollowTeam(Group $group): View
@@ -298,8 +301,8 @@ class GroupController extends Controller
      *
      * This method processes the follow team request and creates the follow relationship.
      *
-     * @param FollowTeamRequest $request The validated request containing team and season data
-     * @param Group $group The group to follow the team
+     * @param  FollowTeamRequest  $request  The validated request containing team and season data
+     * @param  Group  $group  The group to follow the team
      * @return RedirectResponse Redirects back with success/error messages
      */
     public function followTeam(FollowTeamRequest $request, Group $group): RedirectResponse
@@ -322,8 +325,8 @@ class GroupController extends Controller
      *
      * This method removes the follow relationship for the group.
      *
-     * @param Group $group The group to unfollow
-     * @param Follow $follow The follow to remove
+     * @param  Group  $group  The group to unfollow
+     * @param  Follow  $follow  The follow to remove
      * @return RedirectResponse Redirects back with success message
      */
     public function removeFollow(Group $group, Follow $follow): RedirectResponse

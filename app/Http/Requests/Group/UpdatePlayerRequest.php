@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedPlayerData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\PlayerValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdatePlayerRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class UpdatePlayerRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

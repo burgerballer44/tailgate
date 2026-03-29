@@ -1,8 +1,9 @@
 <?php
 
 use App\Models\UserRole;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 test('profile page is displayed', function () {
     $user = signInDeveloperUser();

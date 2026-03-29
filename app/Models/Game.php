@@ -92,8 +92,6 @@ class Game extends Model
 
     /**
      * Season
-     *
-     * @return BelongsTo
      */
     public function season(): BelongsTo
     {
@@ -102,8 +100,6 @@ class Game extends Model
 
     /**
      * Scores
-     *
-     * @return HasMany
      */
     public function scores(): HasMany
     {

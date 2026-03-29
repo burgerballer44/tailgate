@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Score;
-use App\Models\Follow;
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Season extends Model
 {
@@ -87,10 +85,10 @@ class Season extends Model
     {
         if ($q = $query['q'] ?? null) {
             $builder->where(function ($query) use ($q) {
-                $query->whereRaw('LOWER(name) LIKE LOWER(?)', ["%{$q}%"]);;
+                $query->whereRaw('LOWER(name) LIKE LOWER(?)', ["%{$q}%"]);
             });
         }
-        
+
         if (isset($query['sport'])) {
             $builder->where('sport', $query['sport']);
         }

@@ -5,6 +5,7 @@ namespace App\Http\Requests\User;
 use App\DTO\ValidatedUserData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\UserValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class StoreUserRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

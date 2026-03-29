@@ -1,17 +1,19 @@
 <?php
 
+use App\Models\Team;
 use App\Services\TeamQueryService;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 beforeEach(function () {
-    $this->service = new TeamQueryService();
+    $this->service = new TeamQueryService;
 });
 
 describe('query teams', function () {
     test('returns query builder', function () {
         $query = $this->service->query([]);
 
-        expect($query)->toBeInstanceOf(\Illuminate\Contracts\Database\Eloquent\Builder::class);
-        expect($query->getModel())->toBeInstanceOf(\App\Models\Team::class);
+        expect($query)->toBeInstanceOf(Builder::class);
+        expect($query->getModel())->toBeInstanceOf(Team::class);
     });
 
     test('includes sports relationship', function () {

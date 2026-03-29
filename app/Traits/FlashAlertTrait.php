@@ -7,10 +7,10 @@ trait FlashAlertTrait
     /**
      * Set a flash message to be displayed to the user.
      *
-     * @param  string        $type    success, info, warning, or error.
-     * @param  string|array  $message The main message content.
-     * @param  string        $text    Additional text to display.
-     * @param  array         $links   [['text' => 'Link Text', 'link' => 'URL'], ...]
+     * @param  string  $type  success, info, warning, or error.
+     * @param  string|array  $message  The main message content.
+     * @param  string  $text  Additional text to display.
+     * @param  array  $links  [['text' => 'Link Text', 'link' => 'URL'], ...]
      */
     protected function setFlashAlert(
         string $type,

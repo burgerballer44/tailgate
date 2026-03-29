@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Http\Request;
-use App\Services\Contracts\UserCommandInterface;
 use App\Http\Controllers\Controller;
+use App\Services\Contracts\UserCommandInterface;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller

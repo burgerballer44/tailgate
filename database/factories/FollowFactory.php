@@ -2,13 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Models\Follow;
 use App\Models\Group;
 use App\Models\Season;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Follow>
+ * @extends Factory<Follow>
  */
 class FollowFactory extends Factory
 {

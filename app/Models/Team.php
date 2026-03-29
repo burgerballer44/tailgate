@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Team extends Model
 {
@@ -64,13 +64,13 @@ class Team extends Model
 
     /**
      * Get a string representation of the team's sports.
-     * 
+     *
      * Methods ending with "Attribute" are treated as accessors in Laravel.
      * This allows you to access $team->sports_string directly.
      */
     public function getSportsStringAttribute(): string
     {
-        return $this->sports->pluck('sport')->map(fn($sport) => ucfirst($sport->value))->join(', ');
+        return $this->sports->pluck('sport')->map(fn ($sport) => ucfirst($sport->value))->join(', ');
     }
 
     /**

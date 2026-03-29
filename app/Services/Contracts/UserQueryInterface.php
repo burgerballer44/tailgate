@@ -9,5 +9,6 @@ use Illuminate\Database\Eloquent\Collection;
 interface UserQueryInterface
 {
     public function query(array $query): Builder;
+
     public function getAccessibleGroups(User $user): Collection;
 }

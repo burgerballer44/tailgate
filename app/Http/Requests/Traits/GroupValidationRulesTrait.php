@@ -3,13 +3,14 @@
 namespace App\Http\Requests\Traits;
 
 use App\Rules\UserMustBeAMember;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 trait GroupValidationRulesTrait
 {
     /**
      * Get the base validation rules for group fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function baseRules(): array
     {
@@ -23,7 +24,7 @@ trait GroupValidationRulesTrait
     /**
      * Get the validation rules for admin group updates (includes owner validation).
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function developerUpdateRules(): array
     {
@@ -35,7 +36,7 @@ trait GroupValidationRulesTrait
     /**
      * Get the validation rules for creating a group.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function storeRules(): array
     {

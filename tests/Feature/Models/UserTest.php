@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\User;
-use App\Models\UserStatus;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Models\User;
+use App\Models\UserStatus;
 use App\Services\UserQueryService;
 
 describe('activate', function () {
@@ -17,7 +17,6 @@ describe('activate', function () {
         expect($user->status)->toBe(UserStatus::ACTIVE);
     });
 });
-
 
 describe('isOwnerOf', function () {
     test('returns true when user is the owner of the group', function () {
@@ -45,7 +44,7 @@ describe('getMembershipStatus', function () {
             'status' => MemberStatus::APPROVED,
         ]);
 
-        $queryService = new UserQueryService();
+        $queryService = new UserQueryService;
         $groups = $queryService->getAccessibleGroups($user);
         $groupWithMembership = $groups->first();
 
@@ -77,7 +76,7 @@ describe('canAccessGroup', function () {
             'status' => MemberStatus::APPROVED,
         ]);
 
-        $queryService = new UserQueryService();
+        $queryService = new UserQueryService;
         $groups = $queryService->getAccessibleGroups($user);
         $groupWithMembership = $groups->first();
 
@@ -93,7 +92,7 @@ describe('canAccessGroup', function () {
             'status' => MemberStatus::PENDING,
         ]);
 
-        $queryService = new UserQueryService();
+        $queryService = new UserQueryService;
         $groups = $queryService->getAccessibleGroups($user);
         $groupWithMembership = $groups->first();
 

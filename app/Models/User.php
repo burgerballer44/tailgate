@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Str;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\Group;
-use App\Models\MemberStatus;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -95,7 +93,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getMembershipStatus(Group $group): ?string
     {
-        $membership = $group->members->first(fn($member) => $member->user_id === $this->id);
+        $membership = $group->members->first(fn ($member) => $member->user_id === $this->id);
+
         return $membership?->status;
     }
 
@@ -138,5 +137,4 @@ class User extends Authenticatable implements MustVerifyEmail
             $builder->where('role', $role);
         }
     }
-
 }

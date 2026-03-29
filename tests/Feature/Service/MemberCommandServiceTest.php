@@ -1,16 +1,17 @@
 <?php
 
-use App\Models\Member;
-use App\Models\Group;
-use App\Models\User;
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
-use App\Services\MemberCommandService;
 use App\DTO\ValidatedMemberData;
+use App\Models\Group;
+use App\Models\GroupRole;
+use App\Models\Member;
+use App\Models\MemberStatus;
+use App\Models\User;
+use App\Services\Contracts\PlayerCommandInterface;
+use App\Services\MemberCommandService;
 
 beforeEach(function () {
     $this->service = new MemberCommandService(
-        app(\App\Services\Contracts\PlayerCommandInterface::class)
+        app(PlayerCommandInterface::class)
     );
 });
 

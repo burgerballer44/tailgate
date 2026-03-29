@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Season;
 
-use App\Models\Common\DateOrString;
 use App\DTO\ValidatedSeasonData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\SeasonValidationRulesTrait;
+use App\Models\Common\DateOrString;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreSeasonRequest extends FormRequest
 {
@@ -22,7 +23,7 @@ class StoreSeasonRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

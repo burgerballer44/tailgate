@@ -4,13 +4,14 @@ namespace App\Http\Requests\Traits;
 
 use App\Rules\PlayerLimit;
 use App\Rules\UniqueUsernamePerGroup;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 trait PlayerValidationRulesTrait
 {
     /**
      * Get the base validation rules for player fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function baseRules(): array
     {
@@ -22,7 +23,7 @@ trait PlayerValidationRulesTrait
     /**
      * Get the validation rules for storing a player.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function storeRules(): array
     {
@@ -34,7 +35,7 @@ trait PlayerValidationRulesTrait
     /**
      * Get the validation rules for updating a player.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function updateRules(): array
     {

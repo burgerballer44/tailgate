@@ -5,6 +5,7 @@ namespace App\Http\Requests\Traits;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
@@ -13,7 +14,7 @@ trait UserValidationRulesTrait
     /**
      * Get the base validation rules for user fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function baseRules(): array
     {
@@ -28,7 +29,7 @@ trait UserValidationRulesTrait
     /**
      * Get the validation rules for storing a user.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function storeRules(): array
     {
@@ -40,8 +41,8 @@ trait UserValidationRulesTrait
     /**
      * Get the validation rules for updating a user.
      *
-     * @param User $user The user being updated
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @param  User  $user  The user being updated
+     * @return array<string, ValidationRule|array|string>
      */
     protected function updateRules(User $user): array
     {

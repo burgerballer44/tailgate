@@ -114,7 +114,7 @@ describe('index', function () {
         $response->assertOk();
 
         // assert no link to the group
-        $response->assertDontSee('<a href="' . route('groups.show', $group) . '">', false);
+        $response->assertDontSee('<a href="'.route('groups.show', $group).'">', false);
     });
 
     test('shows links for approved memberships', function () {
@@ -133,7 +133,7 @@ describe('index', function () {
         $response->assertOk();
 
         // assert link to the group is present
-        $response->assertSee('<a href="' . route('groups.show', $group) . '">', false);
+        $response->assertSee('<a href="'.route('groups.show', $group).'">', false);
     });
 
     test('shows links for owned groups', function () {
@@ -147,6 +147,6 @@ describe('index', function () {
         $response->assertOk();
 
         // assert link to the group is present
-        $response->assertSee('<a href="' . route('groups.show', $group) . '">', false);
+        $response->assertSee('<a href="'.route('groups.show', $group).'">', false);
     });
 });

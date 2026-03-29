@@ -4,16 +4,17 @@ use App\Models\Group;
 use App\Models\Member;
 use App\Models\User;
 use App\Services\GroupQueryService;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 beforeEach(function () {
-    $this->service = new GroupQueryService();
+    $this->service = new GroupQueryService;
 });
 
 describe('query groups', function () {
     test('returns query builder', function () {
         $result = $this->service->query([]);
 
-        expect($result)->toBeInstanceOf(\Illuminate\Contracts\Database\Eloquent\Builder::class);
+        expect($result)->toBeInstanceOf(Builder::class);
         expect($result->getModel())->toBeInstanceOf(Group::class);
     });
 
@@ -62,7 +63,7 @@ describe('is user already member', function () {
 
     test('returns false when user is not member', function () {
         $group = Group::factory()->create();
-        $user = \App\Models\User::factory()->create();
+        $user = User::factory()->create();
 
         $result = $this->service->isUserAlreadyMember($group, $user->id);
 

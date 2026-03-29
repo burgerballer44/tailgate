@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Season;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Services\Contracts\SeasonQueryInterface;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class SeasonQueryService implements SeasonQueryInterface
 {

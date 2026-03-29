@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Member;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Services\Contracts\MemberQueryInterface;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class MemberQueryService implements MemberQueryInterface
 {
@@ -12,7 +12,7 @@ class MemberQueryService implements MemberQueryInterface
      * Filter members based on the provided query parameters.
      * This method returns a query builder instance that can be further modified or executed.
      *
-     * @param array $query An associative array of query parameters to filter members.
+     * @param  array  $query  An associative array of query parameters to filter members.
      * @return Builder A query builder instance for the filtered members.
      */
     public function query(array $query): Builder

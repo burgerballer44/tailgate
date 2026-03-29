@@ -53,7 +53,7 @@ class UserCommandService implements UserCommandInterface
         ];
 
         // handle password if provided
-        if (null !== $data->password && filled($data->password)) {
+        if ($data->password !== null && filled($data->password)) {
             $updateData['password'] = self::hashPassword($data->password);
         }
 

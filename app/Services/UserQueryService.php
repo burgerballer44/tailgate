@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Group;
+use App\Models\User;
+use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use App\Services\Contracts\UserQueryInterface;
 
 class UserQueryService implements UserQueryInterface
 {

@@ -2,8 +2,6 @@
 
 namespace App\DTO;
 
-use App\Models\User;
-
 readonly class ValidatedGroupData
 {
     public function __construct(

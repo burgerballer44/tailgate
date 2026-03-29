@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Team;
 use App\DTO\ValidatedTeamData;
+use App\Models\Team;
 use App\Services\Contracts\TeamCommandInterface;
 
 class TeamCommandService implements TeamCommandInterface
@@ -27,7 +27,7 @@ class TeamCommandService implements TeamCommandInterface
         $team = Team::create($teamData);
 
         // add sports if provided
-        if (isset($data->sports) && !empty($data->sports)) {
+        if (isset($data->sports) && ! empty($data->sports)) {
             foreach ($data->sports as $sport) {
                 $team->sports()->create(['sport' => $sport->value]);
             }
@@ -57,8 +57,8 @@ class TeamCommandService implements TeamCommandInterface
         $team->fill($updateData);
         $team->save();
 
-         // update sports if provided
-        if (isset($data->sports) && !empty($data->sports)) {
+        // update sports if provided
+        if (isset($data->sports) && ! empty($data->sports)) {
             // remove existing sports and add new ones
             $team->sports()->delete();
             foreach ($data->sports as $sport) {

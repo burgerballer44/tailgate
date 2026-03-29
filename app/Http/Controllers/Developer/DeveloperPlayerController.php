@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Group\StorePlayerRequest;
+use App\Http\Requests\Group\SubmitScoreRequest;
+use App\Http\Requests\Group\UpdatePlayerRequest;
+use App\Http\Requests\Group\UpdateScoreRequest;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Score;
 use App\Services\Contracts\PlayerCommandInterface;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Group\StorePlayerRequest;
-use App\Http\Requests\Group\UpdatePlayerRequest;
-use App\Http\Requests\Group\SubmitScoreRequest;
-use App\Http\Requests\Group\UpdateScoreRequest;
+use Illuminate\Http\Request;
 
 class DeveloperPlayerController extends Controller
 {

@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\Game;
 use App\Models\Season;
 use App\Models\Team;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Services\Contracts\GameQueryInterface;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class GameQueryService implements GameQueryInterface
 {

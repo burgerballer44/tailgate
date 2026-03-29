@@ -3,19 +3,20 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Group\FollowTeamRequest;
+use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\UpdateGroupRequest;
+use App\Models\Follow;
+use App\Models\Group;
+use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\Group;
-use App\Models\Follow;
-use App\Models\Season;
-use Illuminate\Http\Request;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Group\FollowTeamRequest;
-use App\Http\Requests\Group\StoreGroupRequest;
-use App\Http\Requests\Group\UpdateGroupRequest;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class DeveloperGroupController extends Controller
 {
@@ -58,14 +59,14 @@ class DeveloperGroupController extends Controller
             'players.scores.game.homeTeam',
             'players.scores.game.awayTeam',
             'follow.team',
-            'follow.season'
+            'follow.season',
         ]);
 
         $scores = $group->players->flatMap->scores->sortByDesc('created_at');
         $perPage = 20;
         $currentPage = request()->get('page', 1);
         $items = $scores->forPage($currentPage, $perPage);
-        $paginatedScores = new \Illuminate\Pagination\LengthAwarePaginator($items, $scores->count(), $perPage, $currentPage, [
+        $paginatedScores = new LengthAwarePaginator($items, $scores->count(), $perPage, $currentPage, [
             'path' => request()->url(),
             'pageName' => 'page',
         ]);

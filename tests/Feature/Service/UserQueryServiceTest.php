@@ -1,22 +1,20 @@
 <?php
 
-use App\Models\User;
 use App\Models\Group;
 use App\Models\Member;
-use App\Models\UserRole;
-use App\Models\UserStatus;
+use App\Models\User;
 use App\Services\UserQueryService;
-use App\DTO\ValidatedUserData;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 beforeEach(function () {
-    $this->service = new UserQueryService();
+    $this->service = new UserQueryService;
 });
 
 describe('query users', function () {
     test('returns query builder', function () {
         $query = $this->service->query([]);
 
-        expect($query)->toBeInstanceOf(\Illuminate\Contracts\Database\Eloquent\Builder::class);
+        expect($query)->toBeInstanceOf(Builder::class);
         expect($query->getModel())->toBeInstanceOf(User::class);
     });
 });

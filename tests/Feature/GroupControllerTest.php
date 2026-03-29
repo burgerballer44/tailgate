@@ -2,8 +2,8 @@
 
 use App\Models\Follow;
 use App\Models\Group;
-use App\Models\Member;
 use App\Models\GroupRole;
+use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\Season;
 use App\Models\Team;
@@ -142,7 +142,7 @@ describe('show', function () {
     test('shows group details for member', function () {
         $member = Member::factory()->create([
             'user_id' => $this->user->id,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
         $group = $member->group;
 
@@ -164,7 +164,7 @@ describe('show', function () {
     test('denies access to pending members', function () {
         $member = Member::factory()->create([
             'user_id' => $this->user->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
         $group = $member->group;
 
@@ -190,8 +190,8 @@ describe('edit', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $response = $this->get(route('groups.edit', $group));
@@ -205,8 +205,8 @@ describe('edit', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_MEMBER->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $response = $this->get(route('groups.edit', $group));
@@ -219,8 +219,8 @@ describe('edit', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->get(route('groups.edit', $group));
@@ -248,8 +248,8 @@ describe('update', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $response = $this->patch(route('groups.update', $group), [
@@ -274,8 +274,8 @@ describe('update', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->patch(route('groups.update', $group), ['name' => 'New Name']);
@@ -289,14 +289,14 @@ describe('approveMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->post(route('groups.approve-member', [$group, $pendingMember]));
 
         $response->assertRedirect();
         $pendingMember->refresh();
-        expect($pendingMember->status)->toBe(\App\Models\MemberStatus::APPROVED->value);
+        expect($pendingMember->status)->toBe(MemberStatus::APPROVED->value);
     });
 
     test('approves pending member for admin', function () {
@@ -304,19 +304,19 @@ describe('approveMember', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->post(route('groups.approve-member', [$group, $pendingMember]));
 
         $response->assertRedirect();
         $pendingMember->refresh();
-        expect($pendingMember->status)->toBe(\App\Models\MemberStatus::APPROVED->value);
+        expect($pendingMember->status)->toBe(MemberStatus::APPROVED->value);
     });
 
     test('denies approval to regular members', function () {
@@ -324,12 +324,12 @@ describe('approveMember', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_MEMBER->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->post(route('groups.approve-member', [$group, $pendingMember]));
@@ -341,7 +341,7 @@ describe('approveMember', function () {
         $group = Group::factory()->create();
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->post(route('groups.approve-member', [$group, $pendingMember]));
@@ -353,7 +353,7 @@ describe('approveMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $this->post(route('groups.approve-member', [$group, $pendingMember]))->assertRedirect();
@@ -365,7 +365,7 @@ describe('approveMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $approvedMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $response = $this->post(route('groups.approve-member', [$group, $approvedMember]));
@@ -379,7 +379,7 @@ describe('rejectMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $this->assertDatabaseHas('members', ['id' => $pendingMember->id]);
@@ -395,12 +395,12 @@ describe('rejectMember', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $this->assertDatabaseHas('members', ['id' => $pendingMember->id]);
@@ -416,12 +416,12 @@ describe('rejectMember', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_MEMBER->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
@@ -433,7 +433,7 @@ describe('rejectMember', function () {
         $group = Group::factory()->create();
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
@@ -445,7 +445,7 @@ describe('rejectMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $this->post(route('groups.reject-member', [$group, $pendingMember]))->assertRedirect();
@@ -458,12 +458,12 @@ describe('rejectMember', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
@@ -475,7 +475,7 @@ describe('rejectMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $approvedMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $response = $this->post(route('groups.reject-member', [$group, $approvedMember]));
@@ -489,7 +489,7 @@ describe('removeMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $approvedMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $this->assertDatabaseHas('members', ['id' => $approvedMember->id]);
@@ -505,12 +505,12 @@ describe('removeMember', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
         $approvedMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $this->assertDatabaseHas('members', ['id' => $approvedMember->id]);
@@ -526,12 +526,12 @@ describe('removeMember', function () {
         Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_MEMBER->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
         $approvedMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $response = $this->delete(route('groups.remove-member', [$group, $approvedMember]));
@@ -553,8 +553,8 @@ describe('removeMember', function () {
         $adminMember = Member::factory()->create([
             'user_id' => $this->user->id,
             'group_id' => $group->id,
-            'role' => \App\Models\GroupRole::GROUP_ADMIN->value,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $this->assertDatabaseHas('members', ['id' => $adminMember->id]);
@@ -569,7 +569,7 @@ describe('removeMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $approvedMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         $this->delete(route('groups.remove-member', [$group, $approvedMember]))->assertRedirect();
@@ -581,7 +581,7 @@ describe('removeMember', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
-            'status' => \App\Models\MemberStatus::PENDING->value,
+            'status' => MemberStatus::PENDING->value,
         ]);
 
         $response = $this->delete(route('groups.remove-member', [$group, $pendingMember]));

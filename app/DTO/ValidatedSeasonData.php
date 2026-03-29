@@ -2,9 +2,9 @@
 
 namespace App\DTO;
 
+use App\Models\Common\DateOrString;
 use App\Models\SeasonType;
 use App\Models\Sport;
-use App\Models\Common\DateOrString;
 
 readonly class ValidatedSeasonData
 {

@@ -1,22 +1,24 @@
 <?php
 
-use App\Models\Group;
-use App\Models\Member;
-use App\Models\Player;
-use App\Models\Follow;
-use App\Models\Team;
-use App\Models\Season;
-use App\Models\User;
-use App\Services\GroupCommandService;
+use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
-use App\DTO\ValidatedFollowData;
+use App\Models\Follow;
+use App\Models\Group;
+use App\Models\Member;
+use App\Models\Player;
+use App\Models\Season;
+use App\Models\Team;
+use App\Models\User;
+use App\Services\Contracts\MemberCommandInterface;
+use App\Services\Contracts\PlayerCommandInterface;
+use App\Services\GroupCommandService;
 
 beforeEach(function () {
     $this->service = new GroupCommandService(
-        app(\App\Services\Contracts\MemberCommandInterface::class),
-        app(\App\Services\Contracts\PlayerCommandInterface::class)
+        app(MemberCommandInterface::class),
+        app(PlayerCommandInterface::class)
     );
 });
 

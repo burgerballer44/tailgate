@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Team;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use App\Services\Contracts\TeamQueryInterface;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class TeamQueryService implements TeamQueryInterface
 {

@@ -1,14 +1,14 @@
 <?php
 
+use App\DTO\ValidatedUserData;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\UserStatus;
-use Illuminate\Support\Str;
 use App\Services\UserCommandService;
-use App\DTO\ValidatedUserData;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
-    $this->service = new UserCommandService();
+    $this->service = new UserCommandService;
 });
 
 describe('create a user', function () {
@@ -35,7 +35,7 @@ describe('create a user', function () {
         expect($user->role)->toBe($data['role']);
         expect($user->updated_at)->not->toBeNull();
         expect($user->created_at)->not->toBeNull();
-        expect(Str::isUlid((string)$user->ulid))->toBeTrue();
+        expect(Str::isUlid((string) $user->ulid))->toBeTrue();
         expect($this->service->checkPassword('password', $user->password))->toBeTrue();
     });
 });
@@ -94,7 +94,7 @@ describe('change user password', function () {
     test('with valid new password', function () {
         // create existing user with known password
         $user = User::factory()->create([
-            'password' => $this->service->hashPassword('oldpassword')
+            'password' => $this->service->hashPassword('oldpassword'),
         ]);
 
         // change password

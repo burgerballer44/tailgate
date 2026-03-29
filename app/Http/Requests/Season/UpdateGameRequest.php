@@ -3,10 +3,11 @@
 namespace App\Http\Requests\Season;
 
 use App\DTO\ValidatedGameData;
-use App\Models\Common\DateOrString;
-use App\Models\Common\TimeOrString;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GameValidationRulesTrait;
+use App\Models\Common\DateOrString;
+use App\Models\Common\TimeOrString;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateGameRequest extends FormRequest
 {
@@ -34,7 +35,7 @@ class UpdateGameRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

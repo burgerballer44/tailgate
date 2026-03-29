@@ -25,7 +25,7 @@ class EnsureUserIsGroupMember
             ->where('status', MemberStatus::APPROVED->value)
             ->first();
 
-        if (!$member) {
+        if (! $member) {
             abort(403, 'You are not an approved member of this group.');
         }
 

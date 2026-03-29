@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedFollowData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\FollowValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class FollowTeamRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class FollowTeamRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

@@ -3,13 +3,14 @@
 namespace App\Http\Requests\Traits;
 
 use App\Rules\SeasonIsActive;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 trait FollowValidationRulesTrait
 {
     /**
      * Get the base validation rules for follow fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function baseRules(): array
     {
@@ -22,7 +23,7 @@ trait FollowValidationRulesTrait
     /**
      * Get the validation rules for storing a follow.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function storeRules(): array
     {
@@ -32,7 +33,7 @@ trait FollowValidationRulesTrait
     /**
      * Get the validation rules for updating a follow.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     protected function updateRules(): array
     {

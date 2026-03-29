@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Models\User;
 
 beforeEach(function () {
     $this->user = signInDeveloperUser();

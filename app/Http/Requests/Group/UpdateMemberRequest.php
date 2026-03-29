@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedMemberData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\MemberValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateMemberRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class UpdateMemberRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

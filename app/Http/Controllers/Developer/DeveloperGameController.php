@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\GameMustBelongToSeason;
+use App\Http\Requests\Season\AddGameRequest;
+use App\Http\Requests\Season\UpdateGameRequest;
 use App\Models\Game;
 use App\Models\Season;
-use Illuminate\Http\Request;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\SeasonCommandInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Routing\Controllers\Middleware;
-use App\Http\Middleware\GameMustBelongToSeason;
-use App\Http\Requests\Season\AddGameRequest;
-use App\Http\Requests\Season\UpdateGameRequest;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
 class DeveloperGameController extends Controller implements HasMiddleware
 {

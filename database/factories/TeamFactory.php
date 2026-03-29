@@ -8,7 +8,7 @@ use App\Models\TeamType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Team>
+ * @extends Factory<Team>
  */
 class TeamFactory extends Factory
 {
@@ -50,7 +50,7 @@ class TeamFactory extends Factory
             $team->sports()->delete();
             foreach ($sports as $sport) {
                 $team->sports()->create([
-                    'sport' => $sport instanceof Sport ? $sport->value : $sport
+                    'sport' => $sport instanceof Sport ? $sport->value : $sport,
                 ]);
             }
         });

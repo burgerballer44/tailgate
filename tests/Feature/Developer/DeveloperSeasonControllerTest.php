@@ -3,8 +3,8 @@
 use App\Models\Season;
 use App\Models\SeasonType;
 use App\Models\Sport;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 beforeEach(function () {
     $this->user = signInDeveloperUser();
@@ -62,7 +62,7 @@ describe('index', function () {
         $seasons = $response->viewData('seasons');
         expect($seasons->count())->toBe(2);
     });
-    
+
     test('seasons can be filtered by season_type', function () {
         // create 2 basketball seasons
         [$season1, $season2] = Season::factory()->count(2)->create(['season_type' => SeasonType::REGULAR->value]);
@@ -84,7 +84,7 @@ describe('index', function () {
         $seasons = $response->viewData('seasons');
         expect($seasons->count())->toBe(2);
     });
-    
+
     test('seasons can be filtered by q for name', function () {
         // thing to find
         $q = 'FindMe';
@@ -107,7 +107,7 @@ describe('index', function () {
         $seasons = $response->viewData('seasons');
         expect($seasons->count())->toBe(1);
     });
-    
+
 });
 
 describe('creating a season', function () {

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Team;
 use App\DTO\ValidatedTeamData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\TeamValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreTeamRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class StoreTeamRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

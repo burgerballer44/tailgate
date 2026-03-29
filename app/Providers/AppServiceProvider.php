@@ -2,36 +2,36 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\ServiceProvider;
-use App\Services\Contracts\UserCommandInterface;
-use App\Services\Contracts\UserQueryInterface;
-use App\Services\Contracts\TeamCommandInterface;
-use App\Services\Contracts\TeamQueryInterface;
-use App\Services\Contracts\SeasonCommandInterface;
-use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\GameQueryInterface;
-use App\Services\Contracts\PlayerCommandInterface;
-use App\Services\Contracts\PlayerQueryInterface;
-use App\Services\Contracts\MemberCommandInterface;
-use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
-use App\Services\UserCommandService;
-use App\Services\UserQueryService;
-use App\Services\TeamCommandService;
-use App\Services\TeamQueryService;
-use App\Services\SeasonCommandService;
-use App\Services\SeasonQueryService;
+use App\Services\Contracts\MemberCommandInterface;
+use App\Services\Contracts\MemberQueryInterface;
+use App\Services\Contracts\PlayerCommandInterface;
+use App\Services\Contracts\PlayerQueryInterface;
+use App\Services\Contracts\SeasonCommandInterface;
+use App\Services\Contracts\SeasonQueryInterface;
+use App\Services\Contracts\TeamCommandInterface;
+use App\Services\Contracts\TeamQueryInterface;
+use App\Services\Contracts\UserCommandInterface;
+use App\Services\Contracts\UserQueryInterface;
 use App\Services\GameCommandService;
 use App\Services\GameQueryService;
-use App\Services\PlayerCommandService;
-use App\Services\PlayerQueryService;
-use App\Services\MemberCommandService;
-use App\Services\MemberQueryService;
 use App\Services\GroupCommandService;
 use App\Services\GroupQueryService;
+use App\Services\MemberCommandService;
+use App\Services\MemberQueryService;
+use App\Services\PlayerCommandService;
+use App\Services\PlayerQueryService;
+use App\Services\SeasonCommandService;
+use App\Services\SeasonQueryService;
+use App\Services\TeamCommandService;
+use App\Services\TeamQueryService;
+use App\Services\UserCommandService;
+use App\Services\UserQueryService;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

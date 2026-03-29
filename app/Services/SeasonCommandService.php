@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\DTO\ValidatedGameData;
+use App\DTO\ValidatedSeasonData;
 use App\Models\Game;
 use App\Models\Season;
 use App\Services\Contracts\GameCommandInterface;
-use App\DTO\ValidatedGameData;
-use App\DTO\ValidatedSeasonData;
 use App\Services\Contracts\SeasonCommandInterface;
 
 class SeasonCommandService implements SeasonCommandInterface

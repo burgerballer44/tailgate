@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Group\StoreMemberRequest;
+use App\Http\Requests\Group\UpdateMemberRequest;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\User;
 use App\Services\Contracts\MemberCommandInterface;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Group\StoreMemberRequest;
-use App\Http\Requests\Group\UpdateMemberRequest;
+use Illuminate\Http\Request;
 
 class DeveloperMemberController extends Controller
 {
