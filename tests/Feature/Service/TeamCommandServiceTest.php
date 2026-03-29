@@ -4,11 +4,11 @@ use App\Models\Team;
 use App\Models\Sport;
 use App\Models\TeamType;
 use Illuminate\Support\Str;
-use App\Services\TeamService;
+use App\Services\TeamCommandService;
 use App\DTO\ValidatedTeamData;
 
 beforeEach(function () {
-    $this->service = new TeamService();
+    $this->service = new TeamCommandService();
 });
 
 describe('create a team', function () {

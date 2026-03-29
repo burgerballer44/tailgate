@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Models\Team;
 use App\DTO\ValidatedTeamData;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use App\Services\Contracts\TeamCommandInterface;
 
-class TeamService
+class TeamCommandService implements TeamCommandInterface
 {
     /**
      * Create a new team with the provided data.
@@ -47,7 +47,6 @@ class TeamService
     public function update(Team $team, ValidatedTeamData $data): Team
     {
         // Team data properties are never expected to be null or set to null.
-
         $updateData = [
             'organization' => $data->organization,
             'designation' => $data->designation,
@@ -79,17 +78,5 @@ class TeamService
     public function delete(Team $team): void
     {
         $team->delete();
-    }
-
-    /**
-     * Filter teams based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
-     *
-     * @param  array  $query  An associative array of query parameters to filter teams.
-     * @return Builder A query builder instance for the filtered teams.
-     */
-    public function query(array $query)
-    {
-        return Team::filter($query)->with('sports');
     }
 }

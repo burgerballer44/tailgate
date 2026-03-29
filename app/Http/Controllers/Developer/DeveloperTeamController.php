@@ -8,7 +8,8 @@ use App\Models\Sport;
 use App\Models\TeamType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use App\Services\TeamService;
+use App\Services\Contracts\TeamCommandInterface;
+use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\Team\StoreTeamRequest;
@@ -17,13 +18,14 @@ use App\Http\Requests\Team\UpdateTeamRequest;
 class DeveloperTeamController extends Controller
 {
     public function __construct(
-        private TeamService $teamService
+        private TeamCommandInterface $teamCommandService,
+        private TeamQueryInterface $teamQueryService
     ) {}
 
     public function index(Request $request): View
     {
         return view('developer.teams.index', [
-            'teams' => $this->teamService->query($request->all())->paginate(),
+            'teams' => $this->teamQueryService->query($request->all())->paginate(),
             'sports' => collect(Sport::cases())->pluck('value'),
             'types' => collect(TeamType::cases())->pluck('value'),
         ]);
@@ -39,7 +41,7 @@ class DeveloperTeamController extends Controller
 
     public function store(StoreTeamRequest $request): RedirectResponse
     {
-        $this->teamService->create($request->toDTO());
+        $this->teamCommandService->create($request->toDTO());
 
         $this->setFlashAlert('success', 'Team created successfully!');
 
@@ -62,7 +64,7 @@ class DeveloperTeamController extends Controller
 
     public function update(UpdateTeamRequest $request, Team $team): RedirectResponse
     {
-        $this->teamService->update($team, $request->toDTO());
+        $this->teamCommandService->update($team, $request->toDTO());
 
         $this->setFlashAlert('success', 'Team updated successfully!');
 
@@ -71,7 +73,7 @@ class DeveloperTeamController extends Controller
 
     public function destroy(Team $team): RedirectResponse
     {
-        $this->teamService->delete($team);
+        $this->teamCommandService->delete($team);
 
         $this->setFlashAlert('success', 'Team deleted successfully!');
 

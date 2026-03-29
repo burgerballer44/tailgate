@@ -6,8 +6,12 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Contracts\UserCommandInterface;
 use App\Services\Contracts\UserQueryInterface;
+use App\Services\Contracts\TeamCommandInterface;
+use App\Services\Contracts\TeamQueryInterface;
 use App\Services\UserCommandService;
 use App\Services\UserQueryService;
+use App\Services\TeamCommandService;
+use App\Services\TeamQueryService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(UserCommandInterface::class, UserCommandService::class);
         $this->app->bind(UserQueryInterface::class, UserQueryService::class);
+        $this->app->bind(TeamCommandInterface::class, TeamCommandService::class);
+        $this->app->bind(TeamQueryInterface::class, TeamQueryService::class);
     }
 
     /**
