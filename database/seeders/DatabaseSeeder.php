@@ -108,11 +108,37 @@ class DatabaseSeeder extends Seeder
             'role' => UserRole::REGULAR->value,
         ]);
 
+        $teamMetadata = static function (
+            string $conference,
+            string $abbreviation,
+            string $color,
+            string $alternateColor,
+            array $logos,
+            array $socialMedia = [],
+        ): array {
+            return [
+                'conference' => $conference,
+                'abbreviation' => $abbreviation,
+                'color' => $color,
+                'alternate_color' => $alternateColor,
+                'logos' => $logos,
+                'social_media' => $socialMedia,
+            ];
+        };
+
         // Create Teams
         $teamWithGames1 = Team::factory()->withoutSports()->create([
             'organization' => 'University of North Carolina',
             'designation' => 'Tar Heels',
             'mascot' => 'Ram',
+            ...$teamMetadata(
+                conference: 'ACC',
+                abbreviation: 'UNC',
+                color: '#7bafd4',
+                alternateColor: '#13294b',
+                logos: ['https://goheels.com/images/logos/site/site.png'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/uncfootball']],
+            ),
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -120,6 +146,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Duke University',
             'designation' => 'Blue Devils',
             'mascot' => 'Blue Devil',
+            ...$teamMetadata(
+                conference: 'ACC',
+                abbreviation: 'DUKE',
+                color: '#003087',
+                alternateColor: '#ffffff',
+                logos: ['https://goduke.com/images/logos/site/site.png'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/dukefootball']],
+            ),
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -127,6 +161,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'North Carolina State University',
             'designation' => 'Wolfpack',
             'mascot' => 'Wolf',
+            ...$teamMetadata(
+                conference: 'ACC',
+                abbreviation: 'NCSU',
+                color: '#cc0000',
+                alternateColor: '#000000',
+                logos: ['https://gopack.com/images/logos/site/site.png'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/packfootball']],
+            ),
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -134,6 +176,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'University of Virginia',
             'designation' => 'Cavaliers',
             'mascot' => 'Cavalier',
+            ...$teamMetadata(
+                conference: 'ACC',
+                abbreviation: 'UVA',
+                color: '#f84c1e',
+                alternateColor: '#232d4b',
+                logos: ['https://virginiasports.com/images/logos/site/site.png'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/uvafb']],
+            ),
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -142,6 +192,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Virginia Tech',
             'designation' => 'Hokies',
             'mascot' => 'HokieBird',
+            ...$teamMetadata(
+                conference: 'ACC',
+                abbreviation: 'VT',
+                color: '#630031',
+                alternateColor: '#cf4420',
+                logos: ['https://hokiesports.com/images/logos/site/site.png'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/hokiesfb']],
+            ),
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -149,6 +207,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Florida State University',
             'designation' => 'Seminoles',
             'mascot' => 'Chief Osceola',
+            ...$teamMetadata(
+                conference: 'ACC',
+                abbreviation: 'FSU',
+                color: '#782f40',
+                alternateColor: '#ceb888',
+                logos: ['https://seminoles.com/images/logos/site/site.png'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/fsufootball']],
+            ),
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -156,6 +222,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Boston College',
             'designation' => 'Eagles',
             'mascot' => 'Baldwin',
+            ...$teamMetadata(
+                conference: 'ACC',
+                abbreviation: 'BC',
+                color: '#98002e',
+                alternateColor: '#bc9b6a',
+                logos: ['https://bceagles.com/images/logos/site/site.png'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/bceaglesfb']],
+            ),
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -164,6 +238,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Carolina Panthers',
             'designation' => 'Panthers',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'NFC South',
+                abbreviation: 'CAR',
+                color: '#0085ca',
+                alternateColor: '#101820',
+                logos: ['https://www.panthers.com/resources/img/logos/panthers.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/panthers']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
@@ -171,6 +253,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Atlanta Falcons',
             'designation' => 'Falcons',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'NFC South',
+                abbreviation: 'ATL',
+                color: '#a71930',
+                alternateColor: '#000000',
+                logos: ['https://www.atlantafalcons.com/resources/img/logos/falcons.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/atlantafalcons']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
@@ -178,6 +268,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'New Orleans Saints',
             'designation' => 'Saints',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'NFC South',
+                abbreviation: 'NO',
+                color: '#d3bc8d',
+                alternateColor: '#101820',
+                logos: ['https://www.neworleanssaints.com/resources/img/logos/saints.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/saints']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
@@ -185,6 +283,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Tampa Bay Buccaneers',
             'designation' => 'Buccaneers',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'NFC South',
+                abbreviation: 'TB',
+                color: '#d50a0a',
+                alternateColor: '#0a0a08',
+                logos: ['https://www.buccaneers.com/resources/img/logos/buccaneers.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/buccaneers']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
@@ -193,6 +299,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Charlotte Hornets',
             'designation' => 'Hornets',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'Southeast',
+                abbreviation: 'CHA',
+                color: '#1d1160',
+                alternateColor: '#00788c',
+                logos: ['https://www.nba.com/resources/static/team/v2/hornets-logo.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/hornets']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
@@ -200,6 +314,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Atlanta Hawks',
             'designation' => 'Hawks',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'Southeast',
+                abbreviation: 'ATL',
+                color: '#e03a3e',
+                alternateColor: '#c1d32f',
+                logos: ['https://www.nba.com/resources/static/team/v2/hawks-logo.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/atlhawks']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
@@ -207,6 +329,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Miami Heat',
             'designation' => 'Heat',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'Southeast',
+                abbreviation: 'MIA',
+                color: '#98002e',
+                alternateColor: '#f9a01b',
+                logos: ['https://www.nba.com/resources/static/team/v2/heat-logo.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/miamiheat']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
@@ -214,6 +344,14 @@ class DatabaseSeeder extends Seeder
             'organization' => 'Orlando Magic',
             'designation' => 'Magic',
             'mascot' => null,
+            ...$teamMetadata(
+                conference: 'Southeast',
+                abbreviation: 'ORL',
+                color: '#0077c0',
+                alternateColor: '#c4ced4',
+                logos: ['https://www.nba.com/resources/static/team/v2/magic-logo.svg'],
+                socialMedia: [['label' => 'X', 'url' => 'https://x.com/orlandomagic']],
+            ),
             'type' => TeamType::PROFESSIONAL,
         ]);
 
