@@ -28,17 +28,6 @@
                             <div class="px-4 py-4 sm:px-6">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
-                                        {{--
-                                            <div class="h-10 w-10 flex-shrink-0">
-                                            <div
-                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300"
-                                            >
-                                            <span class="text-sm font-medium text-gray-700">
-                                            {{ substr($group->name, 0, 2) }}
-                                            </span>
-                                            </div>
-                                            </div>
-                                        --}}
                                         <div>
                                             <div class="text-sm font-medium text-gray-900">
                                                 @if ($user->canAccessGroup($group))

@@ -7,6 +7,7 @@ applyTo: '**'
 ## ✅ General Coding Standards
 
 - Follow **PSR-12** coding style and structure.
+- Don't use `declare(strict_types=1);`.
 - Prefer short, expressive, and readable code.
 - Use **meaningful, descriptive variable, function, class, and file names**.
 - Apply proper PHPDoc blocks for classes, methods, and complex logic.
@@ -27,6 +28,7 @@ applyTo: '**'
 
 ## ✅ Laravel 12 Project Structure & Conventions
 
+- Target Laravel ^12 (PHP ^8.4) unless the repo states otherwise.
 - Follow the official Laravel project structure:
     - `app/Http/Controllers` - Controllers
     - `app/Models` - Eloquent models
@@ -45,9 +47,16 @@ applyTo: '**'
     - Use Resource classes for API responses.
 
 - Business logic should reside in:
-    - Service classes
+    - Service classes for complex domain logic; keep Eloquent models skinny
     - Action classes
     - Event listeners or Jobs for asynchronous tasks
+
+- Avoid putting business logic in controllers; use domain service classes so that console commands, API controllers, and web controllers can reuse the same logic.
+- Favor constructor injection over facades; when a facade is idiomatic (e.g., Cache, Log), it's fine.
+- Queues: for long-running tasks use jobs & dispatch with retry/backoff; never block HTTP.
+- Events/Listeners for side effects where helpful.
+- ENV safety: never hardcode secrets; read from `config()`.
+- Logging: structured logs with context; no sensitive PII.
 
 ## ✅ Eloquent ORM & Database
 
@@ -56,6 +65,7 @@ applyTo: '**'
 - Apply **accessors & mutators** for attribute transformation.
 - Avoid direct raw SQL unless absolutely necessary; prefer Eloquent or Query Builder.
 - Migrations:
+    - Generate idempotent, rollback-safe migrations.
     - Always use migrations for schema changes.
     - Include proper constraints (foreign keys, unique indexes, etc.).
     - Prefer UUIDs or ULIDs as primary keys where applicable.
@@ -83,6 +93,10 @@ applyTo: '**'
 - Follow **Arrange/Act/Assert** pattern; avoid hidden globals.
 - Provide at least one negative test and one edge-case test for each feature.
 - Use **factories** for test data setup.
+- Use `beforeEach` for test setup where applicable.
+- Feature tests must be created for controller class methods.
+- Unit tests must be created for service class methods.
+- Tests should be grouped by the method name in a `describe` function, with related tests placed in the same `describe` function.
 - Include feature tests for user-facing functionality.
 - Include unit tests for business logic, services, and helper classes.
 - Mock external services using Laravel's `Http::fake()` or equivalent.
