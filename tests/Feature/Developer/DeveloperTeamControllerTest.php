@@ -177,6 +177,12 @@ describe('creating a team', function () {
             'organization' => 'Test Organization',
             'designation' => 'Test Team',
             'mascot' => 'Test Mascot',
+            'conference' => 'SEC',
+            'abbreviation' => 'TT',
+            'color' => '#8c2232',
+            'alternate_color' => '#ffffff',
+            'logos' => json_encode(['https://example.test/team-logo.png']),
+            'social_media' => json_encode([['label' => 'X', 'url' => 'https://x.com/test-team']]),
             'type' => TeamType::COLLEGE->value,
             'sports' => [Sport::BASKETBALL->value],
         ];
@@ -198,6 +204,7 @@ describe('creating a team', function () {
             'organization' => $teamData['organization'],
             'designation' => $teamData['designation'],
             'mascot' => $teamData['mascot'],
+            'conference' => $teamData['conference'],
             'type' => $teamData['type'],
         ]);
 
@@ -212,6 +219,12 @@ describe('creating a team', function () {
             'organization' => 'Test Organization',
             'designation' => 'Test Team',
             'mascot' => 'Test Mascot',
+            'conference' => 'SEC',
+            'abbreviation' => 'TT',
+            'color' => '#8c2232',
+            'alternate_color' => '#ffffff',
+            'logos' => json_encode(['https://example.test/team-logo.png']),
+            'social_media' => json_encode([['label' => 'X', 'url' => 'https://x.com/test-team']]),
             'type' => TeamType::COLLEGE->value,
             'sports' => [Sport::BASKETBALL->value],
         ];
@@ -272,6 +285,7 @@ describe('updating team', function () {
             'organization' => 'theOrganization',
             'designation' => 'theDesignation',
             'mascot' => 'theMascot',
+            'conference' => 'Big Ten',
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -280,6 +294,12 @@ describe('updating team', function () {
             'organization' => 'Updated Organization',
             'designation' => 'Updated Designation',
             'mascot' => 'Updated Mascot',
+            'conference' => 'ACC',
+            'abbreviation' => 'UD',
+            'color' => '#123456',
+            'alternate_color' => '#abcdef',
+            'logos' => json_encode(['https://example.test/new-logo.png']),
+            'social_media' => json_encode([['label' => 'Instagram', 'url' => 'https://instagram.com/new-team']]),
             'type' => TeamType::PROFESSIONAL->value,
             'sports' => [Sport::FOOTBALL->value],
         ];
@@ -295,6 +315,7 @@ describe('updating team', function () {
         expect($team->organization)->toBe($updateData['organization']);
         expect($team->designation)->toBe($updateData['designation']);
         expect($team->mascot)->toBe($updateData['mascot']);
+        expect($team->conference)->toBe($updateData['conference']);
         expect($team->type)->toBe($updateData['type']);
         expect($team->sports->pluck('sport')->toArray())->toBe([Sport::FOOTBALL]);
     });
@@ -308,6 +329,12 @@ describe('updating team', function () {
             'organization' => 'Updated Organization',
             'designation' => 'Updated Designation',
             'mascot' => 'Updated Mascot',
+            'conference' => 'ACC',
+            'abbreviation' => 'UD',
+            'color' => '#123456',
+            'alternate_color' => '#abcdef',
+            'logos' => json_encode(['https://example.test/new-logo.png']),
+            'social_media' => json_encode([['label' => 'Instagram', 'url' => 'https://instagram.com/new-team']]),
             'type' => TeamType::PROFESSIONAL->value,
             'sports' => [Sport::FOOTBALL->value],
         ];

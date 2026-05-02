@@ -17,7 +17,13 @@ describe('create a team', function () {
         $data = [
             'organization' => 'Test Organization',
             'designation' => 'Test Team',
+            'conference' => 'SEC',
             'mascot' => 'Test Mascot',
+            'abbreviation' => 'TT',
+            'color' => '#8c2232',
+            'alternate_color' => '#ffffff',
+            'logos' => ['https://example.test/team-logo.png'],
+            'social_media' => [['label' => 'X', 'url' => 'https://x.com/test-team']],
             'type' => TeamType::COLLEGE->value,
             'sports' => [Sport::BASKETBALL->value],
         ];
@@ -35,6 +41,12 @@ describe('create a team', function () {
         expect($team->organization)->toBe($data['organization']);
         expect($team->designation)->toBe($data['designation']);
         expect($team->mascot)->toBe($data['mascot']);
+        expect($team->conference)->toBe($data['conference']);
+        expect($team->abbreviation)->toBe($data['abbreviation']);
+        expect($team->color)->toBe($data['color']);
+        expect($team->alternate_color)->toBe($data['alternate_color']);
+        expect($team->logos)->toBe($data['logos']);
+        expect($team->social_media)->toBe($data['social_media']);
         expect($team->type)->toBe($data['type']);
         expect($team->sports->pluck('sport')->toArray())->toBe([Sport::BASKETBALL]);
         expect(Str::isUlid((string) $team->ulid))->toBeTrue();
@@ -48,6 +60,12 @@ describe('update a team', function () {
             'organization' => 'Old Organization',
             'designation' => 'Old Designation',
             'mascot' => 'Old Mascot',
+            'conference' => 'Big Ten',
+            'abbreviation' => 'OD',
+            'color' => '#000000',
+            'alternate_color' => '#111111',
+            'logos' => ['https://example.test/old-logo.png'],
+            'social_media' => [['label' => 'X', 'url' => 'https://x.com/old-team']],
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -55,7 +73,13 @@ describe('update a team', function () {
         $data = ValidatedTeamData::fromArray([
             'organization' => 'New Organization',
             'designation' => 'New Designation',
+            'conference' => 'ACC',
             'mascot' => 'New Mascot',
+            'abbreviation' => 'ND',
+            'color' => '#123456',
+            'alternate_color' => '#abcdef',
+            'logos' => ['https://example.test/new-logo.png'],
+            'social_media' => [['label' => 'Instagram', 'url' => 'https://instagram.com/new-team']],
             'type' => TeamType::PROFESSIONAL->value,
             'sports' => [Sport::BASKETBALL->value],
         ]);
@@ -82,6 +106,12 @@ describe('update a team', function () {
         expect($team->organization)->toBe($data->organization);
         expect($team->designation)->toBe($data->designation);
         expect($team->mascot)->toBe($data->mascot);
+        expect($team->conference)->toBe($data->conference);
+        expect($team->abbreviation)->toBe($data->abbreviation);
+        expect($team->color)->toBe($data->color);
+        expect($team->alternate_color)->toBe($data->alternateColor);
+        expect($team->logos)->toBe($data->logos);
+        expect($team->social_media)->toBe($data->socialMedia);
         expect($team->type)->toBe($data->type->value);
         expect($team->sports->pluck('sport')->toArray())->toBe($data->sports);
     });

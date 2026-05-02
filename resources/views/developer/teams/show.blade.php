@@ -28,6 +28,34 @@
                 'value' => $team->mascot,
             ],
             [
+                'label' => 'Conference',
+                'value' => $team->conference,
+            ],
+            [
+                'label' => 'Abbreviation',
+                'value' => $team->abbreviation,
+            ],
+            [
+                'label' => 'Color',
+                'value' => $team->color,
+            ],
+            [
+                'label' => 'Alternate Color',
+                'value' => $team->alternate_color,
+            ],
+            [
+                'label' => 'Logos',
+                'value' => is_array($team->logos) ? implode(', ', $team->logos) : null,
+            ],
+            [
+                'label' => 'Social Media',
+                'value' => is_array($team->social_media)
+                    ? collect($team->social_media)
+                        ->map(fn ($item) => ($item['label'] ?? 'Link') . ': ' . ($item['url'] ?? ''))
+                        ->join(', ')
+                    : null,
+            ],
+            [
                 'label' => 'Type',
                 'value' => $team->type,
             ],

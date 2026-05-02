@@ -23,6 +23,18 @@ class TeamFactory extends Factory
             'organization' => fake()->company(),
             'designation' => fake()->name().'designation',
             'mascot' => fake()->optional()->name().'mascot',
+            'conference' => fake()->randomElement(['ACC', 'Big Ten', 'SEC', 'Big 12', 'Mountain West', 'Independent']),
+            'abbreviation' => fake()->optional()->lexify('???'),
+            'color' => fake()->optional()->hexColor(),
+            'alternate_color' => fake()->optional()->hexColor(),
+            'logos' => fake()->optional()->randomElement([
+                ['https://example.test/logo-primary.png'],
+                ['https://example.test/logo-primary.png', 'https://example.test/logo-secondary.png'],
+            ]),
+            'social_media' => fake()->optional()->randomElement([
+                [['label' => 'X', 'url' => 'https://x.com/example']],
+                [['label' => 'Instagram', 'url' => 'https://instagram.com/example']],
+            ]),
             'type' => fake()->randomElement(TeamType::cases()),
         ];
     }

@@ -10,7 +10,13 @@ readonly class ValidatedTeamData
     public function __construct(
         public string $organization,
         public string $designation,
+        public string $conference,
         public ?string $mascot,
+        public ?string $abbreviation,
+        public ?string $color,
+        public ?string $alternateColor,
+        public ?array $logos,
+        public ?array $socialMedia,
         public TeamType $type,
         public array $sports,
     ) {}
@@ -28,7 +34,13 @@ readonly class ValidatedTeamData
         return new self(
             organization: (string) $data['organization'],
             designation: (string) $data['designation'],
+            conference: (string) $data['conference'],
             mascot: $data['mascot'] ?? null,
+            abbreviation: $data['abbreviation'] ?? null,
+            color: $data['color'] ?? null,
+            alternateColor: $data['alternate_color'] ?? null,
+            logos: isset($data['logos']) && is_array($data['logos']) ? array_values($data['logos']) : null,
+            socialMedia: isset($data['social_media']) && is_array($data['social_media']) ? array_values($data['social_media']) : null,
             type: TeamType::from($data['type']),
             sports: $sports,
         );

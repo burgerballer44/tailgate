@@ -5,11 +5,15 @@ namespace App\Http\Requests\Team;
 use App\DTO\ValidatedTeamData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\TeamValidationRulesTrait;
-use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateTeamRequest extends FormRequest
 {
     use TeamValidationRulesTrait;
+
+    protected function prepareForValidation(): void
+    {
+        $this->prepareTeamJsonFields();
+    }
 
     /**
      * Determine if the user is authorized to make this request.

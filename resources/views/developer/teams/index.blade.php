@@ -37,9 +37,9 @@
         :tableActions="[
             ['route' => 'developer.teams.create', 'text' => 'Add Team']
         ]"
-        :headers="['Organization', 'Designation', 'Mascot', 'Type', 'Sports', 'Created', 'Actions']"
+        :headers="['Organization', 'Designation', 'Conference', 'Mascot', 'Type', 'Sports', 'Created', 'Actions']"
         :rows="$teams"
-        :columns="['organization', 'designation', 'mascot', 'type', 'sports_string', 'created_at']"
+        :columns="['organization', 'designation', 'conference', 'mascot', 'type', 'sports_string', 'created_at']"
         :rowActions="[
             [
                 'label' => 'Show',

@@ -31,7 +31,23 @@ class Team extends Model
         'organization',
         'designation',
         'mascot',
+        'conference',
+        'abbreviation',
+        'color',
+        'alternate_color',
+        'logos',
+        'social_media',
         'type',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'logos' => 'array',
+        'social_media' => 'array',
     ];
 
     /**
@@ -83,7 +99,8 @@ class Team extends Model
             $builder->where(function ($query) use ($q) {
                 $query->whereRaw('LOWER(organization) LIKE LOWER(?)', ["%{$q}%"])
                     ->orWhereRaw('LOWER(designation) LIKE LOWER(?)', ["%{$q}%"])
-                    ->orWhereRaw('LOWER(mascot) LIKE LOWER(?)', ["%{$q}%"]);
+                    ->orWhereRaw('LOWER(mascot) LIKE LOWER(?)', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(conference) LIKE LOWER(?)', ["%{$q}%"]);
             });
         }
 

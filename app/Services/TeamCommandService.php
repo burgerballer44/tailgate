@@ -10,7 +10,7 @@ class TeamCommandService implements TeamCommandInterface
 {
     /**
      * Create a new team with the provided data.
-     * This method handles team creation logic, including setting organization, designation, mascot, type, and sport.
+     * This method handles team creation logic, including setting organization, designation, conference, mascot, type, and sport.
      *
      * @param  ValidatedTeamData  $data  Validated team data including organization, designation, mascot, type, sport.
      * @return Team The created team instance.
@@ -20,7 +20,13 @@ class TeamCommandService implements TeamCommandInterface
         $teamData = [
             'organization' => $data->organization,
             'designation' => $data->designation,
+            'conference' => $data->conference,
             'mascot' => $data->mascot,
+            'abbreviation' => $data->abbreviation,
+            'color' => $data->color,
+            'alternate_color' => $data->alternateColor,
+            'logos' => $data->logos,
+            'social_media' => $data->socialMedia,
             'type' => $data->type->value,
         ];
 
@@ -50,7 +56,13 @@ class TeamCommandService implements TeamCommandInterface
         $updateData = [
             'organization' => $data->organization,
             'designation' => $data->designation,
+            'conference' => $data->conference,
             'mascot' => $data->mascot,
+            'abbreviation' => $data->abbreviation,
+            'color' => $data->color,
+            'alternate_color' => $data->alternateColor,
+            'logos' => $data->logos,
+            'social_media' => $data->socialMedia,
             'type' => $data->type->value,
         ];
 
