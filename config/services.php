@@ -41,6 +41,10 @@ return [
             'base_url' => env('CFBD_BASE_URL', 'https://api.collegefootballdata.com'),
             'token' => env('CFBD_API_TOKEN'),
         ],
+        'cbbd' => [
+            'base_url' => env('CBBD_BASE_URL', 'https://api.collegebasketballdata.com'),
+            'token' => env('CBBD_API_TOKEN'),
+        ],
     ],
 
 ];

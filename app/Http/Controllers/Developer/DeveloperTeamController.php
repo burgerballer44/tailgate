@@ -117,17 +117,32 @@ class DeveloperTeamController extends Controller
             return redirect()->route('developer.teams.import-teams')->withInput();
         }
 
-        if ($result->isPartial()) {
+        $hasChanges = $result->hasImports() || $result->hasUpdates();
+        $summaryParts = [];
+
+        if ($result->hasImports()) {
+            $summaryParts[] = "Imported {$result->importedCount} team(s)";
+        }
+
+        if ($result->hasUpdates()) {
+            $summaryParts[] = "Updated {$result->updatedCount} existing team(s)";
+        }
+
+        $summary = $summaryParts === []
+            ? "No teams were imported or updated from {$result->sourceLabel}."
+            : implode('. ', $summaryParts)." from {$result->sourceLabel}.";
+
+        if ($result->hasErrors() && $hasChanges) {
             $this->setFlashAlert(
                 'warning',
                 array_merge([
-                    "Imported {$result->importedCount} team(s) from {$result->sourceLabel}.",
+                    $summary,
                 ], $result->errors)
             );
-        } elseif ($result->hasImports()) {
-            $this->setFlashAlert('success', "Imported {$result->importedCount} team(s) from {$result->sourceLabel}.");
+        } elseif ($hasChanges) {
+            $this->setFlashAlert('success', $summary);
         } else {
-            $this->setFlashAlert('error', $result->hasErrors() ? $result->errors : 'No teams were imported.');
+            $this->setFlashAlert('error', $result->hasErrors() ? $result->errors : 'No teams were imported or updated.');
         }
 
         return redirect()->route('developer.teams.index');

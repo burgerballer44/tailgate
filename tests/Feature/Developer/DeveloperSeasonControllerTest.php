@@ -337,7 +337,6 @@ describe('deleting a season', function () {
 
 describe('importing season games', function () {
     test('shows import form', function () {
-        //
         $season = Season::factory()->create(['sport' => Sport::FOOTBALL->value]);
 
         // visit the import games page
@@ -349,13 +348,13 @@ describe('importing season games', function () {
         // assert view is returned
         $response->assertViewIs('developer.seasons.import-games');
 
-        //
         $response->assertViewHas('season', $season);
         $response->assertViewHas('sources');
+        $response->assertViewHas('seasonTypes');
     });
 
     test('imports games from cfbd', function () {
-        config()->set('services.cfbd.token', 'test-token');
+        config()->set('services.import.cfbd.token', 'test-token');
 
         $season = Season::factory()->create([
             'sport' => Sport::FOOTBALL->value,
@@ -363,14 +362,22 @@ describe('importing season games', function () {
             'season_start' => '2024-08-01',
         ]);
 
-        $homeTeam = Team::factory()->withSports([$season->sport])->create(['organization' => 'Alabama']);
-        $awayTeam = Team::factory()->withSports([$season->sport])->create(['organization' => 'Georgia']);
+        $homeTeam = Team::factory()->withSports([$season->sport])->create([
+            'organization' => 'Alabama',
+            'conference' => 'SEC',
+        ]);
+        $awayTeam = Team::factory()->withSports([$season->sport])->create([
+            'organization' => 'Georgia',
+            'conference' => 'SEC',
+        ]);
 
         Http::fake([
             'https://api.collegefootballdata.com/games*' => Http::response([
                 [
                     'home_team' => 'Alabama',
+                    'home_conference' => 'SEC',
                     'away_team' => 'Georgia',
+                    'away_conference' => 'SEC',
                     'home_points' => 24,
                     'away_points' => 21,
                     'start_date' => '2024-09-01T19:30:00Z',
@@ -381,7 +388,7 @@ describe('importing season games', function () {
         $response = $this->post(route('developer.seasons.import-games.store', $season), [
             'source' => 'cfbd',
             'year' => 2024,
-            'season_type' => 'regular',
+            'season_type' => 'Regular Season',
         ]);
 
         $response->assertRedirect(route('developer.seasons.show', $season));
@@ -394,11 +401,13 @@ describe('importing season games', function () {
         expect($game->away_team_id)->toBe($awayTeam->id);
         expect($game->home_team_score)->toBe(24);
         expect($game->away_team_score)->toBe(21);
+        expect($game->start_date_time)->toBe('2024-09-01 19:30:00');
+        expect(session('alert')['type'])->toBe('success');
         expect(session('alert')['message'])->toBe('Imported 1 game(s) from CFBD API.');
     });
 
-    test('shows errors when cfbd response cannot be imported', function () {
-        config()->set('services.cfbd.token', 'test-token');
+    test('updates existing games from cfbd when matching teams already exist in season', function () {
+        config()->set('services.import.cfbd.token', 'test-token');
 
         $season = Season::factory()->create([
             'sport' => Sport::FOOTBALL->value,
@@ -406,13 +415,33 @@ describe('importing season games', function () {
             'season_start' => '2024-08-01',
         ]);
 
+        $homeTeam = Team::factory()->withSports([$season->sport])->create([
+            'organization' => 'Alabama',
+            'conference' => 'SEC',
+        ]);
+        $awayTeam = Team::factory()->withSports([$season->sport])->create([
+            'organization' => 'Georgia',
+            'conference' => 'SEC',
+        ]);
+
+        $existingGame = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'home_team_score' => 7,
+            'away_team_score' => 3,
+            'start_date_time' => '2024-08-15 12:00:00',
+        ]);
+
         Http::fake([
             'https://api.collegefootballdata.com/games*' => Http::response([
                 [
-                    'home_team' => 'Unknown Team',
-                    'away_team' => 'Another Team',
-                    'home_points' => 14,
-                    'away_points' => 7,
+                    'home_team' => 'Alabama',
+                    'home_conference' => 'SEC',
+                    'away_team' => 'Georgia',
+                    'away_conference' => 'SEC',
+                    'home_points' => 31,
+                    'away_points' => 28,
                     'start_date' => '2024-09-01T19:30:00Z',
                 ],
             ]),
@@ -421,12 +450,97 @@ describe('importing season games', function () {
         $response = $this->post(route('developer.seasons.import-games.store', $season), [
             'source' => 'cfbd',
             'year' => 2024,
-            'season_type' => 'regular',
+            'season_type' => SeasonType::REGULAR->value,
         ]);
 
         $response->assertRedirect(route('developer.seasons.show', $season));
+        $this->assertDatabaseCount('games', 1);
+
+        $existingGame->refresh();
+
+        expect($existingGame->home_team_score)->toBe(31);
+        expect($existingGame->away_team_score)->toBe(28);
+        expect($existingGame->start_date_time)->toBe('2024-09-01 19:30:00');
+        expect(session('alert')['type'])->toBe('success');
+        expect(session('alert')['message'])->toBe('Updated 1 existing game(s) from CFBD API.');
+    });
+
+    test('shows warning when import is partially successful', function () {
+        config()->set('services.import.cfbd.token', 'test-token');
+
+        $season = Season::factory()->create([
+            'sport' => Sport::FOOTBALL->value,
+            'season_type' => SeasonType::REGULAR->value,
+            'season_start' => '2024-08-01',
+        ]);
+
+        Team::factory()->withSports([$season->sport])->create([
+            'organization' => 'Alabama',
+            'conference' => 'SEC',
+        ]);
+
+        Team::factory()->withSports([$season->sport])->create([
+            'organization' => 'Georgia',
+            'conference' => 'SEC',
+        ]);
+
+        Http::fake([
+            'https://api.collegefootballdata.com/games*' => Http::response([
+                [
+                    'home_team' => 'Alabama',
+                    'home_conference' => 'SEC',
+                    'away_team' => 'Georgia',
+                    'away_conference' => 'SEC',
+                    'home_points' => 24,
+                    'away_points' => 21,
+                    'start_date' => '2024-09-01T19:30:00Z',
+                ],
+                [
+                    'home_team' => 'Unknown Team',
+                    'home_conference' => 'SEC',
+                    'away_team' => 'Georgia',
+                    'away_conference' => 'SEC',
+                    'home_points' => 14,
+                    'away_points' => 7,
+                    'start_date' => '2024-09-08T19:30:00Z',
+                ],
+            ]),
+        ]);
+
+        $response = $this->post(route('developer.seasons.import-games.store', $season), [
+            'source' => 'cfbd',
+            'year' => 2024,
+            'season_type' => SeasonType::REGULAR->value,
+        ]);
+
+        $response->assertRedirect(route('developer.seasons.show', $season));
+        $this->assertDatabaseCount('games', 1);
+
+        expect(session('alert')['type'])->toBe('warning');
+        expect(session('alert')['message'])->toBeArray();
+        expect(session('alert')['message'][0])->toBe('Imported 1 game(s) from CFBD API.');
+        expect(session('alert')['message'][1])->toContain('Skipped game 2: home team');
+    });
+
+    test('validates season type when importing games', function () {
+        config()->set('services.import.cfbd.token', 'test-token');
+
+        $season = Season::factory()->create([
+            'sport' => Sport::FOOTBALL->value,
+            'season_type' => SeasonType::REGULAR->value,
+            'season_start' => '2024-08-01',
+        ]);
+
+        $response = $this->from(route('developer.seasons.import-games', $season))
+            ->post(route('developer.seasons.import-games.store', $season), [
+                'source' => 'cfbd',
+                'year' => 2024,
+                'season_type' => 'regular',
+            ]);
+
+        $response->assertRedirect(route('developer.seasons.import-games', $season));
         $this->assertDatabaseCount('games', 0);
         expect(session('alert')['type'])->toBe('error');
-        expect(session('alert')['message'])->toBeArray();
+        expect(session('alert')['message'])->toBe('Game import failed due to an unexpected error.');
     });
 });

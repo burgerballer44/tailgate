@@ -363,7 +363,7 @@ describe('importing teams', function () {
     });
 
     test('imports teams from cfbd for a selected season', function () {
-        config()->set('services.cfbd.token', 'test-token');
+        config()->set('services.import.cfbd.token', 'test-token');
 
         $season = Season::factory()->create([
             'name' => 'Football Season 2026',
@@ -402,11 +402,12 @@ describe('importing teams', function () {
             'abbreviation' => 'ACU',
         ]);
 
+        expect(session('alert')['type'])->toBe('success');
         expect(session('alert')['message'])->toBe('Imported 1 team(s) from CFBD API.');
     });
 
     test('updates existing team metadata when import finds an existing team for season sport', function () {
-        config()->set('services.cfbd.token', 'test-token');
+        config()->set('services.import.cfbd.token', 'test-token');
 
         $season = Season::factory()->create([
             'name' => 'Football Season 2026',
@@ -452,5 +453,63 @@ describe('importing teams', function () {
         expect($team->abbreviation)->toBe('ACU');
 
         $this->assertDatabaseCount('teams', 1);
+        expect(session('alert')['type'])->toBe('success');
+        expect(session('alert')['message'])->toBe('Updated 1 existing team(s) from CFBD API.');
+    });
+
+    test('shows warning when team import is partially successful', function () {
+        config()->set('services.import.cfbd.token', 'test-token');
+
+        Http::fake([
+            'https://api.collegefootballdata.com/teams*' => Http::response([
+                [
+                    'id' => 2000,
+                    'school' => 'Abilene Christian',
+                    'mascot' => 'Wildcats',
+                    'abbreviation' => 'ACU',
+                    'conference' => 'UAC',
+                    'color' => '#592d82',
+                    'alternateColor' => '#b1b3b3',
+                    'logos' => ['https://example.test/acu-primary.png'],
+                    'twitter' => '@ACUFootball',
+                ],
+                [
+                    'id' => 2001,
+                    'school' => 'Broken Team',
+                    'conference' => '',
+                ],
+            ]),
+        ]);
+
+        $response = $this->post(route('developer.teams.import-teams.store'), [
+            'source' => 'cfbd',
+            'year' => 2026,
+        ]);
+
+        $response->assertRedirect(route('developer.teams.index'));
+
+        $this->assertDatabaseHas('teams', [
+            'organization' => 'Abilene Christian',
+            'conference' => 'UAC',
+            'abbreviation' => 'ACU',
+        ]);
+
+        expect(session('alert')['type'])->toBe('warning');
+        expect(session('alert')['message'])->toBeArray();
+        expect(session('alert')['message'][0])->toBe('Imported 1 team(s) from CFBD API.');
+        expect(session('alert')['message'][1])->toContain('Skipped CFBD team 2001: required fields were missing from the response.');
+    });
+
+    test('shows error alert when team import request validation fails', function () {
+        $response = $this->from(route('developer.teams.import-teams'))
+            ->post(route('developer.teams.import-teams.store'), [
+                'source' => 'not-a-source',
+                'year' => 2026,
+            ]);
+
+        $response->assertRedirect(route('developer.teams.import-teams'));
+        $this->assertDatabaseCount('teams', 0);
+        expect(session('alert')['type'])->toBe('error');
+        expect(session('alert')['message'])->toBe('Team import failed due to an unexpected error.');
     });
 });

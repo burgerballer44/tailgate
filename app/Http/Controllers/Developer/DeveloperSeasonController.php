@@ -118,17 +118,32 @@ class DeveloperSeasonController extends Controller
             return redirect()->route('developer.seasons.import-games', $season)->withInput();
         }
 
-        if ($result->isPartial()) {
+        $hasChanges = $result->hasImports() || $result->hasUpdates();
+        $summaryParts = [];
+
+        if ($result->hasImports()) {
+            $summaryParts[] = "Imported {$result->importedCount} game(s)";
+        }
+
+        if ($result->hasUpdates()) {
+            $summaryParts[] = "Updated {$result->updatedCount} existing game(s)";
+        }
+
+        $summary = $summaryParts === []
+            ? "No games were imported or updated from {$result->sourceLabel}."
+            : implode('. ', $summaryParts)." from {$result->sourceLabel}.";
+
+        if ($result->hasErrors() && $hasChanges) {
             $this->setFlashAlert(
                 'warning',
                 array_merge([
-                    "Imported {$result->importedCount} game(s) from {$result->sourceLabel}.",
+                    $summary,
                 ], $result->errors)
             );
-        } elseif ($result->hasImports()) {
-            $this->setFlashAlert('success', "Imported {$result->importedCount} game(s) from {$result->sourceLabel}.");
+        } elseif ($hasChanges) {
+            $this->setFlashAlert('success', $summary);
         } else {
-            $this->setFlashAlert('error', $result->hasErrors() ? $result->errors : 'No games were imported.');
+            $this->setFlashAlert('error', $result->hasErrors() ? $result->errors : 'No games were imported or updated.');
         }
 
         return redirect()->route('developer.seasons.show', $season);

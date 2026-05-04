@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Clients\CBBDApiClient;
 use App\Clients\CFBDApiClient;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\GameImportManagerInterface;
@@ -16,7 +17,6 @@ use App\Services\Contracts\SeasonCommandInterface;
 use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\TeamCommandInterface;
 use App\Services\Contracts\TeamImportManagerInterface;
-use App\Services\Contracts\TeamImportSourceInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use App\Services\Contracts\UserCommandInterface;
 use App\Services\Contracts\UserQueryInterface;
@@ -25,6 +25,8 @@ use App\Services\GameImportManager;
 use App\Services\GameQueryService;
 use App\Services\GroupCommandService;
 use App\Services\GroupQueryService;
+use App\Services\ImportSources\CBBDGameImportSource;
+use App\Services\ImportSources\CBBDTeamImportSource;
 use App\Services\ImportSources\CFBDGameImportSource;
 use App\Services\ImportSources\CFBDTeamImportSource;
 use App\Services\MemberCommandService;
@@ -54,12 +56,20 @@ class AppServiceProvider extends ServiceProvider
             baseUrl: config('services.import.cfbd.base_url'),
         ));
 
+        // register the CBBD API client as a singleton
+        $this->app->singleton(CBBDApiClient::class, fn (): CBBDApiClient => new CBBDApiClient(
+            token: config('services.import.cbbd.token'),
+            baseUrl: config('services.import.cbbd.base_url'),
+        ));
+
         // register the game import managers, injecting the appropriate import sources
         $this->app->bind(GameImportManagerInterface::class, function ($app): GameImportManager {
             return new GameImportManager(
                 seasonCommandService: $app->make(SeasonCommandInterface::class),
+                gameCommandService: $app->make(GameCommandInterface::class),
                 sources: [
                     $app->make(CFBDGameImportSource::class),
+                    $app->make(CBBDGameImportSource::class),
                 ],
             );
         });
@@ -70,6 +80,7 @@ class AppServiceProvider extends ServiceProvider
                 teamCommandService: $app->make(TeamCommandInterface::class),
                 sources: [
                     $app->make(CFBDTeamImportSource::class),
+                    $app->make(CBBDTeamImportSource::class),
                 ],
             );
         });

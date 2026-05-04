@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\ValidatedTeamData;
+use App\Models\Sport;
 use App\Models\Team;
 use App\Services\Contracts\TeamCommandInterface;
 
@@ -31,11 +32,11 @@ class TeamCommandService implements TeamCommandInterface
 
         $team = Team::create($teamData);
 
-        // add sports if provided
+        // batch-insert all sports in a single query rather than one insert per sport
         if (isset($data->sports) && ! empty($data->sports)) {
-            foreach ($data->sports as $sport) {
-                $team->sports()->create(['sport' => $sport->value]);
-            }
+            $team->sports()->createMany(
+                array_map(fn ($sport) => ['sport' => $sport->value], $data->sports)
+            );
         }
 
         return $team;
@@ -67,12 +68,22 @@ class TeamCommandService implements TeamCommandInterface
         $team->fill($updateData);
         $team->save();
 
-        // update sports if provided
+        // sync sports by diffing incoming against existing to avoid unnecessary deletes and re-inserts
         if (isset($data->sports) && ! empty($data->sports)) {
-            // remove existing sports and add new ones
-            $team->sports()->delete();
-            foreach ($data->sports as $sport) {
-                $team->sports()->create(['sport' => $sport->value]);
+            $incomingValues = array_map(fn ($sport) => $sport->value, $data->sports);
+            $existingValues = $team->sports()->pluck('sport')->map(fn ($s) => $s instanceof Sport ? $s->value : (string) $s)->all();
+
+            $toAdd = array_values(array_diff($incomingValues, $existingValues));
+            $toRemove = array_values(array_diff($existingValues, $incomingValues));
+
+            if ($toRemove !== []) {
+                $team->sports()->whereIn('sport', $toRemove)->delete();
+            }
+
+            if ($toAdd !== []) {
+                $team->sports()->createMany(
+                    array_map(fn ($value) => ['sport' => $value], $toAdd)
+                );
             }
         }
 

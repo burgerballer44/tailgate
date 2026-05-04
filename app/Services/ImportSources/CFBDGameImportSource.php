@@ -4,17 +4,21 @@ namespace App\Services\ImportSources;
 
 use App\Clients\CFBDApiClient;
 use App\DTO\GameImportData;
-use App\DTO\ImportFetchStream;
 use App\DTO\ImportedGameData;
+use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
 use App\Models\Sport;
+use App\Models\Team;
 use App\Services\Contracts\GameImportSourceInterface;
+use App\Traits\ImportSourceDataHelpers;
 use Carbon\CarbonImmutable;
 use Throwable;
 
 class CFBDGameImportSource implements GameImportSourceInterface
 {
+    use ImportSourceDataHelpers;
+
     public function __construct(private readonly CFBDApiClient $client) {}
 
     public function key(): string
@@ -64,17 +68,17 @@ class CFBDGameImportSource implements GameImportSourceInterface
                     $gameId = $this->valueForAny($rawGame, ['id'], $gameRow);
 
                     // get values for home team
-                    $homeTeam = $this->valueForAny($rawGame, ['homeTeam', 'home_team']);
-                    $homeTeamConference = $this->valueForAny($rawGame, ['homeConference', 'home_conference']);
+                    $homeTeam = $this->valueForAny($rawGame, ['homeTeam', 'home_team'], null);
+                    $homeTeamConference = (string) $this->valueForAny($rawGame, ['homeConference', 'home_conference'], Team::UNKNOWN_CONFERENCE);
                     $homeTeamScore = (int) $this->valueForAny($rawGame, ['homePoints', 'home_points'], default: 0);
 
                     // get values for away team
-                    $awayTeam = $this->valueForAny($rawGame, ['awayTeam', 'away_team']);
-                    $awayTeamConference = $this->valueForAny($rawGame, ['awayConference', 'away_conference']);
+                    $awayTeam = $this->valueForAny($rawGame, ['awayTeam', 'away_team'], null);
+                    $awayTeamConference = (string) $this->valueForAny($rawGame, ['awayConference', 'away_conference'], Team::UNKNOWN_CONFERENCE);
                     $awayTeamScore = (int) $this->valueForAny($rawGame, ['awayPoints', 'away_points'], default: 0);
 
                     // get the start date and time for the game, ensuring we have a valid date to work with
-                    $startDateTime = $this->valueForAny($rawGame, ['startDate', 'start_date']);
+                    $startDateTime = $this->valueForAny($rawGame, ['startDate', 'start_date'], null);
                     $startTimeTBD = (bool) $this->valueForAny($rawGame, ['startTimeTBD', 'start_time_tbd'], false);
 
                     // if we don't have teams or a start date, we can't import this game, so add an error and skip it
@@ -108,22 +112,5 @@ class CFBDGameImportSource implements GameImportSourceInterface
                 return $errors;
             })(),
         );
-    }
-
-    /**
-     * Get the first available value from a list of possible keys.
-     *
-     * @param  array<string, mixed>  $rawGame
-     * @param  array<int, string>  $keys
-     */
-    private function valueForAny(array $rawGame, array $keys, mixed $default = null): mixed
-    {
-        foreach ($keys as $key) {
-            if (array_key_exists($key, $rawGame)) {
-                return $rawGame[$key];
-            }
-        }
-
-        return $default;
     }
 }

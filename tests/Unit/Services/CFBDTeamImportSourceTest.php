@@ -177,7 +177,7 @@ describe('fetch', function () {
             ->and($teams[0]->alternateColor)->toBe('#b1b3b3');
     });
 
-    test('skips rows that do not include a valid school name', function () {
+    test('maps missing school values to Unknown organization fallback', function () {
         [$source, $client] = setupSource();
         $client->allows('fetchTeams')->andReturn(teamRowStream([
             sampleTeam(['id' => 1, 'school' => null]),
@@ -188,12 +188,12 @@ describe('fetch', function () {
 
         ['teams' => $teams, 'errors' => $errors] = collectStream($source->fetch(teamImportData()));
 
-        expect($teams)->toHaveCount(1)
-            ->and($teams[0]->organization)->toBe('UCLA')
-            ->and($errors)->toHaveCount(3)
-            ->and($errors[0])->toContain('CFBD team 1')
-            ->and($errors[1])->toContain('CFBD team 2')
-            ->and($errors[2])->toContain('CFBD team 3');
+        expect($teams)->toHaveCount(2)
+            ->and($teams[0]->organization)->toBe('Unknown')
+            ->and($teams[1]->organization)->toBe('UCLA')
+            ->and($errors)->toHaveCount(2)
+            ->and($errors[0])->toContain('CFBD team 2')
+            ->and($errors[1])->toContain('CFBD team 3');
     });
 
     test('normalizes empty optional strings to null', function () {
@@ -277,7 +277,7 @@ describe('fetch', function () {
         expect($teams[0]->logos)->toBeNull();
     });
 
-    test('skips rows that do not include a valid conference', function () {
+    test('maps missing conference values to Unknown conference fallback', function () {
         [$source, $client] = setupSource();
         $client->allows('fetchTeams')->andReturn(teamRowStream([
             sampleTeam(['id' => 10, 'conference' => null]),
@@ -288,24 +288,26 @@ describe('fetch', function () {
 
         ['teams' => $teams, 'errors' => $errors] = collectStream($source->fetch(teamImportData()));
 
-        expect($teams)->toHaveCount(1)
-            ->and($teams[0]->conference)->toBe('SEC')
-            ->and($errors)->toHaveCount(3)
-            ->and($errors[0])->toContain('CFBD team 10')
-            ->and($errors[1])->toContain('CFBD team 11')
-            ->and($errors[2])->toContain('CFBD team 12');
+        expect($teams)->toHaveCount(2)
+            ->and($teams[0]->conference)->toBe('Unknown')
+            ->and($teams[1]->conference)->toBe('SEC')
+            ->and($errors)->toHaveCount(2)
+            ->and($errors[0])->toContain('CFBD team 11')
+            ->and($errors[1])->toContain('CFBD team 12');
     });
 
-    test('falls back to the row index for error identification when id is absent', function () {
+    test('maps a row without id and school using fallback values without error', function () {
         [$source, $client] = setupSource();
         $client->allows('fetchTeams')->andReturn(teamRowStream([
             ['school' => null, 'conference' => 'SEC'],  // no id key — falls back to teamNumber (1)
         ]));
 
-        ['errors' => $errors] = collectStream($source->fetch(teamImportData()));
+        ['teams' => $teams, 'errors' => $errors] = collectStream($source->fetch(teamImportData()));
 
-        expect($errors)->toHaveCount(1)
-            ->and($errors[0])->toContain('CFBD team 1');
+        expect($teams)->toHaveCount(1)
+            ->and($teams[0]->organization)->toBe('Unknown')
+            ->and($teams[0]->conference)->toBe('SEC')
+            ->and($errors)->toBe([]);
     });
 
     test('propagates TeamImportException thrown by the client', function () {

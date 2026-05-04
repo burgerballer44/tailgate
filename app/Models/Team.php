@@ -11,6 +11,9 @@ use Illuminate\Support\Str;
 
 class Team extends Model
 {
+    const UNKNOWN_ORGANIZATION = 'Unknown';
+    const UNKNOWN_CONFERENCE = 'Unknown';
+
     use HasFactory;
 
     /**

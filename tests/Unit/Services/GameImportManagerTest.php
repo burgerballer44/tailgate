@@ -4,9 +4,11 @@ use App\DTO\GameImportData;
 use App\DTO\ImportFetchStream;
 use App\DTO\ImportedGameData;
 use App\Exceptions\GameImportException;
+use App\Models\Game;
 use App\Models\Season;
 use App\Models\Sport;
 use App\Models\Team;
+use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\GameImportSourceInterface;
 use App\Services\Contracts\SeasonCommandInterface;
 use App\Services\GameImportManager;
@@ -22,6 +24,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     $this->seasonCommandService = Mockery::mock(SeasonCommandInterface::class);
+    $this->gameCommandService = Mockery::mock(GameCommandInterface::class);
 });
 
 /**
@@ -81,6 +84,7 @@ describe('availableSources', function () {
     test('returns an empty array when no sources are registered', function () {
         $manager = new GameImportManager(
             seasonCommandService: $this->seasonCommandService,
+            gameCommandService: $this->gameCommandService,
             sources: [],
         );
 
@@ -92,6 +96,7 @@ describe('availableSources', function () {
 
         $manager = new GameImportManager(
             seasonCommandService: $this->seasonCommandService,
+            gameCommandService: $this->gameCommandService,
             sources: [$source],
         );
 
@@ -109,6 +114,7 @@ describe('availableSources', function () {
     test('includes all registered sources in the returned array', function () {
         $manager = new GameImportManager(
             seasonCommandService: $this->seasonCommandService,
+            gameCommandService: $this->gameCommandService,
             sources: [fakeSource('a', 'Source A'), fakeSource('b', 'Source B')],
         );
 
@@ -124,6 +130,7 @@ describe('import – source resolution', function () {
     test('throws GameImportException when the requested source key is not registered', function () {
         $manager = new GameImportManager(
             seasonCommandService: $this->seasonCommandService,
+            gameCommandService: $this->gameCommandService,
             sources: [],
         );
 
@@ -140,6 +147,7 @@ describe('import – source resolution', function () {
 
         $manager = new GameImportManager(
             seasonCommandService: $this->seasonCommandService,
+            gameCommandService: $this->gameCommandService,
             sources: [fakeSource('other'), $matchingSource],
         );
 
@@ -167,7 +175,7 @@ describe('import – successful game creation', function () {
 
         $this->seasonCommandService->shouldReceive('addGame')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(1)
@@ -186,7 +194,7 @@ describe('import – successful game creation', function () {
 
         $this->seasonCommandService->allows('addGame');
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->sourceLabel)->toBe('My Source');
@@ -198,7 +206,7 @@ describe('import – successful game creation', function () {
         $source = fakeSource();
         $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(items: []));
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(0)
@@ -223,7 +231,7 @@ describe('import – team resolution', function () {
 
         $this->seasonCommandService->shouldReceive('addGame')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(1);
@@ -245,7 +253,7 @@ describe('import – team resolution', function () {
 
         $this->seasonCommandService->shouldReceive('addGame')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(1);
@@ -269,7 +277,7 @@ describe('import – team resolution', function () {
 
         $this->seasonCommandService->shouldReceive('addGame')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(1);
@@ -287,7 +295,7 @@ describe('import – team resolution', function () {
 
         $this->seasonCommandService->shouldReceive('addGame')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(1);
@@ -307,7 +315,7 @@ describe('import – team resolution', function () {
 
         $this->seasonCommandService->shouldNotReceive('addGame');
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(0)
@@ -331,7 +339,7 @@ describe('import – skip logic', function () {
 
         $this->seasonCommandService->shouldNotReceive('addGame');
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(0)
@@ -350,7 +358,7 @@ describe('import – skip logic', function () {
 
         $this->seasonCommandService->shouldNotReceive('addGame');
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(0)
@@ -369,7 +377,7 @@ describe('import – skip logic', function () {
 
         $this->seasonCommandService->shouldNotReceive('addGame');
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(0)
@@ -377,34 +385,59 @@ describe('import – skip logic', function () {
             ->and($result->errors[0])->toContain('home and away teams resolved to the same team');
     });
 
-    test('skips a game and records an error when an identical game already exists in the season', function () {
+    test('updates an existing game when a game with the same home and away teams already exists in the season', function () {
         $season = Season::factory()->create(['sport' => Sport::FOOTBALL->value]);
         $homeTeam = Team::factory()->withSports([Sport::FOOTBALL->value])->create(['organization' => 'Alabama']);
         $awayTeam = Team::factory()->withSports([Sport::FOOTBALL->value])->create(['organization' => 'Georgia']);
 
-        // Pre-seed the duplicate game directly.
-        $season->games()->create([
+        // Pre-seed an existing game with stale data.
+        $existingGame = $season->games()->create([
             'home_team_id' => $homeTeam->id,
             'away_team_id' => $awayTeam->id,
-            'home_team_score' => 24,
-            'away_team_score' => 17,
-            'start_date_time' => '2024-09-07 15:30:00',
-            'start_time_tbd' => false,
+            'home_team_score' => 0,
+            'away_team_score' => 0,
+            'start_date_time' => '2024-09-07 00:00:00',
+            'start_time_tbd' => true,
         ]);
 
         $source = fakeSource();
         $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(items: [
+            // same matchup but with updated scores, start time, and TBD flag
             importedGame('Alabama', 'Georgia', 24, 17, '2024-09-07', '3:30 PM'),
         ]));
 
         $this->seasonCommandService->shouldNotReceive('addGame');
+        $this->gameCommandService->shouldReceive('update')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(0)
+            ->and($result->updatedCount)->toBe(1)
+            ->and($result->errors)->toBe([]);
+    });
+
+    test('skips and records an error when the same home/away teams appear twice in the same import batch', function () {
+        $season = Season::factory()->create(['sport' => Sport::FOOTBALL->value]);
+        Team::factory()->withSports([Sport::FOOTBALL->value])->create(['organization' => 'Alabama']);
+        Team::factory()->withSports([Sport::FOOTBALL->value])->create(['organization' => 'Georgia']);
+
+        $source = fakeSource();
+        $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(items: [
+            importedGame('Alabama', 'Georgia', 24, 17, '2024-09-07', '3:30 PM'),
+            // duplicate matchup in the same batch
+            importedGame('Alabama', 'Georgia', 24, 17, '2024-09-07', '3:30 PM'),
+        ]));
+
+        $this->seasonCommandService->shouldReceive('addGame')->once();
+        $this->gameCommandService->shouldNotReceive('update');
+
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
+            ->import($season, fakeImportData());
+
+        expect($result->importedCount)->toBe(1)
             ->and($result->errors)->toHaveCount(1)
-            ->and($result->errors[0])->toContain('an identical game already exists');
+            ->and($result->errors[0])->toContain('already been processed in this import batch');
     });
 
     test('numbers skipped games starting at 1 relative to their position in the response', function () {
@@ -422,7 +455,7 @@ describe('import – skip logic', function () {
 
         $this->seasonCommandService->shouldReceive('addGame')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->errors[0])->toContain('game 1')
@@ -444,7 +477,7 @@ describe('import – error propagation', function () {
             errors: ['Skipped CFBD game 1: required fields were missing from the response.'],
         ));
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         expect($result->importedCount)->toBe(0)
@@ -468,7 +501,7 @@ describe('import – error propagation', function () {
 
         $this->seasonCommandService->shouldReceive('addGame')->once();
 
-        $result = (new GameImportManager($this->seasonCommandService, [$source]))
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
             ->import($season, fakeImportData());
 
         // 1 fetch-level error + 1 skip error = 2 total errors, 1 successfully imported.

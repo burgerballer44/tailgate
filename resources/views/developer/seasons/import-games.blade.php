@@ -44,7 +44,7 @@
             >
                 <div class="mt-4">
                     <div>
-                        <x-inputs.input-label for="year" class="font-semibold" :value="__('Season year')" />
+                        <x-inputs.input-label for="year" class="font-semibold" :value="__('Year')" />
                         <x-inputs.text-input
                             id="year"
                             name="year"

@@ -103,7 +103,8 @@ describe('import', function () {
 
         expect($result->source)->toBe('cfbd')
             ->and($result->sourceLabel)->toBe('CFBD API')
-            ->and($result->importedCount)->toBe(2)
+            ->and($result->importedCount)->toBe(1)
+            ->and($result->updatedCount)->toBe(1)
             ->and($result->errors)->toBe([])
             ->and(Team::query()->where('organization', 'USC')->exists())->toBeTrue();
 
@@ -123,7 +124,7 @@ describe('import', function () {
             errors: [],
         ));
 
-        $createdTeam = Team::factory()->withoutSports()->create([
+        $createdTeam = Team::factory()->withoutSports()->make([
             'organization' => 'Texas',
             'conference' => 'SEC',
             'type' => TeamType::COLLEGE->value,
@@ -139,7 +140,7 @@ describe('import', function () {
             ->shouldReceive('update')
             ->once()
             ->withArgs(function (Team $team, ValidatedTeamData $dto): bool {
-                return $team->organization === 'Texas';
+                return $team->organization === 'Texas' && $dto->organization === 'Texas';
             })
             ->andReturnUsing(fn (Team $team) => $team);
 
@@ -147,7 +148,75 @@ describe('import', function () {
 
         $result = $manager->import(managerImportData(['chunk_size' => 100]));
 
-        expect($result->importedCount)->toBe(2)
+        expect($result->importedCount)->toBe(1)
+            ->and($result->updatedCount)->toBe(1)
+            ->and($result->errors)->toBe([]);
+    });
+
+    test('merges existing sports, logos and social links during update without clearing missing fields', function () {
+        $existingTeam = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'UCLA',
+            'designation' => 'Bruins',
+            'conference' => 'Big Ten',
+            'abbreviation' => 'UCLA',
+            'color' => '#123456',
+            'alternate_color' => '#654321',
+            'logos' => ['https://example.test/logo-football.png'],
+            'social_media' => [['label' => 'X', 'url' => 'https://x.com/ucla']],
+            'type' => TeamType::COLLEGE->value,
+        ]);
+
+        $source = \Mockery::mock(TeamImportSourceInterface::class);
+        $source->allows('key')->andReturn('cfbd');
+        $source->allows('label')->andReturn('CFBD API');
+        $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(
+            items: [
+                importedTeam([
+                    'organization' => 'ucla',
+                    'conference' => 'big ten',
+                    'sport' => Sport::BASKETBALL->value,
+                    'abbreviation' => null,
+                    'color' => null,
+                    'alternateColor' => null,
+                    'logos' => ['https://example.test/logo-basketball.png'],
+                    'socialMedia' => [['label' => 'Instagram', 'url' => 'https://instagram.com/ucla']],
+                ]),
+            ],
+            errors: [],
+        ));
+
+        $teamCommand = \Mockery::mock(TeamCommandInterface::class);
+        $teamCommand
+            ->shouldReceive('update')
+            ->once()
+            ->withArgs(function (Team $team, ValidatedTeamData $dto) use ($existingTeam): bool {
+                $sportValues = array_map(fn (Sport $sport): string => $sport->value, $dto->sports);
+                sort($sportValues);
+
+                $logos = $dto->logos ?? [];
+                sort($logos);
+
+                return $team->is($existingTeam)
+                    && $dto->abbreviation === 'UCLA'
+                    && $dto->color === '#123456'
+                    && $dto->alternateColor === '#654321'
+                    && $sportValues === [Sport::BASKETBALL->value, Sport::FOOTBALL->value]
+                    && $logos === ['https://example.test/logo-basketball.png', 'https://example.test/logo-football.png']
+                    && $dto->socialMedia === [
+                        ['label' => 'X', 'url' => 'https://x.com/ucla'],
+                        ['label' => 'Instagram', 'url' => 'https://instagram.com/ucla'],
+                    ];
+            })
+            ->andReturnUsing(fn (Team $team) => $team);
+
+        $teamCommand->shouldReceive('create')->never();
+
+        $manager = new TeamImportManager($teamCommand, [$source]);
+
+        $result = $manager->import(managerImportData());
+
+        expect($result->importedCount)->toBe(0)
+            ->and($result->updatedCount)->toBe(1)
             ->and($result->errors)->toBe([]);
     });
 

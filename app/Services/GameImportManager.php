@@ -6,8 +6,10 @@ use App\DTO\GameImportData;
 use App\DTO\ImportResult;
 use App\DTO\ValidatedGameData;
 use App\Exceptions\GameImportException;
+use App\Models\Game;
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\GameImportManagerInterface;
 use App\Services\Contracts\GameImportSourceInterface;
 use App\Services\Contracts\SeasonCommandInterface;
@@ -24,6 +26,7 @@ class GameImportManager implements GameImportManagerInterface
      */
     public function __construct(
         private readonly SeasonCommandInterface $seasonCommandService,
+        private readonly GameCommandInterface $gameCommandService,
         private readonly iterable $sources,
     ) {}
 
@@ -56,13 +59,16 @@ class GameImportManager implements GameImportManagerInterface
         $chunkSize = $this->resolveChunkSize($data);
         $chunk = [];
         $teamLookupCache = [];
+        $updatedCount = 0;
         
         // process the fetch stream in chunks to manage memory usage and allow for batch processing of games
         foreach ($fetchStream->items() as $game) {
             $chunk[] = $game;
 
             if (count($chunk) === $chunkSize) {
-                $importedCount += $this->importChunk($season, $chunk, $processedCount, $importErrors, $teamLookupCache);
+                [$chunkImported, $chunkUpdated] = $this->importChunk($season, $chunk, $processedCount, $importErrors, $teamLookupCache);
+                $importedCount += $chunkImported;
+                $updatedCount += $chunkUpdated;
                 $processedCount += $chunkSize;
                 $chunk = [];
             }
@@ -70,7 +76,9 @@ class GameImportManager implements GameImportManagerInterface
 
         // process any remaining items in the chunk that didn't reach the chunk size threshold
         if ($chunk !== []) {
-            $importedCount += $this->importChunk($season, $chunk, $processedCount, $importErrors, $teamLookupCache);
+            [$chunkImported, $chunkUpdated] = $this->importChunk($season, $chunk, $processedCount, $importErrors, $teamLookupCache);
+            $importedCount += $chunkImported;
+            $updatedCount += $chunkUpdated;
         }
 
         $errors = array_merge($fetchStream->errors(), $importErrors);
@@ -79,6 +87,7 @@ class GameImportManager implements GameImportManagerInterface
             source: $source->key(),
             sourceLabel: $source->label(),
             importedCount: $importedCount,
+            updatedCount: $updatedCount,
             errors: $errors,
         );
     }
@@ -118,15 +127,16 @@ class GameImportManager implements GameImportManagerInterface
 
     /**
      * Imports a chunk of games into the specified season, handling team resolution, duplicate detection, and error collection.
+     * Existing games (matched by home and away team) are updated with the latest data from the import source.
      *
      * @param Season $season The season to which the games should be added.
      * @param array<int, \App\DTO\ImportedGameData> $chunk The chunk of imported game data to process.
      * @param int $processedCount The count of games processed before this chunk, used for error messaging.
      * @param array<int, string> $errors A reference to an array where import errors will be collected.
      * @param array<string, array<string, Team>> $teamLookupCache A reference to a cache for team lookups to optimize performance.
-     * @return int The count of successfully imported games from this chunk.
+     * @return array{0: int, 1: int} A tuple of [importedCount, updatedCount] for the chunk.
      */
-    private function importChunk(Season $season, array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): int
+    private function importChunk(Season $season, array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): array
     {
         $this->warmTeamLookupCache($season, $chunk, $teamLookupCache);
 
@@ -169,26 +179,21 @@ class GameImportManager implements GameImportManagerInterface
         }
 
         if ($resolvedGames === []) {
-            return 0;
+            return [0, 0];
         }
 
-        $existingSignatures = $this->existingGameSignatures($season, $resolvedGames);
+        // keys are 'home_team_id|away_team_id'; value is the existing Game model or false when already processed in this chunk
+        $existingGames = $this->existingGamesBySignature($season, $resolvedGames);
         $importedCount = 0;
+        $updatedCount = 0;
 
         foreach ($resolvedGames as $resolvedGame) {
             $signature = $this->gameSignature(
                 $resolvedGame['home_team_id'],
                 $resolvedGame['away_team_id'],
-                $resolvedGame['start_date_time'],
             );
 
-            if (isset($existingSignatures[$signature])) {
-                $errors[] = "Skipped game {$resolvedGame['game_number']}: an identical game already exists in this season.";
-
-                continue;
-            }
-
-            $this->seasonCommandService->addGame($season, ValidatedGameData::fromArray([
+            $gameData = ValidatedGameData::fromArray([
                 'season_id' => $season->id,
                 'home_team_id' => $resolvedGame['home_team_id'],
                 'away_team_id' => $resolvedGame['away_team_id'],
@@ -196,13 +201,32 @@ class GameImportManager implements GameImportManagerInterface
                 'away_team_score' => $resolvedGame['away_team_score'],
                 'start_date_time' => $resolvedGame['start_date_time'],
                 'start_time_tbd' => $resolvedGame['start_time_tbd'],
-            ]));
+            ]);
 
-            $existingSignatures[$signature] = true;
+            if (array_key_exists($signature, $existingGames)) {
+                $existingGame = $existingGames[$signature];
+
+                if (! ($existingGame instanceof Game)) {
+                    // a game between these same teams was already processed in this import batch
+                    $errors[] = "Skipped game {$resolvedGame['game_number']}: a game between the same teams has already been processed in this import batch.";
+
+                    continue;
+                }
+
+                // update the existing game with the latest data from the import source
+                $this->gameCommandService->update($existingGame, $gameData);
+                $existingGames[$signature] = false;
+                $updatedCount++;
+
+                continue;
+            }
+
+            $this->seasonCommandService->addGame($season, $gameData);
+            $existingGames[$signature] = false;
             $importedCount++;
         }
 
-        return $importedCount;
+        return [$importedCount, $updatedCount];
     }
 
     /**
@@ -291,56 +315,48 @@ class GameImportManager implements GameImportManagerInterface
     }
 
     /**
-     * Retrieves existing games for the given season that match any of the home team IDs, away team IDs, and start date-times from the resolved games.
-     * This is used to identify duplicate games during the import process.
+     * Retrieves existing games for the given season that match any of the home team ID and away team ID pairs from the resolved games.
+     * This is used to identify games that should be updated rather than created during the import process.
      *
      * @param Season $season The season for which to check existing games.
-     * @param array<int, array<string, mixed>> $resolvedGames The resolved games with home team IDs, away team IDs, and start date-times.
-     * @return array<string, bool> An associative array where keys are game signatures and values indicate existence.
+     * @param array<int, array<string, mixed>> $resolvedGames The resolved games with home team IDs and away team IDs.
+     * @return array<string, Game> An associative array where keys are game signatures ('homeId|awayId') and values are the existing Game models.
      */
-    private function existingGameSignatures(Season $season, array $resolvedGames): array
+    private function existingGamesBySignature(Season $season, array $resolvedGames): array
     {
         $homeTeamIds = array_values(array_unique(array_column($resolvedGames, 'home_team_id')));
         $awayTeamIds = array_values(array_unique(array_column($resolvedGames, 'away_team_id')));
-        $startDateTimes = array_values(array_unique(array_column($resolvedGames, 'start_date_time')));
 
-        if ($homeTeamIds === [] || $awayTeamIds === [] || $startDateTimes === []) {
+        if ($homeTeamIds === [] || $awayTeamIds === []) {
             return [];
         }
 
         $existing = [];
 
+        // fetch all games in this season matching any combination of the home/away team IDs so we can update them if needed
         foreach ($season->games()
-            ->select(['home_team_id', 'away_team_id', 'start_date_time'])
             ->whereIn('home_team_id', $homeTeamIds)
             ->whereIn('away_team_id', $awayTeamIds)
-            ->whereIn('start_date_time', $startDateTimes)
             ->get() as $game
         ) {
-            $signature = $this->gameSignature(
-                $game->home_team_id,
-                $game->away_team_id,
-                (string) $game->start_date_time,
-            );
-
-            $existing[$signature] = true;
+            $signature = $this->gameSignature($game->home_team_id, $game->away_team_id);
+            $existing[$signature] = $game;
         }
 
         return $existing;
     }
 
     /**
-     * Generates a unique signature for a game based on its home team ID, away team ID, and start date-time.
-     * This is used to identify duplicate games during the import process.
+     * Generates a unique signature for a game based on its home team ID and away team ID.
+     * This is used to identify existing games during the import process — the teams define the matchup identity.
      *
      * @param int $homeTeamId The ID of the home team.
      * @param int $awayTeamId The ID of the away team.
-     * @param string $startDateTime The start date-time of the game.
-     * @return string A unique signature string representing the game.
+     * @return string A unique signature string representing the game matchup.
      */
-    private function gameSignature(int $homeTeamId, int $awayTeamId, string $startDateTime): string
+    private function gameSignature(int $homeTeamId, int $awayTeamId): string
     {
-        return $homeTeamId.'|'.$awayTeamId.'|'.$startDateTime;
+        return $homeTeamId.'|'.$awayTeamId;
     }
 
     /**

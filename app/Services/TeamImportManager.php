@@ -7,7 +7,9 @@ use App\DTO\ImportedTeamData;
 use App\DTO\TeamImportData;
 use App\DTO\ValidatedTeamData;
 use App\Exceptions\TeamImportException;
+use App\Models\Sport;
 use App\Models\Team;
+use App\Models\TeamType;
 use App\Services\Contracts\TeamCommandInterface;
 use App\Services\Contracts\TeamImportManagerInterface;
 use App\Services\Contracts\TeamImportSourceInterface;
@@ -61,12 +63,15 @@ class TeamImportManager implements TeamImportManagerInterface
         // as it fills up. This keeps at most $chunkSize ImportedTeamData DTOs in memory at once
         // rather than buffering the entire result set.
         $chunk = [];
+        $updatedCount = 0;
 
         foreach ($fetchStream->items() as $team) {
             $chunk[] = $team;
 
             if (count($chunk) === $chunkSize) {
-                $importedCount += $this->importChunk($chunk, $processedCount, $importErrors, $teamLookupCache);
+                [$chunkImported, $chunkUpdated] = $this->importChunk($chunk, $processedCount, $importErrors, $teamLookupCache);
+                $importedCount += $chunkImported;
+                $updatedCount += $chunkUpdated;
                 $processedCount += $chunkSize;
                 $chunk = [];
             }
@@ -74,7 +79,9 @@ class TeamImportManager implements TeamImportManagerInterface
 
         // process any remaining teams in the final chunk
         if ($chunk !== []) {
-            $importedCount += $this->importChunk($chunk, $processedCount, $importErrors, $teamLookupCache);
+            [$chunkImported, $chunkUpdated] = $this->importChunk($chunk, $processedCount, $importErrors, $teamLookupCache);
+            $importedCount += $chunkImported;
+            $updatedCount += $chunkUpdated;
         }
 
         $errors = array_merge($fetchStream->errors(), $importErrors);
@@ -83,6 +90,7 @@ class TeamImportManager implements TeamImportManagerInterface
             source: $source->key(),
             sourceLabel: $source->label(),
             importedCount: $importedCount,
+            updatedCount: $updatedCount,
             errors: $errors,
         );
     }
@@ -94,41 +102,31 @@ class TeamImportManager implements TeamImportManagerInterface
      * @param  array<int, ImportedTeamData>  $chunk
      * @param  int  $processedCount  Number of teams already processed before this chunk (used for error numbering).
      * @param  array<int, string>  $errors  Accumulated errors array, passed by reference.
-     * @param  array<string, array<string, array<string, Team>>>  $teamLookupCache
-     * @return int  Number of teams successfully imported in this chunk.
+     * @param  array<string, array<string, Team>>  $teamLookupCache
+     * @return array{0: int, 1: int}  A tuple of [importedCount, updatedCount] for the chunk.
      */
-    private function importChunk(array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): int
+    private function importChunk(array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): array
     {
         $this->warmTeamLookupCache($chunk, $teamLookupCache);
         $importedCount = 0;
+        $updatedCount = 0;
 
         foreach ($chunk as $offset => $team) {
             $teamNumber = $processedCount + $offset + 1;
-            $sportKey = Str::lower(trim($team->sport));
             $conferenceKey = Str::lower(trim($team->conference));
             $organizationKey = Str::lower(trim($team->organization));
 
-            $teamData = [
-                'organization' => $team->organization,
-                'designation' => $team->designation ?? $team->organization,
-                'conference' => $team->conference,
-                'abbreviation' => $team->abbreviation,
-                'color' => $team->color,
-                'alternate_color' => $team->alternateColor,
-                'logos' => $team->logos,
-                'social_media' => $team->socialMedia,
-                'sports' => [$team->sport],
-                'type' => $team->type,
-            ];
-
+            $existingTeam = $teamLookupCache[$conferenceKey][$organizationKey] ?? null;
+            $teamData = $this->buildTeamDataForPersist($team, $existingTeam);
             $dto = ValidatedTeamData::fromArray($teamData);
-            $existingTeam = $teamLookupCache[$sportKey][$conferenceKey][$organizationKey] ?? null;
 
             try {
                 if ($existingTeam !== null) {
                     $persistedTeam = $this->teamCommandService->update($existingTeam, $dto);
+                    $updatedCount++;
                 } else {
                     $persistedTeam = $this->teamCommandService->create($dto);
+                    $importedCount++;
                 }
             } catch (\Throwable $exception) {
                 $errors[] = "Skipped team {$teamNumber}: failed to persist imported data.";
@@ -137,11 +135,205 @@ class TeamImportManager implements TeamImportManagerInterface
             }
 
             // Keep chunk-local duplicates from causing duplicate creates.
-            $teamLookupCache[$sportKey][$conferenceKey][$organizationKey] = $persistedTeam;
-            $importedCount++;
+            $teamLookupCache[$conferenceKey][$organizationKey] = $persistedTeam;
         }
 
-        return $importedCount;
+        return [$importedCount, $updatedCount];
+    }
+
+    /**
+     * Build a validated payload for create/update while preserving existing values when
+     * the incoming import does not explicitly provide a replacement value.
+     *
+     * For existing teams, this method intentionally performs a non-destructive merge:
+     * - scalar fields only change when a non-empty value is provided by the source
+     * - list fields (logos/social links) are merged and deduplicated
+     * - sports are merged so cross-source imports can accumulate multiple sports
+     *
+     * @param  ImportedTeamData  $team The incoming team data from the import source.
+     * @param  Team|null  $existingTeam The existing team record if found, or null if this team is new.
+     * @return array<string, mixed> An array of team data ready for validation and persistence.
+     */
+    private function buildTeamDataForPersist(ImportedTeamData $team, ?Team $existingTeam): array
+    {
+        // New team: normalize incoming values and persist exactly what the source provides.
+        if ($existingTeam === null) {
+            return [
+                'organization' => $team->organization,
+                'designation' => $this->pickPreferredString($team->designation, $team->organization),
+                'conference' => $team->conference,
+                'abbreviation' => $this->nullableStringOrNull($team->abbreviation),
+                'color' => $this->nullableStringOrNull($team->color),
+                'alternate_color' => $this->nullableStringOrNull($team->alternateColor),
+                'logos' => $this->normalizeList($team->logos),
+                'social_media' => $this->normalizeList($team->socialMedia),
+                'sports' => $this->mergeSportValues(null, $team->sport),
+                'type' => $this->resolveTypeValue($team->type, null),
+            ];
+        }
+
+        // Existing team: merge data to avoid losing previously imported information.
+        return [
+            'organization' => $this->pickPreferredString($team->organization, $existingTeam->organization),
+            'designation' => $this->pickPreferredString($team->designation, $existingTeam->designation),
+            'conference' => $this->pickPreferredString($team->conference, $existingTeam->conference),
+            'abbreviation' => $this->pickPreferredNullableString($team->abbreviation, $existingTeam->abbreviation),
+            'color' => $this->pickPreferredNullableString($team->color, $existingTeam->color),
+            'alternate_color' => $this->pickPreferredNullableString($team->alternateColor, $existingTeam->alternate_color),
+            'logos' => $this->mergeLists($existingTeam->logos, $team->logos),
+            'social_media' => $this->mergeLists($existingTeam->social_media, $team->socialMedia),
+            'sports' => $this->mergeSportValues($existingTeam, $team->sport),
+            'type' => $this->resolveTypeValue($team->type, $existingTeam->type),
+        ];
+    }
+
+    /**
+     * Use the incoming string only when it is non-empty; otherwise keep the fallback.
+     */
+    private function pickPreferredString(?string $incoming, string $fallback): string
+    {
+        if ($this->hasValue($incoming)) {
+            return trim($incoming);
+        }
+
+        return $fallback;
+    }
+
+    /**
+     * Use the incoming nullable string only when it is non-empty; otherwise keep fallback.
+     */
+    private function pickPreferredNullableString(?string $incoming, ?string $fallback): ?string
+    {
+        if ($this->hasValue($incoming)) {
+            return trim($incoming);
+        }
+
+        return $fallback;
+    }
+
+    /**
+     * Normalize optional scalar text into a trimmed value or null.
+     */
+    private function nullableStringOrNull(?string $value): ?string
+    {
+        if ($this->hasValue($value)) {
+            return trim($value);
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine whether a string carries meaningful content.
+     */
+    private function hasValue(?string $value): bool
+    {
+        return is_string($value) && trim($value) !== '';
+    }
+
+    /**
+     * Merge existing and incoming list-like values, preserving existing entries and
+     * deduplicating by encoded content to prevent repeated links/assets.
+     *
+     * @param  mixed  $existing
+     * @param  mixed  $incoming
+     * @return array<int, mixed>|null
+     */
+    private function mergeLists(mixed $existing, mixed $incoming): ?array
+    {
+        $existingList = $this->normalizeList($existing) ?? [];
+        $incomingList = $this->normalizeList($incoming);
+
+        if ($incomingList === null) {
+            return $existingList !== [] ? $existingList : null;
+        }
+
+        $merged = [];
+        $seen = [];
+
+        foreach (array_merge($existingList, $incomingList) as $entry) {
+            $encoded = json_encode($entry);
+
+            if (! is_string($encoded) || isset($seen[$encoded])) {
+                continue;
+            }
+
+            $seen[$encoded] = true;
+            $merged[] = $entry;
+        }
+
+        return $merged !== [] ? $merged : null;
+    }
+
+    /**
+     * Normalize a potential list value into a dense array or null.
+     * Empty strings, null entries, and empty nested arrays are removed.
+     *
+     * @param  mixed  $value
+     * @return array<int, mixed>|null
+     */
+    private function normalizeList(mixed $value): ?array
+    {
+        if (! is_array($value)) {
+            return null;
+        }
+
+        $normalized = array_values(array_filter($value, function (mixed $item): bool {
+            if (is_string($item)) {
+                return trim($item) !== '';
+            }
+
+            if (is_array($item)) {
+                return $item !== [];
+            }
+
+            return $item !== null;
+        }));
+
+        return $normalized !== [] ? $normalized : null;
+    }
+
+    /**
+     * Merge existing team sports with the incoming sport so imports from different
+     * sources can enrich the same team instead of replacing prior sport associations.
+     *
+     * @return array<int, string>
+     */
+    private function mergeSportValues(?Team $existingTeam, ?string $incomingSport): array
+    {
+        $sports = [];
+
+        if ($existingTeam !== null) {
+            $sports = $existingTeam->sports()
+                ->pluck('sport')
+                ->map(fn (mixed $sport): string => $sport instanceof Sport ? $sport->value : (string) $sport)
+                ->filter(fn (string $sport): bool => trim($sport) !== '')
+                ->values()
+                ->all();
+        }
+
+        if ($this->hasValue($incomingSport)) {
+            $sports[] = trim($incomingSport);
+        }
+
+        return array_values(array_unique($sports));
+    }
+
+    /**
+     * Resolve the team type from incoming data, falling back to an existing type when
+     * the source omits or sends an invalid value.
+     */
+    private function resolveTypeValue(?string $incomingType, ?string $fallbackType): string
+    {
+        if ($this->hasValue($incomingType)) {
+            try {
+                return TeamType::from(trim($incomingType))->value;
+            } catch (\ValueError) {
+                // Fall through to existing type if source provided an invalid value.
+            }
+        }
+
+        return $fallbackType ?? TeamType::COLLEGE->value;
     }
     
     /**
@@ -182,63 +374,61 @@ class TeamImportManager implements TeamImportManagerInterface
      * chunk into the lookup cache, minimizing database queries during the chunk import.
      * 
      * @param  array<int, ImportedTeamData>  $teams
-     * @param  array<string, array<string, array<string, Team>>>  $teamLookupCache
+     * @param  array<string, array<string, Team>>  $teamLookupCache
      */
     private function warmTeamLookupCache(array $teams, array &$teamLookupCache): void
     {
-        $missingBySport = [];
+        $missingByConference = [];
 
         foreach ($teams as $team) {
-
-            // lowercase and trim sport and conference to improve cache hit rates
-            $sport = Str::lower(trim($team->sport));
+            // lowercase and trim conference and organization to improve cache hit rates
             $conference = Str::lower(trim($team->conference));
+            $organization = Str::lower(trim($team->organization));
 
             // initialize cache buckets if they don't exist yet
-            if (! isset($teamLookupCache[$sport])) {
-                $teamLookupCache[$sport] = [];
+            if (! isset($teamLookupCache[$conference])) {
+                $teamLookupCache[$conference] = [];
             }
 
-            // track any sport/conference combinations that are missing from the cache so we can batch query them
-            if (! isset($teamLookupCache[$sport][$conference])) {
-                $teamLookupCache[$sport][$conference] = [];
-                $missingBySport[$sport]['sport_value'] = $team->sport;
-                $missingBySport[$sport][$conference] = true;
+            // track any conference/organization combinations that are missing from the cache so we can batch query them
+            if (! isset($teamLookupCache[$conference][$organization])) {
+                $missingByConference[$conference]['conference_value'] = $team->conference;
+                $missingByConference[$conference][$organization] = true;
             }
         }
 
-        foreach ($missingBySport as $sport => $requested) {
-            $sportValue = $requested['sport_value'] ?? null;
+        foreach ($missingByConference as $conference => $requested) {
+            $conferenceValue = $requested['conference_value'] ?? null;
 
-            // if we don't have a valid sport value, we won't be able to match any teams for this sport, so skip it
-            if (! is_string($sportValue) || trim($sportValue) === '') {
+            // if we don't have a valid conference value, we won't be able to match any teams for this bucket, so skip it
+            if (! is_string($conferenceValue) || trim($conferenceValue) === '') {
                 continue;
             }
 
-            // get the list of requested conferences for this sport (excluding the 'sport_value' key)
-            $conferenceValues = array_values(array_filter(
+            // get the list of requested organizations for this conference bucket (excluding the 'conference_value' key)
+            $organizationValues = array_values(array_filter(
                 array_keys($requested),
-                static fn (string $value): bool => $value !== 'sport_value',
+                static fn (string $value): bool => $value !== 'conference_value',
             ));
 
-            // if we don't have any valid conference values, we won't be able to match any teams for this sport, so skip it
-            if ($conferenceValues === []) {
+            // if we don't have any valid organization values, we won't be able to match any teams for this bucket, so skip it
+            if ($organizationValues === []) {
                 continue;
             }
 
-            // query for teams matching any of the requested conference values for this sport
+            // query for teams matching any of the requested organization values for this conference
             $matches = Team::query()
-                ->whereHas('sports', fn ($query) => $query->where('sport', $sportValue))
-                ->whereIn(DB::raw('LOWER(conference)'), $conferenceValues)
+                ->whereRaw('LOWER(conference) = ?', [$conference])
+                ->whereIn(DB::raw('LOWER(organization)'), $organizationValues)
                 ->get();
 
             // index the matching teams in the cache by their lowercase conference and organization values for quick lookup during import
             foreach ($matches as $matchedTeam) {
-                $conference = Str::lower(trim($matchedTeam->conference));
+                $conferenceKey = Str::lower(trim($matchedTeam->conference));
                 $organization = Str::lower(trim($matchedTeam->organization));
 
-                if (! isset($teamLookupCache[$sport][$conference][$organization])) {
-                    $teamLookupCache[$sport][$conference][$organization] = $matchedTeam;
+                if (! isset($teamLookupCache[$conferenceKey][$organization])) {
+                    $teamLookupCache[$conferenceKey][$organization] = $matchedTeam;
                 }
             }
         }
