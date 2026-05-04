@@ -103,7 +103,13 @@ Route::middleware('auth')->group(function () {
         Route::prefix('developer')->name('developer.')->middleware('role:Developer')->group(function () {
             Route::resource('users', DeveloperUserController::class);
 
+            Route::get('teams/import-teams', [DeveloperTeamController::class, 'importTeams'])->name('teams.import-teams');
+            Route::post('teams/import-teams', [DeveloperTeamController::class, 'storeImportedTeams'])->name('teams.import-teams.store');
+
             Route::resource('teams', DeveloperTeamController::class);
+
+            Route::get('seasons/{season}/import-games', [DeveloperSeasonController::class, 'importGames'])->name('seasons.import-games');
+            Route::post('seasons/{season}/import-games', [DeveloperSeasonController::class, 'storeImportedGames'])->name('seasons.import-games.store');
 
             Route::resource('seasons', DeveloperSeasonController::class);
 

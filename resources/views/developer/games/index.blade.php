@@ -21,9 +21,9 @@
         :tableActions="[
             ['route' => 'developer.seasons.games.create', 'routeParams' => ['season' => $season], 'text' => 'Add Game']
         ]"
-        :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Date', 'Time', 'Actions']"
+        :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Start Date Time', 'Start Time TBD', 'Actions']"
         :rows="$games"
-        :columns="['homeTeam.organization', 'awayTeam.organization', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
+        :columns="['homeTeam.organization', 'awayTeam.organization', 'home_team_score', 'away_team_score', 'start_date_time', 'start_time_tbd']"
         :rowActions="[
             [
                 'label' => 'Show',

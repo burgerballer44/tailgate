@@ -1,115 +1,125 @@
-<form action="{{ $action }}" method="POST" class="rounded-lg bg-white p-6 shadow-md">
-    @csrf
-    @if ($method !== 'POST')
-        @method($method)
-    @endif
+<x-forms.multi-section-form :action="$action" :method="$method">
+    <x-slot name="sections">
+        <x-forms.form-section
+            title="Season information"
+            description="Enter the basic details for this season, including the name, sport, and type."
+        >
+            <div>
+                <x-inputs.input-label for="name" class="font-semibold" :value="__('Name')" />
+                <x-inputs.text-input
+                    id="name"
+                    name="name"
+                    type="text"
+                    class="mt-1 block w-full"
+                    :value="old('name', $season?->name)"
+                    required
+                    autofocus
+                    autocomplete="name"
+                />
+                <x-inputs.input-error class="mt-2" :messages="$errors->get('name')" />
+            </div>
 
-    <div>
-        <x-inputs.input-label for="name" class="font-semibold" :value="__('Name')" />
-        <x-inputs.text-input
-            id="name"
-            name="name"
-            type="text"
-            class="mt-1 block w-full"
-            :value="old('name', $season?->name)"
-            required
-            autofocus
-            autocomplete="name"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('name')" />
-    </div>
+            <div class="mt-4">
+                <x-form.select
+                    name="sport"
+                    label="Sport"
+                    :required="true"
+                    :value="old('sport', $season?->sport)"
+                    :options="['' => ''] + $sports->mapWithKeys(fn($sport) => [$sport => ucfirst($sport)])->toArray()"
+                />
+                <x-inputs.input-error class="mt-2" :messages="$errors->get('sport')" />
+            </div>
 
-    <div class="mt-4">
-        <x-form.select
-            name="sport"
-            label="Sport"
-            :required="true"
-            :value="old('sport', $season?->sport)"
-            :options="['' => ''] + $sports->mapWithKeys(fn($sport) => [$sport => ucfirst($sport)])->toArray()"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('sport')" />
-    </div>
+            <div class="mt-4">
+                <x-form.select
+                    name="season_type"
+                    label="Season Type"
+                    :required="true"
+                    :value="old('season_type', $season?->season_type)"
+                    :options="['' => ''] + $seasonTypes->mapWithKeys(fn($type) => [$type => ucfirst($type)])->toArray()"
+                />
+                <x-inputs.input-error class="mt-2" :messages="$errors->get('season_type')" />
+            </div>
+        </x-forms.form-section>
 
-    <div class="mt-4">
-        <x-form.select
-            name="season_type"
-            label="Season Type"
-            :required="true"
-            :value="old('season_type', $season?->season_type)"
-            :options="['' => ''] + $seasonTypes->mapWithKeys(fn($type) => [$type => ucfirst($type)])->toArray()"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('season_type')" />
-    </div>
+        <x-forms.form-section
+            title="Season dates"
+            description="Configure when this season starts, ends, and is active for scoring."
+        >
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <x-inputs.input-label for="season_start" class="font-semibold" :value="__('Season Start')" />
+                    <x-inputs.text-input
+                        id="season_start"
+                        name="season_start"
+                        type="date"
+                        class="mt-1 block w-full"
+                        :value="old('season_start', $season?->season_start)"
+                        required
+                        autocomplete="season_start"
+                    />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('season_start')" />
+                </div>
 
-    <div class="mt-4">
-        <x-inputs.input-label for="season_start" class="font-semibold" :value="__('Season Start')" />
-        <x-inputs.text-input
-            id="season_start"
-            name="season_start"
-            type="date"
-            class="mt-1 block w-full"
-            :value="old('season_start', $season?->season_start)"
-            required
-            autocomplete="season_start"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('season_start')" />
-    </div>
+                <div>
+                    <x-inputs.input-label for="season_end" class="font-semibold" :value="__('Season End')" />
+                    <x-inputs.text-input
+                        id="season_end"
+                        name="season_end"
+                        type="date"
+                        class="mt-1 block w-full"
+                        :value="old('season_end', $season?->season_end)"
+                        required
+                        autocomplete="season_end"
+                    />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('season_end')" />
+                </div>
+            </div>
 
-    <div class="mt-4">
-        <x-inputs.input-label for="season_end" class="font-semibold" :value="__('Season End')" />
-        <x-inputs.text-input
-            id="season_end"
-            name="season_end"
-            type="date"
-            class="mt-1 block w-full"
-            :value="old('season_end', $season?->season_end)"
-            required
-            autocomplete="season_end"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('season_end')" />
-    </div>
+            <div class="mt-4 flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    id="active"
+                    name="active"
+                    value="1"
+                    {{ old('active', $season?->active) ? 'checked' : '' }}
+                    class="text-navy-600 focus:ring-navy-500 rounded border-gray-300 shadow-sm"
+                />
+                <x-inputs.input-label for="active" class="font-semibold" :value="__('Active')" />
+                <x-inputs.input-error class="mt-2" :messages="$errors->get('active')" />
+            </div>
 
-    <div class="mt-4">
-        <x-inputs.input-label for="active" class="font-semibold" :value="__('Active')" />
-        <input
-            type="checkbox"
-            id="active"
-            name="active"
-            value="1"
-            {{ old('active', $season?->active) ? 'checked' : '' }}
-            class="text-navy-600 focus:ring-navy-500 rounded border-gray-300 shadow-sm"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('active')" />
-    </div>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
+                    <x-inputs.input-label for="active_date" class="font-semibold" :value="__('Active Date')" />
+                    <x-inputs.text-input
+                        id="active_date"
+                        name="active_date"
+                        type="date"
+                        class="mt-1 block w-full"
+                        :value="old('active_date', $season?->active_date)"
+                        autocomplete="active_date"
+                    />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('active_date')" />
+                </div>
 
-    <div class="mt-4">
-        <x-inputs.input-label for="active_date" class="font-semibold" :value="__('Active Date')" />
-        <x-inputs.text-input
-            id="active_date"
-            name="active_date"
-            type="date"
-            class="mt-1 block w-full"
-            :value="old('active_date', $season?->active_date)"
-            autocomplete="active_date"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('active_date')" />
-    </div>
+                <div>
+                    <x-inputs.input-label for="inactive_date" class="font-semibold" :value="__('Inactive Date')" />
+                    <x-inputs.text-input
+                        id="inactive_date"
+                        name="inactive_date"
+                        type="date"
+                        class="mt-1 block w-full"
+                        :value="old('inactive_date', $season?->inactive_date)"
+                        autocomplete="inactive_date"
+                    />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('inactive_date')" />
+                </div>
+            </div>
+        </x-forms.form-section>
+    </x-slot>
 
-    <div class="mt-4">
-        <x-inputs.input-label for="inactive_date" class="font-semibold" :value="__('Inactive Date')" />
-        <x-inputs.text-input
-            id="inactive_date"
-            name="inactive_date"
-            type="date"
-            class="mt-1 block w-full"
-            :value="old('inactive_date', $season?->inactive_date)"
-            autocomplete="inactive_date"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('inactive_date')" />
-    </div>
-
-    {{-- buttons --}}
-    <div class="mt-4 flex items-center justify-end">
+    <x-slot name="buttons">
         @isset($buttons)
             {{ $buttons }}
         @else
@@ -120,6 +130,6 @@
             <x-buttons.primary-button class="ms-4">
                 {{ __('Submit') }}
             </x-buttons.primary-button>
-        @endif
-    </div>
-</form>
+        @endisset
+    </x-slot>
+</x-forms.multi-section-form>

@@ -30,7 +30,6 @@ class Team extends Model
     protected $fillable = [
         'organization',
         'designation',
-        'mascot',
         'conference',
         'abbreviation',
         'color',
@@ -99,8 +98,8 @@ class Team extends Model
             $builder->where(function ($query) use ($q) {
                 $query->whereRaw('LOWER(organization) LIKE LOWER(?)', ["%{$q}%"])
                     ->orWhereRaw('LOWER(designation) LIKE LOWER(?)', ["%{$q}%"])
-                    ->orWhereRaw('LOWER(mascot) LIKE LOWER(?)', ["%{$q}%"])
-                    ->orWhereRaw('LOWER(conference) LIKE LOWER(?)', ["%{$q}%"]);
+                    ->orWhereRaw('LOWER(conference) LIKE LOWER(?)', ["%{$q}%"])
+                    ->orWhereRaw('LOWER(abbreviation) LIKE LOWER(?)', ["%{$q}%"]);
             });
         }
 

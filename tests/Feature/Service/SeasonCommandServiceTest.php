@@ -124,8 +124,8 @@ describe('add game', function () {
             'away_team_id' => $awayTeam->id,
             'home_team_score' => 100,
             'away_team_score' => 95,
-            'start_date' => '2024-01-01',
-            'start_time' => '19:00:00',
+            'start_date_time' => '2024-01-01 19:00:00',
+            'start_time_tbd' => false,
         ]);
 
         // mock the game creation
@@ -135,8 +135,8 @@ describe('add game', function () {
             'away_team_id' => $awayTeam->id,
             'home_team_score' => 100,
             'away_team_score' => 95,
-            'start_date' => '2024-01-01',
-            'start_time' => '19:00:00',
+            'start_date_time' => '2024-01-01 19:00:00',
+            'start_time_tbd' => false,
         ]);
         $this->gameCommandService->shouldReceive('create')->once()->andReturn($expectedGame);
 

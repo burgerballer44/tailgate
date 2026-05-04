@@ -16,7 +16,6 @@ return new class extends Migration
             $table->ulid('ulid')->index();
             $table->string('organization');
             $table->string('designation');
-            $table->string('mascot')->nullable();
             $table->string('type');
             $table->timestamps();
         });

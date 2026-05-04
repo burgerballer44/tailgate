@@ -4,6 +4,7 @@
     :mainActions="[
         ['text' => 'Back to Seasons', 'route' => 'developer.seasons.index'],
         ['text' => 'Edit Season', 'route' => 'developer.seasons.edit', 'params' => ['season' => $season]],
+        ['text' => 'Import Games', 'route' => 'developer.seasons.import-games', 'params' => ['season' => $season]],
         ['text' => 'Add Game', 'route' => 'developer.seasons.games.create', 'params' => ['season' => $season]],
     ]"
 >
@@ -64,12 +65,13 @@
             heading="Games"
             description="A list of all the games for this season including teams, scores, and date/time."
             :tableActions="[
+                ['route' => 'developer.seasons.import-games', 'routeParams' => ['season' => $season], 'text' => 'Import Games'],
                 ['route' => 'developer.seasons.games.create', 'routeParams' => ['season' => $season], 'text' => 'Add Game'],
                 ['route' => 'developer.seasons.games.index', 'routeParams' => ['season' => $season], 'text' => 'View All Games']
             ]"
-            :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Date', 'Time', 'Actions']"
+            :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Start Date Time', 'Start Time TBD', 'Actions']"
             :rows="$games"
-            :columns="['homeTeam.organization', 'awayTeam.organization', 'home_team_score', 'away_team_score', 'start_date', 'start_time']"
+            :columns="['homeTeam.organization', 'awayTeam.organization', 'home_team_score', 'away_team_score', 'start_date_time', 'start_time_tbd']"
             :rowActions="[
                 [
                     'label' => 'Show',

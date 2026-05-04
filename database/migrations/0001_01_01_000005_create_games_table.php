@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedBigInteger('away_team_id');
             $table->string('home_team_score');
             $table->string('away_team_score');
-            $table->string('start_date');
-            $table->string('start_time');
+            $table->dateTime('start_date_time')->nullable();
+            $table->boolean('start_time_tbd')->nullable();
             $table->timestamps();
 
             $table->foreign('season_id')->references('id')->on('seasons')->onDelete('cascade');

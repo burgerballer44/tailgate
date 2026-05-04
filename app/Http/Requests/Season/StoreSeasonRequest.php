@@ -5,8 +5,7 @@ namespace App\Http\Requests\Season;
 use App\DTO\ValidatedSeasonData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\SeasonValidationRulesTrait;
-use App\Models\Common\DateOrString;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Common\DateTimeOrString;
 
 class StoreSeasonRequest extends FormRequest
 {
@@ -23,7 +22,7 @@ class StoreSeasonRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array|string>
+        * @return array<string, mixed>
      */
     public function rules(): array
     {
@@ -36,10 +35,10 @@ class StoreSeasonRequest extends FormRequest
     protected function passedValidation(): void
     {
         $this->replace([
-            'season_start' => DateOrString::fromString($this->season_start),
-            'season_end' => DateOrString::fromString($this->season_end),
-            'active_date' => $this->active_date ? DateOrString::fromString($this->active_date) : null,
-            'inactive_date' => $this->inactive_date ? DateOrString::fromString($this->inactive_date) : null,
+            'season_start' => DateTimeOrString::fromString($this->season_start),
+            'season_end' => DateTimeOrString::fromString($this->season_end),
+            'active_date' => $this->active_date ? DateTimeOrString::fromString($this->active_date) : null,
+            'inactive_date' => $this->inactive_date ? DateTimeOrString::fromString($this->inactive_date) : null,
         ]);
     }
 

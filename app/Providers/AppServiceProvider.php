@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Clients\CFBDApiClient;
 use App\Services\Contracts\GameCommandInterface;
+use App\Services\Contracts\GameImportManagerInterface;
 use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
@@ -13,13 +15,18 @@ use App\Services\Contracts\PlayerQueryInterface;
 use App\Services\Contracts\SeasonCommandInterface;
 use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\TeamCommandInterface;
+use App\Services\Contracts\TeamImportManagerInterface;
+use App\Services\Contracts\TeamImportSourceInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use App\Services\Contracts\UserCommandInterface;
 use App\Services\Contracts\UserQueryInterface;
 use App\Services\GameCommandService;
+use App\Services\GameImportManager;
 use App\Services\GameQueryService;
 use App\Services\GroupCommandService;
 use App\Services\GroupQueryService;
+use App\Services\ImportSources\CFBDGameImportSource;
+use App\Services\ImportSources\CFBDTeamImportSource;
 use App\Services\MemberCommandService;
 use App\Services\MemberQueryService;
 use App\Services\PlayerCommandService;
@@ -27,6 +34,7 @@ use App\Services\PlayerQueryService;
 use App\Services\SeasonCommandService;
 use App\Services\SeasonQueryService;
 use App\Services\TeamCommandService;
+use App\Services\TeamImportManager;
 use App\Services\TeamQueryService;
 use App\Services\UserCommandService;
 use App\Services\UserQueryService;
@@ -40,6 +48,32 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // register the CFBD API client as a singleton
+        $this->app->singleton(CFBDApiClient::class, fn (): CFBDApiClient => new CFBDApiClient(
+            token: config('services.import.cfbd.token'),
+            baseUrl: config('services.import.cfbd.base_url'),
+        ));
+
+        // register the game import managers, injecting the appropriate import sources
+        $this->app->bind(GameImportManagerInterface::class, function ($app): GameImportManager {
+            return new GameImportManager(
+                seasonCommandService: $app->make(SeasonCommandInterface::class),
+                sources: [
+                    $app->make(CFBDGameImportSource::class),
+                ],
+            );
+        });
+
+        // register the team import managers, injecting the appropriate import sources
+        $this->app->bind(TeamImportManagerInterface::class, function ($app): TeamImportManager {
+            return new TeamImportManager(
+                teamCommandService: $app->make(TeamCommandInterface::class),
+                sources: [
+                    $app->make(CFBDTeamImportSource::class),
+                ],
+            );
+        });
+
         $this->app->bind(UserCommandInterface::class, UserCommandService::class);
         $this->app->bind(UserQueryInterface::class, UserQueryService::class);
         $this->app->bind(TeamCommandInterface::class, TeamCommandService::class);

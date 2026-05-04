@@ -34,8 +34,8 @@ class Game extends Model
         'away_team_id',
         'home_team_score',
         'away_team_score',
-        'start_date',
-        'start_time',
+        'start_date_time',
+        'start_time_tbd',
     ];
 
     /**
@@ -46,6 +46,7 @@ class Game extends Model
     protected $casts = [
         'home_team_score' => 'integer',
         'away_team_score' => 'integer',
+        'start_time_tbd' => 'boolean',
     ];
 
     /**

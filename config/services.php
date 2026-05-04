@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    // Configuration for external services related to data import functionality
+    'import' => [
+        'cfbd' => [
+            'base_url' => env('CFBD_BASE_URL', 'https://api.collegefootballdata.com'),
+            'token' => env('CFBD_API_TOKEN'),
+        ],
+    ],
+
 ];

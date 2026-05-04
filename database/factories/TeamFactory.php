@@ -22,7 +22,6 @@ class TeamFactory extends Factory
         return [
             'organization' => fake()->company(),
             'designation' => fake()->name().'designation',
-            'mascot' => fake()->optional()->name().'mascot',
             'conference' => fake()->randomElement(['ACC', 'Big Ten', 'SEC', 'Big 12', 'Mountain West', 'Independent']),
             'abbreviation' => fake()->optional()->lexify('???'),
             'color' => fake()->optional()->hexColor(),

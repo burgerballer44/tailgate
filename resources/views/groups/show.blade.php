@@ -45,7 +45,7 @@
                             @if ($group->isFollowingTeam())
                                 <div>
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $group->follow->team->designation }} ({{ $group->follow->team->mascot }})
+                                        {{ $group->follow->team->designation }}
                                     </div>
                                     <div class="text-sm text-gray-500">{{ $group->follow->season->name }}</div>
                                 </div>

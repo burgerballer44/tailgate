@@ -61,8 +61,8 @@ describe('creating a game', function () {
             'away_team_id' => $awayTeam->id,
             'home_team_score' => 0,
             'away_team_score' => 0,
-            'start_date' => '2024-10-01',
-            'start_time' => '7:00 PM',
+            'start_date_time' => '2024-10-01 19:00:00',
+            'start_time_tbd' => false,
         ];
 
         // there should be 0 games in the db
@@ -82,8 +82,8 @@ describe('creating a game', function () {
             'season_id' => $season->id,
             'home_team_id' => $homeTeam->id,
             'away_team_id' => $awayTeam->id,
-            'start_date' => '2024-10-01',
-            'start_time' => '7:00 PM',
+            'start_date_time' => '2024-10-01 19:00:00',
+            'start_time_tbd' => 0,
         ]);
     });
 
@@ -101,8 +101,8 @@ describe('creating a game', function () {
             'away_team_id' => $awayTeam->id,
             'home_team_score' => 0,
             'away_team_score' => 0,
-            'start_date' => '2024-10-01',
-            'start_time' => '7:00 PM',
+            'start_date_time' => '2024-10-01 19:00:00',
+            'start_time_tbd' => false,
         ];
 
         // post the game data
@@ -110,6 +110,58 @@ describe('creating a game', function () {
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Game created successfully!');
+    });
+
+    test('sets start_time_tbd to true when start_date_time is null', function () {
+        $season = Season::factory()->create();
+        $homeTeam = Team::factory()->withSports([$season->sport])->create();
+        $awayTeam = Team::factory()->withSports([$season->sport])->create();
+
+        $gameData = [
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'home_team_score' => 0,
+            'away_team_score' => 0,
+            'start_date_time' => null,
+        ];
+
+        $this->post(route('developer.seasons.games.store', $season), $gameData)
+            ->assertRedirect(route('developer.seasons.games.index', $season));
+
+        $this->assertDatabaseHas('games', [
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'start_date_time' => null,
+            'start_time_tbd' => 1,
+        ]);
+    });
+
+    test('sets start_time_tbd to true when start_date_time has date only', function () {
+        $season = Season::factory()->create();
+        $homeTeam = Team::factory()->withSports([$season->sport])->create();
+        $awayTeam = Team::factory()->withSports([$season->sport])->create();
+
+        $gameData = [
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'home_team_score' => 0,
+            'away_team_score' => 0,
+            'start_date_time' => '2024-10-01',
+        ];
+
+        $this->post(route('developer.seasons.games.store', $season), $gameData)
+            ->assertRedirect(route('developer.seasons.games.index', $season));
+
+        $this->assertDatabaseHas('games', [
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'start_date_time' => '2024-10-01 00:00:00',
+            'start_time_tbd' => 1,
+        ]);
     });
 
     test('fails with same home and away team', function () {
@@ -125,8 +177,8 @@ describe('creating a game', function () {
             'away_team_id' => $team->id,
             'home_team_score' => 10,
             'away_team_score' => 5,
-            'start_date' => '2024-10-01',
-            'start_time' => '7:00 PM',
+            'start_date_time' => '2024-10-01 19:00:00',
+            'start_time_tbd' => false,
         ];
 
         // post the game data
@@ -195,8 +247,8 @@ describe('updating a game', function () {
             'away_team_id' => $awayTeam->id,
             'home_team_score' => 10,
             'away_team_score' => 5,
-            'start_date' => '2024-10-02',
-            'start_time' => '8:00 PM',
+            'start_date_time' => '2024-10-02 20:00:00',
+            'start_time_tbd' => true,
         ];
 
         // patch the game data
@@ -212,8 +264,8 @@ describe('updating a game', function () {
         expect($game->away_team_id)->toBe($awayTeam->id);
         expect($game->home_team_score)->toBe(10);
         expect($game->away_team_score)->toBe(5);
-        expect($game->start_date)->toBe('2024-10-02');
-        expect($game->start_time)->toBe('8:00 PM');
+        expect($game->start_date_time)->toBe('2024-10-02 20:00:00');
+        expect($game->start_time_tbd)->toBeTrue();
     });
 
     test('flashes success message on update', function () {
@@ -232,8 +284,8 @@ describe('updating a game', function () {
             'away_team_id' => $awayTeam->id,
             'home_team_score' => 5,
             'away_team_score' => 3,
-            'start_date' => '2024-10-02',
-            'start_time' => '8:00 PM',
+            'start_date_time' => '2024-10-02 20:00:00',
+            'start_time_tbd' => false,
         ];
 
         // patch the game data
@@ -258,8 +310,8 @@ describe('updating a game', function () {
             'away_team_id' => $team->id,
             'home_team_score' => 0,
             'away_team_score' => 0,
-            'start_date' => '2024-10-02',
-            'start_time' => '8:00 PM',
+            'start_date_time' => '2024-10-02 20:00:00',
+            'start_time_tbd' => false,
         ];
 
         // patch the game data

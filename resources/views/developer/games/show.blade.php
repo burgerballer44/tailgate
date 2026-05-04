@@ -35,12 +35,12 @@
                 'value' => $game->away_team_score ?? 'Not set',
             ],
             [
-                'label' => 'Start Date',
-                'value' => $game->start_date,
+                'label' => 'Start Date Time',
+                'value' => $game->start_date_time,
             ],
             [
-                'label' => 'Start Time',
-                'value' => $game->start_time,
+                'label' => 'Start Time TBD',
+                'value' => $game->start_time_tbd ? 'Yes' : 'No',
             ],
             [
                 'label' => 'Created At',

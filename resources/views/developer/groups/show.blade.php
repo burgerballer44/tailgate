@@ -69,7 +69,7 @@
                 :fields="[
                     [
                         'label' => 'Team',
-                        'value' => $group->follow->team->designation . ' (' . $group->follow->team->mascot . ')',
+                        'value' => $group->follow->team->designation,
                     ],
                     [
                         'label' => 'Season',

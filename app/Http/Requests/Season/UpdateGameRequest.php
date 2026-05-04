@@ -5,9 +5,6 @@ namespace App\Http\Requests\Season;
 use App\DTO\ValidatedGameData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GameValidationRulesTrait;
-use App\Models\Common\DateOrString;
-use App\Models\Common\TimeOrString;
-use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateGameRequest extends FormRequest
 {
@@ -22,24 +19,22 @@ class UpdateGameRequest extends FormRequest
     }
 
     /**
-     * Handle a passed validation attempt.
-     */
-    protected function passedValidation(): void
-    {
-        $this->replace([
-            'start_date' => DateOrString::fromString($this->start_date),
-            'start_time' => TimeOrString::fromString($this->start_time),
-        ]);
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
         return $this->updateRules();
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'start_time_tbd' => $this->has('start_time_tbd')
+                ? $this->boolean('start_time_tbd')
+                : null,
+        ]);
     }
 
     /**

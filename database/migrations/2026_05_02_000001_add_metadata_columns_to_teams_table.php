@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('teams', function (Blueprint $table) {
-            $table->string('conference')->default('Unknown')->after('mascot');
+            $table->string('conference')->default('Unknown')->after('designation');
             $table->string('abbreviation')->nullable()->after('conference');
             $table->string('color')->nullable()->after('abbreviation');
             $table->string('alternate_color')->nullable()->after('color');

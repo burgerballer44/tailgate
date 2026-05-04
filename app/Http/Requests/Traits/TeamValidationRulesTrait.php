@@ -19,7 +19,6 @@ trait TeamValidationRulesTrait
             'organization' => ['required', 'string', 'max:255'],
             'designation' => ['required', 'string', 'max:255'],
             'conference' => ['required', 'string', 'max:255'],
-            'mascot' => ['nullable', 'string', 'max:255'],
             'abbreviation' => ['nullable', 'string', 'max:32'],
             'color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'alternate_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],

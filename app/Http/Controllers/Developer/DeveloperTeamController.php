@@ -2,23 +2,28 @@
 
 namespace App\Http\Controllers\Developer;
 
+use App\Exceptions\TeamImportException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Team\ImportTeamsRequest;
 use App\Http\Requests\Team\StoreTeamRequest;
 use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Models\Sport;
 use App\Models\Team;
 use App\Models\TeamType;
 use App\Services\Contracts\TeamCommandInterface;
+use App\Services\Contracts\TeamImportManagerInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class DeveloperTeamController extends Controller
 {
     public function __construct(
         private TeamCommandInterface $teamCommandService,
-        private TeamQueryInterface $teamQueryService
+        private TeamQueryInterface $teamQueryService,
+        private TeamImportManagerInterface $teamImportManager,
     ) {}
 
     public function index(Request $request): View
@@ -75,6 +80,55 @@ class DeveloperTeamController extends Controller
         $this->teamCommandService->delete($team);
 
         $this->setFlashAlert('success', 'Team deleted successfully!');
+
+        return redirect()->route('developer.teams.index');
+    }
+    
+    /**
+     * Displays the team import form, providing available import sources and seasons for the user to select from.
+     */
+    public function importTeams(): View
+    {
+        return view('developer.teams.import-teams', [
+            'sources' => $this->teamImportManager->availableSources(),
+        ]);
+    }
+
+    /**
+     * Handles the submission of the team import form, performing the import operation
+     * and redirecting back to the team index with appropriate flash messages.
+     *
+     * @param ImportTeamsRequest $request The validated request containing the team import data.
+     * @return RedirectResponse A redirect response back to the team index page with flash messages indicating the result of the import operation.
+     */
+    public function storeImportedTeams(ImportTeamsRequest $request): RedirectResponse
+    {
+        try {
+            $result = $this->teamImportManager->import($request->toDTO());
+        } catch (TeamImportException $exception) {
+            $this->setFlashAlert('error', $exception->getMessage());
+
+            return redirect()->route('developer.teams.import-teams')->withInput();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            $this->setFlashAlert('error', 'Team import failed due to an unexpected error.');
+
+            return redirect()->route('developer.teams.import-teams')->withInput();
+        }
+
+        if ($result->isPartial()) {
+            $this->setFlashAlert(
+                'warning',
+                array_merge([
+                    "Imported {$result->importedCount} team(s) from {$result->sourceLabel}.",
+                ], $result->errors)
+            );
+        } elseif ($result->hasImports()) {
+            $this->setFlashAlert('success', "Imported {$result->importedCount} team(s) from {$result->sourceLabel}.");
+        } else {
+            $this->setFlashAlert('error', $result->hasErrors() ? $result->errors : 'No teams were imported.');
+        }
 
         return redirect()->route('developer.teams.index');
     }

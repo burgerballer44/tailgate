@@ -1,6 +1,6 @@
 <x-layouts.app
-    mainHeading="Team: {{ $team->designation }} ({{ $team->mascot }})"
-    mainDescription="Details for team including designation, mascot, and sport."
+    mainHeading="Team: {{ $team->designation }}"
+    mainDescription="Details for team including designation and sport."
     :mainActions="[
         ['text' => 'Back to Teams', 'route' => 'developer.teams.index'],
         ['text' => 'Edit Team', 'route' => 'developer.teams.edit', 'params' => ['team' => $team]],
@@ -22,10 +22,6 @@
             [
                 'label' => 'Designation',
                 'value' => $team->designation,
-            ],
-            [
-                'label' => 'Mascot',
-                'value' => $team->mascot,
             ],
             [
                 'label' => 'Conference',

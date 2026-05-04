@@ -12,7 +12,7 @@ class GameCommandService implements GameCommandInterface
      * Create a new game with the provided data.
      * This method handles game creation logic, including setting season, teams, scores, and date/time.
      *
-     * @param  ValidatedGameData  $data  Validated game data including season, teams, scores, start_date, start_time.
+        * @param  ValidatedGameData  $data  Validated game data including season, teams, scores, start date-time, and TBD flag.
      * @return Game The created game instance.
      */
     public function create(ValidatedGameData $data): Game
@@ -23,8 +23,8 @@ class GameCommandService implements GameCommandInterface
             'away_team_id' => $data->away_team_id,
             'home_team_score' => $data->home_team_score,
             'away_team_score' => $data->away_team_score,
-            'start_date' => (string) $data->start_date,
-            'start_time' => (string) $data->start_time,
+            'start_date_time' => $data->start_date_time,
+            'start_time_tbd' => $data->start_time_tbd,
         ];
 
         return Game::create($gameData);
@@ -45,8 +45,8 @@ class GameCommandService implements GameCommandInterface
             'away_team_id' => $data->away_team_id,
             'home_team_score' => $data->home_team_score,
             'away_team_score' => $data->away_team_score,
-            'start_date' => (string) $data->start_date,
-            'start_time' => (string) $data->start_time,
+            'start_date_time' => $data->start_date_time,
+            'start_time_tbd' => $data->start_time_tbd,
         ];
 
         $game->fill($updateData);

@@ -31,7 +31,7 @@ The core prediction functionality is missing for normal users:
 - **Member**: Junction between users and groups with roles (admin/member) and status (pending/approved)
 - **Player**: Prediction entries belonging to members (users can have multiple players per group)
 - **Score**: Predictions submitted by players for specific games (home/away team scores)
-- **Team**: Sports teams with designation and mascot
+- **Team**: Sports teams with organization, designation, and conference
 - **Season**: Time periods (e.g., "2024 NFL Season")
 - **Game**: Matches between teams in seasons
 - **Follow**: Groups following teams for specific seasons

@@ -10,9 +10,9 @@ class TeamCommandService implements TeamCommandInterface
 {
     /**
      * Create a new team with the provided data.
-     * This method handles team creation logic, including setting organization, designation, conference, mascot, type, and sport.
+    * This method handles team creation logic, including setting organization, designation, conference, type, and sport.
      *
-     * @param  ValidatedTeamData  $data  Validated team data including organization, designation, mascot, type, sport.
+    * @param  ValidatedTeamData  $data  Validated team data including organization, designation, type, sport.
      * @return Team The created team instance.
      */
     public function create(ValidatedTeamData $data): Team
@@ -21,7 +21,6 @@ class TeamCommandService implements TeamCommandInterface
             'organization' => $data->organization,
             'designation' => $data->designation,
             'conference' => $data->conference,
-            'mascot' => $data->mascot,
             'abbreviation' => $data->abbreviation,
             'color' => $data->color,
             'alternate_color' => $data->alternateColor,
@@ -44,7 +43,7 @@ class TeamCommandService implements TeamCommandInterface
 
     /**
      * Update an existing team's information in the system.
-     * This method is used to modify team details such as organization, designation, mascot, type, or sport.
+        * This method is used to modify team details such as organization, designation, type, or sport.
      *
      * @param  Team  $team  The team to update.
      * @param  ValidatedTeamData  $data  Validated data to update the team with.
@@ -57,7 +56,6 @@ class TeamCommandService implements TeamCommandInterface
             'organization' => $data->organization,
             'designation' => $data->designation,
             'conference' => $data->conference,
-            'mascot' => $data->mascot,
             'abbreviation' => $data->abbreviation,
             'color' => $data->color,
             'alternate_color' => $data->alternateColor,

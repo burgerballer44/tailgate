@@ -1,8 +1,11 @@
 <?php
 
 use App\Models\Sport;
+use App\Models\Season;
+use App\Models\SeasonType;
 use App\Models\Team;
 use App\Models\TeamType;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
@@ -105,29 +108,6 @@ describe('index', function () {
         expect($teams->count())->toBe(1);
     });
 
-    test('lists of teams can be filtered by q for mascot', function () {
-        // thing to find
-        $q = 'FindMe';
-
-        // create a team
-        $team = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => $q]);
-        $differentTeamToNotFind = Team::factory()->withSports([Sport::BASKETBALL])->create(['mascot' => 'somethingelse']);
-
-        // get the team
-        $response = $this->get(route('developer.teams.index', ['q' => $q]));
-
-        // assert successful response
-        $response->assertOk();
-
-        // assert view is returned
-        $response->assertViewIs('developer.teams.index');
-
-        // assert teams are filtered
-        $response->assertViewHas('teams');
-        $teams = $response->viewData('teams');
-        expect($teams->count())->toBe(1);
-    });
-
     test('lists of teams can be filtered by q for organization', function () {
         // thing to find
         $q = 'FindMe';
@@ -176,7 +156,6 @@ describe('creating a team', function () {
         $teamData = [
             'organization' => 'Test Organization',
             'designation' => 'Test Team',
-            'mascot' => 'Test Mascot',
             'conference' => 'SEC',
             'abbreviation' => 'TT',
             'color' => '#8c2232',
@@ -203,7 +182,6 @@ describe('creating a team', function () {
         $this->assertDatabaseHas('teams', [
             'organization' => $teamData['organization'],
             'designation' => $teamData['designation'],
-            'mascot' => $teamData['mascot'],
             'conference' => $teamData['conference'],
             'type' => $teamData['type'],
         ]);
@@ -218,7 +196,6 @@ describe('creating a team', function () {
         $teamData = [
             'organization' => 'Test Organization',
             'designation' => 'Test Team',
-            'mascot' => 'Test Mascot',
             'conference' => 'SEC',
             'abbreviation' => 'TT',
             'color' => '#8c2232',
@@ -284,7 +261,6 @@ describe('updating team', function () {
         $team = Team::factory()->withSports([Sport::BASKETBALL])->create([
             'organization' => 'theOrganization',
             'designation' => 'theDesignation',
-            'mascot' => 'theMascot',
             'conference' => 'Big Ten',
             'type' => TeamType::COLLEGE,
         ]);
@@ -293,7 +269,6 @@ describe('updating team', function () {
         $updateData = [
             'organization' => 'Updated Organization',
             'designation' => 'Updated Designation',
-            'mascot' => 'Updated Mascot',
             'conference' => 'ACC',
             'abbreviation' => 'UD',
             'color' => '#123456',
@@ -314,7 +289,6 @@ describe('updating team', function () {
         $team->refresh();
         expect($team->organization)->toBe($updateData['organization']);
         expect($team->designation)->toBe($updateData['designation']);
-        expect($team->mascot)->toBe($updateData['mascot']);
         expect($team->conference)->toBe($updateData['conference']);
         expect($team->type)->toBe($updateData['type']);
         expect($team->sports->pluck('sport')->toArray())->toBe([Sport::FOOTBALL]);
@@ -328,7 +302,6 @@ describe('updating team', function () {
         $updateData = [
             'organization' => 'Updated Organization',
             'designation' => 'Updated Designation',
-            'mascot' => 'Updated Mascot',
             'conference' => 'ACC',
             'abbreviation' => 'UD',
             'color' => '#123456',
@@ -377,5 +350,107 @@ describe('deleting a team', function () {
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Team deleted successfully!');
+    });
+});
+
+describe('importing teams', function () {
+    test('shows import teams form', function () {
+        $response = $this->get(route('developer.teams.import-teams'));
+
+        $response->assertOk();
+        $response->assertViewIs('developer.teams.import-teams');
+        $response->assertViewHas('sources');
+    });
+
+    test('imports teams from cfbd for a selected season', function () {
+        config()->set('services.cfbd.token', 'test-token');
+
+        $season = Season::factory()->create([
+            'name' => 'Football Season 2026',
+            'sport' => Sport::FOOTBALL->value,
+            'season_type' => SeasonType::REGULAR->value,
+        ]);
+
+        Http::fake([
+            'https://api.collegefootballdata.com/teams*' => Http::response([
+                [
+                    'id' => 2000,
+                    'school' => 'Abilene Christian',
+                    'mascot' => 'Wildcats',
+                    'abbreviation' => 'ACU',
+                    'conference' => 'UAC',
+                    'color' => '#592d82',
+                    'alternateColor' => '#b1b3b3',
+                    'logos' => ['https://example.test/acu-primary.png'],
+                    'twitter' => '@ACUFootball',
+                ],
+            ]),
+        ]);
+
+        $response = $this->post(route('developer.teams.import-teams.store'), [
+            'season_id' => $season->id,
+            'source' => 'cfbd',
+            'year' => 2026,
+        ]);
+
+        $response->assertRedirect(route('developer.teams.index'));
+
+        $this->assertDatabaseHas('teams', [
+            'organization' => 'Abilene Christian',
+            'designation' => 'ACU',
+            'conference' => 'UAC',
+            'abbreviation' => 'ACU',
+        ]);
+
+        expect(session('alert')['message'])->toBe('Imported 1 team(s) from CFBD API.');
+    });
+
+    test('updates existing team metadata when import finds an existing team for season sport', function () {
+        config()->set('services.cfbd.token', 'test-token');
+
+        $season = Season::factory()->create([
+            'name' => 'Football Season 2026',
+            'sport' => Sport::FOOTBALL->value,
+            'season_type' => SeasonType::REGULAR->value,
+        ]);
+
+        $team = Team::factory()->withSports([Sport::FOOTBALL->value])->create([
+            'organization' => 'Abilene Christian',
+            'designation' => 'Old Name',
+            'conference' => 'UAC',
+            'abbreviation' => 'OLD',
+        ]);
+
+        Http::fake([
+            'https://api.collegefootballdata.com/teams*' => Http::response([
+                [
+                    'id' => 2000,
+                    'school' => 'Abilene Christian',
+                    'mascot' => 'Wildcats',
+                    'abbreviation' => 'ACU',
+                    'conference' => 'UAC',
+                    'color' => '#592d82',
+                    'alternateColor' => '#b1b3b3',
+                    'logos' => ['https://example.test/acu-primary.png'],
+                    'twitter' => '@ACUFootball',
+                ],
+            ]),
+        ]);
+
+        $response = $this->post(route('developer.teams.import-teams.store'), [
+            'season_id' => $season->id,
+            'source' => 'cfbd',
+            'year' => 2026,
+        ]);
+
+        $response->assertRedirect(route('developer.teams.index'));
+
+        $team->refresh();
+
+        expect($team->designation)->toBe('ACU');
+        expect($team->conference)->toBe('UAC');
+        expect($team->abbreviation)->toBe('ACU');
+
+        $this->assertDatabaseCount('teams', 1);
     });
 });

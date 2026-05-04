@@ -1,35 +1,36 @@
 @props(['group' => null, 'teams' => collect(), 'seasons' => collect(), 'action' => '', 'method' => 'POST'])
 
-<form action="{{ $action }}" method="POST" class="rounded-lg bg-white p-6 shadow-md">
-    @csrf
-    @if ($method !== 'POST')
-        @method($method)
-    @endif
+<x-forms.multi-section-form :action="$action" :method="$method">
+    <x-slot name="sections">
+        <x-forms.form-section
+            title="Team selection"
+            description="Choose the team and season this group will follow."
+        >
+            <div>
+                <x-form.select
+                    name="team_id"
+                    label="Team"
+                    :required="true"
+                    :value="old('team_id')"
+                    :options="['' => ''] + $teams->mapWithKeys(fn($team) => [$team->id => $team->designation])->toArray()"
+                />
+                <x-inputs.input-error class="mt-2" :messages="$errors->get('team_id')" />
+            </div>
 
-    <div>
-        <x-form.select
-            name="team_id"
-            label="Team"
-            :required="true"
-            :value="old('team_id')"
-            :options="['' => ''] + $teams->mapWithKeys(fn($team) => [$team->id => $team->designation . ' (' . $team->mascot . ')'])->toArray()"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('team_id')" />
-    </div>
+            <div class="mt-4">
+                <x-form.select
+                    name="season_id"
+                    label="Season"
+                    :required="true"
+                    :value="old('season_id')"
+                    :options="['' => ''] + $seasons->mapWithKeys(fn($season) => [$season->id => $season->name])->toArray()"
+                />
+                <x-inputs.input-error class="mt-2" :messages="$errors->get('season_id')" />
+            </div>
+        </x-forms.form-section>
+    </x-slot>
 
-    <div class="mt-4">
-        <x-form.select
-            name="season_id"
-            label="Season"
-            :required="true"
-            :value="old('season_id')"
-            :options="['' => ''] + $seasons->mapWithKeys(fn($season) => [$season->id => $season->name])->toArray()"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('season_id')" />
-    </div>
-
-    {{-- buttons --}}
-    <div class="mt-4 flex items-center justify-end">
+    <x-slot name="buttons">
         @isset($buttons)
             {{ $buttons }}
         @else
@@ -40,6 +41,6 @@
             <x-buttons.primary-button class="ms-4">
                 {{ __('Follow Team') }}
             </x-buttons.primary-button>
-        @endif
-    </div>
-</form>
+        @endisset
+    </x-slot>
+</x-forms.multi-section-form>

@@ -92,7 +92,7 @@ class SeasonCommandService implements SeasonCommandInterface
      * This method creates a new game and associates it with the given season.
      *
      * @param  Season  $season  The season to add the game to.
-     * @param  ValidatedGameData  $data  Validated game data including teams, scores, start_date, start_time.
+        * @param  ValidatedGameData  $data  Validated game data including teams, scores, start date-time, and TBD flag.
      * @return Game The created game instance.
      */
     public function addGame(Season $season, ValidatedGameData $data): Game
@@ -104,8 +104,8 @@ class SeasonCommandService implements SeasonCommandInterface
             'away_team_id' => $data->away_team_id,
             'home_team_score' => $data->home_team_score,
             'away_team_score' => $data->away_team_score,
-            'start_date' => $data->start_date,
-            'start_time' => $data->start_time,
+            'start_date_time' => $data->start_date_time,
+            'start_time_tbd' => $data->start_time_tbd,
         ]);
 
         return $this->gameCommandService->create($gameData);

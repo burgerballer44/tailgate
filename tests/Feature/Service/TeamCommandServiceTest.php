@@ -18,7 +18,6 @@ describe('create a team', function () {
             'organization' => 'Test Organization',
             'designation' => 'Test Team',
             'conference' => 'SEC',
-            'mascot' => 'Test Mascot',
             'abbreviation' => 'TT',
             'color' => '#8c2232',
             'alternate_color' => '#ffffff',
@@ -40,7 +39,6 @@ describe('create a team', function () {
         expect($team)->toBeInstanceOf(Team::class);
         expect($team->organization)->toBe($data['organization']);
         expect($team->designation)->toBe($data['designation']);
-        expect($team->mascot)->toBe($data['mascot']);
         expect($team->conference)->toBe($data['conference']);
         expect($team->abbreviation)->toBe($data['abbreviation']);
         expect($team->color)->toBe($data['color']);
@@ -59,7 +57,6 @@ describe('update a team', function () {
         $team = Team::factory()->withSports([Sport::FOOTBALL])->create([
             'organization' => 'Old Organization',
             'designation' => 'Old Designation',
-            'mascot' => 'Old Mascot',
             'conference' => 'Big Ten',
             'abbreviation' => 'OD',
             'color' => '#000000',
@@ -74,7 +71,6 @@ describe('update a team', function () {
             'organization' => 'New Organization',
             'designation' => 'New Designation',
             'conference' => 'ACC',
-            'mascot' => 'New Mascot',
             'abbreviation' => 'ND',
             'color' => '#123456',
             'alternate_color' => '#abcdef',
@@ -87,7 +83,6 @@ describe('update a team', function () {
         // ensure updated team does not exist
         $this->assertDatabaseMissing('teams', [
             'designation' => $data->designation,
-            'mascot' => $data->mascot,
         ]);
 
         // try to update the team
@@ -96,7 +91,6 @@ describe('update a team', function () {
         // verify updated team exists in database
         $this->assertDatabaseHas('teams', [
             'designation' => $data->designation,
-            'mascot' => $data->mascot,
         ]);
 
         // verify returned team is the same instance
@@ -105,7 +99,6 @@ describe('update a team', function () {
         // verify updated data
         expect($team->organization)->toBe($data->organization);
         expect($team->designation)->toBe($data->designation);
-        expect($team->mascot)->toBe($data->mascot);
         expect($team->conference)->toBe($data->conference);
         expect($team->abbreviation)->toBe($data->abbreviation);
         expect($team->color)->toBe($data->color);

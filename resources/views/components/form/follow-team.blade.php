@@ -12,7 +12,7 @@
             label="Team"
             :required="true"
             :value="old('team_id')"
-            :options="['' => ''] + $teams->mapWithKeys(fn($team) => [$team->id => $team->designation . ' (' . $team->mascot . ')'])->toArray()"
+            :options="['' => ''] + $teams->mapWithKeys(fn($team) => [$team->id => $team->designation])->toArray()"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('team_id')" />
     </div>

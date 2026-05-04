@@ -24,8 +24,8 @@ describe('create a game', function () {
             'away_team_id' => $awayTeam->id,
             'home_team_score' => 100,
             'away_team_score' => 95,
-            'start_date' => '2024-01-01',
-            'start_time' => '19:00:00',
+            'start_date_time' => '2024-01-01 19:00:00',
+            'start_time_tbd' => false,
         ];
 
         // ensure game does not exist
@@ -45,6 +45,44 @@ describe('create a game', function () {
         expect($game->away_team_score)->toBe(95);
         expect(Str::isUlid((string) $game->ulid))->toBeTrue();
     });
+
+    test('forces start_time_tbd when start_date_time is null', function () {
+        $season = Season::factory()->create();
+        $homeTeam = Team::factory()->create();
+        $awayTeam = Team::factory()->create();
+
+        $game = $this->service->create(ValidatedGameData::fromArray([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'home_team_score' => 10,
+            'away_team_score' => 7,
+            'start_date_time' => null,
+            'start_time_tbd' => false,
+        ]));
+
+        expect($game->start_date_time)->toBeNull();
+        expect($game->start_time_tbd)->toBeTrue();
+    });
+
+    test('forces start_time_tbd when start_date_time has only a date', function () {
+        $season = Season::factory()->create();
+        $homeTeam = Team::factory()->create();
+        $awayTeam = Team::factory()->create();
+
+        $game = $this->service->create(ValidatedGameData::fromArray([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'home_team_score' => 10,
+            'away_team_score' => 7,
+            'start_date_time' => '2024-11-02',
+            'start_time_tbd' => false,
+        ]));
+
+        expect($game->start_date_time)->toBe('2024-11-02 00:00:00');
+        expect($game->start_time_tbd)->toBeTrue();
+    });
 });
 
 describe('update a game', function () {
@@ -62,8 +100,8 @@ describe('update a game', function () {
             'away_team_id' => $game->away_team_id,
             'home_team_score' => 90,
             'away_team_score' => 85,
-            'start_date' => $game->start_date,
-            'start_time' => $game->start_time,
+            'start_date_time' => $game->start_date_time,
+            'start_time_tbd' => $game->start_time_tbd,
         ]);
 
         // try to update the game

@@ -25,8 +25,8 @@ class GameFactory extends Factory
             'away_team_id' => Team::factory(),
             'home_team_score' => 10,
             'away_team_score' => 5,
-            'start_date' => '2019-10-01',
-            'start_time' => '12:12',
+            'start_date_time' => '2019-10-01 12:12:00',
+            'start_time_tbd' => false,
         ];
     }
 }

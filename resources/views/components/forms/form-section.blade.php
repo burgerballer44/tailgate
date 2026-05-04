@@ -9,7 +9,7 @@
         <p class="mt-1 text-sm/6 text-gray-600">{{ $description }}</p>
     </div>
 
-    <div class="">
+    <div class="md:col-span-2">
         {{ $slot }}
     </div>
 </div>
