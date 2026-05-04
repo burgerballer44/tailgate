@@ -34,7 +34,6 @@ function importedTeam(array $overrides = []): ImportedTeamData
         'designation' => 'Bruins',
         'abbreviation' => 'UCLA',
         'color' => '#2774ae',
-        'alternateColor' => '#ffd100',
         'logos' => ['https://example.test/ucla.png'],
         'socialMedia' => [['label' => 'X', 'url' => 'https://x.com/ucla']],
     ], $overrides);
@@ -47,7 +46,6 @@ function importedTeam(array $overrides = []): ImportedTeamData
         designation: $data['designation'],
         abbreviation: $data['abbreviation'],
         color: $data['color'],
-        alternateColor: $data['alternateColor'],
         logos: $data['logos'],
         socialMedia: $data['socialMedia'],
     );
@@ -160,7 +158,6 @@ describe('import', function () {
             'conference' => 'Big Ten',
             'abbreviation' => 'UCLA',
             'color' => '#123456',
-            'alternate_color' => '#654321',
             'logos' => ['https://example.test/logo-football.png'],
             'social_media' => [['label' => 'X', 'url' => 'https://x.com/ucla']],
             'type' => TeamType::COLLEGE->value,
@@ -177,7 +174,6 @@ describe('import', function () {
                     'sport' => Sport::BASKETBALL->value,
                     'abbreviation' => null,
                     'color' => null,
-                    'alternateColor' => null,
                     'logos' => ['https://example.test/logo-basketball.png'],
                     'socialMedia' => [['label' => 'Instagram', 'url' => 'https://instagram.com/ucla']],
                 ]),
@@ -199,7 +195,6 @@ describe('import', function () {
                 return $team->is($existingTeam)
                     && $dto->abbreviation === 'UCLA'
                     && $dto->color === '#123456'
-                    && $dto->alternateColor === '#654321'
                     && $sportValues === [Sport::BASKETBALL->value, Sport::FOOTBALL->value]
                     && $logos === ['https://example.test/logo-basketball.png', 'https://example.test/logo-football.png']
                     && $dto->socialMedia === [

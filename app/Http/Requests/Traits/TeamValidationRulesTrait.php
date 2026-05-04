@@ -21,7 +21,6 @@ trait TeamValidationRulesTrait
             'conference' => ['required', 'string', 'max:255'],
             'abbreviation' => ['nullable', 'string', 'max:32'],
             'color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'alternate_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'logos' => ['nullable', 'array'],
             'logos.*' => ['string', 'url', 'max:2048'],
             'social_media' => ['nullable', 'array'],

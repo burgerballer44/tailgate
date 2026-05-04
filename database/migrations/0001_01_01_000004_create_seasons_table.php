@@ -21,6 +21,9 @@ return new class extends Migration
             $table->enum('season_type', SeasonType::values());
             $table->string('season_start');
             $table->string('season_end');
+            $table->boolean('active')->default(false);
+            $table->date('active_date')->nullable();
+            $table->date('inactive_date')->nullable();
             $table->timestamps();
         });
     }

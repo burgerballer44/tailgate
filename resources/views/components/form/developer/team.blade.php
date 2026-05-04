@@ -98,20 +98,6 @@
                     />
                     <x-inputs.input-error class="mt-2" :messages="$errors->get('color')" />
                 </div>
-
-                <div>
-                    <x-inputs.input-label for="alternate_color" class="font-semibold" :value="__('Alternate color (hex)')" />
-                    <x-inputs.text-input
-                        id="alternate_color"
-                        name="alternate_color"
-                        type="text"
-                        class="mt-1 block w-full"
-                        :value="old('alternate_color', $team?->alternate_color)"
-                        placeholder="#ffffff"
-                        autocomplete="off"
-                    />
-                    <x-inputs.input-error class="mt-2" :messages="$errors->get('alternate_color')" />
-                </div>
             </div>
 
             <div class="mt-4">

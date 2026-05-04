@@ -36,7 +36,6 @@ function cbbdSampleTeam(array $overrides = []): array
         'abbreviation' => 'DUKE',
         'conference' => 'ACC',
         'color' => '#001a57',
-        'alternateColor' => '#ffffff',
         'logos' => [
             'https://example.test/duke-primary.png',
             'https://example.test/duke-secondary.png',
@@ -115,7 +114,6 @@ describe('fetch', function () {
                 'abbreviation' => '  NOVA  ',
                 'conference' => '  Big East  ',
                 'color' => '#null',
-                'alternateColor' => '#null',
                 'twitter' => null,
             ]),
         ]));
@@ -142,7 +140,6 @@ describe('fetch', function () {
             ->and($teams[1]->abbreviation)->toBe('NOVA')
             ->and($teams[1]->conference)->toBe('Big East')
             ->and($teams[1]->color)->toBeNull()
-            ->and($teams[1]->alternateColor)->toBeNull()
             ->and($teams[1]->socialMedia)->toBeNull();
     });
 
@@ -186,7 +183,6 @@ describe('fetch', function () {
                 'abbreviation' => '',
                 'mascot' => ' ',
                 'color' => '#null',
-                'alternateColor' => '#null',
                 'logos' => ['not-a-url', 'https://example.test/valid-logo.png', 123],
                 'twitter' => ' ',
             ]),
@@ -197,7 +193,6 @@ describe('fetch', function () {
         expect($teams[0]->designation)->toBeNull()
             ->and($teams[0]->abbreviation)->toBeNull()
             ->and($teams[0]->color)->toBeNull()
-            ->and($teams[0]->alternateColor)->toBeNull()
             ->and($teams[0]->logos)->toBe(['https://example.test/valid-logo.png'])
             ->and($teams[0]->socialMedia)->toBeNull();
     });

@@ -20,7 +20,6 @@ describe('create a team', function () {
             'conference' => 'SEC',
             'abbreviation' => 'TT',
             'color' => '#8c2232',
-            'alternate_color' => '#ffffff',
             'logos' => ['https://example.test/team-logo.png'],
             'social_media' => [['label' => 'X', 'url' => 'https://x.com/test-team']],
             'type' => TeamType::COLLEGE->value,
@@ -42,7 +41,6 @@ describe('create a team', function () {
         expect($team->conference)->toBe($data['conference']);
         expect($team->abbreviation)->toBe($data['abbreviation']);
         expect($team->color)->toBe($data['color']);
-        expect($team->alternate_color)->toBe($data['alternate_color']);
         expect($team->logos)->toBe($data['logos']);
         expect($team->social_media)->toBe($data['social_media']);
         expect($team->type)->toBe($data['type']);
@@ -60,7 +58,6 @@ describe('update a team', function () {
             'conference' => 'Big Ten',
             'abbreviation' => 'OD',
             'color' => '#000000',
-            'alternate_color' => '#111111',
             'logos' => ['https://example.test/old-logo.png'],
             'social_media' => [['label' => 'X', 'url' => 'https://x.com/old-team']],
             'type' => TeamType::COLLEGE,
@@ -73,7 +70,6 @@ describe('update a team', function () {
             'conference' => 'ACC',
             'abbreviation' => 'ND',
             'color' => '#123456',
-            'alternate_color' => '#abcdef',
             'logos' => ['https://example.test/new-logo.png'],
             'social_media' => [['label' => 'Instagram', 'url' => 'https://instagram.com/new-team']],
             'type' => TeamType::PROFESSIONAL->value,
@@ -102,7 +98,6 @@ describe('update a team', function () {
         expect($team->conference)->toBe($data->conference);
         expect($team->abbreviation)->toBe($data->abbreviation);
         expect($team->color)->toBe($data->color);
-        expect($team->alternate_color)->toBe($data->alternateColor);
         expect($team->logos)->toBe($data->logos);
         expect($team->social_media)->toBe($data->socialMedia);
         expect($team->type)->toBe($data->type->value);

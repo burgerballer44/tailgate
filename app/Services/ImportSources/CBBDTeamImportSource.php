@@ -85,7 +85,6 @@ class CBBDTeamImportSource implements TeamImportSourceInterface
                         designation: $this->nullableString($this->valueForAny($rawTeam, ['mascot', 'nickname'], null)),
                         abbreviation: $this->nullableString($this->valueForAny($rawTeam, ['abbreviation', 'abbrev'], null)),
                         color: $this->nullableHexColor($this->valueForAny($rawTeam, ['color', 'primaryColor', 'primary_color'], null)),
-                        alternateColor: $this->nullableHexColor($this->valueForAny($rawTeam, ['alternateColor', 'alternate_color', 'secondaryColor', 'secondary_color'], null)),
                         logos: $this->nullableUrlArray($this->valueForAny($rawTeam, ['logos', 'logo'], null)),
                         socialMedia: $socialMedia === [] ? null : $socialMedia,
                     );

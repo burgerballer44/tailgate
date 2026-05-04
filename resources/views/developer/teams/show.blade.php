@@ -36,10 +36,6 @@
                 'value' => $team->color,
             ],
             [
-                'label' => 'Alternate Color',
-                'value' => $team->alternate_color,
-            ],
-            [
                 'label' => 'Logos',
                 'value' => is_array($team->logos) ? implode(', ', $team->logos) : null,
             ],

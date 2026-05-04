@@ -25,7 +25,6 @@ class TeamFactory extends Factory
             'conference' => fake()->randomElement(['ACC', 'Big Ten', 'SEC', 'Big 12', 'Mountain West', 'Independent']),
             'abbreviation' => fake()->optional()->lexify('???'),
             'color' => fake()->optional()->hexColor(),
-            'alternate_color' => fake()->optional()->hexColor(),
             'logos' => fake()->optional()->randomElement([
                 ['https://example.test/logo-primary.png'],
                 ['https://example.test/logo-primary.png', 'https://example.test/logo-secondary.png'],

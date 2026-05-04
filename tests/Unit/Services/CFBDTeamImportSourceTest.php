@@ -39,7 +39,6 @@ function sampleTeam(array $overrides = []): array
         'division' => null,
         'classification' => 'fcs',
         'color' => '#592d82',
-        'alternateColor' => '#b1b3b3',
         'logos' => [
             'https://example.test/acu-primary.png',
             'https://example.test/acu-secondary.png',
@@ -126,7 +125,6 @@ describe('fetch', function () {
                 'conference' => ' Rocky Mountain ',
                 'classification' => 'ii',
                 'color' => '#null',
-                'alternateColor' => '#null',
                 'logos' => [
                     'https://example.test/adams-primary.png',
                     'https://example.test/adams-secondary.png',
@@ -147,7 +145,6 @@ describe('fetch', function () {
             ->and($teams[0]->abbreviation)->toBe('ACU')
             ->and($teams[0]->conference)->toBe('UAC')
             ->and($teams[0]->color)->toBe('#592d82')
-            ->and($teams[0]->alternateColor)->toBe('#b1b3b3')
             ->and($teams[0]->logos)->toBe([
                 'https://example.test/acu-primary.png',
                 'https://example.test/acu-secondary.png',
@@ -161,20 +158,18 @@ describe('fetch', function () {
             ->and($teams[1]->abbreviation)->toBe('ADST')
             ->and($teams[1]->conference)->toBe('Rocky Mountain')
             ->and($teams[1]->color)->toBeNull()
-            ->and($teams[1]->alternateColor)->toBeNull()
             ->and($teams[1]->socialMedia)->toBeNull();
     });
 
     test('lowercases hex color values', function () {
         [$source, $client] = setupSource();
         $client->allows('fetchTeams')->andReturn(teamRowStream([
-            sampleTeam(['color' => '#592D82', 'alternateColor' => '#B1B3B3']),
+            sampleTeam(['color' => '#592D82']),
         ]));
 
         ['teams' => $teams] = collectStream($source->fetch(teamImportData()));
 
-        expect($teams[0]->color)->toBe('#592d82')
-            ->and($teams[0]->alternateColor)->toBe('#b1b3b3');
+        expect($teams[0]->color)->toBe('#592d82');
     });
 
     test('maps missing school values to Unknown organization fallback', function () {
@@ -203,7 +198,6 @@ describe('fetch', function () {
                 'abbreviation' => '',
                 'mascot' => ' ',
                 'color' => '#null',
-                'alternateColor' => '#null',
                 'logos' => ['not-a-url', 'https://example.test/valid-logo.png', 123],
                 'twitter' => ' ',
             ]),
@@ -214,7 +208,6 @@ describe('fetch', function () {
         expect($teams[0]->designation)->toBeNull()
             ->and($teams[0]->abbreviation)->toBeNull()
             ->and($teams[0]->color)->toBeNull()
-            ->and($teams[0]->alternateColor)->toBeNull()
             ->and($teams[0]->logos)->toBe(['https://example.test/valid-logo.png'])
             ->and($teams[0]->socialMedia)->toBeNull();
     });

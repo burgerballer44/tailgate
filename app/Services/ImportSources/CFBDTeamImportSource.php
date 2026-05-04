@@ -90,7 +90,6 @@ class CFBDTeamImportSource implements TeamImportSourceInterface
                         designation: $this->nullableString($this->valueForAny($rawTeam, ['abbreviation'], null)), // CFBD abbreviation maps to our team designation
                         abbreviation: $this->nullableString($this->valueForAny($rawTeam, ['abbreviation'], null)),
                         color: $this->nullableHexColor($this->valueForAny($rawTeam, ['color'], null)),
-                        alternateColor: $this->nullableHexColor($this->valueForAny($rawTeam, ['alternateColor'], null)),
                         logos: $this->nullableUrlArray($this->valueForAny($rawTeam, ['logos'], null)),
                         socialMedia: empty($socialMedia) ? null : $socialMedia,
                     );

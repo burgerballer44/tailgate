@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\GroupRole;
+use App\Models\MemberStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('user_id');
             $table->enum('role', GroupRole::values())->default(GroupRole::GROUP_MEMBER->value);
+            $table->enum('status', MemberStatus::values())->default(MemberStatus::APPROVED->value);
             $table->timestamps();
 
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');

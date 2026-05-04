@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Team;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,6 +18,11 @@ return new class extends Migration
             $table->string('organization');
             $table->string('designation');
             $table->string('type');
+            $table->string('conference')->default(Team::UNKNOWN_CONFERENCE);
+            $table->string('abbreviation')->nullable();
+            $table->string('color')->nullable();
+            $table->json('logos')->nullable();
+            $table->json('social_media')->nullable();
             $table->timestamps();
         });
     }

@@ -15,7 +15,6 @@ readonly class ImportedTeamData
      * @param string|null $designation The team's designation or nickname (e.g. "Alabama Crimson Tide").
      * @param string|null $abbreviation The team's abbreviation or short name (e.g. "ALA").
      * @param string|null $color The team's primary color in hex format (e.g. "#9E1B32").
-     * @param string|null $alternateColor The team's alternate color in hex format (e.g. "#000000").
      * @param array|null $logos An array of logo URLs for the team, keyed by size or type (e.g. ['small' => '...', 'large' => '...']).
      * @param array|null $socialMedia An array of social media links for the team, keyed by platform (e.g. [['label' => 'twitter', 'url' => '...'], ['label' => 'facebook', 'url' => '...']]).
      */
@@ -27,7 +26,6 @@ readonly class ImportedTeamData
         public ?string $designation,
         public ?string $abbreviation,
         public ?string $color,
-        public ?string $alternateColor,
         public ?array $logos,
         public ?array $socialMedia
     ) {}

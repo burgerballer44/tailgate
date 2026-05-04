@@ -36,7 +36,6 @@ class Team extends Model
         'conference',
         'abbreviation',
         'color',
-        'alternate_color',
         'logos',
         'social_media',
         'type',
