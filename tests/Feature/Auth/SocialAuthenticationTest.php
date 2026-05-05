@@ -58,6 +58,10 @@ test('callback logs in an existing linked social account user', function () {
     get('/auth/callback')->assertRedirect(route('dashboard'));
 
     assertAuthenticated();
+
+    // ensure the existing user is updated with the latest login time
+    expect($user->fresh()->last_login_at)->not->toBeNull();
+
     assertDatabaseHas('social_accounts', [
         'provider' => 'google',
         'provider_user_id' => 'google-123',

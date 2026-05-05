@@ -35,13 +35,22 @@
     {{-- table --}}
     <x-tables.full-width
         heading="Users"
-        description="A list of all the users including their name, title, email and role."
+        description="A list of all the users with basic information."
         :tableActions="[
             ['route' => 'developer.users.create', 'text' => 'Add User']
         ]"
-        :headers="['Name', 'Email', 'Status', 'Role', 'Created', 'Actions']"
+        :headers="['Name', 'Status', 'Role', 'Verified', 'Last Login', 'Created', 'Actions']"
         :rows="$users"
-        :columns="['name', 'email', 'status', 'role', 'created_at']"
+            :columns="[
+                'name',
+                'status',
+                'role',
+                fn ($row) => $row->hasVerifiedEmail()
+                    ? \App\Models\HtmlEntity::CHECK_MARK->character()
+                    : \App\Models\HtmlEntity::RED_X->character(),
+                fn ($row) => $row->last_login_at?->diffForHumans(),
+                fn ($row) => $row->created_at->format('Y-m-d H:i:a'),
+            ]"
         :rowActions="[
             [
                 'label' => 'Show',

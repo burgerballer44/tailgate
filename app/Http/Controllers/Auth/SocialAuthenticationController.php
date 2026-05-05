@@ -31,6 +31,10 @@ class SocialAuthenticationController extends Controller
             $providerUser = Socialite::driver('google')->user();
             $user = $socialAuthenticationService->resolveUserFromProvider(provider: 'google', providerUser: $providerUser);
 
+            $user->forceFill([
+                'last_login_at' => now(),
+            ])->save();
+
             Auth::guard('web')->login($user);
             $request->session()->regenerate();
 
