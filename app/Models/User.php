@@ -23,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'email_verified_at',
         'status',
         'role',
     ];
@@ -78,6 +79,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function members()
     {
         return $this->hasMany(Member::class);
+    }
+
+    /**
+     * Get social accounts linked to this user.
+     */
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Check whether this user can sign in with a local password.
+     */
+    public function hasPassword(): bool
+    {
+        return ! empty($this->password);
     }
 
     /**

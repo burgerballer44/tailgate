@@ -12,6 +12,7 @@
         "php": "^8.2",
         "halaxa/json-machine": "^1.2",
         "laravel/framework": "^13.0",
+        "laravel/socialite": "^5.27",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {

@@ -35,7 +35,13 @@ return [
         ],
     ],
 
-    // Configuration for external services related to data import functionality
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
+
+    // configuration for external services related to data import functionality
     'import' => [
         'cfbd' => [
             'base_url' => env('CFBD_BASE_URL', 'https://api.collegefootballdata.com'),
