@@ -18,6 +18,7 @@ test('users can authenticate using the login screen', function () {
     ])->assertRedirect(route('dashboard'));
 
     $this->assertAuthenticated();
+    expect($user->fresh()->last_login_at)->not->toBeNull();
 });
 
 test('users can not authenticate with invalid password', function () {
@@ -29,4 +30,5 @@ test('users can not authenticate with invalid password', function () {
     ]);
 
     $this->assertGuest();
+    expect($user->fresh()->last_login_at)->toBeNull();
 });

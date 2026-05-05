@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('last_login_at')->nullable();
             $table->enum('status', UserStatus::values())->default(UserStatus::ACTIVE->value);
             $table->enum('role', UserRole::values())->default(UserRole::REGULAR->value);
             $table->string('password')->nullable();
