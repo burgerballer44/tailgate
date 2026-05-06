@@ -41,16 +41,14 @@
         ]"
         :headers="['Name', 'Status', 'Role', 'Verified', 'Last Login', 'Created', 'Actions']"
         :rows="$users"
-            :columns="[
-                'name',
-                'status',
-                'role',
-                fn ($row) => $row->hasVerifiedEmail()
-                    ? \App\Models\HtmlEntity::CHECK_MARK->character()
-                    : \App\Models\HtmlEntity::RED_X->character(),
-                fn ($row) => $row->last_login_at?->diffForHumans(),
-                fn ($row) => $row->created_at->format('Y-M-d H:i:a'),
-            ]"
+        :columns="[
+            'name',
+            'status',
+            'role',
+            'verified_html_entity',
+            fn ($row) => $row->last_login_at?->diffForHumans(),
+            fn ($row) => $row->created_at->format('Y-M-d H:i:a'),
+        ]"
         :rowActions="[
             [
                 'label' => 'Show',

@@ -1,6 +1,6 @@
 <x-layouts.app
     mainHeading="Season: {!! $season->name !!}"
-    mainDescription="Details for season including name, sport, season type, and dates."
+    mainDescription="Details for season including name, sport, season type, and status."
     :mainActions="[
         ['text' => 'Back to Seasons', 'route' => 'developer.seasons.index'],
         ['text' => 'Edit Season', 'route' => 'developer.seasons.edit', 'params' => ['season' => $season]],
@@ -19,7 +19,7 @@
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <x-model-viewer
             message="Season identity"
-            details="Core classification and date range fields."
+            details="Core classification details for this season."
             tone="info"
             :fields="[
                 [
@@ -35,14 +35,6 @@
                     'value' => $season->season_type,
                 ],
                 [
-                    'label' => 'Season Start',
-                    'value' => $season->season_start,
-                ],
-                [
-                    'label' => 'Season End',
-                    'value' => $season->season_end,
-                ],
-                [
                     'label' => 'ULID',
                     'value' => $season->ulid,
                 ],
@@ -55,20 +47,12 @@
 
         <x-model-viewer
             message="Activation state"
-            details="Current active state and activation windows."
+            details="Current active state for follow and feed behavior."
             tone="success"
             :fields="[
                 [
                     'label' => 'Active',
                     'value' => $season->active,
-                ],
-                [
-                    'label' => 'Active Date',
-                    'value' => $season->active_date?->format('F j, Y') ?? 'N/A',
-                ],
-                [
-                    'label' => 'Inactive Date',
-                    'value' => $season->inactive_date?->format('F j, Y') ?? 'N/A',
                 ],
                 [
                     'label' => 'Games Count',

@@ -30,8 +30,6 @@ class Season extends Model
      */
     protected $casts = [
         'active' => 'boolean',
-        'active_date' => 'date',
-        'inactive_date' => 'date',
     ];
 
     /**
@@ -43,11 +41,7 @@ class Season extends Model
         'name',
         'sport',
         'season_type',
-        'season_start',
-        'season_end',
         'active',
-        'active_date',
-        'inactive_date',
     ];
 
     /**
@@ -90,6 +84,14 @@ class Season extends Model
         }
 
         return new HtmlString($sport->htmlEntity()->entity());
+    }
+
+    /**
+     * Get the season active state as an HTML entity for compact table display.
+     */
+    public function getActiveHtmlEntityAttribute(): HtmlString
+    {
+        return new HtmlString(HtmlEntity::forBoolean((bool) $this->active)->entity());
     }
 
     /**

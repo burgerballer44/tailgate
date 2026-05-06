@@ -21,6 +21,11 @@ enum HtmlEntity: string
     case BASKETBALL = '&#127936;';
     case FOOTBALL = '&#127944;';
 
+    public static function forBoolean(bool $value): self
+    {
+        return $value ? self::CHECK_MARK : self::RED_X;
+    }
+
     public function entity(): string
     {
         return $this->value;

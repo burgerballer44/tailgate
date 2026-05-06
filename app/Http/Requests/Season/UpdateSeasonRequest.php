@@ -5,7 +5,6 @@ namespace App\Http\Requests\Season;
 use App\DTO\ValidatedSeasonData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\SeasonValidationRulesTrait;
-use App\Models\Common\DateTimeOrString;
 
 class UpdateSeasonRequest extends FormRequest
 {
@@ -27,19 +26,6 @@ class UpdateSeasonRequest extends FormRequest
     public function rules(): array
     {
         return $this->updateRules();
-    }
-
-    /**
-     * Handle a passed validation attempt.
-     */
-    protected function passedValidation(): void
-    {
-        $this->replace([
-            'season_start' => DateTimeOrString::fromString($this->season_start),
-            'season_end' => DateTimeOrString::fromString($this->season_end),
-            'active_date' => $this->active_date ? DateTimeOrString::fromString($this->active_date) : null,
-            'inactive_date' => $this->inactive_date ? DateTimeOrString::fromString($this->inactive_date) : null,
-        ]);
     }
 
     /**

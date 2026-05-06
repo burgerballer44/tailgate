@@ -13,7 +13,7 @@ class SeasonIsActive implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $season = Season::where('id', $value)->first();
+        $season = Season::query()->find($value);
 
         if (! $season) {
             $fail('Season not found.');
@@ -23,22 +23,6 @@ class SeasonIsActive implements ValidationRule
 
         if (! $season->active) {
             $fail('Season is not active.');
-
-            return;
-        }
-
-        $today = (new \DateTime('today'))->format('Y-m-d');
-        $seasonActive = $season->active_date->format('Y-m-d');
-        $seasonInactive = $season->inactive_date->format('Y-m-d');
-
-        if ($season->active_date && $today < $seasonActive) {
-            $fail('Season has not started yet.');
-
-            return;
-        }
-
-        if ($season->inactive_date && $today > $seasonInactive) {
-            $fail('Season has ended.');
 
             return;
         }

@@ -23,11 +23,7 @@ class SeasonFactory extends Factory
             'name' => 'Some Season Name',
             'sport' => fake()->randomElement(Sport::cases())->value,
             'season_type' => fake()->randomElement(SeasonType::cases())->value,
-            'season_start' => '2019-09-01',
-            'season_end' => '2099-12-28',
             'active' => fake()->boolean(),
-            'active_date' => fake()->date('Y-m-d'),
-            'inactive_date' => fake()->date('Y-m-d'),
         ];
     }
 
@@ -38,8 +34,6 @@ class SeasonFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'active' => true,
-            'active_date' => now()->format('Y-m-d'),
-            'inactive_date' => '2099-12-28',
         ]);
     }
 }

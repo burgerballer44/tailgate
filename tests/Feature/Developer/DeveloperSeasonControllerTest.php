@@ -6,7 +6,6 @@ use App\Models\SeasonType;
 use App\Models\Sport;
 use App\Models\Team;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
@@ -156,11 +155,7 @@ describe('creating a season', function () {
             'name' => $seasonData['name'],
             'sport' => $seasonData['sport'],
             'season_type' => $seasonData['season_type'],
-            'season_start' => $seasonData['season_start'],
-            'season_end' => $seasonData['season_end'],
             'active' => $seasonData['active'],
-            'active_date' => Carbon::parse($seasonData['active_date'])->toDateTimeString(),
-            'inactive_date' => Carbon::parse($seasonData['inactive_date'])->toDateTimeString(),
         ]);
     });
 
@@ -241,11 +236,7 @@ describe('updating season', function () {
             'name' => 'Original Name',
             'sport' => Sport::BASKETBALL->value,
             'season_type' => SeasonType::REGULAR->value,
-            'season_start' => '2023-01-01',
-            'season_end' => '2023-12-31',
             'active' => true,
-            'active_date' => '2023-01-01',
-            'inactive_date' => '2023-12-31',
         ]);
 
         // update data
@@ -253,11 +244,7 @@ describe('updating season', function () {
             'name' => 'Updated Name',
             'sport' => Sport::FOOTBALL->value,
             'season_type' => SeasonType::POST->value,
-            'season_start' => '2024-01-01',
-            'season_end' => '2024-12-31',
             'active' => false,
-            'active_date' => '2024-01-01',
-            'inactive_date' => '2024-12-31',
         ];
 
         // patch the season data
@@ -271,11 +258,7 @@ describe('updating season', function () {
         expect($season->name)->toBe($updateData['name']);
         expect($season->sport)->toBe($updateData['sport']);
         expect($season->season_type)->toBe($updateData['season_type']);
-        expect($season->season_start)->toBe($updateData['season_start']);
-        expect($season->season_end)->toBe($updateData['season_end']);
         expect($season->active)->toBe($updateData['active']);
-        expect($season->active_date->toDateString())->toBe($updateData['active_date']);
-        expect($season->inactive_date->toDateString())->toBe($updateData['inactive_date']);
     });
 
     test('flashes success message on update', function () {
@@ -287,11 +270,7 @@ describe('updating season', function () {
             'name' => 'Updated Name',
             'sport' => Sport::FOOTBALL->value,
             'season_type' => SeasonType::POST->value,
-            'season_start' => '2024-01-01',
-            'season_end' => '2024-12-31',
             'active' => false,
-            'active_date' => '2024-01-01',
-            'inactive_date' => '2024-12-31',
         ];
 
         // patch the season data
@@ -359,7 +338,6 @@ describe('importing season games', function () {
         $season = Season::factory()->create([
             'sport' => Sport::FOOTBALL->value,
             'season_type' => SeasonType::REGULAR->value,
-            'season_start' => '2024-08-01',
         ]);
 
         $homeTeam = Team::factory()->withSports([$season->sport])->create([
@@ -412,7 +390,6 @@ describe('importing season games', function () {
         $season = Season::factory()->create([
             'sport' => Sport::FOOTBALL->value,
             'season_type' => SeasonType::REGULAR->value,
-            'season_start' => '2024-08-01',
         ]);
 
         $homeTeam = Team::factory()->withSports([$season->sport])->create([
@@ -471,7 +448,6 @@ describe('importing season games', function () {
         $season = Season::factory()->create([
             'sport' => Sport::FOOTBALL->value,
             'season_type' => SeasonType::REGULAR->value,
-            'season_start' => '2024-08-01',
         ]);
 
         Team::factory()->withSports([$season->sport])->create([
@@ -528,7 +504,6 @@ describe('importing season games', function () {
         $season = Season::factory()->create([
             'sport' => Sport::FOOTBALL->value,
             'season_type' => SeasonType::REGULAR->value,
-            'season_start' => '2024-08-01',
         ]);
 
         $response = $this->from(route('developer.seasons.import-games', $season))

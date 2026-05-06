@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class Group extends Model
@@ -162,5 +163,17 @@ class Group extends Model
     public function isFollowingTeam(): bool
     {
         return $this->follow()->exists();
+    }
+
+    /**
+     * Get the group's follow state as an HTML entity.
+     */
+    public function getFollowHtmlEntityAttribute(): HtmlString
+    {
+        $isFollowing = $this->relationLoaded('follow')
+            ? $this->follow !== null
+            : $this->isFollowingTeam();
+
+        return new HtmlString(HtmlEntity::forBoolean($isFollowing)->entity());
     }
 }

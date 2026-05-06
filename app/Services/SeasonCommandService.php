@@ -17,9 +17,9 @@ class SeasonCommandService implements SeasonCommandInterface
 
     /**
      * Create a new season with the provided data.
-     * This method handles season creation logic, including setting name, sport, season_type, and dates.
+    * This method handles season creation logic, including setting name, sport, season_type, and active state.
      *
-     * @param  ValidatedSeasonData  $data  Validated season data including name, sport, season_type, season_start, season_end.
+    * @param  ValidatedSeasonData  $data  Validated season data including name, sport, season_type, and active state.
      * @return Season The created season instance.
      */
     public function create(ValidatedSeasonData $data): Season
@@ -28,11 +28,7 @@ class SeasonCommandService implements SeasonCommandInterface
             'name' => $data->name,
             'sport' => $data->sport->value,
             'season_type' => $data->season_type->value,
-            'season_start' => (string) $data->season_start,
-            'season_end' => (string) $data->season_end,
             'active' => $data->active ?? false,
-            'active_date' => $data->active_date ? (string) $data->active_date : (string) $data->season_start,
-            'inactive_date' => $data->inactive_date ? (string) $data->inactive_date : (string) $data->season_end,
         ];
 
         return Season::create($seasonData);
@@ -40,7 +36,7 @@ class SeasonCommandService implements SeasonCommandInterface
 
     /**
      * Update an existing season's information in the system.
-     * This method is used to modify season details such as name, sport, season_type, or dates.
+    * This method is used to modify season details such as name, sport, season_type, or active state.
      *
      * @param  Season  $season  The season to update.
      * @param  ValidatedSeasonData  $data  Validated data to update the season with.
@@ -54,20 +50,10 @@ class SeasonCommandService implements SeasonCommandInterface
             'name' => $data->name,
             'sport' => $data->sport->value,
             'season_type' => $data->season_type->value,
-            'season_start' => (string) $data->season_start,
-            'season_end' => (string) $data->season_end,
         ];
 
         if ($data->active !== null) {
             $updateData['active'] = $data->active;
-        }
-
-        if ($data->active_date !== null) {
-            $updateData['active_date'] = (string) $data->active_date;
-        }
-
-        if ($data->inactive_date !== null) {
-            $updateData['inactive_date'] = (string) $data->inactive_date;
         }
 
         $season->fill($updateData);
@@ -84,7 +70,7 @@ class SeasonCommandService implements SeasonCommandInterface
      */
     public function delete(Season $season): void
     {
-        $season->delete();
+        Season::destroy($season->getKey());
     }
 
     /**

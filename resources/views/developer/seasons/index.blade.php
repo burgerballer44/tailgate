@@ -35,21 +35,17 @@
     {{-- table --}}
     <x-tables.full-width
         heading="Seasons"
-        description="A list of all the seasons including their name, sport, season type, and dates."
+        description="A list of all the seasons including their name, sport, season type, and status."
         :tableActions="[
             ['route' => 'developer.seasons.create', 'text' => 'Add Season']
         ]"
-        :headers="['Name', 'Sport', 'Season Type', 'Active', 'Start Date', 'End Date', 'Created', 'Actions']"
+        :headers="['Name', 'Sport', 'Season Type', 'Active', 'Created', 'Actions']"
         :rows="$seasons"
         :columns="[
             'name',
             'sport_html_entity',
             'season_type',
-            fn ($row) => $row->active
-                ? \App\Models\HtmlEntity::CHECK_MARK->character()
-                : \App\Models\HtmlEntity::RED_X->character(),
-            fn ($row) => rescue(fn () => \Illuminate\Support\Carbon::parse($row->season_start)->format('Y-m-d'), $row->season_start),
-            fn ($row) => rescue(fn () => \Illuminate\Support\Carbon::parse($row->season_end)->format('Y-m-d'), $row->season_end),
+            'active_html_entity',
             fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
         ]"
         :rowActions="[

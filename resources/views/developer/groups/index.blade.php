@@ -39,9 +39,7 @@
             'owner.name',
             'member_limit',
             'player_limit',
-            fn ($row) => $row->follow
-                ? \App\Models\HtmlEntity::CHECK_MARK->character()
-                : \App\Models\HtmlEntity::RED_X->character(),
+            'follow_html_entity',
             fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
         ]"
         :rowActions="[

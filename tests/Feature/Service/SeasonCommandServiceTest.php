@@ -9,7 +9,7 @@ use App\Models\Sport;
 use App\Models\Team;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\SeasonCommandService;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
     $this->gameCommandService = mock(GameCommandInterface::class);
@@ -23,11 +23,7 @@ describe('create a season', function () {
             'name' => 'Test Season',
             'sport' => Sport::BASKETBALL->value,
             'season_type' => SeasonType::REGULAR->value,
-            'season_start' => '2024-01-01',
-            'season_end' => '2024-12-31',
             'active' => true,
-            'active_date' => '2024-01-01',
-            'inactive_date' => '2024-12-31',
         ];
 
         // ensure season does not exist
@@ -43,8 +39,6 @@ describe('create a season', function () {
         expect($season->name)->toBe($data['name']);
         expect($season->sport)->toBe($data['sport']);
         expect($season->season_type)->toBe($data['season_type']);
-        expect($season->season_start)->toBe($data['season_start']);
-        expect($season->season_end)->toBe($data['season_end']);
         expect($season->active)->toBe($data['active']);
         expect(Str::isUlid((string) $season->ulid))->toBeTrue();
     });
@@ -57,8 +51,6 @@ describe('update a season', function () {
             'name' => 'Old Name',
             'sport' => Sport::FOOTBALL->value,
             'season_type' => SeasonType::REGULAR,
-            'season_start' => Carbon::parse('2023-01-01'),
-            'season_end' => Carbon::parse('2023-12-31'),
         ]);
 
         // data to update to
@@ -66,8 +58,6 @@ describe('update a season', function () {
             'name' => 'New Name',
             'sport' => Sport::BASKETBALL->value,
             'season_type' => SeasonType::POST->value,
-            'season_start' => '2024-01-01',
-            'season_end' => '2024-12-31',
         ]);
 
         // ensure updated season does not exist
@@ -90,8 +80,6 @@ describe('update a season', function () {
         expect($season->name)->toBe($data->name);
         expect($season->sport)->toBe($data->sport->value);
         expect($season->season_type)->toBe($data->season_type->value);
-        expect($season->season_start)->toBe((string) $data->season_start);
-        expect($season->season_end)->toBe((string) $data->season_end);
     });
 });
 
