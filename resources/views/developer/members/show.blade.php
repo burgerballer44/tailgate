@@ -52,7 +52,10 @@
             heading="Players"
             :headers="['Player Name', 'Created', 'Actions']"
             :rows="$players"
-            :columns="['player_name', 'created_at']"
+            :columns="[
+                'player_name',
+                fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
+            ]"
             :rowActions="[
                 [
                     'label' => 'Show',

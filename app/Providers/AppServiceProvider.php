@@ -109,7 +109,7 @@ class AppServiceProvider extends ServiceProvider
         // this directive will check if the provided expression is a callable (like a closure) and execute it with the current row,
         // or if it's not callable, it will simply output the value from the row using dot notation
         Blade::directive('renderTableData', function ($expression) {
-            return "<?php echo is_callable($expression) ? $expression(\$row) : e(data_get(\$row, $expression)); ?>";
+            return "<?php \$value = is_callable({$expression}) ? {$expression}(\$row) : data_get(\$row, {$expression}); echo \$value instanceof \\Illuminate\\Contracts\\Support\\Htmlable ? \$value->toHtml() : e(\$value); ?>";
         });
     }
 }

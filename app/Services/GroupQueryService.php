@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Group;
 use App\Services\Contracts\GroupQueryInterface;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class GroupQueryService implements GroupQueryInterface
 {
@@ -34,7 +34,7 @@ class GroupQueryService implements GroupQueryInterface
             $builder->where('name', 'like', '%'.$query['name'].'%');
         }
 
-        return $builder;
+        return $builder->with(['owner', 'follow']);
     }
 
     /**
@@ -46,7 +46,7 @@ class GroupQueryService implements GroupQueryInterface
      */
     public function findByInviteCode(string $inviteCode): ?Group
     {
-        return Group::where('invite_code', $inviteCode)->first();
+        return Group::query()->where('invite_code', $inviteCode)->first();
     }
 
     /**

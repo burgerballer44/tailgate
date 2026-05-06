@@ -38,9 +38,18 @@
         :tableActions="[
             ['route' => 'developer.teams.create', 'text' => 'Add Team']
         ]"
-        :headers="['Organization', 'Designation', 'Conference', 'Type', 'Sports', 'Created', 'Actions']"
+        :headers="['Organization', 'Designation', 'Conference', 'Type', 'Sports', 'Color', 'Logo', 'Created', 'Actions']"
         :rows="$teams"
-        :columns="['organization', 'designation', 'conference', 'type', 'sports_string', 'created_at']"
+        :columns="[
+            'organization',
+            'designation',
+            'conference',
+            'type',
+            'sports_html_entities',
+            'color_badge',
+            'logo_badge',
+            fn ($row) => $row->created_at->format('Y-m-d H:i:a'),
+        ]"
         :rowActions="[
             [
                 'label' => 'Show',

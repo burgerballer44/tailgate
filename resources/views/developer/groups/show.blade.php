@@ -15,34 +15,83 @@
         ]"
     />
 
-    <x-model-viewer
-        :fields="[
-            [
-                'label' => 'Name',
-                'value' => $group->name,
-            ],
-            [
-                'label' => 'Owner',
-                'value' => $group->owner?->name ?? 'N/A',
-            ],
-            [
-                'label' => 'Member Limit',
-                'value' => $group->member_limit,
-            ],
-            [
-                'label' => 'Player Limit',
-                'value' => $group->player_limit,
-            ],
-            [
-                'label' => 'Invite Code',
-                'value' => $group->invite_code,
-            ],
-            [
-                'label' => 'Created At',
-                'value' => $group->created_at?->format('F j, Y, g:i a') ?? 'N/A',
-            ],
-        ]"
-    />
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <x-model-viewer
+            message="Group information"
+            details="Primary identifiers and ownership details."
+            tone="info"
+            :fields="[
+                [
+                    'label' => 'Name',
+                    'value' => $group->name,
+                ],
+                [
+                    'label' => 'Owner',
+                    'value' => $group->owner?->name ?? 'N/A',
+                ],
+                [
+                    'label' => 'Owner ID',
+                    'value' => $group->owner_id,
+                ],
+                [
+                    'label' => 'Invite Code',
+                    'value' => $group->invite_code,
+                ],
+                [
+                    'label' => 'ULID',
+                    'value' => $group->ulid,
+                ],
+                [
+                    'label' => 'ID',
+                    'value' => $group->id,
+                ],
+            ]"
+        />
+
+        <x-model-viewer
+            message="Limits and related records"
+            details="Capacity and relationship summary for this group."
+            tone="success"
+            :fields="[
+                [
+                    'label' => 'Member Limit',
+                    'value' => $group->member_limit,
+                ],
+                [
+                    'label' => 'Player Limit',
+                    'value' => $group->player_limit,
+                ],
+                [
+                    'label' => 'Member Count',
+                    'value' => $group->members()->count(),
+                ],
+                [
+                    'label' => 'Player Count',
+                    'value' => $group->players()->count(),
+                ],
+                [
+                    'label' => 'Following Team',
+                    'value' => $group->follow()->exists(),
+                ],
+            ]"
+        />
+
+        <x-model-viewer
+            message="Metadata"
+            details="Lifecycle context for this group record."
+            tone="neutral"
+            :fields="[
+                [
+                    'label' => 'Created At',
+                    'value' => $group->created_at?->format('F j, Y, g:i a') ?? 'N/A',
+                ],
+                [
+                    'label' => 'Updated At',
+                    'value' => $group->updated_at?->format('F j, Y, g:i a') ?? 'N/A',
+                ],
+            ]"
+        />
+    </div>
 
     {{-- Follow Section --}}
     @if ($group->follow && $group->follow->team && $group->follow->season)
@@ -66,6 +115,9 @@
                 </form>
             </div>
             <x-model-viewer
+                message="Current follow"
+                details="Team and season this group is currently following."
+                tone="warning"
                 :fields="[
                     [
                         'label' => 'Team',
@@ -90,7 +142,12 @@
             heading="Members"
             :headers="['User', 'Role', 'Status', 'Joined', 'Actions']"
             :rows="$group->members"
-            :columns="['user.name', 'role', 'status', 'created_at']"
+            :columns="[
+                'user.name',
+                'role',
+                'status',
+                fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
+            ]"
             :rowActions="[
                 [
                     'label' => 'Show',
@@ -120,7 +177,11 @@
             heading="Players"
             :headers="['Player Name', 'Member', 'Created', 'Actions']"
             :rows="$group->players"
-            :columns="['player_name', 'member.user.name', 'created_at']"
+            :columns="[
+                'player_name',
+                'member.user.name',
+                fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
+            ]"
             :rowActions="[
                 [
                     'label' => 'Show',
@@ -155,7 +216,7 @@
                 'player.member.user.name',
                 'game.homeTeam.name . \' vs \' . game.awayTeam.name',
                 'home_team_prediction . \' - \' . away_team_prediction',
-                'created_at'
+                fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
             ]"
             :rowActions="[
                 [

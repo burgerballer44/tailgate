@@ -42,7 +42,12 @@
             heading="Scores"
             :headers="['Game', 'Home Prediction', 'Away Prediction', 'Submitted At', 'Actions']"
             :rows="$scores"
-            :columns="['game.homeTeam.name . \' vs \' . game.awayTeam.name', 'home_team_prediction', 'away_team_prediction', 'created_at']"
+            :columns="[
+                'game.homeTeam.name . \' vs \' . game.awayTeam.name',
+                'home_team_prediction',
+                'away_team_prediction',
+                fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
+            ]"
             :rowActions="[
                 [
                     'label' => 'Edit',

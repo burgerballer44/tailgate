@@ -15,50 +15,84 @@
             ['text' => $season->name, 'active' => true],
         ]"
     />
-    <x-model-viewer
-        :fields="[
-            [
-                'label' => 'Name',
-                'value' => $season->name,
-            ],
-            [
-                'label' => 'Sport',
-                'value' => $season->sport,
-            ],
-            [
-                'label' => 'Season Type',
-                'value' => $season->season_type,
-            ],
-            [
-                'label' => 'Season Start',
-                'value' => $season->season_start,
-            ],
-            [
-                'label' => 'Season End',
-                'value' => $season->season_end,
-            ],
-            [
-                'label' => 'Active',
-                'value' => $season->active ? 'Yes' : 'No',
-            ],
-            [
-                'label' => 'Active Date',
-                'value' => $season->active_date->format('F j, Y, g:i a'),
-            ],
-            [
-                'label' => 'Inactive Date',
-                'value' => $season->inactive_date->format('F j, Y, g:i a'),
-            ],
-            [
-                'label' => 'Created At',
-                'value' => $season->created_at->format('F j, Y, g:i a'),
-            ],
-            [
-                'label' => 'Updated At',
-                'value' => $season->updated_at->format('F j, Y, g:i a'),
-            ],
-        ]"
-    />
+
+    <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <x-model-viewer
+            message="Season identity"
+            details="Core classification and date range fields."
+            tone="info"
+            :fields="[
+                [
+                    'label' => 'Name',
+                    'value' => $season->name,
+                ],
+                [
+                    'label' => 'Sport',
+                    'value' => $season->sport,
+                ],
+                [
+                    'label' => 'Season Type',
+                    'value' => $season->season_type,
+                ],
+                [
+                    'label' => 'Season Start',
+                    'value' => $season->season_start,
+                ],
+                [
+                    'label' => 'Season End',
+                    'value' => $season->season_end,
+                ],
+                [
+                    'label' => 'ULID',
+                    'value' => $season->ulid,
+                ],
+                [
+                    'label' => 'ID',
+                    'value' => $season->id,
+                ],
+            ]"
+        />
+
+        <x-model-viewer
+            message="Activation state"
+            details="Current active state and activation windows."
+            tone="success"
+            :fields="[
+                [
+                    'label' => 'Active',
+                    'value' => $season->active,
+                ],
+                [
+                    'label' => 'Active Date',
+                    'value' => $season->active_date?->format('F j, Y') ?? 'N/A',
+                ],
+                [
+                    'label' => 'Inactive Date',
+                    'value' => $season->inactive_date?->format('F j, Y') ?? 'N/A',
+                ],
+                [
+                    'label' => 'Games Count',
+                    'value' => $season->games()->count(),
+                ],
+            ]"
+        />
+
+        <x-model-viewer
+            message="Metadata"
+            details="Record lifecycle context for this season."
+            tone="neutral"
+            :fields="[
+                [
+                    'label' => 'Created At',
+                    'value' => $season->created_at?->format('F j, Y, g:i a') ?? 'N/A',
+                ],
+                [
+                    'label' => 'Updated At',
+                    'value' => $season->updated_at?->format('F j, Y, g:i a') ?? 'N/A',
+                ],
+            ]"
+        />
+    </div>
 
     <div class="mt-8">
         <x-tables.full-width
@@ -71,7 +105,18 @@
             ]"
             :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Start Date Time', 'Start Time TBD', 'Actions']"
             :rows="$games"
-            :columns="['homeTeam.organization', 'awayTeam.organization', 'home_team_score', 'away_team_score', 'start_date_time', 'start_time_tbd']"
+            :columns="[
+                'homeTeam.organization',
+                'awayTeam.organization',
+                'home_team_score',
+                'away_team_score',
+                fn ($row) => $row->start_date_time
+                    ? rescue(fn () => \Illuminate\Support\Carbon::parse($row->start_date_time)->format('Y-m-d H:i:a'), $row->start_date_time)
+                    : null,
+                fn ($row) => $row->start_time_tbd
+                    ? \App\Models\HtmlEntity::CHECK_MARK->character()
+                    : \App\Models\HtmlEntity::RED_X->character(),
+            ]"
             :rowActions="[
                 [
                     'label' => 'Show',

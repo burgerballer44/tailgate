@@ -18,6 +18,8 @@ enum HtmlEntity: string
     case UNLOCK = '&#x1F513;';
     case CLOCK = '&#x23F0;';
     case TROPHY = '&#x1F3C6;';
+    case BASKETBALL = '&#127936;';
+    case FOOTBALL = '&#127944;';
 
     public function entity(): string
     {

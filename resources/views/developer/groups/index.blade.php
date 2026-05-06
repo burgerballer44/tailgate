@@ -31,9 +31,19 @@
         :tableActions="[
             ['route' => 'developer.groups.create', 'text' => 'Add Group']
         ]"
-        :headers="['Name', 'Invite Code', 'Owner', 'Member Limit', 'Player Limit', 'Created', 'Actions']"
+        :headers="['Name', 'Invite Code', 'Owner', 'Member Limit', 'Player Limit', 'Following', 'Created', 'Actions']"
         :rows="$groups"
-        :columns="['name', 'invite_code', 'owner.name', 'member_limit', 'player_limit', 'created_at']"
+        :columns="[
+            'name',
+            'invite_code',
+            'owner.name',
+            'member_limit',
+            'player_limit',
+            fn ($row) => $row->follow
+                ? \App\Models\HtmlEntity::CHECK_MARK->character()
+                : \App\Models\HtmlEntity::RED_X->character(),
+            fn ($row) => $row->created_at?->format('Y-m-d H:i:a'),
+        ]"
         :rowActions="[
             [
                 'label' => 'Show',
