@@ -49,7 +49,7 @@
                     ? \App\Models\HtmlEntity::CHECK_MARK->character()
                     : \App\Models\HtmlEntity::RED_X->character(),
                 fn ($row) => $row->last_login_at?->diffForHumans(),
-                fn ($row) => $row->created_at->format('Y-m-d H:i:a'),
+                fn ($row) => $row->created_at->format('Y-M-d H:i:a'),
             ]"
         :rowActions="[
             [

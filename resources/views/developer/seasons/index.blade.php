@@ -43,7 +43,7 @@
         :rows="$seasons"
         :columns="[
             'name',
-            'sport',
+            'sport_html_entity',
             'season_type',
             fn ($row) => $row->active
                 ? \App\Models\HtmlEntity::CHECK_MARK->character()

@@ -48,7 +48,7 @@
             'sports_html_entities',
             'color_badge',
             'logo_badge',
-            fn ($row) => $row->created_at->format('Y-m-d H:i:a'),
+            fn ($row) => $row->created_at->format('Y-M-d H:i:a'),
         ]"
         :rowActions="[
             [

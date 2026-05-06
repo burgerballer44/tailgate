@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class Season extends Model
@@ -75,6 +76,20 @@ class Season extends Model
     public function games(): HasMany
     {
         return $this->hasMany(Game::class);
+    }
+
+    /**
+     * Get the season sport as an HTML entity for compact table display.
+     */
+    public function getSportHtmlEntityAttribute(): HtmlString|string
+    {
+        $sport = Sport::tryFrom((string) $this->sport);
+
+        if (! $sport) {
+            return (string) $this->sport;
+        }
+
+        return new HtmlString($sport->htmlEntity()->entity());
     }
 
     /**
