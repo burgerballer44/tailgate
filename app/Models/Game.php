@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class Game extends Model
@@ -105,5 +106,15 @@ class Game extends Model
     public function scores(): HasMany
     {
         return $this->hasMany(Score::class);
+    }
+
+    /**
+     * Get the start time TBD state as an HTML entity for human-friendly display.
+     */
+    public function getStartTimeTbdHtmlEntityAttribute(): HtmlString
+    {
+        return new HtmlString(
+            ($this->start_time_tbd ? HtmlEntity::QUESTION_MARK : HtmlEntity::CHECK_MARK)->entity()
+        );
     }
 }

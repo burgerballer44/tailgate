@@ -47,6 +47,15 @@ describe('creating a game', function () {
         $response->assertViewHas('teams');
     });
 
+    test('renders a hidden start_time_tbd input alongside the checkbox', function () {
+        $season = Season::factory()->create();
+
+        $response = $this->get(route('developer.seasons.games.create', $season));
+
+        $response->assertOk();
+        $response->assertSee('type="hidden" name="start_time_tbd" value="0"', false);
+    });
+
     test('works with valid data', function () {
         // create a season
         $season = Season::factory()->create();

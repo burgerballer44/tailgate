@@ -79,6 +79,7 @@
 
             <div class="mt-4">
                 <x-inputs.input-label for="start_time_tbd" class="font-semibold" :value="__('Start Time TBD')" />
+                <input type="hidden" name="start_time_tbd" value="0" />
                 <input
                     id="start_time_tbd"
                     name="start_time_tbd"

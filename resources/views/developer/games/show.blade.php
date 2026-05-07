@@ -40,7 +40,7 @@
             ],
             [
                 'label' => 'Start Time TBD',
-                'value' => $game->start_time_tbd ? 'Yes' : 'No',
+                'value' => ($game->start_time_tbd ? \App\Models\HtmlEntity::QUESTION_MARK : \App\Models\HtmlEntity::CHECK_MARK)->character(),
             ],
             [
                 'label' => 'Created At',

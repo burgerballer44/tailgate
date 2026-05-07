@@ -20,9 +20,7 @@ readonly class ValidatedGameData
     public static function fromArray(array $data): self
     {
         $normalizedStartDateTime = self::normalizeStartDateTime($data['start_date_time'] ?? null);
-        $explicitStartTimeTbd = array_key_exists('start_time_tbd', $data) && $data['start_time_tbd'] !== null
-            ? (bool) $data['start_time_tbd']
-            : false;
+        $explicitStartTimeTbd = (bool) ($data['start_time_tbd'] ?? false);
 
         $derivedStartTimeTbd = $normalizedStartDateTime === null
             || self::isDateOnly($data['start_date_time'] ?? null);

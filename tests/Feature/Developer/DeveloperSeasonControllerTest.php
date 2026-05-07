@@ -159,6 +159,32 @@ describe('creating a season', function () {
         ]);
     });
 
+    test('defaults active to false when omitted', function () {
+        $seasonData = Season::factory()->make([
+            'active' => true,
+        ])->toArray();
+
+        unset($seasonData['active']);
+
+        $response = $this->post(route('developer.seasons.store'), $seasonData);
+
+        $response->assertRedirect(route('developer.seasons.index'));
+
+        $this->assertDatabaseHas('seasons', [
+            'name' => $seasonData['name'],
+            'sport' => $seasonData['sport'],
+            'season_type' => $seasonData['season_type'],
+            'active' => false,
+        ]);
+    });
+
+    test('renders a hidden active input alongside the checkbox', function () {
+        $response = $this->get(route('developer.seasons.create'));
+
+        $response->assertOk();
+        $response->assertSee('type="hidden" name="active" value="0"', false);
+    });
+
     test('flashes success message on store', function () {
         // season data
         $seasonData = Season::factory()->make()->toArray();
@@ -201,6 +227,74 @@ describe('viewing a season', function () {
 
         // we should see the import games link on the page
         $response->assertSee(route('developer.seasons.import-games', $season), false);
+    });
+
+    test('season games can be filtered by start_time_tbd', function () {
+        $season = Season::factory()->create();
+
+        $homeTeam = Team::factory()->withSports([$season->sport])->create();
+        $awayTeam = Team::factory()->withSports([$season->sport])->create();
+        $otherHomeTeam = Team::factory()->withSports([$season->sport])->create();
+        $otherAwayTeam = Team::factory()->withSports([$season->sport])->create();
+
+        $tbdGame = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'start_time_tbd' => true,
+        ]);
+
+        $finalizedGame = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $otherHomeTeam->id,
+            'away_team_id' => $otherAwayTeam->id,
+            'start_time_tbd' => false,
+        ]);
+
+        $response = $this->get(route('developer.seasons.show', ['season' => $season, 'start_time_tbd' => '1']));
+
+        $response->assertOk();
+        $response->assertViewIs('developer.seasons.show');
+
+        $games = $response->viewData('games');
+
+        expect($games->count())->toBe(1);
+        expect($games->first()->id)->toBe($tbdGame->id);
+    });
+
+    test('season games can be filtered by home_team_id and away_team_id', function () {
+        $season = Season::factory()->create();
+
+        $homeTeam = Team::factory()->withSports([$season->sport])->create();
+        $awayTeam = Team::factory()->withSports([$season->sport])->create();
+        $otherHomeTeam = Team::factory()->withSports([$season->sport])->create();
+        $otherAwayTeam = Team::factory()->withSports([$season->sport])->create();
+
+        $matchingGame = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $otherHomeTeam->id,
+            'away_team_id' => $otherAwayTeam->id,
+        ]);
+
+        $response = $this->get(route('developer.seasons.show', [
+            'season' => $season,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertViewIs('developer.seasons.show');
+
+        $games = $response->viewData('games');
+
+        expect($games->count())->toBe(1);
+        expect($games->first()->id)->toBe($matchingGame->id);
     });
 });
 
@@ -259,6 +353,26 @@ describe('updating season', function () {
         expect($season->sport)->toBe($updateData['sport']);
         expect($season->season_type)->toBe($updateData['season_type']);
         expect($season->active)->toBe($updateData['active']);
+    });
+
+    test('defaults active to false when omitted during update', function () {
+        $season = Season::factory()->create([
+            'active' => true,
+        ]);
+
+        $updateData = [
+            'name' => 'Updated Name',
+            'sport' => Sport::FOOTBALL->value,
+            'season_type' => SeasonType::POST->value,
+        ];
+
+        $response = $this->patch(route('developer.seasons.update', $season), $updateData);
+
+        $response->assertRedirect(route('developer.seasons.index'));
+
+        $season->refresh();
+
+        expect($season->active)->toBeFalse();
     });
 
     test('flashes success message on update', function () {

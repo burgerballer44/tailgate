@@ -79,6 +79,35 @@
     </div>
 
     <div class="mt-8">
+        <x-form.query-filters>
+            <x-form.select
+                name="home_team_id"
+                label="Home team"
+                :value="old('home_team_id', request()->input('home_team_id'))"
+                placeholder="All Home Teams"
+                :options="$teams"
+            />
+
+            <x-form.select
+                name="away_team_id"
+                label="Away team"
+                :value="old('away_team_id', request()->input('away_team_id'))"
+                placeholder="All Away Teams"
+                :options="$teams"
+            />
+
+            <x-form.select
+                name="start_time_tbd"
+                label="Start time status"
+                :value="old('start_time_tbd', request()->input('start_time_tbd'))"
+                :options="[
+                    '' => 'All',
+                    'false' => 'Finalized',
+                    'true' => 'TBD',
+                ]"
+            />
+        </x-form.query-filters>
+
         <x-tables.full-width
             heading="Games"
             description="A list of all the games for this season including teams, scores, and date/time."
@@ -87,7 +116,7 @@
                 ['route' => 'developer.seasons.games.create', 'routeParams' => ['season' => $season], 'text' => 'Add Game'],
                 ['route' => 'developer.seasons.games.index', 'routeParams' => ['season' => $season], 'text' => 'View All Games']
             ]"
-            :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Start Date Time', 'Start Time TBD', 'Actions']"
+            :headers="['Home Team', 'Away Team', 'Home Score', 'Away Score', 'Start Date Time', 'Start Time Finalized', 'Actions']"
             :rows="$games"
             :columns="[
                 'homeTeam.organization',
@@ -95,11 +124,9 @@
                 'home_team_score',
                 'away_team_score',
                 fn ($row) => $row->start_date_time
-                    ? rescue(fn () => \Illuminate\Support\Carbon::parse($row->start_date_time)->format('Y-m-d H:i:a'), $row->start_date_time)
+                    ? rescue(fn () => \Illuminate\Support\Carbon::parse($row->start_date_time)->format('F j, Y, g:i a'), $row->start_date_time)
                     : null,
-                fn ($row) => $row->start_time_tbd
-                    ? \App\Models\HtmlEntity::CHECK_MARK->character()
-                    : \App\Models\HtmlEntity::RED_X->character(),
+                'start_time_tbd_html_entity',
             ]"
             :rowActions="[
                 [

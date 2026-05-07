@@ -20,6 +20,7 @@ enum HtmlEntity: string
     case TROPHY = '&#x1F3C6;';
     case BASKETBALL = '&#127936;';
     case FOOTBALL = '&#127944;';
+    case QUESTION_MARK = '&#10067;';
 
     public static function forBoolean(bool $value): self
     {

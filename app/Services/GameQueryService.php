@@ -25,6 +25,18 @@ class GameQueryService implements GameQueryInterface
             $query->where('season_id', $filters['season_id']);
         }
 
+        if (! empty($filters['home_team_id'])) {
+            $query->where('home_team_id', $filters['home_team_id']);
+        }
+
+        if (! empty($filters['away_team_id'])) {
+            $query->where('away_team_id', $filters['away_team_id']);
+        }
+
+        if (array_key_exists('start_time_tbd', $filters) && $filters['start_time_tbd'] !== '' && $filters['start_time_tbd'] !== null) {
+            $query->where('start_time_tbd', filter_var($filters['start_time_tbd'], FILTER_VALIDATE_BOOLEAN));
+        }
+
         return $query;
     }
 

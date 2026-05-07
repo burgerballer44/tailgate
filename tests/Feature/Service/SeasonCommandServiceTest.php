@@ -42,6 +42,16 @@ describe('create a season', function () {
         expect($season->active)->toBe($data['active']);
         expect(Str::isUlid((string) $season->ulid))->toBeTrue();
     });
+
+    test('defaults active to false when omitted', function () {
+        $season = $this->service->create(ValidatedSeasonData::fromArray([
+            'name' => 'Test Season',
+            'sport' => Sport::BASKETBALL->value,
+            'season_type' => SeasonType::REGULAR->value,
+        ]));
+
+        expect($season->active)->toBeFalse();
+    });
 });
 
 describe('update a season', function () {
@@ -80,6 +90,20 @@ describe('update a season', function () {
         expect($season->name)->toBe($data->name);
         expect($season->sport)->toBe($data->sport->value);
         expect($season->season_type)->toBe($data->season_type->value);
+    });
+
+    test('defaults active to false when omitted', function () {
+        $season = Season::factory()->create([
+            'active' => true,
+        ]);
+
+        $updatedSeason = $this->service->update($season, ValidatedSeasonData::fromArray([
+            'name' => 'Updated Name',
+            'sport' => Sport::BASKETBALL->value,
+            'season_type' => SeasonType::POST->value,
+        ]));
+
+        expect($updatedSeason->active)->toBeFalse();
     });
 });
 

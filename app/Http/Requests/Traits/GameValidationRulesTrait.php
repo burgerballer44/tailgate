@@ -18,7 +18,7 @@ trait GameValidationRulesTrait
             'home_team_score' => ['required', 'integer', 'min:0'],
             'away_team_score' => ['required', 'integer', 'min:0'],
             'start_date_time' => ['nullable', 'date'],
-            'start_time_tbd' => ['nullable', 'boolean'],
+            'start_time_tbd' => ['boolean'],
         ];
     }
 

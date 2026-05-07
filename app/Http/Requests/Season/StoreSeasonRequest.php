@@ -10,6 +10,13 @@ class StoreSeasonRequest extends FormRequest
 {
     use SeasonValidationRulesTrait;
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'active' => $this->boolean('active'),
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

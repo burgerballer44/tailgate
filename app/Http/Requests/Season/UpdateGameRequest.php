@@ -31,9 +31,7 @@ class UpdateGameRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'start_time_tbd' => $this->has('start_time_tbd')
-                ? $this->boolean('start_time_tbd')
-                : null,
+            'start_time_tbd' => $this->boolean('start_time_tbd'),
         ]);
     }
 

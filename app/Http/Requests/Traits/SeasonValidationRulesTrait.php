@@ -30,7 +30,7 @@ trait SeasonValidationRulesTrait
     protected function storeRules(): array
     {
         return array_merge($this->baseRules(), [
-            'active' => ['required', 'boolean'],
+            'active' => ['boolean'],
         ]);
     }
 
@@ -42,7 +42,7 @@ trait SeasonValidationRulesTrait
     protected function updateRules(): array
     {
         return array_merge($this->baseRules(), [
-            'active' => ['nullable', 'boolean'],
+            'active' => ['boolean'],
         ]);
     }
 }

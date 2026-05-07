@@ -47,6 +47,7 @@
             description="Mark whether this season should currently be treated as active."
         >
             <div class="mt-4 flex items-center gap-2">
+                <input type="hidden" name="active" value="0" />
                 <input
                     type="checkbox"
                     id="active"

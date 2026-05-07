@@ -44,17 +44,12 @@ class SeasonCommandService implements SeasonCommandInterface
      */
     public function update(Season $season, ValidatedSeasonData $data): Season
     {
-        // Season data properties are never expected to be null or set to null.
-
         $updateData = [
             'name' => $data->name,
             'sport' => $data->sport->value,
             'season_type' => $data->season_type->value,
+            'active' => $data->active ?? false,
         ];
-
-        if ($data->active !== null) {
-            $updateData['active'] = $data->active;
-        }
 
         $season->fill($updateData);
         $season->save();

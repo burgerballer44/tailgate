@@ -11,6 +11,7 @@ use App\Models\Season;
 use App\Models\SeasonType;
 use App\Models\Sport;
 use App\Services\Contracts\GameImportManagerInterface;
+use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\SeasonCommandInterface;
 use App\Services\Contracts\SeasonQueryInterface;
 use Illuminate\Contracts\View\View;
@@ -24,6 +25,7 @@ class DeveloperSeasonController extends Controller
         private SeasonCommandInterface $seasonCommandService,
         private SeasonQueryInterface $seasonQueryService,
         private GameImportManagerInterface $gameImportManager,
+        private GameQueryInterface $gameQueryService,
     ) {}
 
     public function index(Request $request): View
@@ -52,11 +54,19 @@ class DeveloperSeasonController extends Controller
         return redirect()->route('developer.seasons.index');
     }
 
-    public function show(Season $season): View
+    public function show(Request $request, Season $season): View
     {
-        $games = $season->games()->with('homeTeam', 'awayTeam')->paginate();
+        $games = $this->gameQueryService
+            ->query(array_merge($request->all(), ['season_id' => $season->id]))
+            ->with('homeTeam', 'awayTeam')
+            ->paginate()
+            ->withQueryString();
 
-        return view('developer.seasons.show', ['season' => $season, 'games' => $games]);
+        return view('developer.seasons.show', [
+            'season' => $season,
+            'games' => $games,
+            'teams' => $this->gameQueryService->getAvailableTeamsForSeason($season),
+        ]);
     }
 
     public function edit(Season $season): View
