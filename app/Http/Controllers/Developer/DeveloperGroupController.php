@@ -135,3 +135,5 @@ class DeveloperGroupController extends Controller
         return redirect()->route('developer.groups.show', $group);
     }
 }
+
+I'd like to refactor the DeveloperGroupController show template to use tailwind css tabs for better organization of the group details, members, players, and scores. Not everthing needs to be on the same page, and using tabs can help improve the user experience by categorizing the information. Each tab can display different aspects of the group, such as "Details", "Members", "Players", and "Scores". This way, users can easily navigate through the information without being overwhelmed by too much data on a single page.

@@ -28,7 +28,7 @@
                 ],
                 [
                     'label' => 'Sport',
-                    'value' => $season->sport,
+                    'value' => $season->sport_html_entity,
                 ],
                 [
                     'label' => 'Season Type',
@@ -98,7 +98,7 @@
 
             <x-form.select
                 name="start_time_tbd"
-                label="Start time status"
+                label="Start time finalized"
                 :value="old('start_time_tbd', request()->input('start_time_tbd'))"
                 :options="[
                     '' => 'All',
