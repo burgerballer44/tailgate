@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTO\ValidatedMemberData;
 use App\Http\Requests\Group\FollowTeamRequest;
+use App\Http\Requests\Group\JoinGroupRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UserUpdateGroupRequest;
 use App\Models\Follow;
@@ -18,7 +19,6 @@ use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 /**
  * GroupController handles user-facing group operations.
@@ -98,14 +98,11 @@ class GroupController extends Controller
      * if everything is valid. Currently uses direct joining, but can be extended
      * with owner confirmation logic later.
      *
-     * @param  Request  $request  The HTTP request containing the invite code
+     * @param  JoinGroupRequest  $request  The validated request containing the invite code
      * @return RedirectResponse Redirects back with success/error messages
      */
-    public function requestJoin(Request $request): RedirectResponse
+    public function requestJoin(JoinGroupRequest $request): RedirectResponse
     {
-        // validate that the invite code is provided and is a string
-        $request->validate(['invite_code' => 'required|string']);
-
         // find the group by invite code
         $group = $this->groupQueryService->findByInviteCode($request->invite_code);
 
