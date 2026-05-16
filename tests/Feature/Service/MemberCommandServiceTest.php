@@ -6,13 +6,10 @@ use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\User;
-use App\Services\Contracts\PlayerCommandInterface;
 use App\Services\MemberCommandService;
 
 beforeEach(function () {
-    $this->service = new MemberCommandService(
-        app(PlayerCommandInterface::class)
-    );
+    $this->service = new MemberCommandService;
 });
 
 describe('create member for group', function () {
@@ -40,8 +37,8 @@ describe('create member for group', function () {
         expect($member->user_id)->toBe($user->id);
         expect($member->group_id)->toBe($group->id);
 
-        // verify player was created
-        $this->assertDatabaseHas('players', ['member_id' => $member->id, 'player_name' => $user->name]);
+        // verify player was not auto-created
+        $this->assertDatabaseMissing('players', ['member_id' => $member->id]);
     });
 });
 

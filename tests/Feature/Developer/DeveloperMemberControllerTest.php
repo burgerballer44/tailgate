@@ -78,13 +78,12 @@ describe('creating a member', function () {
             'status' => $memberData['status'],
         ]);
 
-        // retrieve the created member to get the associated player
+        // retrieve the created member
         $member = Member::where('user_id', $memberData['user_id'])->where('group_id', $group->id)->first();
 
-        // the player should be created with the member
-        $this->assertDatabaseHas('players', [
+        // no player should be created when a member is added
+        $this->assertDatabaseMissing('players', [
             'member_id' => $member->id,
-            'player_name' => $user->name,
         ]);
     });
 

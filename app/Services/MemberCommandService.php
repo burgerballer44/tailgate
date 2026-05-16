@@ -3,21 +3,14 @@
 namespace App\Services;
 
 use App\DTO\ValidatedMemberData;
-use App\DTO\ValidatedPlayerData;
 use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
-use App\Models\User;
 use App\Services\Contracts\MemberCommandInterface;
-use App\Services\Contracts\PlayerCommandInterface;
 
 class MemberCommandService implements MemberCommandInterface
 {
-    public function __construct(
-        private PlayerCommandInterface $playerCommandService
-    ) {}
-
     /**
      * Create a new member for a specific group.
      * This method handles member creation logic within a group context.
@@ -34,20 +27,7 @@ class MemberCommandService implements MemberCommandInterface
             'status' => $data->status?->value ?? MemberStatus::APPROVED->value,
         ];
 
-        $member = $group->members()->create($memberData);
-
-        // retrieve the user to get their name for the player
-        $user = User::find($data->user_id);
-
-        // create a ValidatedPlayerData DTO for the player service
-        $playerData = ValidatedPlayerData::fromArray([
-            'player_name' => $user->name,
-        ]);
-
-        // create a new player associated with the member using the PlayerService
-        $this->playerCommandService->createForMember($member, $playerData);
-
-        return $member;
+        return $group->members()->create($memberData);
     }
 
     /**
