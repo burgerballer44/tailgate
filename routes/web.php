@@ -93,12 +93,20 @@ Route::middleware('auth')->group(function () {
             Route::middleware('group.admin')->group(function () {
                 Route::get('{group}/edit', [GroupController::class, 'edit'])->name('edit');
                 Route::patch('{group}', [GroupController::class, 'update'])->name('update');
-                Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])->name('approve-member');
-                Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])->name('reject-member');
-                Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])->name('remove-member');
+                Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])
+                    ->middleware('group.member.belongs')
+                    ->name('approve-member');
+                Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])
+                    ->middleware('group.member.belongs')
+                    ->name('reject-member');
+                Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])
+                    ->middleware(['group.member.belongs', 'group.member.approved'])
+                    ->name('remove-member');
                 Route::get('{group}/follow-team', [GroupController::class, 'createFollowTeam'])->name('follow-team.create');
                 Route::post('{group}/follow-team', [GroupController::class, 'followTeam'])->name('follow-team');
-                Route::delete('{group}/follow/{follow}', [GroupController::class, 'removeFollow'])->name('follow.destroy');
+                Route::delete('{group}/follow/{follow}', [GroupController::class, 'removeFollow'])
+                    ->middleware('group.follow.belongs')
+                    ->name('follow.destroy');
             });
         });
 

@@ -372,6 +372,21 @@ describe('approveMember', function () {
 
         $response->assertNotFound();
     });
+
+    test('returns 404 when member does not belong to group', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $otherGroup = Group::factory()->create();
+        $pendingMember = Member::factory()->create([
+            'group_id' => $otherGroup->id,
+            'status' => MemberStatus::PENDING->value,
+        ]);
+
+        $response = $this->post(route('groups.approve-member', [$group, $pendingMember]));
+
+        $response->assertNotFound();
+        $pendingMember->refresh();
+        expect($pendingMember->status)->toBe(MemberStatus::PENDING->value);
+    });
 });
 
 describe('rejectMember', function () {
@@ -482,6 +497,20 @@ describe('rejectMember', function () {
 
         $response->assertNotFound();
     });
+
+    test('returns 404 when rejecting member from a different group', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $otherGroup = Group::factory()->create();
+        $pendingMember = Member::factory()->create([
+            'group_id' => $otherGroup->id,
+            'status' => MemberStatus::PENDING->value,
+        ]);
+
+        $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
+
+        $response->assertNotFound();
+        $this->assertDatabaseHas('members', ['id' => $pendingMember->id]);
+    });
 });
 
 describe('removeMember', function () {
@@ -588,6 +617,20 @@ describe('removeMember', function () {
 
         $response->assertNotFound();
     });
+
+    test('returns 404 when removing member from a different group', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $otherGroup = Group::factory()->create();
+        $approvedMember = Member::factory()->create([
+            'group_id' => $otherGroup->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->delete(route('groups.remove-member', [$group, $approvedMember]));
+
+        $response->assertNotFound();
+        $this->assertDatabaseHas('members', ['id' => $approvedMember->id]);
+    });
 });
 
 describe('createFollowTeam', function () {
@@ -658,5 +701,19 @@ describe('removeFollow', function () {
         $response->assertRedirect(route('groups.show', $group));
         $this->assertDatabaseMissing('follows', ['id' => $follow->id]);
         expect(session('alert')['message'])->toBe('Follow removed successfully!');
+    });
+
+    test('returns 404 when follow does not belong to group', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $groupFollow = Follow::factory()->create(['group_id' => $group->id]);
+
+        $otherGroup = Group::factory()->create();
+        $otherFollow = Follow::factory()->create(['group_id' => $otherGroup->id]);
+
+        $response = $this->delete(route('groups.follow.destroy', [$group, $otherFollow]));
+
+        $response->assertNotFound();
+        $this->assertDatabaseHas('follows', ['id' => $groupFollow->id]);
+        $this->assertDatabaseHas('follows', ['id' => $otherFollow->id]);
     });
 });

@@ -2,26 +2,22 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\MemberStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class MemberMustBeInGroup
+class MemberMustBeApproved
 {
     /**
      * Handle an incoming request.
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $group = $request->route('group');
         $member = $request->route('member');
 
-        if (! $group || ! $member) {
-            abort(404, 'Member cannot be found or is not part of the group.');
-        }
-
-        if (! $group->members()->whereKey($member->id)->exists()) {
-            abort(404, 'Member cannot be found or is not part of the group.');
+        if (! $member || $member->status !== MemberStatus::APPROVED->value) {
+            abort(404, 'Invalid member or not approved.');
         }
 
         return $next($request);

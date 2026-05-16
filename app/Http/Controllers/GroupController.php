@@ -209,8 +209,8 @@ class GroupController extends Controller
      */
     public function approveMember(Group $group, Member $member): RedirectResponse
     {
-        // ensure member belongs to this group and is pending
-        if ($member->group_id !== $group->id || $member->status !== MemberStatus::PENDING->value) {
+        // ensure member is pending
+        if ($member->status !== MemberStatus::PENDING->value) {
             abort(404, 'Invalid member or not pending.');
         }
 
@@ -239,8 +239,8 @@ class GroupController extends Controller
      */
     public function rejectMember(Group $group, Member $member): RedirectResponse
     {
-        // ensure member belongs to this group and is pending
-        if ($member->group_id !== $group->id || $member->status !== MemberStatus::PENDING->value) {
+        // ensure member is pending
+        if ($member->status !== MemberStatus::PENDING->value) {
             abort(404, 'Invalid member or not pending.');
         }
 
@@ -263,11 +263,6 @@ class GroupController extends Controller
      */
     public function removeMember(Group $group, Member $member): RedirectResponse
     {
-        // ensure member belongs to this group and is approved
-        if ($member->group_id !== $group->id || $member->status !== MemberStatus::APPROVED->value) {
-            abort(404, 'Invalid member or not approved.');
-        }
-
         // cannot remove the owner
         if ($member->user_id === $group->owner_id) {
             abort(403, 'Cannot remove the group owner.');

@@ -16,10 +16,14 @@ class FollowBelongsToGroup
         $group = $request->route('group');
         $follow = $request->route('follow');
 
-        if ($group->follow && $group->follow->is($follow)) {
-            return $next($request);
+        if (! $group || ! $follow) {
+            abort(404, 'Follow cannot be found or is not part of the group.');
         }
 
-        return response()->json(['message' => 'Follow cannot be found or is not part of the group.'], 404);
+        if (! $group->follow()->whereKey($follow->id)->exists()) {
+            abort(404, 'Follow cannot be found or is not part of the group.');
+        }
+
+        return $next($request);
     }
 }
