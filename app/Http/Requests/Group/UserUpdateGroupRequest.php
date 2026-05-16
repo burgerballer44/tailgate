@@ -5,7 +5,6 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
-use Illuminate\Contracts\Validation\ValidationRule;
 
 class UserUpdateGroupRequest extends FormRequest
 {
@@ -26,7 +25,9 @@ class UserUpdateGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->baseRules();
+        return array_merge($this->baseRules(), [
+            'name' => 'sometimes|required|string|max:255',
+        ]);
     }
 
     /**

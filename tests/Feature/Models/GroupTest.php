@@ -5,6 +5,7 @@ use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 describe('isAdminOrOwner', function () {
     test('returns true for group owner', function () {
@@ -42,6 +43,27 @@ describe('isAdminOrOwner', function () {
         $nonMemberUser = User::factory()->create();
 
         expect($group->isAdminOrOwner($nonMemberUser))->toBeFalse();
+    });
+
+    test('uses loaded members collection when available', function () {
+        $group = Group::factory()->create();
+        $adminUser = User::factory()->create();
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $adminUser->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+        ]);
+
+        $group->load('members');
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        expect($group->isAdminOrOwner($adminUser))->toBeTrue();
+        expect(DB::getQueryLog())->toBe([]);
+
+        DB::disableQueryLog();
     });
 });
 

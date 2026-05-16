@@ -269,6 +269,20 @@ describe('update', function () {
         expect(session('alert')['message'])->toBe('Group updated successfully!');
     });
 
+    test('rejects empty group name on update', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id, 'name' => 'Original Name']);
+
+        $response = $this->patch(route('groups.update', $group), [
+            'name' => '',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('name');
+
+        $group->refresh();
+        expect($group->name)->toBe('Original Name');
+    });
+
     test('denies update to pending admins', function () {
         $group = Group::factory()->create();
         Member::factory()->create([

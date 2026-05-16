@@ -156,7 +156,9 @@ class Group extends Model
             return true;
         }
 
-        $member = $this->members()->where('user_id', $user->id)->first();
+        $member = $this->relationLoaded('members')
+            ? $this->members->first(fn (Member $member) => $member->user_id === $user->id)
+            : $this->members()->where('user_id', $user->id)->first();
 
         return $member && $member->isAdmin();
     }
