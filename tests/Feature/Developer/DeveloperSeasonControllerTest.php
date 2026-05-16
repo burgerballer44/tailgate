@@ -251,7 +251,11 @@ describe('viewing a season', function () {
             'start_time_tbd' => false,
         ]);
 
-        $response = $this->get(route('developer.seasons.show', ['season' => $season, 'start_time_tbd' => '1']));
+        $response = $this->get(route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+            'start_time_tbd' => 'true',
+        ]));
 
         $response->assertOk();
         $response->assertViewIs('developer.seasons.show');
@@ -284,6 +288,7 @@ describe('viewing a season', function () {
 
         $response = $this->get(route('developer.seasons.show', [
             'season' => $season,
+            'tab' => 'games',
             'home_team_id' => $homeTeam->id,
             'away_team_id' => $awayTeam->id,
         ]));

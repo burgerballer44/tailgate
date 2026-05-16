@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\DTO\ValidatedMemberData;
+use App\Services\Contracts\MemberCommandInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -80,12 +82,14 @@ class Group extends Model
             }
         });
 
-        static::created(function ($group) {
-            // add the owner of the group as a member
-            $member = $group->members()->save(new Member([
-                'user_id' => $group->owner_id,
-                'role' => GroupRole::GROUP_ADMIN->value,
-            ]));
+        static::created(function (Group $group): void {
+            app(MemberCommandInterface::class)->createForGroup(
+                $group,
+                ValidatedMemberData::fromArray([
+                    'user_id' => $group->owner_id,
+                    'role' => GroupRole::GROUP_ADMIN,
+                ])
+            );
         });
     }
 
