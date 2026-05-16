@@ -8,6 +8,7 @@ use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Group;
+use App\Models\Score;
 use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
@@ -16,7 +17,6 @@ use App\Services\Contracts\GroupQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class DeveloperGroupController extends Controller
 {
@@ -49,31 +49,58 @@ class DeveloperGroupController extends Controller
         return redirect()->route('developer.groups.index');
     }
 
-    public function show(Group $group): View
+    /**
+     * The show method handles displaying the details of a specific group,
+     * including its members, players, and scores.
+     * It also manages the active tab state based on the query parameter.
+     * Depending on the active tab, it loads the necessary
+     * relationships and data to be displayed in the view.
+     * 
+     * @param Request $request
+     * @param Group $group
+     * @return View
+     */
+    public function show(Request $request, Group $group): View
     {
-        $group->load([
-            'owner',
-            'members.user',
-            'players.member.user',
-            'players.scores.player.member.user',
-            'players.scores.game.homeTeam',
-            'players.scores.game.awayTeam',
-            'follow.team',
-            'follow.season',
-        ]);
+        // these are the valid tabs that can be displayed in the group details view
+        $validTabs = ['details', 'members', 'players', 'scores'];
 
-        $scores = $group->players->flatMap->scores->sortByDesc('created_at');
-        $perPage = 20;
-        $currentPage = request()->get('page', 1);
-        $items = $scores->forPage($currentPage, $perPage);
-        $paginatedScores = new LengthAwarePaginator($items, $scores->count(), $perPage, $currentPage, [
-            'path' => request()->url(),
-            'pageName' => 'page',
-        ]);
+        // determine the active tab based on the query parameter, defaulting to 'details' if not provided or invalid
+        $activeTab = in_array($request->query('tab'), $validTabs, true)
+            ? $request->query('tab')
+            : 'details';
+
+        if ($activeTab === 'details') {
+            $group->load(['owner', 'follow.team', 'follow.season'])
+                ->loadCount(['members', 'players']);
+        }
+
+        if ($activeTab === 'members') {
+            $group->load('members.user');
+        }
+
+        if ($activeTab === 'players') {
+            $group->load('players.member.user');
+        }
+
+        $scores = null;
+        if ($activeTab === 'scores') {
+            $scores = Score::query()
+                ->whereHas('player.member', fn ($query) => $query->where('group_id', $group->id))
+                ->with([
+                    'player.member.user',
+                    'game.homeTeam',
+                    'game.awayTeam',
+                ])
+                ->latest()
+                ->paginate(perPage: 20, pageName: 'scores_page')
+                ->appends(['tab' => 'scores']);
+        }
 
         return view('developer.groups.show', [
             'group' => $group,
-            'scores' => $paginatedScores,
+            'scores' => $scores,
+            'activeTab' => $activeTab,
         ]);
     }
 
@@ -135,5 +162,3 @@ class DeveloperGroupController extends Controller
         return redirect()->route('developer.groups.show', $group);
     }
 }
-
-I'd like to refactor the DeveloperGroupController show template to use tailwind css tabs for better organization of the group details, members, players, and scores. Not everthing needs to be on the same page, and using tabs can help improve the user experience by categorizing the information. Each tab can display different aspects of the group, such as "Details", "Members", "Players", and "Scores". This way, users can easily navigate through the information without being overwhelmed by too much data on a single page.

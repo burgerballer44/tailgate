@@ -56,16 +56,33 @@ class DeveloperSeasonController extends Controller
 
     public function show(Request $request, Season $season): View
     {
-        $games = $this->gameQueryService
-            ->query(array_merge($request->all(), ['season_id' => $season->id]))
-            ->with('homeTeam', 'awayTeam')
-            ->paginate()
-            ->withQueryString();
+        $validTabs = ['details', 'games'];
+        $activeTab = in_array($request->query('tab'), $validTabs, true)
+            ? $request->query('tab')
+            : 'details';
+
+        $games = null;
+        $teams = [];
+
+        if ($activeTab === 'details') {
+            $season->loadCount('games');
+        }
+
+        if ($activeTab === 'games') {
+            $games = $this->gameQueryService
+                ->query(array_merge($request->all(), ['season_id' => $season->id]))
+                ->with('homeTeam', 'awayTeam')
+                ->paginate()
+                ->withQueryString();
+
+            $teams = $this->gameQueryService->getAvailableTeamsForSeason($season);
+        }
 
         return view('developer.seasons.show', [
             'season' => $season,
             'games' => $games,
-            'teams' => $this->gameQueryService->getAvailableTeamsForSeason($season),
+            'teams' => $teams,
+            'activeTab' => $activeTab,
         ]);
     }
 
