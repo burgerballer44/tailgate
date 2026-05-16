@@ -127,6 +127,8 @@ class Member extends Model
      */
     public function canBeRemovedBy(User $user): bool
     {
-        return $this->isApproved() && ! $this->isOwner();
+        return $this->isApproved()
+            && ! $this->isOwner()
+            && $this->group->isAdminOrOwner($user);
     }
 }
