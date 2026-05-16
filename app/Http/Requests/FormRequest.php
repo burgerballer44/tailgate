@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use App\Traits\FlashAlertTrait;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Validation\ValidationException;
 
 abstract class FormRequest extends \Illuminate\Foundation\Http\FormRequest
 {
@@ -12,8 +12,6 @@ abstract class FormRequest extends \Illuminate\Foundation\Http\FormRequest
 
     /**
      * Handle a failed validation attempt.
-     *
-     * @return RedirectResponse|void
      */
     protected function failedValidation(Validator $validator)
     {
@@ -27,6 +25,11 @@ abstract class FormRequest extends \Illuminate\Foundation\Http\FormRequest
             implode(', ', $validator->errors()->all())
         );
 
-        return redirect($this->getRedirectUrl())->withInput();
+        $exception = new ValidationException($validator);
+
+        $exception->errorBag = $this->errorBag;
+        $exception->redirectTo($this->getRedirectUrl());
+
+        throw $exception;
     }
 }

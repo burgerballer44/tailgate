@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Team;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class TeamQueryService implements TeamQueryInterface
 {
@@ -18,5 +19,13 @@ class TeamQueryService implements TeamQueryInterface
     public function query(array $query): Builder
     {
         return Team::filter($query)->with('sports');
+    }
+
+    /**
+    * Get teams available for the follow-team form.
+    */
+    public function getAvailableTeamsForFollow(): Collection
+    {
+        return Team::query()->orderBy('designation')->get();
     }
 }

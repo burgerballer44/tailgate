@@ -658,6 +658,21 @@ describe('createFollowTeam', function () {
 
         $response->assertForbidden();
     });
+
+    test('only includes active seasons in follow team form', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $activeSeason = Season::factory()->create(['active' => true]);
+        $inactiveSeason = Season::factory()->create(['active' => false]);
+
+        $response = $this->get(route('groups.follow-team.create', $group));
+
+        $response->assertOk();
+
+        $seasons = $response->viewData('seasons');
+
+        expect($seasons->contains(fn ($season) => $season->id === $activeSeason->id))->toBeTrue();
+        expect($seasons->contains(fn ($season) => $season->id === $inactiveSeason->id))->toBeFalse();
+    });
 });
 
 describe('followTeam', function () {

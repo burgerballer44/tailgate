@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Season;
 use App\Services\Contracts\SeasonQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class SeasonQueryService implements SeasonQueryInterface
 {
@@ -30,5 +31,16 @@ class SeasonQueryService implements SeasonQueryInterface
     public function loadWithGames(Season $season): Season
     {
         return $season->load('games.homeTeam', 'games.awayTeam');
+    }
+
+    /**
+     * Get active seasons available for the follow-team form.
+     */
+    public function getAvailableSeasonsForFollow(): Collection
+    {
+        return Season::query()
+            ->where('active', true)
+            ->orderByDesc('name')
+            ->get();
     }
 }

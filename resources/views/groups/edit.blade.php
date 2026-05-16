@@ -73,9 +73,9 @@
                 @else
                     <div>
                         <p class="mb-4 text-sm text-gray-500">No team followed yet.</p>
-                        <x-buttons.primary-button>
-                            <a href="{{ route('groups.follow-team.create', $group) }}">Follow a Team</a>
-                        </x-buttons.primary-button>
+                        <a href="{{ route('groups.follow-team.create', $group) }}">
+                            <x-buttons.primary-button>Follow a Team</x-buttons.primary-button>
+                        </a>
                     </div>
                 @endif
             </div>

@@ -12,11 +12,11 @@ use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
-use App\Models\Season;
-use App\Models\Team;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
+use App\Services\Contracts\SeasonQueryInterface;
+use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -38,7 +38,9 @@ class GroupController extends Controller
     public function __construct(
         private GroupCommandInterface $groupCommandService,
         private GroupQueryInterface $groupQueryService,
-        private MemberCommandInterface $memberCommandService
+        private MemberCommandInterface $memberCommandService,
+        private TeamQueryInterface $teamQueryService,
+        private SeasonQueryInterface $seasonQueryService,
     ) {}
 
     /**
@@ -282,8 +284,8 @@ class GroupController extends Controller
      */
     public function createFollowTeam(Group $group): View
     {
-        $teams = Team::all();
-        $seasons = Season::all();
+        $teams = $this->teamQueryService->getAvailableTeamsForFollow();
+        $seasons = $this->seasonQueryService->getAvailableSeasonsForFollow();
 
         return view('groups.follow-team', compact('group', 'teams', 'seasons'));
     }
