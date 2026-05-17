@@ -165,15 +165,13 @@ describe('remove player', function () {
 
 describe('follow team', function () {
     test('creates follow relationship', function () {
-        // create group, team, season
+        // create group and team
         $group = Group::factory()->create();
         $team = Team::factory()->create();
-        $season = Season::factory()->create();
 
         // follow data
         $data = [
             'team_id' => $team->id,
-            'season_id' => $season->id,
         ];
 
         // follow team
@@ -183,7 +181,6 @@ describe('follow team', function () {
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'season_id' => $season->id,
         ]);
         expect($follow)->toBeInstanceOf(Follow::class);
     });

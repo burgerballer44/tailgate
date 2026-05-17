@@ -145,6 +145,28 @@ class Team extends Model
     }
 
     /**
+     * Get a friendly display name for the team.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        $organization = trim((string) $this->organization);
+        $designation = trim((string) $this->designation);
+        $conference = trim((string) $this->conference);
+        $abbreviation = trim((string) $this->abbreviation);
+
+        $nameParts = array_filter([$organization, $designation]);
+        $name = $nameParts !== [] ? implode(' ', $nameParts) : 'Unknown Team';
+
+        $metaParts = array_filter([$conference, $abbreviation]);
+
+        if ($metaParts === []) {
+            return $name;
+        }
+
+        return sprintf('%s (%s)', $name, implode(' | ', $metaParts));
+    }
+
+    /**
      * Scope to filter teams based on the provided filters.
      */
     #[Scope]

@@ -160,7 +160,7 @@
             />
         </div>
 
-        @if ($group->follow && $group->follow->team && $group->follow->season)
+        @if ($group->follow && $group->follow->team)
             <div class="mt-8">
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-lg font-semibold">Following</h2>
@@ -182,16 +182,12 @@
                 </div>
                 <x-model-viewer
                     message="Current follow"
-                    details="Team and season this group is currently following."
+                    details="Team this group is currently following."
                     tone="warning"
                     :fields="[
                         [
                             'label' => 'Team',
                             'value' => $group->follow->team->designation,
-                        ],
-                        [
-                            'label' => 'Season',
-                            'value' => $group->follow->season->name,
                         ],
                     ]"
                 />

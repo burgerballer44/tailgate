@@ -26,6 +26,11 @@ class TeamQueryService implements TeamQueryInterface
     */
     public function getAvailableTeamsForFollow(): Collection
     {
-        return Team::query()->orderBy('designation')->get();
+        return Team::query()
+            ->orderBy('organization')
+            ->orderBy('designation')
+            ->orderBy('conference')
+            ->orderBy('abbreviation')
+            ->get();
     }
 }

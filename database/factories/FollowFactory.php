@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Follow;
 use App\Models\Group;
-use App\Models\Season;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,7 +22,6 @@ class FollowFactory extends Factory
         return [
             'group_id' => Group::factory(),
             'team_id' => Team::factory(),
-            'season_id' => Season::factory(),
         ];
     }
 }

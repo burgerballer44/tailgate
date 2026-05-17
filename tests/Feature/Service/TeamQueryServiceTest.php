@@ -34,3 +34,42 @@ describe('query teams', function () {
             ->and($teams->first()->conference)->toBe('SEC');
     });
 });
+
+describe('get available teams for follow', function () {
+    test('returns teams ordered for descriptive dropdown display', function () {
+        Team::factory()->create([
+            'organization' => 'North Carolina',
+            'designation' => 'Tar Heels',
+            'conference' => 'ACC',
+            'abbreviation' => 'UNC',
+        ]);
+
+        Team::factory()->create([
+            'organization' => 'Alabama',
+            'designation' => 'Crimson Tide',
+            'conference' => 'SEC',
+            'abbreviation' => 'BAMA',
+        ]);
+
+        $teams = $this->service->getAvailableTeamsForFollow();
+
+        expect($teams->pluck('display_name')->all())->toBe([
+            'Alabama Crimson Tide (SEC | BAMA)',
+            'North Carolina Tar Heels (ACC | UNC)',
+        ]);
+    });
+
+    test('exposes display_name accessor for follow form labels', function () {
+        Team::factory()->create([
+            'organization' => 'Duke',
+            'designation' => 'Blue Devils',
+            'conference' => 'ACC',
+            'abbreviation' => 'DUKE',
+        ]);
+
+        $team = $this->service->getAvailableTeamsForFollow()->first();
+
+        expect($team)->not->toBeNull()
+            ->and($team->display_name)->toBe('Duke Blue Devils (ACC | DUKE)');
+    });
+});

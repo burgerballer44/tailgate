@@ -1,4 +1,4 @@
-<x-layouts.app mainHeading="Follow Team for {{ $group->name }}" mainDescription="Choose a team and season to follow.">
+<x-layouts.app mainHeading="Follow Team for {{ $group->name }}" mainDescription="Choose a team to follow.">
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
@@ -11,7 +11,6 @@
     <x-form.developer.follow-team
         :group="$group"
         :teams="$teams"
-        :seasons="$seasons"
         :action="route('developer.groups.follow-team', $group)"
         :method="'POST'"
     />

@@ -53,7 +53,6 @@
                             <div class="text-sm font-medium text-gray-900">
                                 {{ $group->follow->team->designation }}
                             </div>
-                            <div class="text-sm text-gray-500">{{ $group->follow->season->name }}</div>
                         </div>
                         <form
                             action="{{ route('groups.follow.destroy', ['group' => $group, 'follow' => $group->follow]) }}"

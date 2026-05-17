@@ -392,7 +392,7 @@ describe('importing teams', function () {
 
         $this->assertDatabaseHas('teams', [
             'organization' => 'Abilene Christian',
-            'designation' => 'ACU',
+            'designation' => 'Wildcats',
             'conference' => 'UAC',
             'abbreviation' => 'ACU',
         ]);
@@ -442,7 +442,7 @@ describe('importing teams', function () {
 
         $team->refresh();
 
-        expect($team->designation)->toBe('ACU');
+        expect($team->designation)->toBe('Wildcats');
         expect($team->conference)->toBe('UAC');
         expect($team->abbreviation)->toBe('ACU');
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Rules\GameMustExistInSeasonGroupFollows;
+use App\Rules\GameBelongsToFollowedTeam;
 use App\Rules\GameTimeNotPassed;
 use App\Rules\GameTimeNotPassedForUpdate;
 use App\Rules\NoScoreSubmitted;
@@ -32,7 +32,7 @@ trait ScoreValidationRulesTrait
     {
         return array_merge($this->baseRules(), [
             'player_id' => ['required', 'exists:players,id'],
-            'game_id' => ['required', 'exists:games,id', new GameMustExistInSeasonGroupFollows, new GameTimeNotPassed, new NoScoreSubmitted],
+            'game_id' => ['required', 'exists:games,id', new GameBelongsToFollowedTeam, new GameTimeNotPassed, new NoScoreSubmitted],
         ]);
     }
 

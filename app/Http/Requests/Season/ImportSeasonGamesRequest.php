@@ -6,6 +6,8 @@ use App\DTO\GameImportData;
 use App\Http\Requests\FormRequest;
 use App\Models\SeasonType;
 use App\Services\Contracts\GameImportManagerInterface;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Enum;
 
 class ImportSeasonGamesRequest extends FormRequest
@@ -51,5 +53,27 @@ class ImportSeasonGamesRequest extends FormRequest
                 'week' => $validated['week'] ?? null,
             ], static fn (mixed $value): bool => $value !== null)
         );
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        if ($this->expectsJson()) {
+            parent::failedValidation($validator);
+        }
+
+        $this->setFlashAlert(
+            'error',
+            'Game import failed due to an unexpected error.',
+            implode(', ', $validator->errors()->all())
+        );
+
+        $exception = new ValidationException($validator);
+        $exception->errorBag = $this->errorBag;
+        $exception->redirectTo($this->getRedirectUrl());
+
+        throw $exception;
     }
 }

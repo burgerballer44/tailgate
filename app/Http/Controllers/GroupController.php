@@ -15,7 +15,6 @@ use App\Models\MemberStatus;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
-use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -40,7 +39,6 @@ class GroupController extends Controller
         private GroupQueryInterface $groupQueryService,
         private MemberCommandInterface $memberCommandService,
         private TeamQueryInterface $teamQueryService,
-        private SeasonQueryInterface $seasonQueryService,
     ) {}
 
     /**
@@ -156,7 +154,7 @@ class GroupController extends Controller
      */
     public function show(Group $group): View
     {
-        $group->load(['follow.team', 'follow.season']);
+        $group->load(['follow.team']);
 
         return view('groups.show', ['group' => $group]);
     }
@@ -172,7 +170,7 @@ class GroupController extends Controller
      */
     public function edit(Group $group): View
     {
-        $group->load(['follow.team', 'follow.season']);
+        $group->load(['follow.team']);
 
         return view('groups.edit', ['group' => $group]);
     }
@@ -277,7 +275,7 @@ class GroupController extends Controller
     /**
      * Show the form for following a team.
      *
-     * This method displays the form where group admins can choose a team and season to follow.
+     * This method displays the form where group admins can choose a team to follow.
      *
      * @param  Group  $group  The group to follow a team for
      * @return View Returns the follow team view
@@ -285,9 +283,8 @@ class GroupController extends Controller
     public function createFollowTeam(Group $group): View
     {
         $teams = $this->teamQueryService->getAvailableTeamsForFollow();
-        $seasons = $this->seasonQueryService->getAvailableSeasonsForFollow();
 
-        return view('groups.follow-team', compact('group', 'teams', 'seasons'));
+        return view('groups.follow-team', compact('group', 'teams'));
     }
 
     /**
@@ -295,7 +292,7 @@ class GroupController extends Controller
      *
      * This method processes the follow team request and creates the follow relationship.
      *
-     * @param  FollowTeamRequest  $request  The validated request containing team and season data
+    * @param  FollowTeamRequest  $request  The validated request containing team data
      * @param  Group  $group  The group to follow the team
      * @return RedirectResponse Redirects back with success/error messages
      */

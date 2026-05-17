@@ -90,3 +90,38 @@ describe('logo_badge', function () {
             ->toContain('alt="Tar Heels logo"');
     });
 });
+
+describe('display_name', function () {
+    test('returns full display name with conference and abbreviation when all fields are present', function () {
+        $team = new Team([
+            'organization' => 'North Carolina',
+            'designation' => 'Tar Heels',
+            'conference' => 'ACC',
+            'abbreviation' => 'UNC',
+        ]);
+
+        expect($team->display_name)->toBe('North Carolina Tar Heels (ACC | UNC)');
+    });
+
+    test('returns name only when conference and abbreviation are missing', function () {
+        $team = new Team([
+            'organization' => 'North Carolina',
+            'designation' => 'Tar Heels',
+            'conference' => null,
+            'abbreviation' => '',
+        ]);
+
+        expect($team->display_name)->toBe('North Carolina Tar Heels');
+    });
+
+    test('returns unknown team when organization and designation are blank', function () {
+        $team = new Team([
+            'organization' => ' ',
+            'designation' => null,
+            'conference' => 'ACC',
+            'abbreviation' => 'UNC',
+        ]);
+
+        expect($team->display_name)->toBe('Unknown Team (ACC | UNC)');
+    });
+});

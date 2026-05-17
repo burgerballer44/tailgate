@@ -145,23 +145,22 @@ class GroupCommandService implements GroupCommandInterface
 
     /**
      * Follow a team for a group.
-     * This method creates a follow relationship between a group and a team for a specific season.
+     * This method creates a follow relationship between a group and a team.
      *
      * @param  Group  $group  The group to follow the team.
-     * @param  ValidatedFollowData  $data  Validated follow data including team_id and season_id.
+     * @param  ValidatedFollowData  $data  Validated follow data including team_id.
      * @return Follow The created follow instance.
      *
-     * @throws \Exception If the group is already following a team.
+     * @throws \Exception If the group is already following this team.
      */
     public function followTeam(Group $group, ValidatedFollowData $data): Follow
     {
-        if ($group->follow) {
-            throw new \Exception('This group is already following a team.');
+        if ($group->follow && $group->follow->team_id === $data->team_id) {
+            throw new \Exception('This group is already following this team.');
         }
 
         return $group->follow()->create([
             'team_id' => $data->team_id,
-            'season_id' => $data->season_id,
         ]);
     }
 

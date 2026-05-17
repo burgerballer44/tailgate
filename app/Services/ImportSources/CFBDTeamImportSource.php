@@ -87,7 +87,7 @@ class CFBDTeamImportSource implements TeamImportSourceInterface
                         sport: Sport::FOOTBALL->value, // CFBD only provides football teams
                         type: TeamType::COLLEGE->value, // CFBD only provides college teams
                         conference: trim($conference),
-                        designation: $this->nullableString($this->valueForAny($rawTeam, ['abbreviation'], null)), // CFBD abbreviation maps to our team designation
+                        designation: $this->nullableString($this->valueForAny($rawTeam, ['mascot'], null)),
                         abbreviation: $this->nullableString($this->valueForAny($rawTeam, ['abbreviation'], null)),
                         color: $this->nullableHexColor($this->valueForAny($rawTeam, ['color'], null)),
                         logos: $this->nullableUrlArray($this->valueForAny($rawTeam, ['logos'], null)),

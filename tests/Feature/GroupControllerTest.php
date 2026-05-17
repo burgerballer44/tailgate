@@ -651,13 +651,12 @@ describe('createFollowTeam', function () {
     test('shows follow team form for admin', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $team = Team::factory()->create();
-        $season = Season::factory()->create();
 
         $response = $this->get(route('groups.follow-team.create', $group));
 
         $response->assertOk();
         $response->assertViewIs('groups.follow-team');
-        $response->assertViewHas(['group', 'teams', 'seasons']);
+        $response->assertViewHas(['group', 'teams']);
     });
 
     test('denies access to non-admin', function () {
@@ -672,41 +671,23 @@ describe('createFollowTeam', function () {
 
         $response->assertForbidden();
     });
-
-    test('only includes active seasons in follow team form', function () {
-        $group = Group::factory()->create(['owner_id' => $this->user->id]);
-        $activeSeason = Season::factory()->create(['active' => true]);
-        $inactiveSeason = Season::factory()->create(['active' => false]);
-
-        $response = $this->get(route('groups.follow-team.create', $group));
-
-        $response->assertOk();
-
-        $seasons = $response->viewData('seasons');
-
-        expect($seasons->contains(fn ($season) => $season->id === $activeSeason->id))->toBeTrue();
-        expect($seasons->contains(fn ($season) => $season->id === $inactiveSeason->id))->toBeFalse();
-    });
 });
 
 describe('followTeam', function () {
     test('follows team successfully', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $team = Team::factory()->create();
-        $season = Season::factory()->active()->create();
 
         $this->assertDatabaseMissing('follows', ['group_id' => $group->id]);
 
         $response = $this->post(route('groups.follow-team', $group), [
             'team_id' => $team->id,
-            'season_id' => $season->id,
         ]);
 
         $response->assertRedirect(route('groups.show', $group));
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'season_id' => $season->id,
         ]);
         expect(session('alert')['message'])->toBe('Team followed successfully!');
     });
@@ -716,11 +697,9 @@ describe('removeFollow', function () {
     test('removes follow successfully', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $team = Team::factory()->create();
-        $season = Season::factory()->create();
         $follow = Follow::factory()->create([
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'season_id' => $season->id,
         ]);
 
         $this->assertDatabaseHas('follows', ['id' => $follow->id]);

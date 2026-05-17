@@ -27,7 +27,6 @@ class Follow extends Model
      */
     protected $fillable = [
         'team_id',
-        'season_id',
     ];
 
     /**
@@ -53,11 +52,6 @@ class Follow extends Model
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
-    }
-
-    public function season(): BelongsTo
-    {
-        return $this->belongsTo(Season::class);
     }
 
     public function group(): BelongsTo

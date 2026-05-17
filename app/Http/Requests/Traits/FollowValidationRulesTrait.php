@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Rules\SeasonIsActive;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 trait FollowValidationRulesTrait
@@ -16,7 +15,6 @@ trait FollowValidationRulesTrait
     {
         return [
             'team_id' => ['required', 'exists:teams,id'],
-            'season_id' => ['required', 'exists:seasons,id', new SeasonIsActive],
         ];
     }
 

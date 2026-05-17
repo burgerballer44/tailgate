@@ -9,7 +9,6 @@ use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Group;
 use App\Models\Score;
-use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Contracts\GroupCommandInterface;
@@ -71,7 +70,7 @@ class DeveloperGroupController extends Controller
             : 'details';
 
         if ($activeTab === 'details') {
-            $group->load(['owner', 'follow.team', 'follow.season'])
+            $group->load(['owner', 'follow.team'])
                 ->loadCount(['members', 'players']);
         }
 
@@ -133,9 +132,8 @@ class DeveloperGroupController extends Controller
     public function createFollowTeam(Group $group): View
     {
         $teams = Team::all();
-        $seasons = Season::all();
 
-        return view('developer.groups.follow-team', compact('group', 'teams', 'seasons'));
+        return view('developer.groups.follow-team', compact('group', 'teams'));
     }
 
     public function followTeam(FollowTeamRequest $request, Group $group): RedirectResponse

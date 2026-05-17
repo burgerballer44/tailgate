@@ -43,11 +43,8 @@
                         <dt class="text-sm font-medium text-gray-500">Following Team</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                             @if ($group->isFollowingTeam())
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">
-                                        {{ $group->follow->team->designation }}
-                                    </div>
-                                    <div class="text-sm text-gray-500">{{ $group->follow->season->name }}</div>
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ $group->follow->team->designation }}
                                 </div>
                             @else
                                 None

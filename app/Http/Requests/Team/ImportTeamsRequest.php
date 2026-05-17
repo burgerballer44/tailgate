@@ -5,6 +5,8 @@ namespace App\Http\Requests\Team;
 use App\DTO\TeamImportData;
 use App\Http\Requests\FormRequest;
 use App\Services\Contracts\TeamImportManagerInterface;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ImportTeamsRequest extends FormRequest
 {
@@ -47,5 +49,27 @@ class ImportTeamsRequest extends FormRequest
                 'conference' => $validated['conference'] ?? null,
             ], static fn (mixed $value): bool => $value !== null)
         );
+    }
+
+    /**
+     * Handle a failed validation attempt.
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        if ($this->expectsJson()) {
+            parent::failedValidation($validator);
+        }
+
+        $this->setFlashAlert(
+            'error',
+            'Team import failed due to an unexpected error.',
+            implode(', ', $validator->errors()->all())
+        );
+
+        $exception = new ValidationException($validator);
+        $exception->errorBag = $this->errorBag;
+        $exception->redirectTo($this->getRedirectUrl());
+
+        throw $exception;
     }
 }

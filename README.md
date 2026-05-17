@@ -4,7 +4,9 @@ Sports group prediction platform built with Laravel.
 
 ## Product goal
 
-Tailgate lets users form prediction groups around a sports team and season. Each member creates one or more "players" and submits score predictions for upcoming games. The group follows a team, predictions roll in before game time, and the platform tracks who predicted what.
+Tailgate lets users form prediction groups around sports teams. Each member creates one or more "players" and submits score predictions for upcoming games. The core relationship is that a group follows a team; seasons provide time-bound context for games and scores.
+
+If a new season starts, a group should still be following the same team without re-following. Upcoming games for that team in the new season should automatically flow into the prediction experience.
 
 The immediate goal is a working MVP where a regular user can move through the full loop without any developer tooling.
 
@@ -25,66 +27,12 @@ When building user-facing features, the right process is:
 3. Update services or models as needed — the user experience is the design authority, not the current state of the developer admin.
 4. Cover the feature with tests that reflect user intent, not just technical wiring.
 
-## Pre-MVP fixes
-
-These issues exist in the current user-facing code and must be resolved before building any new functionality. They affect correctness, consistency, or the assumptions the player creation flow will depend on.
-
-### 1. `MemberCommandService::createForGroup` auto-creates a player on join — HIGH
-
-**File:** `app/Services/MemberCommandService.php`
-
-`createForGroup` automatically creates a `Player` record named after the user the moment a `Member` is created. This fires for pending memberships too — so the moment a user submits an invite code, a player is silently created for them before they are even approved. This directly conflicts with the MVP goal of users intentionally creating their own players. The auto-creation logic should be removed from this method.
-
-### 2. Owner member creation bypasses the service layer — MEDIUM
-
-**File:** `app/Models/Group.php` (boot hook)
-
-When a group is created, the owner's `Member` record is created directly via Eloquent in the model's `created` boot hook, bypassing `MemberCommandService::createForGroup`. Once issue #1 is resolved, this inconsistency means the code paths for member creation diverge — the owner goes through the model directly, everyone else goes through the service. The boot hook should either call the service, or member creation for the owner should be made consistent with the approach used for all other members.
-
-### 3. `MemberMustBeInGroup` and `FollowBelongsToGroup` middleware are unused and return JSON — MEDIUM
-
-**Files:** `app/Http/Middleware/MemberMustBeInGroup.php`, `app/Http/Middleware/FollowBelongsToGroup.php`
-
-Neither middleware is registered as an alias in `bootstrap/app.php`, so neither can be applied to routes. Both also return a raw JSON response, which is wrong for a web app — users would receive JSON instead of a redirect or error page. The manual group-membership cross-checks currently duplicated across `approveMember`, `rejectMember`, and `removeMember` in `GroupController` exist because this middleware never got wired up. Fix both middlewares to return an appropriate web response, register them in `bootstrap/app.php`, and apply them to the relevant routes to remove the duplicated inline checks.
-
-### 4. `requestJoin` uses inline validation instead of a Form Request — LOW
-
-**File:** `app/Http/Controllers/GroupController.php`
-
-Every other controller action uses a typed Form Request class. `requestJoin` validates inline directly on the `Request` object (`$request->validate([...])`). A `JoinGroupRequest` form request should be created to keep this consistent with the rest of the codebase.
-
-### 5. `createFollowTeam` loads all teams and seasons directly — LOW
-
-**File:** `app/Http/Controllers/GroupController.php`
-
-`createFollowTeam` calls `Team::all()` and `Season::all()` directly, bypassing the service layer and loading every record with no filtering. This should at minimum be scoped to active seasons and, where possible, routed through the query service layer for consistency.
-
-### 6. `Member::canBeRemovedBy` ignores its `$user` parameter — LOW
-
-**File:** `app/Models/Member.php`
-
-The method accepts a `User $user` argument but never uses it. The method name implies it checks whether the given user has permission to remove this member, but it only checks whether the member itself is removable at all. Either rename it to `isRemovable()` to reflect what it actually does, or implement the full permission check using the `$user` argument so callers don't have to perform the admin check separately.
-
-### 7. `Group::isAdminOrOwner` fires a query even when members are loaded — LOW
-
-**File:** `app/Models/Group.php`
-
-`isAdminOrOwner` calls `$this->members()->where(...)` (a dynamic query) rather than searching the already-loaded `members` collection. If the `members` relationship is eager-loaded, this still hits the database. Change it to `$this->members->first(fn ($m) => $m->user_id === $user->id)` to use the loaded collection when available.
-
-### 8. `UserUpdateGroupRequest` allows clearing the group name — LOW
-
-**File:** `app/Http/Requests/Group/UserUpdateGroupRequest.php`
-
-`rules()` calls `baseRules()` which defines `name` as `nullable`. This means a PATCH request with an empty name passes validation and clears the group name. The update request should require a valid name if the field is present (e.g., `sometimes|required|string|max:255`).
-
----
-
 ## MVP definition
 
 The MVP is complete when an approved group member can, without developer-panel access:
 
 1. Create one or more players under their group membership.
-2. See the upcoming games for the team their group is following.
+2. See the upcoming games for the teams their group is following.
 3. Submit a score prediction (home and away score) for each game, per player.
 4. See confirmation that their predictions are saved.
 
@@ -99,12 +47,12 @@ Everything else — leaderboards, prediction history, admin dashboards, notifica
 - Create a group.
 - Join a group by invite code (creates a pending membership).
 - View group details once approved.
-- Group admin/owner actions: edit group name, approve/reject/remove members, follow or unfollow a team-season pair.
+- Group admin/owner actions: edit group name, approve/reject/remove members, follow or unfollow teams.
 
 ### What is missing for the MVP
 
 - **Player creation** — users cannot create players from the UI.
-- **Game listing** — users have no view to see upcoming games for their group's followed team/season.
+- **Game listing** — users have no view to see upcoming games for their group's followed teams.
 - **Score predictions** — users cannot submit predictions from the UI.
 
 These three items are the entire remaining scope of the MVP.
@@ -114,7 +62,7 @@ These three items are the entire remaining scope of the MVP.
 Both the user-facing product and the developer admin section call into the same command and query services. The following are available for user-facing controllers to use:
 
 - `PlayerCommandService` / `PlayerQueryService` — create, update, delete players; submit and manage scores.
-- `GameQueryService` — query games with filters; retrieve games scoped to a season.
+- `GameQueryService` — query games with filters; retrieve upcoming games for a team's active schedule windows.
 - `GroupQueryService` — check membership status, follow relationships, and member limits.
 - `StorePlayerRequest`, `SubmitScoreRequest` — existing form request classes that may need to be adapted for user-facing validation rules.
 - Factories and Pest test helpers for all core models.
@@ -128,8 +76,24 @@ These services were initially exercised through the developer admin, so some met
 - **Member** — join table between user and group; has a role (admin/member) and status (pending/approved).
 - **Player** — prediction identity belonging to a member; a member can have multiple players per group.
 - **Score** — a player's predicted home/away score for a specific game.
-- **Team, Season, Game** — sports schedule entities managed via developer tools and import pipelines.
-- **Follow** — a group's commitment to follow a specific team in a specific season.
+- **Team, Season, Game** — sports schedule entities managed via developer tools and import pipelines. Seasons are contexts for games, not the source of follow relationships.
+- **Follow** — a group's commitment to follow a specific team independent of season boundaries.
+
+## Follow direction (May 2026)
+
+The product direction is now explicit:
+
+- A group follows a team, not a season.
+- Seasons are time windows that organize games and scoring.
+- A follow should persist across season boundaries until a group explicitly unfollows.
+- New-season games for followed teams should be available automatically for prediction workflows.
+
+Recommended domain shape for ongoing implementation:
+
+- `follows` (or `team_follows`): `(group_id, team_id)` for durable team follow intent.
+- `season_participations`: `(group_id, team_id, season_id)` for season-specific participation state when needed.
+
+This split keeps product behavior clear: "we follow this team" is durable, while seasonal participation remains a contextual layer for game access and reporting.
 
 ## Build order for the MVP
 
@@ -153,7 +117,7 @@ Once the UX is clear, implement:
 
 ### Phase 2: Game listing and score prediction
 
-The user should be able to see upcoming games for their group and submit a prediction per player. Questions to design before coding:
+The user should be able to see upcoming games for their group's followed teams and submit a prediction per player. Questions to design before coding:
 
 - Should predictions be per-player or per-membership? Confirm how the Score model ties a player to a game.
 - When is a game "open" for predictions? Is there a lock time? What happens after the game starts?
@@ -165,7 +129,7 @@ Once the UX is clear, implement:
 - Routes for listing games and submitting predictions, scoped to group membership.
 - A `ScoreController` handling the game list, prediction form, and store/update actions.
 - Views for upcoming games and the prediction form.
-- Validation: non-negative integer scores, game belongs to group's followed season, submission within allowed window.
+- Validation: non-negative integer scores, game belongs to a team the group follows, submission within allowed window.
 - Feature tests covering the happy path, validation errors, out-of-window submissions, and authorization.
 
 ### Phase 3: Dashboard and group surface updates

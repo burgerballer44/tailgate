@@ -1,10 +1,10 @@
-@props(['group' => null, 'teams' => collect(), 'seasons' => collect(), 'action' => '', 'method' => 'POST'])
+@props(['group' => null, 'teams' => collect(), 'action' => '', 'method' => 'POST'])
 
 <x-forms.multi-section-form :action="$action" :method="$method">
     <x-slot name="sections">
         <x-forms.form-section
             title="Team selection"
-            description="Choose the team and season this group will follow."
+            description="Choose the team this group will follow."
         >
             <div>
                 <x-form.select
@@ -15,17 +15,6 @@
                     :options="['' => ''] + $teams->mapWithKeys(fn($team) => [$team->id => $team->designation])->toArray()"
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('team_id')" />
-            </div>
-
-            <div class="mt-4">
-                <x-form.select
-                    name="season_id"
-                    label="Season"
-                    :required="true"
-                    :value="old('season_id')"
-                    :options="['' => ''] + $seasons->mapWithKeys(fn($season) => [$season->id => $season->name])->toArray()"
-                />
-                <x-inputs.input-error class="mt-2" :messages="$errors->get('season_id')" />
             </div>
         </x-forms.form-section>
     </x-slot>
