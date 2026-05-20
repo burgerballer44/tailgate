@@ -16,6 +16,17 @@
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('team_id')" />
             </div>
+
+            <div class="mt-4">
+                <x-form.select
+                    name="sport"
+                    label="Sport scope"
+                    :required="false"
+                    :value="old('sport')"
+                    :options="['' => 'All sports'] + collect(\App\Models\Sport::cases())->mapWithKeys(fn ($sport) => [$sport->value => $sport->value])->toArray()"
+                />
+                <x-inputs.input-error class="mt-2" :messages="$errors->get('sport')" />
+            </div>
         </x-forms.form-section>
     </x-slot>
 

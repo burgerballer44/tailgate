@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Traits;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Sport;
+use Illuminate\Validation\Rule;
 
 trait FollowValidationRulesTrait
 {
@@ -15,6 +16,13 @@ trait FollowValidationRulesTrait
     {
         return [
             'team_id' => ['required', 'exists:teams,id'],
+            'sport' => [
+                'nullable',
+                Rule::enum(Sport::class),
+                Rule::exists('team_sports', 'sport')->where(function ($query) {
+                    $query->where('team_id', $this->input('team_id'));
+                }),
+            ],
         ];
     }
 

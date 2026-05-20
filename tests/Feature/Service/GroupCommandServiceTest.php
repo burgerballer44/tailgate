@@ -8,7 +8,7 @@ use App\Models\Follow;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Season;
+use App\Models\Sport;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Contracts\MemberCommandInterface;
@@ -181,20 +181,89 @@ describe('follow team', function () {
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $team->id,
+            'sport' => null,
         ]);
         expect($follow)->toBeInstanceOf(Follow::class);
+    });
+
+    test('creates sport-scoped follow relationship', function () {
+        $group = Group::factory()->create();
+        $team = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        $follow = $this->service->followTeam($group, ValidatedFollowData::fromArray([
+            'team_id' => $team->id,
+            'sport' => Sport::FOOTBALL->value,
+        ]));
+
+        $this->assertDatabaseHas('follows', [
+            'group_id' => $group->id,
+            'team_id' => $team->id,
+            'sport' => Sport::FOOTBALL->value,
+        ]);
+        expect($follow->sport)->toBe(Sport::FOOTBALL);
+    });
+
+    test('creates multiple follows when under follow limit', function () {
+        $group = Group::factory()->create(['follow_limit' => 2]);
+        $firstTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $secondTeam = Team::factory()->withSports([Sport::BASKETBALL])->create();
+
+        $firstFollow = $this->service->followTeam($group, ValidatedFollowData::fromArray([
+            'team_id' => $firstTeam->id,
+            'sport' => Sport::FOOTBALL->value,
+        ]));
+
+        $secondFollow = $this->service->followTeam($group, ValidatedFollowData::fromArray([
+            'team_id' => $secondTeam->id,
+            'sport' => Sport::BASKETBALL->value,
+        ]));
+
+        expect($group->follows()->count())->toBe(2);
+        expect($firstFollow->id)->not->toBe($secondFollow->id);
+    });
+
+    test('throws error when follow limit is reached', function () {
+        $group = Group::factory()->create(['follow_limit' => 1]);
+        $firstTeam = Team::factory()->create();
+        $secondTeam = Team::factory()->create();
+
+        $this->service->followTeam($group, ValidatedFollowData::fromArray([
+            'team_id' => $firstTeam->id,
+        ]));
+
+        expect(fn () => $this->service->followTeam($group, ValidatedFollowData::fromArray([
+            'team_id' => $secondTeam->id,
+        ])))->toThrow('This group has reached its follow limit.');
+    });
+
+    test('throws error when team and sport scope are already followed', function () {
+        $group = Group::factory()->create(['follow_limit' => 2]);
+        $team = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        $this->service->followTeam($group, ValidatedFollowData::fromArray([
+            'team_id' => $team->id,
+            'sport' => Sport::FOOTBALL->value,
+        ]));
+
+        expect(fn () => $this->service->followTeam($group, ValidatedFollowData::fromArray([
+            'team_id' => $team->id,
+            'sport' => Sport::FOOTBALL->value,
+        ])))->toThrow('This group is already following this team.');
     });
 });
 
 describe('remove follow', function () {
-    test('removes follow relationship', function () {
+    test('removes only the targeted follow relationship', function () {
         // create follow
-        $follow = Follow::factory()->create();
+        $group = Group::factory()->create(['follow_limit' => 2]);
+        $follow = Follow::factory()->create(['group_id' => $group->id]);
+        $otherFollow = Follow::factory()->create(['group_id' => $group->id]);
 
         // remove follow
-        $this->service->removeFollow($follow->group);
+        $this->service->removeFollow($group, $follow);
 
         // verify removed
         $this->assertDatabaseMissing('follows', ['id' => $follow->id]);
+        $this->assertDatabaseHas('follows', ['id' => $otherFollow->id]);
     });
 });

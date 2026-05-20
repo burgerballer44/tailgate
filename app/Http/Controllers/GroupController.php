@@ -154,7 +154,7 @@ class GroupController extends Controller
      */
     public function show(Group $group): View
     {
-        $group->load(['follow.team']);
+        $group->load(['follows.team']);
 
         return view('groups.show', ['group' => $group]);
     }
@@ -170,7 +170,7 @@ class GroupController extends Controller
      */
     public function edit(Group $group): View
     {
-        $group->load(['follow.team']);
+        $group->load(['follows.team']);
 
         return view('groups.edit', ['group' => $group]);
     }
@@ -322,7 +322,7 @@ class GroupController extends Controller
      */
     public function removeFollow(Group $group, Follow $follow): RedirectResponse
     {
-        $this->groupCommandService->removeFollow($group);
+        $this->groupCommandService->removeFollow($group, $follow);
 
         $this->setFlashAlert('success', 'Follow removed successfully!');
 

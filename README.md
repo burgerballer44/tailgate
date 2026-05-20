@@ -4,9 +4,9 @@ Sports group prediction platform built with Laravel.
 
 ## Product goal
 
-Tailgate lets users form prediction groups around sports teams. Each member creates one or more "players" and submits score predictions for upcoming games. The core relationship is that a group follows a team; seasons provide time-bound context for games and scores.
+Tailgate lets users form prediction groups around sports teams. Each member creates one or more "players" and submits score predictions for upcoming games. The core relationship is that a group follows a team, optionally scoped to a single sport for that team; seasons provide time-bound context for games and scores.
 
-If a new season starts, a group should still be following the same team without re-following. Upcoming games for that team in the new season should automatically flow into the prediction experience.
+If a new season starts, a group should still be following the same team without re-following. Upcoming games for that team in the new season should automatically flow into the prediction experience, filtered by sport when a sport-scoped follow is selected.
 
 The immediate goal is a working MVP where a regular user can move through the full loop without any developer tooling.
 
@@ -47,7 +47,7 @@ Everything else — leaderboards, prediction history, admin dashboards, notifica
 - Create a group.
 - Join a group by invite code (creates a pending membership).
 - View group details once approved.
-- Group admin/owner actions: edit group name, approve/reject/remove members, follow or unfollow teams.
+- Group admin/owner actions: edit group name, approve/reject/remove members, follow or unfollow teams (optionally scoped to a sport).
 
 ### What is missing for the MVP
 
@@ -77,23 +77,32 @@ These services were initially exercised through the developer admin, so some met
 - **Player** — prediction identity belonging to a member; a member can have multiple players per group.
 - **Score** — a player's predicted home/away score for a specific game.
 - **Team, Season, Game** — sports schedule entities managed via developer tools and import pipelines. Seasons are contexts for games, not the source of follow relationships.
-- **Follow** — a group's commitment to follow a specific team independent of season boundaries.
+- **Follow** — a group's commitment to follow a specific team independent of season boundaries, with an optional sport scope to limit eligible games to a single sport.
 
 ## Follow direction (May 2026)
 
 The product direction is now explicit:
 
 - A group follows a team, not a season.
+- A follow may be scoped to a sport when a group wants predictions for only one sport.
 - Seasons are time windows that organize games and scoring.
 - A follow should persist across season boundaries until a group explicitly unfollows.
-- New-season games for followed teams should be available automatically for prediction workflows.
+- New-season games for followed teams should be available automatically for prediction workflows, respecting optional sport scope.
+
+Current implementation behavior:
+
+- A group can have multiple follows, up to its `follow_limit`.
+- Sport scope on follow is optional (`null` means all sports for that team).
+- New follows are blocked when the group reaches its `follow_limit`.
+- Default `follow_limit` is `1`, which preserves current single-team behavior for existing groups.
 
 Recommended domain shape for ongoing implementation:
 
-- `follows` (or `team_follows`): `(group_id, team_id)` for durable team follow intent.
+- `follows` (or `team_follows`): `(group_id, team_id, sport nullable)` for durable follow intent per team/sport scope.
+- `groups.follow_limit`: per-group maximum number of follows (defaults to `1`).
 - `season_participations`: `(group_id, team_id, season_id)` for season-specific participation state when needed.
 
-This split keeps product behavior clear: "we follow this team" is durable, while seasonal participation remains a contextual layer for game access and reporting.
+This split keeps product behavior clear: "we follow this team" is durable, optional sport scope narrows that intent when needed, and seasonal participation remains a contextual layer for game access and reporting.
 
 ## Build order for the MVP
 
@@ -129,7 +138,7 @@ Once the UX is clear, implement:
 - Routes for listing games and submitting predictions, scoped to group membership.
 - A `ScoreController` handling the game list, prediction form, and store/update actions.
 - Views for upcoming games and the prediction form.
-- Validation: non-negative integer scores, game belongs to a team the group follows, submission within allowed window.
+- Validation: non-negative integer scores, game belongs to a team the group follows (and matches follow sport when scoped), submission within allowed window.
 - Feature tests covering the happy path, validation errors, out-of-window submissions, and authorization.
 
 ### Phase 3: Dashboard and group surface updates

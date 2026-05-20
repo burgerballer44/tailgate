@@ -20,7 +20,7 @@ class FollowBelongsToGroup
             abort(404, 'Follow cannot be found or is not part of the group.');
         }
 
-        if (! $group->follow()->whereKey($follow->id)->exists()) {
+        if (! $group->follows()->whereKey($follow->id)->exists()) {
             abort(404, 'Follow cannot be found or is not part of the group.');
         }
 

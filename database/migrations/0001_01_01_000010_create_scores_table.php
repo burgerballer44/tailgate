@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('scores', function (Blueprint $table) {
             $table->id();
-            $table->ulid('ulid')->index();
+            $table->ulid('ulid')->unique();
             $table->unsignedBigInteger('player_id');
             $table->unsignedBigInteger('game_id');
             $table->string('home_team_prediction');
@@ -22,6 +22,9 @@ return new class extends Migration
 
             $table->foreign('player_id')->references('id')->on('players')->onDelete('cascade');
             $table->foreign('game_id')->references('id')->on('games')->onDelete('cascade');
+
+            $table->unique(['player_id', 'game_id']);
+            $table->index('game_id');
         });
     }
 

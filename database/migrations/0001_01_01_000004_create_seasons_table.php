@@ -15,12 +15,15 @@ return new class extends Migration
     {
         Schema::create('seasons', function (Blueprint $table) {
             $table->id();
-            $table->ulid('ulid')->index();
+            $table->ulid('ulid')->unique();
             $table->string('name');
             $table->enum('sport', Sport::values());
             $table->enum('season_type', SeasonType::values());
             $table->boolean('active')->default(false);
             $table->timestamps();
+
+            $table->index(['sport', 'active']);
+            $table->index(['sport', 'season_type']);
         });
     }
 

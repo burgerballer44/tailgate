@@ -22,6 +22,7 @@ class FollowFactory extends Factory
         return [
             'group_id' => Group::factory(),
             'team_id' => Team::factory(),
+            'sport' => null,
         ];
     }
 }

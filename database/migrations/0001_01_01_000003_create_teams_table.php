@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('teams', function (Blueprint $table) {
             $table->id();
-            $table->ulid('ulid')->index();
+            $table->ulid('ulid')->unique();
             $table->string('organization');
             $table->string('designation');
             $table->string('type');
@@ -24,6 +24,8 @@ return new class extends Migration
             $table->json('logos')->nullable();
             $table->json('social_media')->nullable();
             $table->timestamps();
+
+            $table->index('type');
         });
     }
 

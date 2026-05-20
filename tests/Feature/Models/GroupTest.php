@@ -2,6 +2,7 @@
 
 use App\Models\Follow;
 use App\Models\Group;
+use App\Models\HtmlEntity;
 use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\User;
@@ -74,9 +75,69 @@ describe('isFollowingTeam', function () {
         expect($follow->group->isFollowingTeam())->toBeTrue();
     });
 
+    test('returns true when group has multiple follows', function () {
+        $group = Group::factory()->create(['follow_limit' => 3]);
+        Follow::factory()->create(['group_id' => $group->id]);
+        Follow::factory()->create(['group_id' => $group->id]);
+
+        expect($group->fresh()->isFollowingTeam())->toBeTrue();
+    });
+
     test('returns false when group has no follow', function () {
         $group = Group::factory()->create();
 
         expect($group->isFollowingTeam())->toBeFalse();
+    });
+});
+
+describe('model defaults and accessors', function () {
+    test('defaults follow_limit when not provided', function () {
+        $group = Group::factory()->create([
+            'follow_limit' => null,
+        ]);
+
+        expect($group->fresh()->follow_limit)->toBe(Group::INITIAL_FOLLOW_LIMIT);
+    });
+
+    test('follow_collection returns follows with teams', function () {
+        $group = Group::factory()->create(['follow_limit' => 3]);
+        $firstFollow = Follow::factory()->create(['group_id' => $group->id]);
+        $secondFollow = Follow::factory()->create(['group_id' => $group->id]);
+
+        $collection = $group->follow_collection;
+
+        expect($collection)->toHaveCount(2);
+        expect($collection->pluck('id')->all())
+            ->toContain($firstFollow->id, $secondFollow->id);
+        expect($collection->every(fn (Follow $follow) => $follow->relationLoaded('team')))->toBeTrue();
+    });
+
+    test('follow_collection uses loaded follows relation without extra queries', function () {
+        $group = Group::factory()->create(['follow_limit' => 2]);
+        Follow::factory()->create(['group_id' => $group->id]);
+        $group->load('follows.team');
+
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+
+        $collection = $group->follow_collection;
+
+        expect($collection)->toHaveCount(1);
+        expect(DB::getQueryLog())->toBe([]);
+
+        DB::disableQueryLog();
+    });
+
+    test('follow_html_entity returns red x when no follows exist', function () {
+        $group = Group::factory()->create();
+
+        expect($group->follow_html_entity->toHtml())->toBe(HtmlEntity::RED_X->entity());
+    });
+
+    test('follow_html_entity returns check mark when follows exist', function () {
+        $group = Group::factory()->create(['follow_limit' => 2]);
+        Follow::factory()->create(['group_id' => $group->id]);
+
+        expect($group->follow_html_entity->toHtml())->toBe(HtmlEntity::CHECK_MARK->entity());
     });
 });

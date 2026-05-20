@@ -70,7 +70,7 @@ class DeveloperGroupController extends Controller
             : 'details';
 
         if ($activeTab === 'details') {
-            $group->load(['owner', 'follow.team'])
+            $group->load(['owner', 'follows.team'])
                 ->loadCount(['members', 'players']);
         }
 
@@ -153,7 +153,7 @@ class DeveloperGroupController extends Controller
 
     public function removeFollow(Group $group, Follow $follow): RedirectResponse
     {
-        $this->groupCommandService->removeFollow($group);
+        $this->groupCommandService->removeFollow($group, $follow);
 
         $this->setFlashAlert('success', 'Follow removed successfully!');
 

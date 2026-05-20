@@ -1,6 +1,14 @@
+@php
+    $followDescription = 'No team followed yet.';
+    $follows = $group->follow_collection;
+    if ($follows->isNotEmpty()) {
+        $followDescription = $follows->count().' team'.($follows->count() === 1 ? '' : 's').' followed';
+    }
+@endphp
+
 <x-layouts.app
     mainHeading="{{ $group->name }}"
-    mainDescription="{{ $group->isFollowingTeam() ? 'Following ' . $group->follow->team->display_name : 'No team followed yet.' }}"
+    mainDescription="{{ $followDescription }}"
     :mainActions="collect([
         ['text' => 'Back to dashboard', 'route' => 'dashboard'],
         $group->isAdminOrOwner(auth()->user()) ? [
@@ -18,8 +26,9 @@
                 <div class="px-6 py-5">
                     <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Following</p>
                     <p class="mt-1 text-sm font-semibold text-gray-900">
-                        @if ($group->isFollowingTeam())
-                            {{ $group->follow->team->display_name }}
+                        @if ($follows->isNotEmpty())
+                            {{ $follows->count() }}
+                            <span class="font-normal text-gray-400">/ {{ $group->follow_limit }} slots used</span>
                         @else
                             <span class="font-normal text-gray-400">No team yet</span>
                         @endif
@@ -41,6 +50,21 @@
                     <p class="mt-1 font-mono text-sm font-semibold tracking-widest text-gray-900">{{ $group->invite_code }}</p>
                 </div>
             </div>
+        </x-groups.section-card>
+
+        <x-groups.section-card title="Followed teams" description="Teams this group can predict games for.">
+            @if ($follows->isEmpty())
+                <p class="text-sm text-gray-500">No teams followed yet.</p>
+            @else
+                <ul class="space-y-2">
+                    @foreach ($follows as $follow)
+                        <li class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                            <span class="font-semibold text-gray-900">{{ $follow->team->display_name }}</span>
+                            <span class="text-gray-500">- {{ $follow->sport?->value ?? 'All sports' }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </x-groups.section-card>
 
         {{-- Upcoming Games --}}

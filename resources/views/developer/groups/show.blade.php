@@ -137,8 +137,8 @@
                         'value' => $group->players_count,
                     ],
                     [
-                        'label' => 'Following Team',
-                        'value' => $group->follow ? 'Yes' : 'No',
+                        'label' => 'Follow Count',
+                        'value' => $group->follows->count() . ' / ' . $group->follow_limit,
                     ],
                 ]"
             />
@@ -160,37 +160,37 @@
             />
         </div>
 
-        @if ($group->follow && $group->follow->team)
+        @if ($group->follows->isNotEmpty())
             <div class="mt-8">
                 <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-lg font-semibold">Following</h2>
-                    <form
-                        method="POST"
-                        action="{{ route('developer.groups.follow.destroy', [$group, $group->follow]) }}"
-                        class="inline"
-                    >
-                        @csrf
-                        @method('DELETE')
-                        <button
-                            type="submit"
-                            class="btn btn-danger"
-                            onclick="return confirm('Are you sure you want to unfollow this team?')"
-                        >
-                            Unfollow Team
-                        </button>
-                    </form>
                 </div>
-                <x-model-viewer
-                    message="Current follow"
-                    details="Team this group is currently following."
-                    tone="warning"
-                    :fields="[
-                        [
-                            'label' => 'Team',
-                            'value' => $group->follow->team->designation,
-                        ],
-                    ]"
-                />
+
+                <div class="space-y-3">
+                    @foreach ($group->follows as $follow)
+                        <div class="flex items-center justify-between rounded-md border border-gray-200 p-3">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">{{ $follow->team->designation }}</p>
+                                <p class="text-xs text-gray-500">Sport scope: {{ $follow->sport?->value ?? 'All sports' }}</p>
+                            </div>
+                            <form
+                                method="POST"
+                                action="{{ route('developer.groups.follow.destroy', [$group, $follow]) }}"
+                                class="inline"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button
+                                    type="submit"
+                                    class="btn btn-danger"
+                                    onclick="return confirm('Are you sure you want to unfollow this team?')"
+                                >
+                                    Unfollow Team
+                                </button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         @endif
     @endif

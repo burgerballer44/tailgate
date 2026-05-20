@@ -29,5 +29,5 @@ interface GroupCommandInterface
 
     public function followTeam(Group $group, ValidatedFollowData $data): Follow;
 
-    public function removeFollow(Group $group): void;
+    public function removeFollow(Group $group, Follow $follow): void;
 }

@@ -34,7 +34,7 @@ class GroupQueryService implements GroupQueryInterface
             $builder->where('name', 'like', '%'.$query['name'].'%');
         }
 
-        return $builder->with(['owner', 'follow']);
+        return $builder->with(['owner', 'follows.team']);
     }
 
     /**

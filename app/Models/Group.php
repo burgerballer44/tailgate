@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -29,6 +30,9 @@ class Group extends Model
 
     // initial maximum number of players for a player who can have multiple
     public const INITIAL_PLAYER_LIMIT = 5;
+
+    // initial maximum number of teams a group can follow
+    public const INITIAL_FOLLOW_LIMIT = 1;
 
     // minimum number of admins that have to be in a group
     public const MIN_NUMBER_ADMINS = 1;
@@ -52,6 +56,7 @@ class Group extends Model
         'owner_id',
         'member_limit',
         'player_limit',
+        'follow_limit',
     ];
 
     /**
@@ -79,6 +84,9 @@ class Group extends Model
             }
             if (! $group->player_limit) {
                 $group->player_limit = self::INITIAL_PLAYER_LIMIT;
+            }
+            if (! $group->follow_limit) {
+                $group->follow_limit = self::INITIAL_FOLLOW_LIMIT;
             }
         });
 
@@ -132,6 +140,11 @@ class Group extends Model
         return $this->hasOne(Follow::class);
     }
 
+    public function follows(): HasMany
+    {
+        return $this->hasMany(Follow::class);
+    }
+
     public function admin(): HasMany
     {
         return $this->hasMany(Member::class)->where('role', GroupRole::GROUP_ADMIN);
@@ -168,7 +181,17 @@ class Group extends Model
      */
     public function isFollowingTeam(): bool
     {
-        return $this->follow()->exists();
+        return $this->follows()->exists();
+    }
+
+    /**
+     * Get follows as a loaded collection when available.
+     */
+    public function getFollowCollectionAttribute(): Collection
+    {
+        return $this->relationLoaded('follows')
+            ? $this->follows
+            : $this->follows()->with('team')->get();
     }
 
     /**
@@ -176,8 +199,8 @@ class Group extends Model
      */
     public function getFollowHtmlEntityAttribute(): HtmlString
     {
-        $isFollowing = $this->relationLoaded('follow')
-            ? $this->follow !== null
+        $isFollowing = $this->relationLoaded('follows')
+            ? $this->follows->isNotEmpty()
             : $this->isFollowingTeam();
 
         return new HtmlString(HtmlEntity::forBoolean($isFollowing)->entity());

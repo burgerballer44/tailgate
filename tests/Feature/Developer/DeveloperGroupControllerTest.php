@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Follow;
 use App\Models\Group;
+use App\Models\Sport;
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -304,5 +307,77 @@ describe('deleting a group', function () {
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Group deleted successfully!');
+    });
+});
+
+describe('follow team', function () {
+    test('shows follow team form', function () {
+        $group = Group::factory()->create();
+        Team::factory()->create();
+
+        $response = $this->get(route('developer.groups.follow-team.create', $group));
+
+        $response->assertOk();
+        $response->assertViewIs('developer.groups.follow-team');
+        $response->assertViewHas(['group', 'teams']);
+    });
+
+    test('follows multiple teams up to follow limit', function () {
+        $group = Group::factory()->create(['follow_limit' => 2]);
+        $firstTeam = Team::factory()->create();
+        $secondTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        $this->post(route('developer.groups.follow-team', $group), [
+            'team_id' => $firstTeam->id,
+        ])->assertRedirect(route('developer.groups.show', $group));
+
+        $this->post(route('developer.groups.follow-team', $group), [
+            'team_id' => $secondTeam->id,
+            'sport' => Sport::FOOTBALL->value,
+        ])->assertRedirect(route('developer.groups.show', $group));
+
+        $this->assertDatabaseHas('follows', [
+            'group_id' => $group->id,
+            'team_id' => $firstTeam->id,
+            'sport' => null,
+        ]);
+
+        $this->assertDatabaseHas('follows', [
+            'group_id' => $group->id,
+            'team_id' => $secondTeam->id,
+            'sport' => Sport::FOOTBALL->value,
+        ]);
+    });
+
+    test('rejects follow when follow limit is reached', function () {
+        $group = Group::factory()->create(['follow_limit' => 1]);
+        $firstTeam = Team::factory()->create();
+        $secondTeam = Team::factory()->create();
+
+        $this->post(route('developer.groups.follow-team', $group), [
+            'team_id' => $firstTeam->id,
+        ])->assertRedirect(route('developer.groups.show', $group));
+
+        $response = $this->from(route('developer.groups.follow-team.create', $group))
+            ->post(route('developer.groups.follow-team', $group), [
+                'team_id' => $secondTeam->id,
+            ]);
+
+        $response->assertRedirect(route('developer.groups.follow-team.create', $group));
+        expect(session('alert')['message'])->toBe('This group has reached its follow limit.');
+    });
+});
+
+describe('remove follow', function () {
+    test('removes only the selected follow', function () {
+        $group = Group::factory()->create(['follow_limit' => 2]);
+        $follow = Follow::factory()->create(['group_id' => $group->id]);
+        $otherFollow = Follow::factory()->create(['group_id' => $group->id]);
+
+        $response = $this->delete(route('developer.groups.follow.destroy', [$group, $follow]));
+
+        $response->assertRedirect(route('developer.groups.show', $group));
+        $this->assertDatabaseMissing('follows', ['id' => $follow->id]);
+        $this->assertDatabaseHas('follows', ['id' => $otherFollow->id]);
     });
 });

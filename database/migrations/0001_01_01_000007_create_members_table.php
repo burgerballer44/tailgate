@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('members', function (Blueprint $table) {
             $table->id();
-            $table->ulid('ulid')->index();
+            $table->ulid('ulid')->unique();
             $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('user_id');
             $table->enum('role', GroupRole::values())->default(GroupRole::GROUP_MEMBER->value);
@@ -24,6 +24,11 @@ return new class extends Migration
 
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
+            $table->unique(['group_id', 'user_id']);
+            $table->index(['group_id', 'status']);
+            $table->index(['group_id', 'role']);
+            $table->index('user_id');
         });
     }
 

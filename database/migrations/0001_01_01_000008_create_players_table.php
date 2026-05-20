@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('players', function (Blueprint $table) {
             $table->id();
-            $table->ulid('ulid')->index();
+            $table->ulid('ulid')->unique();
             $table->unsignedBigInteger('member_id');
             $table->string('player_name');
             $table->timestamps();
 
             $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
+
+            $table->index('member_id');
         });
     }
 

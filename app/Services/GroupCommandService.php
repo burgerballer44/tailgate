@@ -155,12 +155,23 @@ class GroupCommandService implements GroupCommandInterface
      */
     public function followTeam(Group $group, ValidatedFollowData $data): Follow
     {
-        if ($group->follow && $group->follow->team_id === $data->team_id) {
+        $duplicateFollowExists = $group->follows()
+            ->where('team_id', $data->team_id)
+            ->where('sport', $data->sport?->value)
+            ->exists();
+
+        if ($duplicateFollowExists) {
             throw new \Exception('This group is already following this team.');
         }
 
-        return $group->follow()->create([
+        $followCount = $group->follows()->count();
+        if ($followCount >= $group->follow_limit) {
+            throw new \Exception('This group has reached its follow limit.');
+        }
+
+        return $group->follows()->create([
             'team_id' => $data->team_id,
+            'sport' => $data->sport?->value,
         ]);
     }
 
@@ -170,10 +181,8 @@ class GroupCommandService implements GroupCommandInterface
      *
      * @param  Group  $group  The group to unfollow.
      */
-    public function removeFollow(Group $group): void
+    public function removeFollow(Group $group, Follow $follow): void
     {
-        if ($group->follow) {
-            $group->follow->delete();
-        }
+        $group->follows()->whereKey($follow->id)->delete();
     }
 }

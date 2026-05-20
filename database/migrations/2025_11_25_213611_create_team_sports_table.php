@@ -20,6 +20,8 @@ return new class extends Migration
 
             $table->unique(['team_id', 'sport']);
             $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
+
+            $table->index('sport');
         });
     }
 

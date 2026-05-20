@@ -36,34 +36,52 @@
             </x-forms.multi-section-form>
         </x-groups.section-card>
 
-        {{-- Followed team --}}
-        <x-groups.section-card title="Followed team" description="The team this group follows for predictions.">
-                @if ($group->isFollowingTeam())
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">{{ $group->follow->team->display_name }}</p>
-                            <p class="mt-0.5 text-xs text-gray-500">Upcoming games for this team will automatically appear for prediction.</p>
-                        </div>
-                        <form
-                            action="{{ route('groups.follow.destroy', ['group' => $group, 'follow' => $group->follow]) }}"
-                            method="POST"
-                            class="ml-4 shrink-0"
-                        >
-                            @csrf
-                            @method('DELETE')
-                            <x-buttons.danger-button type="submit" confirm="Are you sure you want to unfollow this team?">
-                                Unfollow
-                            </x-buttons.danger-button>
-                        </form>
-                    </div>
+        {{-- Followed teams --}}
+        <x-groups.section-card title="Followed teams" description="The teams this group follows for predictions.">
+            @php
+                $follows = $group->follow_collection;
+                $canAddFollow = $follows->count() < $group->follow_limit;
+            @endphp
+
+            <div class="mb-3 text-xs text-gray-500">
+                {{ $follows->count() }} of {{ $group->follow_limit }} follow slots used.
+            </div>
+
+            @if ($follows->isEmpty())
+                <p class="text-sm text-gray-500">No teams followed yet. Follow a team to start making predictions.</p>
+            @else
+                <ul class="space-y-3">
+                    @foreach ($follows as $follow)
+                        <li class="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">{{ $follow->team->display_name }}</p>
+                                <p class="mt-0.5 text-xs text-gray-500">Sport scope: {{ $follow->sport?->value ?? 'All sports' }}</p>
+                            </div>
+                            <form
+                                action="{{ route('groups.follow.destroy', ['group' => $group, 'follow' => $follow]) }}"
+                                method="POST"
+                                class="ml-4 shrink-0"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <x-buttons.danger-button type="submit" confirm="Are you sure you want to unfollow this team?">
+                                    Unfollow
+                                </x-buttons.danger-button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+
+            <div class="mt-4 flex items-center justify-end">
+                @if ($canAddFollow)
+                    <x-buttons.nav-button route="groups.follow-team.create" :params="['group' => $group]" class="ml-4 shrink-0">
+                        Follow a team
+                    </x-buttons.nav-button>
                 @else
-                    <div class="flex items-center justify-between">
-                        <p class="text-sm text-gray-500">No team followed yet. Follow a team to start making predictions.</p>
-                        <x-buttons.nav-button route="groups.follow-team.create" :params="['group' => $group]" class="ml-4 shrink-0">
-                            Follow a team
-                        </x-buttons.nav-button>
-                    </div>
+                    <p class="text-sm text-gray-500">Follow limit reached. Remove a follow to add another team.</p>
                 @endif
+            </div>
         </x-groups.section-card>
 
         {{-- Members --}}
