@@ -47,15 +47,16 @@ Everything else — leaderboards, prediction history, admin dashboards, notifica
 - Create a group.
 - Join a group by invite code (creates a pending membership).
 - View group details once approved.
+- Manage players from the group page (create, edit, delete) for their own approved membership.
 - Group admin/owner actions: edit group name, approve/reject/remove members, follow or unfollow teams (optionally scoped to a sport).
+- Group admin/owner can manage players for any approved member from Manage group.
 
 ### What is missing for the MVP
 
-- **Player creation** — users cannot create players from the UI.
 - **Game listing** — users have no view to see upcoming games for their group's followed teams.
 - **Score predictions** — users cannot submit predictions from the UI.
 
-These three items are the entire remaining scope of the MVP.
+These two items are the entire remaining scope of the MVP.
 
 ### Shared service layer
 
@@ -108,21 +109,15 @@ This split keeps product behavior clear: "we follow this team" is durable, optio
 
 Work through these phases in sequence. Each phase should be treated as a vertical slice — routes, controller, views, and tests together before moving on.
 
-### Phase 1: Player creation
+### Phase 1: Player management (completed)
 
-The user should be able to create players under their own membership in a group. The relevant questions to answer through UX design before writing code:
+User-facing player management has been implemented with role-aware behavior:
 
-- How many players can a member have? Is there a limit per group? How should the UI communicate that limit?
-- Where does a user navigate to create a player — from the group page, from their profile, from the dashboard?
-- What information does a player need beyond a name?
-
-Once the UX is clear, implement:
-
-- User-facing routes under the existing `group.member` middleware.
-- A `PlayerController` handling index, create, and store.
-- Views that fit within the existing layout and component patterns.
-- Middleware or policy checks ensuring users can only manage their own players.
-- Feature tests covering creation, validation errors, and authorization failures.
+- Regular approved members can manage only their own players from the group show page.
+- Group admin/owner can manage players for any approved member from Manage group.
+- Regular self-service player creation is capped at `1` player per member.
+- Admin-managed creation follows the group's `player_limit` for the selected member.
+- Feature coverage exists for create/edit/delete paths, limit enforcement, and authorization boundaries.
 
 ### Phase 2: Game listing and score prediction
 
@@ -154,77 +149,3 @@ Connect the completed flows into the existing navigation:
 - Review any service or model changes made during phases 1–3 and ensure they are consistent with the rest of the codebase.
 - Ensure all new routes, controllers, and service methods have test coverage.
 - Remove or reconcile any developer-panel assumptions that were found to conflict with the real user flows.
-
-## Existing route surface
-
-### User-facing routes (current)
-
-- `/` — welcome page (guest only).
-- Auth: register, login, logout, password reset, email verification, Google OAuth.
-- `/dashboard` — user dashboard.
-- `/profile` — profile edit/delete.
-- `/groups/create` — create group.
-- `/groups` (POST) — store group.
-- `/groups/join` — join by invite code form.
-- `/groups/join` (POST) — submit invite code.
-- `/groups/{group}` — show group (approved members only).
-- `/groups/{group}/edit` — manage group (admins only).
-- `/groups/{group}` (PATCH) — update group settings.
-- `/groups/{group}/approve/{member}` — approve join request.
-- `/groups/{group}/reject/{member}` — reject join request.
-- `/groups/{group}/remove/{member}` — remove member.
-- `/groups/{group}/follow-team` — follow team form/store.
-- `/groups/{group}/follow/{follow}` (DELETE) — unfollow team.
-
-### Developer admin routes (role: Developer)
-
-Full CRUD for users, teams, seasons, games, groups, members, players, and scores. Team and game import from CFBD and CBBD APIs. These routes exist under `/developer` and are only accessible to accounts with the Developer role. They are an independent data management interface used during development and testing — separate from the user-facing product, sharing the same service layer underneath.
-
-## Tech stack
-
-- PHP ^8.2, Laravel ^13
-- Vite + Tailwind CSS 4 + Alpine.js
-- Pest for testing
-- SQLite by default (local development)
-
-## Local setup
-
-```bash
-composer install
-npm install
-cp .env.example .env
-php artisan key:generate
-touch database/database.sqlite   # only needed if the file doesn't exist
-php artisan migrate
-composer run dev                  # starts server, queue, log watcher, and Vite together
-```
-
-Seed if your branch includes seeders:
-
-```bash
-php artisan db:seed
-```
-
-## External service keys (optional)
-
-Only needed when using import tools or Google login:
-
-```
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=
-
-CFBD_API_TOKEN=
-CFBD_BASE_URL=   # defaults to https://api.collegefootballdata.com
-
-CBBD_API_TOKEN=
-CBBD_BASE_URL=   # defaults to https://api.collegebasketballdata.com
-```
-
-## Running tests
-
-```bash
-./vendor/bin/pest                                               # full suite
-./vendor/bin/pest tests/Feature/GroupControllerTest.php        # single file
-./vendor/bin/pest --filter "creates a group"                   # single test
-```

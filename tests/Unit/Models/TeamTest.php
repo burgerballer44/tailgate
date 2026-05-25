@@ -92,7 +92,7 @@ describe('logo_badge', function () {
 });
 
 describe('display_name', function () {
-    test('returns full display name with conference and abbreviation when all fields are present', function () {
+    test('returns full display name with abbreviation when all fields are present', function () {
         $team = new Team([
             'organization' => 'North Carolina',
             'designation' => 'Tar Heels',
@@ -100,10 +100,10 @@ describe('display_name', function () {
             'abbreviation' => 'UNC',
         ]);
 
-        expect($team->display_name)->toBe('North Carolina Tar Heels (ACC | UNC)');
+        expect($team->display_name)->toBe('North Carolina Tar Heels (UNC)');
     });
 
-    test('returns name only when conference and abbreviation are missing', function () {
+    test('returns name only when abbreviation is missing', function () {
         $team = new Team([
             'organization' => 'North Carolina',
             'designation' => 'Tar Heels',
@@ -122,6 +122,6 @@ describe('display_name', function () {
             'abbreviation' => 'UNC',
         ]);
 
-        expect($team->display_name)->toBe('Unknown Team (ACC | UNC)');
+        expect($team->display_name)->toBe('Unknown Team (UNC)');
     });
 });

@@ -5,9 +5,11 @@ use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Models\Player;
 use App\Models\Season;
 use App\Models\Sport;
 use App\Models\Team;
+use App\Models\User;
 
 beforeEach(function () {
     $this->user = signInRegularUser();
@@ -173,6 +175,94 @@ describe('show', function () {
 
         $response->assertForbidden();
     });
+
+    test('shows create player action on group page when current member has no players', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertOk();
+        $response->assertSee(route('groups.members.players.create', ['group' => $group, 'member' => $member]), false);
+    });
+
+    test('hides create player action on group page once regular member reaches self-service limit', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        Player::factory()->for($member)->create();
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertOk();
+        $response->assertDontSee(route('groups.members.players.create', ['group' => $group, 'member' => $member]), false);
+    });
+
+    test('hides create player action on group page when member reached player limit', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        Player::factory()->for($member)->create();
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertOk();
+        $response->assertDontSee(route('groups.members.players.create', ['group' => $group, 'member' => $member]), false);
+    });
+
+    test('lists member players alphabetically without query filtering', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        Player::factory()->for($member)->create(['player_name' => 'Alpha Runner']);
+        Player::factory()->for($member)->create(['player_name' => 'Beta Shooter']);
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertOk();
+        $response->assertViewHas('memberPlayers', function ($memberPlayers) {
+            return $memberPlayers->count() === 2
+                && $memberPlayers->first()->player_name === 'Alpha Runner';
+        });
+    });
+
+    test('shows sport icon when follow is scoped and all sports icons when unscoped', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => Team::factory()->create()->id,
+            'sport' => Sport::FOOTBALL,
+        ]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => Team::factory()->create()->id,
+            'sport' => null,
+        ]);
+
+        $response = $this->get(route('groups.show', $group));
+
+        $response->assertOk();
+        $response->assertSee('&#127944;', false);
+        $response->assertSee('&#127936;', false);
+    });
 });
 
 describe('edit', function () {
@@ -227,6 +317,81 @@ describe('edit', function () {
         $response = $this->get(route('groups.edit', $group));
 
         $response->assertForbidden();
+    });
+
+    test('selects current admin member by default when no member query is provided', function () {
+        $group = Group::factory()->create();
+        $adminMember = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        Player::factory()->for($adminMember)->create(['player_name' => 'Admin Player']);
+
+        $response = $this->get(route('groups.edit', $group));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedMember', fn ($selectedMember) => $selectedMember?->id === $adminMember->id);
+        $response->assertViewHas('managedPlayers', fn ($managedPlayers) => $managedPlayers && $managedPlayers->count() === 1);
+    });
+
+    test('uses member query to select member and list managed players', function () {
+        $group = Group::factory()->create();
+
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $targetUser = User::factory()->create();
+
+        $targetMember = Member::factory()->create([
+            'user_id' => $targetUser->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        Player::factory()->for($targetMember)->create(['player_name' => 'Target Match']);
+        Player::factory()->for($targetMember)->create(['player_name' => 'Target Other']);
+
+        $response = $this->get(
+            route('groups.edit', $group).'?member='.$targetMember->ulid.'&q=Match'
+        );
+
+        $response->assertOk();
+        $response->assertViewHas('selectedMember', fn ($selectedMember) => $selectedMember?->id === $targetMember->id);
+        $response->assertViewHas('managedPlayers', function ($managedPlayers) {
+            return $managedPlayers
+                && $managedPlayers->count() === 2
+                && $managedPlayers->first()->player_name === 'Target Match';
+        });
+    });
+
+    test('falls back to current admin member when member query does not match an approved member', function () {
+        $group = Group::factory()->create();
+
+        $adminMember = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        Player::factory()->for($adminMember)->create(['player_name' => 'Fallback Admin Player']);
+
+        $response = $this->get(route('groups.edit', [
+            'group' => $group,
+            'member' => '01INVALIDULIDVALUE',
+        ]));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedMember', fn ($selectedMember) => $selectedMember?->id === $adminMember->id);
+        $response->assertViewHas('managedPlayers', fn ($managedPlayers) => $managedPlayers && $managedPlayers->count() === 1);
     });
 });
 

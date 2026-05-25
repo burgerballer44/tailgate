@@ -1,6 +1,7 @@
 @php
     $followDescription = 'No team followed yet.';
     $follows = $group->follow_collection;
+    $regularMemberPlayerLimit = \App\Models\Group::REGULAR_MEMBER_PLAYER_LIMIT;
     if ($follows->isNotEmpty()) {
         $followDescription = $follows->count().' team'.($follows->count() === 1 ? '' : 's').' followed';
     }
@@ -26,11 +27,17 @@
                 <div class="px-6 py-5">
                     <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Following</p>
                     <p class="mt-1 text-sm font-semibold text-gray-900">
-                        @if ($follows->isNotEmpty())
-                            {{ $follows->count() }}
-                            <span class="font-normal text-gray-400">/ {{ $group->follow_limit }} slots used</span>
+                        @if ($follows->isEmpty())
+                            <p class="text-sm text-gray-500">No teams followed yet.</p>
                         @else
-                            <span class="font-normal text-gray-400">No team yet</span>
+                            <ul class="space-y-2">
+                                @foreach ($follows as $follow)
+                                    <li class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                                        <p class="font-semibold text-gray-900">{{ $follow->team->display_name }}</p>
+                                        <p class="text-gray-500">{{ $follow->sport_display }}</p>
+                                    </li>
+                                @endforeach
+                            </ul>
                         @endif
                     </p>
                 </div>
@@ -41,7 +48,7 @@
                 <div class="px-6 py-5">
                     <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Members</p>
                     <p class="mt-1 text-sm font-semibold text-gray-900">
-                        {{ $group->members->count() }}
+                        {{ $group->members_count }}
                         <span class="font-normal text-gray-400">/ {{ $group->member_limit }}</span>
                     </p>
                 </div>
@@ -52,18 +59,54 @@
             </div>
         </x-groups.section-card>
 
-        <x-groups.section-card title="Followed teams" description="Teams this group can predict games for.">
-            @if ($follows->isEmpty())
-                <p class="text-sm text-gray-500">No teams followed yet.</p>
+        {{-- My Players --}}
+        <x-groups.section-card overflowClass="overflow-visible" title="My players" description="Manage your players.">
+            @if ($playerCount > 0)
+                <div class="space-y-4">
+                    <x-tables.full-width
+                        :headers="['Player Name', 'Created', 'Actions']"
+                        :rows="$memberPlayers"
+                        :columns="[
+                            'player_name',
+                            fn ($row) => $row->created_at?->format('M d, Y'),
+                        ]"
+                        :rowActions="[
+                            [
+                                'label' => 'Edit',
+                                'route' => 'groups.members.players.edit',
+                                'routeParams' => ['group' => $group, 'member' => $currentMember, 'player' => 'ulid'],
+                            ],
+                            [
+                                'label' => 'Delete',
+                                'type' => 'form',
+                                'route' => 'groups.members.players.destroy',
+                                'routeParams' => ['group' => $group, 'member' => $currentMember, 'player' => 'ulid'],
+                                'confirm' => 'Are you sure you want to delete this player?',
+                            ],
+                        ]"
+                        emptyTitle="No players match this filter"
+                        emptyDescription="Try a different search term."
+                    />
+
+                    @if ($playerCount < $regularMemberPlayerLimit)
+                        <div class="flex justify-end">
+                            <x-buttons.nav-button
+                                route="groups.members.players.create"
+                                :params="['group' => $group, 'member' => $currentMember]"
+                            >
+                                Create player
+                            </x-buttons.nav-button>
+                        </div>
+                    @endif
+                </div>
             @else
-                <ul class="space-y-2">
-                    @foreach ($follows as $follow)
-                        <li class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
-                            <span class="font-semibold text-gray-900">{{ $follow->team->display_name }}</span>
-                            <span class="text-gray-500">- {{ $follow->sport?->value ?? 'All sports' }}</span>
-                        </li>
-                    @endforeach
-                </ul>
+                <x-empty-state
+                    title="No players yet"
+                    description="Create a player to start submitting score predictions."
+                    buttonText="Create player"
+                    buttonRoute="groups.members.players.create"
+                    :buttonParams="['group' => $group, 'member' => $currentMember]"
+                />
             @endif
         </x-groups.section-card>
 
@@ -78,27 +121,9 @@
             />
         </x-groups.section-card>
 
-        {{-- My Players & Predictions --}}
-        {{-- TODO: wire up PlayerQueryService and ScoreCommandService per member --}}
-        <x-groups.section-card title="My players &amp; predictions" description="Manage your players and submit score predictions per game.">
-            <x-slot name="headerAction">
-                {{-- TODO: replace with link to player creation once wired up --}}
-                <span class="inline-flex items-center rounded-md bg-carolina/15 px-2.5 py-1 text-xs font-medium text-navy ring-1 ring-inset ring-carolina/30">
-                    Coming soon
-                </span>
-            </x-slot>
-
-            <x-empty-state
-                title="No players yet"
-                description="Create a player to start submitting score predictions."
-                :buttonText="null"
-                :buttonRoute="null"
-            />
-        </x-groups.section-card>
-
         {{-- Scores --}}
         {{-- TODO: wire up PlayerQueryService / ScoreQueryService for historical results --}}
-        <x-groups.section-card title="Scores &amp; results" description="How your predictions compared to final scores.">
+        <x-groups.section-card title="Scores & results" description="How your predictions compared to final scores.">
             <x-empty-state
                 title="No results yet"
                 description="Completed game results and your prediction scores will show here."

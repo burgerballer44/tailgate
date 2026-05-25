@@ -15,8 +15,11 @@ use App\Models\MemberStatus;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
+use App\Services\Contracts\MemberQueryInterface;
+use App\Services\Contracts\PlayerQueryInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 
 /**
@@ -38,6 +41,8 @@ class GroupController extends Controller
         private GroupCommandInterface $groupCommandService,
         private GroupQueryInterface $groupQueryService,
         private MemberCommandInterface $memberCommandService,
+        private MemberQueryInterface $memberQueryService,
+        private PlayerQueryInterface $playerQueryService,
         private TeamQueryInterface $teamQueryService,
     ) {}
 
@@ -146,33 +151,84 @@ class GroupController extends Controller
     /**
      * Display the specified group details.
      *
-     * This method shows detailed information about a group, including members,
-     * pending join requests, and other group data. Any member can view details.
+     * This method shows the group details page, which includes information about
+     * the group, its members, and other related data.
      *
+     * @param  Request  $request  The incoming request instance
      * @param  Group  $group  The group to display
      * @return View Returns the group details view
      */
-    public function show(Group $group): View
+    public function show(Request $request, Group $group): View
     {
-        $group->load(['follows.team']);
+        // get the authenticated user
+        $user = $request->user();
 
-        return view('groups.show', ['group' => $group]);
+        // load core group context used by the user-facing group details page
+        $group->load(['owner', 'follows.team'])->loadCount('members');
+
+        // resolve the current signed-in approved member record for this group.
+        $currentMember = $this->memberQueryService->findApprovedMemberForGroupAndUser(
+            $group,
+            $user
+        );
+
+        // get all players for this member
+        $memberPlayers = $this->playerQueryService->getAllForMember($currentMember);
+
+        return view('groups.show', [
+            'group' => $group,
+            'currentMember' => $currentMember,
+            'memberPlayers' => $memberPlayers,
+            'playerCount' => $memberPlayers->count(),
+        ]);
     }
 
     /**
      * Show the form for editing the specified group.
      *
-     * This method displays the group management form where owners and admins
-     * can manage group settings, approve/reject join requests, and manage members.
+     * This method displays the group management form where admins can
+     * manage group settings, approve/reject join requests, and manage members.
      *
      * @param  Group  $group  The group to edit
      * @return View Returns the group edit view
      */
-    public function edit(Group $group): View
+    public function edit(Request $request, Group $group): View
     {
+        // get the authenticated user
+        $user = $request->user();
+
+        // load group follows used by the manage page summary cards
         $group->load(['follows.team']);
 
-        return view('groups.edit', ['group' => $group]);
+        // Get the approved members from the query service so the controller
+        // stays focused on request flow and view composition.
+        $approvedMembers = $this->memberQueryService->getApprovedMembersForGroup($group);
+
+        // Member selection priority:
+        // 1) explicit ?member=<ulid> from the member selector
+        // 2) current admin's own member record
+        // 3) first approved member as a safe fallback
+        $selectedMemberUlid = $request->query('member');
+        $selectedMemberUlid = is_string($selectedMemberUlid) ? $selectedMemberUlid : null;
+        $currentAdminMember = $approvedMembers->firstWhere('user_id', $user->id);
+
+        $selectedMember = $selectedMemberUlid
+            ? $approvedMembers->firstWhere('ulid', $selectedMemberUlid)
+            : $currentAdminMember;
+
+        $selectedMember ??= $approvedMembers->first();
+
+        $managedPlayers = null;
+        if ($selectedMember) {
+            $managedPlayers = $this->playerQueryService->getAllForMember($selectedMember);
+        }
+
+        return view('groups.edit', [
+            'group' => $group,
+            'approvedMembers' => $approvedMembers,
+            'selectedMember' => $selectedMember,
+            'managedPlayers' => $managedPlayers,
+        ]);
     }
 
     /**

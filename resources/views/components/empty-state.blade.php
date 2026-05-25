@@ -3,6 +3,7 @@
     'description',
     'buttonText',
     'buttonRoute',
+    'buttonParams' => [],
 ])
 
 <div class="text-center">
@@ -25,7 +26,7 @@
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $description }}</p>
     <div class="mt-6">
         @if ($buttonRoute && $buttonText)
-            <x-buttons.nav-button :route="$buttonRoute">
+            <x-buttons.nav-button :route="$buttonRoute" :params="$buttonParams">
                 {{ $buttonText }}
             </x-buttons.nav-button>
         @endif

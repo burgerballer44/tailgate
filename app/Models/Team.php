@@ -151,13 +151,12 @@ class Team extends Model
     {
         $organization = trim((string) $this->organization);
         $designation = trim((string) $this->designation);
-        $conference = trim((string) $this->conference);
         $abbreviation = trim((string) $this->abbreviation);
 
         $nameParts = array_filter([$organization, $designation]);
         $name = $nameParts !== [] ? implode(' ', $nameParts) : 'Unknown Team';
 
-        $metaParts = array_filter([$conference, $abbreviation]);
+        $metaParts = array_filter([$abbreviation]);
 
         if ($metaParts === []) {
             return $name;

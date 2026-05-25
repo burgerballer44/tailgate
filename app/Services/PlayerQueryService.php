@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Member;
 use App\Models\Player;
 use App\Services\Contracts\PlayerQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class PlayerQueryService implements PlayerQueryInterface
 {
@@ -18,5 +20,15 @@ class PlayerQueryService implements PlayerQueryInterface
     public function query(array $query): Builder
     {
         return Player::filter($query ?? []);
+    }
+
+    /**
+     * Get all players for a member in stable alphabetical order.
+     */
+    public function getAllForMember(Member $member): Collection
+    {
+        return $member->players()
+            ->orderBy('player_name')
+            ->get();
     }
 }

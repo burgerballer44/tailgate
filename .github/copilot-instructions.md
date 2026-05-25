@@ -2,7 +2,7 @@
 applyTo: '**'
 ---
 
-# GitHub Copilot Instructions for Laravel 12 Projects
+# GitHub Copilot Instructions for Laravel 13 Projects
 
 ## ✅ General Coding Standards
 
@@ -26,9 +26,9 @@ applyTo: '**'
 - Adopt **final classes** where extension is not intended.
 - Use **Named Arguments** for improved clarity when calling functions with multiple parameters.
 
-## ✅ Laravel 12 Project Structure & Conventions
+## ✅ Laravel 13 Project Structure & Conventions
 
-- Target Laravel ^12 (PHP ^8.4) unless the repo states otherwise.
+- Target Laravel ^13 (PHP ^8.4) unless the repo states otherwise.
 - Follow the official Laravel project structure:
     - `app/Http/Controllers` - Controllers
     - `app/Models` - Eloquent models

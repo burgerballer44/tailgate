@@ -19,6 +19,7 @@ use App\Http\Controllers\Developer\DeveloperSeasonController;
 use App\Http\Controllers\Developer\DeveloperTeamController;
 use App\Http\Controllers\Developer\DeveloperUserController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,12 +86,26 @@ Route::middleware('auth')->group(function () {
             Route::post('join', [GroupController::class, 'requestJoin'])->name('request-join');
 
             // these routes require the user to be an approved member of the group
-            Route::middleware('group.member')->group(function () {
+            Route::middleware('user.group.member')->group(function () {
                 Route::get('{group}', [GroupController::class, 'show'])->name('show');
             });
 
+            // player management routes - nested resource for managing players within groups
+            Route::middleware('group.member.belongs', 'group.member.approved')
+                ->resource('{group}/members.players', PlayerController::class)
+                ->except(['index', 'show']);
+
+            Route::middleware(['user.group.admin', 'group.member.belongs', 'group.member.approved'])->prefix('{group}/manage')->name('manage.')->group(function () {
+                Route::get('members/{member}/players', [PlayerController::class, 'index'])->name('members.players.index');
+                Route::get('members/{member}/players/create', [PlayerController::class, 'create'])->name('members.players.create');
+                Route::post('members/{member}/players', [PlayerController::class, 'store'])->name('members.players.store');
+                Route::get('members/{member}/players/{player}/edit', [PlayerController::class, 'edit'])->name('members.players.edit');
+                Route::put('members/{member}/players/{player}', [PlayerController::class, 'update'])->name('members.players.update');
+                Route::delete('members/{member}/players/{player}', [PlayerController::class, 'destroy'])->name('members.players.destroy');
+            });
+
             // these routes require the user to be an approved admin of the group
-            Route::middleware('group.admin')->group(function () {
+            Route::middleware('user.group.admin')->group(function () {
                 Route::get('{group}/edit', [GroupController::class, 'edit'])->name('edit');
                 Route::patch('{group}', [GroupController::class, 'update'])->name('update');
                 Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])

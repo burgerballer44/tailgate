@@ -54,8 +54,8 @@ describe('get available teams for follow', function () {
         $teams = $this->service->getAvailableTeamsForFollow();
 
         expect($teams->pluck('display_name')->all())->toBe([
-            'Alabama Crimson Tide (SEC | BAMA)',
-            'North Carolina Tar Heels (ACC | UNC)',
+            'Alabama Crimson Tide (BAMA)',
+            'North Carolina Tar Heels (UNC)',
         ]);
     });
 
@@ -70,6 +70,6 @@ describe('get available teams for follow', function () {
         $team = $this->service->getAvailableTeamsForFollow()->first();
 
         expect($team)->not->toBeNull()
-            ->and($team->display_name)->toBe('Duke Blue Devils (ACC | DUKE)');
+            ->and($team->display_name)->toBe('Duke Blue Devils (DUKE)');
     });
 });

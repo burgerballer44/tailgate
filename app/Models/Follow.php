@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class Follow extends Model
@@ -67,5 +68,21 @@ class Follow extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    /**
+     * Get the follow sport display value as an icon or all-sports label.
+     */
+    public function getSportDisplayAttribute(): HtmlString
+    {
+        if (! $this->sport instanceof Sport) {
+            $allSportsEntities = collect(Sport::cases())
+                ->map(fn (Sport $sport) => $sport->htmlEntity()->entity())
+                ->implode(' ');
+
+            return new HtmlString($allSportsEntities);
+        }
+
+        return new HtmlString($this->sport->htmlEntity()->entity());
     }
 }

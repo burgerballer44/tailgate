@@ -19,8 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role' => CheckRole::class,
-            'group.member' => EnsureUserIsGroupMember::class,
-            'group.admin' => EnsureUserIsGroupAdmin::class,
+            'user.group.member' => EnsureUserIsGroupMember::class,
+            'user.group.admin' => EnsureUserIsGroupAdmin::class,
             'group.member.belongs' => MemberMustBeInGroup::class,
             'group.member.approved' => MemberMustBeApproved::class,
             'group.follow.belongs' => FollowBelongsToGroup::class,

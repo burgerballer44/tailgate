@@ -84,6 +84,86 @@
             </div>
         </x-groups.section-card>
 
+        <x-groups.section-card title="Player management" description="Manage players for any approved group member.">
+            @if ($approvedMembers->isEmpty())
+                <p class="text-sm text-gray-500">No approved members available yet.</p>
+            @else
+                <form method="GET" action="{{ route('groups.edit', $group) }}" class="mb-4 max-w-sm">
+                    <x-inputs.input-label for="member" :value="__('Member')" />
+                    <select
+                        id="member"
+                        name="member"
+                        class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        onchange="this.form.submit()"
+                    >
+                        @foreach ($approvedMembers as $approvedMember)
+                            <option value="{{ $approvedMember->ulid }}" @selected($selectedMember && $selectedMember->id === $approvedMember->id)>
+                                {{ $approvedMember->user->name }} ({{ $approvedMember->players_count }} player{{ $approvedMember->players_count === 1 ? '' : 's' }})
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+
+                @if ($selectedMember)
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                        <p class="text-sm text-gray-700">
+                            Managing players for <span class="font-semibold">{{ $selectedMember->user->name }}</span>
+                        </p>
+                    </div>
+
+                    <div class="mt-4 flex items-center justify-end">
+                        @if ($selectedMember->players_count < $group->player_limit)
+                            <x-buttons.nav-button
+                                route="groups.manage.members.players.create"
+                                :params="['group' => $group, 'member' => $selectedMember]"
+                            >
+                                Create player
+                            </x-buttons.nav-button>
+                        @else
+                            <p class="text-sm text-gray-500">Player limit reached for this member.</p>
+                        @endif
+                    </div>
+
+                    <div class="mt-4">
+                        @if ($managedPlayers && $managedPlayers->isNotEmpty())
+                            <x-tables.full-width
+                                :headers="['Player Name', 'Created', 'Actions']"
+                                :rows="$managedPlayers"
+                                :columns="[
+                                    'player_name',
+                                    fn ($row) => $row->created_at?->format('M d, Y'),
+                                ]"
+                                :rowActions="[
+                                    [
+                                        'label' => 'Edit',
+                                        'route' => 'groups.manage.members.players.edit',
+                                        'routeParams' => ['group' => $group, 'member' => $selectedMember, 'player' => 'ulid'],
+                                    ],
+                                    [
+                                        'label' => 'Delete',
+                                        'type' => 'form',
+                                        'route' => 'groups.manage.members.players.destroy',
+                                        'routeParams' => ['group' => $group, 'member' => $selectedMember, 'player' => 'ulid'],
+                                        'confirm' => 'Are you sure you want to delete this player?',
+                                    ],
+                                ]"
+                                emptyTitle="No players yet"
+                                emptyDescription="Create a player for this member to start predictions."
+                            />
+                        @else
+                            <x-empty-state
+                                title="No players yet"
+                                description="Create a player for this member to start predictions."
+                                buttonText="Create player"
+                                buttonRoute="groups.manage.members.players.create"
+                                :buttonParams="['group' => $group, 'member' => $selectedMember]"
+                            />
+                        @endif
+                    </div>
+                @endif
+            @endif
+        </x-groups.section-card>
+
         {{-- Members --}}
         <x-groups.section-card
             title="Members"

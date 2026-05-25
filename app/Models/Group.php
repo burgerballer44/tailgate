@@ -29,7 +29,10 @@ class Group extends Model
     public const INITIAL_MEMBER_LIMIT = 30;
 
     // initial maximum number of players for a player who can have multiple
-    public const INITIAL_PLAYER_LIMIT = 5;
+    public const INITIAL_PLAYER_LIMIT = 3;
+
+    // default player limit for regular self-service member management
+    public const REGULAR_MEMBER_PLAYER_LIMIT = 1;
 
     // initial maximum number of teams a group can follow
     public const INITIAL_FOLLOW_LIMIT = 1;
