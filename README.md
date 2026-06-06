@@ -121,22 +121,89 @@ User-facing player management has been implemented with role-aware behavior:
 - Admin-managed creation follows the group's `player_limit` for the selected member.
 - Feature coverage exists for create/edit/delete paths, limit enforcement, and authorization boundaries.
 
-### Phase 2: Game listing and score prediction
+### Phase 2A: Upcoming games listing (read-only slice)
 
-The user should be able to see upcoming games for their group's followed teams and submit a prediction per player. Questions to design before coding:
+Goal: deliver immediate user value by letting approved members see upcoming games for their group's followed teams before prediction submission is introduced.
 
-- Should predictions be per-player or per-membership? Confirm how the Score model ties a player to a game.
-- When is a game "open" for predictions? Is there a lock time? What happens after the game starts?
-- Can a player change a prediction? Is there a deadline?
-- What does the prediction form look like — one game at a time, or a list of games with inline inputs?
+Scope:
 
-Once the UX is clear, implement:
+- Add routes and controller actions to list upcoming games for a group membership.
+- Show games even when prediction is closed (for example, inactive season), with clear status badges.
+- Respect follow filters: team follow and optional sport scope.
+- Keep this slice read-only; no score entry yet.
 
-- Routes for listing games and submitting predictions, scoped to group membership.
-- A `ScoreController` handling the game list, prediction form, and store/update actions.
-- Views for upcoming games and the prediction form.
-- Validation: non-negative integer scores, game belongs to a team the group follows (and matches follow sport when scoped), submission within allowed window.
-- Feature tests covering the happy path, validation errors, out-of-window submissions, and authorization.
+Definition of done:
+
+- An approved member can open a game list page and understand which games are open or closed for prediction.
+- Empty states explain why no games are currently available.
+
+Testing focus:
+
+- Authorization: only approved members can access the page.
+- Filtering: only games for followed teams and allowed sport scope appear.
+- Status display: open vs closed is correctly derived from season status and game start time.
+
+### Phase 2B: Core prediction submission (required policy rules)
+
+Goal: complete the MVP prediction loop with the required prediction policy rules.
+
+Required rules to implement in this slice:
+
+- Prediction lock time at scheduled game start.
+- Season activity gate for submission (inactive seasons visible but closed).
+- One prediction per player per game (upsert behavior).
+- Edits allowed until lock time.
+- Basic validation and eligibility checks:
+  non-negative integer scores, eligible followed team/sport, and submission within allowed window.
+
+Scope:
+
+- Add create/store/update prediction actions and form UI from the game listing flow.
+- Keep prediction model per-player (not per-membership).
+- Provide user-facing validation and lock-state messages.
+
+Definition of done:
+
+- An approved member can submit and edit predictions for open games and see confirmation.
+- Submissions outside policy are rejected with clear errors.
+
+Testing focus:
+
+- Happy path for create and update before lock.
+- Validation failures (invalid scores, ineligible game, unauthorized player).
+- Out-of-window behavior (post-lock and inactive season).
+- Authorization boundaries for member/group access.
+
+### Phase 2C: Optional competitive policy (admin opt-in)
+
+Goal: add at least one optional rule to support more competitive groups without blocking MVP launch.
+
+MVP optional rule:
+
+- Group-wide unique score predictions per game (admin toggle).
+
+Deferred optional rules (post-MVP, same policy framework):
+
+- Duplicate handling mode (reject vs allow non-scoring duplicate).
+- Blind picks visibility mode.
+- Minimum lead time before lock.
+
+Scope:
+
+- Add group-level prediction policy setting for uniqueness.
+- Enforce uniqueness during prediction create/update.
+- Show clear conflict messaging when a submitted score is disallowed by policy.
+
+Definition of done:
+
+- Group admin can enable/disable uniqueness policy.
+- Members receive immediate, understandable feedback when a duplicate score is blocked.
+
+Testing focus:
+
+- Policy toggle behavior and authorization (admin-only policy changes).
+- Uniqueness enforcement across players in the same group/game.
+- Regression coverage ensuring baseline rules still work when uniqueness is off.
 
 ### Phase 3: Dashboard and group surface updates
 
