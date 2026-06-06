@@ -46,17 +46,14 @@
             title="Season status"
             description="Mark whether this season should currently be treated as active."
         >
-            <div class="mt-4 flex items-center gap-2">
-                <input type="hidden" name="active" value="0" />
-                <input
-                    type="checkbox"
+            <div class="mt-4">
+                <x-form.checkbox
                     id="active"
                     name="active"
-                    value="1"
-                    {{ old('active', $season?->active) ? 'checked' : '' }}
-                    class="text-navy-600 focus:ring-navy-500 rounded border-gray-300 shadow-sm"
+                    label="Active"
+                    :checked="(bool) old('active', $season?->active)"
+                    :includeHidden="true"
                 />
-                <x-inputs.input-label for="active" class="font-semibold" :value="__('Active')" />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('active')" />
             </div>
         </x-forms.form-section>

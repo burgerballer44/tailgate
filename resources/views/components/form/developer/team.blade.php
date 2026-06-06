@@ -101,27 +101,25 @@
             </div>
 
             <div class="mt-4">
-                <x-inputs.input-label for="logos" class="font-semibold" :value="__('Logos (JSON array of URLs)')" />
-                <textarea
-                    id="logos"
+                <x-form.textarea
                     name="logos"
-                    rows="4"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    label="Logos (JSON array of URLs)"
+                    :value="$logosValue"
+                    :rows="4"
                     placeholder='["https://example.com/logo.png"]'
-                >{{ $logosValue }}</textarea>
+                />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('logos')" />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('logos.*')" />
             </div>
 
             <div class="mt-4">
-                <x-inputs.input-label for="social_media" class="font-semibold" :value="__('Social media (JSON array of label/url objects)')" />
-                <textarea
-                    id="social_media"
+                <x-form.textarea
                     name="social_media"
-                    rows="5"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    label="Social media (JSON array of label/url objects)"
+                    :value="$socialMediaValue"
+                    :rows="5"
                     placeholder='[{"label":"X","url":"https://x.com/example"}]'
-                >{{ $socialMediaValue }}</textarea>
+                />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('social_media')" />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('social_media.*')" />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('social_media.*.label')" />
@@ -134,20 +132,14 @@
             description="Select the team type and the sports this team competes in."
         >
             <div>
-                <x-inputs.input-label for="type" class="font-semibold" :value="__('Type')" />
-                <select
-                    id="type"
+                <x-form.select
                     name="type"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                >
-                    <option value="">Select Type</option>
-                    @foreach ($types as $typeOption)
-                        <option value="{{ $typeOption }}" {{ old('type', $team?->type) === $typeOption ? 'selected' : '' }}>
-                            {{ $typeOption }}
-                        </option>
-                    @endforeach
-                </select>
+                    label="Type"
+                    :required="true"
+                    :value="old('type', $team?->type)"
+                    placeholder="Select Type"
+                    :options="collect($types)->mapWithKeys(fn($typeOption) => [$typeOption => $typeOption])->toArray()"
+                />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('type')" />
             </div>
 
@@ -155,17 +147,14 @@
                 <label for="sports" class="block font-semibold">Sports</label>
                 <div class="mt-2 space-y-2">
                     @foreach ($sports as $sport)
-                        <div class="flex items-center">
-                            <input
-                                type="checkbox"
-                                id="sport_{{ $sport }}"
-                                name="sports[]"
-                                value="{{ $sport }}"
-                                {{ in_array($sport, old('sports', $teamSports ?? [])) ? 'checked' : '' }}
-                                class="text-navy-600 focus:ring-navy-500 rounded border-gray-300 shadow-sm"
-                            />
-                            <label for="sport_{{ $sport }}" class="ml-2 text-sm">{{ ucfirst($sport) }}</label>
-                        </div>
+                        <x-form.checkbox
+                            id="sport_{{ $sport }}"
+                            name="sports[]"
+                            :label="ucfirst($sport)"
+                            :value="$sport"
+                            :checked="in_array($sport, old('sports', $teamSports ?? []))"
+                            labelClass="text-sm"
+                        />
                     @endforeach
                 </div>
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('sports')" />

@@ -26,22 +26,18 @@
 
     <div class="mt-6">
         <div class="grid grid-cols-1 sm:hidden">
-            <label for="group-tab-selector" class="sr-only">Select a tab</label>
-            <select
+            <x-form.select
                 id="group-tab-selector"
+                name="group_tab_selector"
+                label="Select a tab"
+                labelClass="sr-only"
+                :value="route('developer.groups.show', ['group' => $group->ulid, 'tab' => $activeTab])"
+                :options="collect($tabs)->mapWithKeys(fn ($label, $key) => [route('developer.groups.show', ['group' => $group->ulid, 'tab' => $key]) => $label])->toArray()"
+                containerClass="col-start-1 row-start-1"
+                class="w-full appearance-none py-2 text-base focus:outline-indigo-600"
                 aria-label="Select a tab"
-                class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-2 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                 onchange="window.location.href = this.value"
-            >
-                @foreach ($tabs as $key => $label)
-                    <option
-                        value="{{ route('developer.groups.show', ['group' => $group->ulid, 'tab' => $key]) }}"
-                        @selected($activeTab === $key)
-                    >
-                        {{ $label }}
-                    </option>
-                @endforeach
-            </select>
+            />
             <svg
                 viewBox="0 0 16 16"
                 fill="currentColor"

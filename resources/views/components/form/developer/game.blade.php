@@ -1,7 +1,7 @@
 <x-forms.multi-section-form :action="$action" :method="$method">
     <x-slot name="sections">
         {{-- hidden season id is included in sections so it is inside the form --}}
-        <input type="hidden" name="season_id" value="{{ $season->id }}" />
+        <x-form.hidden name="season_id" :value="$season->id" />
 
         <x-forms.form-section
             title="Teams"
@@ -78,15 +78,13 @@
             </div>
 
             <div class="mt-4">
-                <x-inputs.input-label for="start_time_tbd" class="font-semibold" :value="__('Start Time TBD')" />
-                <input type="hidden" name="start_time_tbd" value="0" />
-                <input
+                <x-form.checkbox
                     id="start_time_tbd"
                     name="start_time_tbd"
-                    type="checkbox"
+                    label="Start Time TBD"
                     value="1"
-                    class="mt-1 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                    @checked(old('start_time_tbd', $game?->start_time_tbd))
+                    :checked="(bool) old('start_time_tbd', $game?->start_time_tbd)"
+                    :includeHidden="true"
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('start_time_tbd')" />
             </div>

@@ -89,19 +89,16 @@
                 <p class="text-sm text-gray-500">No approved members available yet.</p>
             @else
                 <form method="GET" action="{{ route('groups.edit', $group) }}" class="mb-4 max-w-sm">
-                    <x-inputs.input-label for="member" :value="__('Member')" />
-                    <select
-                        id="member"
+                    <x-form.select
                         name="member"
-                        class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        label="Member"
+                        :value="request('member', $selectedMember?->ulid)"
+                        :options="$approvedMembers->mapWithKeys(fn ($approvedMember) => [
+                            $approvedMember->ulid => $approvedMember->user->name . ' (' . $approvedMember->players_count . ' player' . ($approvedMember->players_count === 1 ? '' : 's') . ')',
+                        ])->toArray()"
                         onchange="this.form.submit()"
-                    >
-                        @foreach ($approvedMembers as $approvedMember)
-                            <option value="{{ $approvedMember->ulid }}" @selected($selectedMember && $selectedMember->id === $approvedMember->id)>
-                                {{ $approvedMember->user->name }} ({{ $approvedMember->players_count }} player{{ $approvedMember->players_count === 1 ? '' : 's' }})
-                            </option>
-                        @endforeach
-                    </select>
+                        class="text-sm"
+                    />
                 </form>
 
                 @if ($selectedMember)
