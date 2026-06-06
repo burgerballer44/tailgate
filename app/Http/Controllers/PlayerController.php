@@ -27,6 +27,26 @@ class PlayerController extends Controller
     ) {}
 
     /**
+     * Display a listing of players for a member.
+     */
+    public function index(Request $request, Group $group, Member $member): View
+    {
+        $this->authorizeMemberPlayerManagement($request, $group, $member, 'view players for your own membership.');
+
+        [$returnRouteName, $returnRouteParams] = $this->getReturnRoute($request, $group, $member);
+
+        return view('groups.players.index', [
+            'group' => $group,
+            'member' => $member,
+            'players' => $member->players()->latest()->paginate(),
+            'routeBaseName' => $this->getRouteBaseName($request),
+            'returnRouteName' => $returnRouteName,
+            'returnRouteParams' => $returnRouteParams,
+            'effectivePlayerLimit' => $this->getEffectivePlayerLimit($request, $group),
+        ]);
+    }
+
+    /**
      * Show the form to create a new player.
      *
      * @param  Group  $group

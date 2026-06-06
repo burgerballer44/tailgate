@@ -2,6 +2,8 @@
 
 use App\Models\Follow;
 use App\Models\Group;
+use App\Models\Member;
+use App\Models\Player;
 use App\Models\Sport;
 use App\Models\Team;
 use App\Models\User;
@@ -214,6 +216,20 @@ describe('viewing a group', function () {
 
         // assert group is passed to view
         $response->assertViewHas('group', $group);
+    });
+
+    test('players tab action links resolve nested route params', function () {
+        $group = Group::factory()->create();
+        $member = Member::factory()->create(['group_id' => $group->id]);
+        $player = Player::factory()->create(['member_id' => $member->id]);
+
+        $response = $this->get(route('developer.groups.show', ['group' => $group, 'tab' => 'players']));
+
+        $response->assertOk();
+        $response->assertSee(
+            route('developer.groups.members.players.show', [$group, $member, $player]),
+            false
+        );
     });
 });
 

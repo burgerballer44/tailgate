@@ -16,7 +16,9 @@ Tailgate has two distinct interfaces that are independent of each other but shar
 
 **User-facing interface** — the product experience. Everything a regular user interacts with: authentication, groups, players, and predictions. This is the primary focus of active development.
 
-**Developer admin section** — a separate interface for developers to manually create and manage data outside of the user flow. It exists to support development and testing: creating teams, seasons, and games via import pipelines, seeding groups and members, and inspecting data directly. It is not a staging environment for user features and does not represent the intended user experience.
+**Developer admin section** — a separate interface for developers to manually create and manage data outside of the user flow. It exists to support development and testing: creating teams, seasons, and games via import pipelines, seeding groups, members, and players, and inspecting data directly. It is not a staging environment for user features and does not represent the intended user experience.
+
+Developer admin player management is intentionally administrative and unrestricted compared to user-facing flows: developers can create, view, edit, and delete players for any group member to support data setup and testing.
 
 Both interfaces call into the same command and query services (`PlayerCommandService`, `GameQueryService`, etc.), but they do so independently. The developer admin has its own controllers, routes, and views. The user-facing product has its own. Shared service logic should be written to accommodate both, and if it does not, it should be updated.
 

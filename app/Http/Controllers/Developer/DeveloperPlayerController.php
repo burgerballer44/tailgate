@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Group\StorePlayerRequest;
+use App\Http\Requests\Developer\StoreDeveloperPlayerRequest;
 use App\Http\Requests\Group\SubmitScoreRequest;
 use App\Http\Requests\Group\UpdatePlayerRequest;
 use App\Http\Requests\Group\UpdateScoreRequest;
@@ -40,7 +40,7 @@ class DeveloperPlayerController extends Controller
         ]);
     }
 
-    public function store(StorePlayerRequest $request, Group $group, Member $member): RedirectResponse
+    public function store(StoreDeveloperPlayerRequest $request, Group $group, Member $member): RedirectResponse
     {
         $this->playerCommandService->createForMember($member, $request->toDTO());
 

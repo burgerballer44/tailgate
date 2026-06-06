@@ -65,12 +65,14 @@
                                                     $routeParams = [];
                                                     if (isset($action['routeParams'])) {
                                                         foreach ($action['routeParams'] as $key => $value) {
-                                                            // if the value is a string and matches a property on the row, use that value
-                                                            if (is_string($value) && isset($row->$value)) {
-                                                                $routeParams[$key] = $row->$value;
-                                                            } else {
-                                                                $routeParams[$key] = $value;
+                                                            // Resolve values from the current row, including nested paths like "member.ulid".
+                                                            if (is_string($value)) {
+                                                                $resolvedValue = data_get($row, $value);
+                                                                $routeParams[$key] = $resolvedValue ?? $value;
+                                                                continue;
                                                             }
+
+                                                            $routeParams[$key] = $value;
                                                         }
                                                     }
                                                     $item = [
