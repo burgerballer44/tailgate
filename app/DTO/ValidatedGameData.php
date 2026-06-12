@@ -5,6 +5,18 @@ namespace App\DTO;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
+/**
+ * Holds validated data for a game, including team IDs, scores, season information, and start time details.
+ * This DTO normalizes and validates game information from various sources for database persistence.
+ *
+ * @param  int  $season_id  The ID of the season the game belongs to.
+ * @param  int  $home_team_id  The ID of the home team.
+ * @param  int  $away_team_id  The ID of the away team.
+ * @param  int  $home_team_score  The final score of the home team.
+ * @param  int  $away_team_score  The final score of the away team.
+ * @param  string|null  $start_date_time  The start date and time of the game in normalized format, or null if unknown.
+ * @param  bool  $start_time_tbd  Whether the start time is to be determined (TBD).
+ */
 readonly class ValidatedGameData
 {
     public function __construct(

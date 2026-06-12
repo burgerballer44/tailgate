@@ -2,6 +2,15 @@
 
 namespace App\DTO;
 
+/**
+ * Holds validated data for a game score prediction, including player ID, game ID, and team score predictions.
+ * This DTO represents a single player's prediction for a specific game, validated for database persistence.
+ *
+ * @param  int|null  $player_id  The ID of the player making the prediction, or null for system-generated predictions.
+ * @param  int|null  $game_id  The ID of the game being predicted, or null if the game is not yet determined.
+ * @param  int  $home_team_prediction  The predicted score for the home team.
+ * @param  int  $away_team_prediction  The predicted score for the away team.
+ */
 readonly class ValidatedScoreData
 {
     public function __construct(

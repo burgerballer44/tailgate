@@ -70,16 +70,23 @@ class CBBDApiClient
      */
     private function streamCollection(string $endpoint, array $query, string $exceptionClass): \Generator
     {
+        // ensure the API token is configured before making the request
         $this->ensureTokenConfigured($exceptionClass);
 
+        // send the request
         $response = $this->sendStreamRequest($endpoint, $query, $exceptionClass);
+
+        // if we get here, we have a successful response with a valid JSON body, so we can stream the items from the response
         $stream = $response->toPsrResponse()->getBody()->detach();
 
+        // validate that we have a valid stream resource before attempting to read from it
         if (! is_resource($stream)) {
             throw $this->newImportException($exceptionClass, 'CBBD returned an invalid response payload.');
         }
 
         try {
+
+            // use JsonMachine to stream items from the response body, which allows us to handle large responses without buffering the entire payload in memory
             foreach (Items::fromStream($stream, ['decoder' => new ExtJsonDecoder(true)]) as $item) {
                 if (! is_array($item)) {
                     throw $this->newImportException($exceptionClass, 'CBBD returned an invalid response payload.');
@@ -87,11 +94,15 @@ class CBBDApiClient
 
                 yield $item;
             }
+
         } catch (GameImportException|TeamImportException $exception) {
+
             throw $exception;
         } catch (Throwable $exception) {
+
             throw $this->newImportException($exceptionClass, 'CBBD returned an invalid response payload.', $exception);
         } finally {
+
             fclose($stream);
         }
     }

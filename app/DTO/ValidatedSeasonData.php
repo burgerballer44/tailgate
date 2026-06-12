@@ -5,6 +5,15 @@ namespace App\DTO;
 use App\Models\SeasonType;
 use App\Models\Sport;
 
+/**
+ * Holds validated data for a season, including the season name, associated sport, season type, and active status.
+ * This DTO ensures season information is properly typed and validated for database persistence.
+ *
+ * @param  string  $name  The name of the season (e.g., "2024", "Fall 2024").
+ * @param  Sport  $sport  The sport enum associated with the season (e.g., Football, Basketball).
+ * @param  SeasonType  $season_type  The type of season enum (e.g., Regular, Playoff, Preseason).
+ * @param  bool|null  $active  Whether the season is currently active, or null to use system default.
+ */
 readonly class ValidatedSeasonData
 {
     public function __construct(

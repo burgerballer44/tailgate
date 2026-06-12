@@ -5,6 +5,20 @@ namespace App\DTO;
 use App\Models\Sport;
 use App\Models\TeamType;
 
+/**
+ * Holds validated data for a team, including organization name, designation, conference, and related metadata.
+ * This DTO normalizes and validates team information from various sources, converting raw data into properly typed entities.
+ *
+ * @param  string  $organization  The full name of the team's organization (e.g., "University of Alabama").
+ * @param  string  $designation  The team's designation or nickname (e.g., "Alabama Crimson Tide").
+ * @param  string  $conference  The conference the team belongs to (e.g., "SEC").
+ * @param  string|null  $abbreviation  The team's abbreviation or short code (e.g., "ALA"), or null if not provided.
+ * @param  string|null  $color  The team's primary color in hex format (e.g., "#9E1B32"), or null if not provided.
+ * @param  array|null  $logos  An array of logo URLs keyed by type or size, or null if not provided.
+ * @param  array|null  $socialMedia  An array of social media links keyed by platform, or null if not provided.
+ * @param  TeamType  $type  The team type enum (e.g., College, Professional).
+ * @param  array  $sports  An array of Sport enum instances the team participates in.
+ */
 readonly class ValidatedTeamData
 {
     public function __construct(
