@@ -1,8 +1,8 @@
 <?php
 
 use App\DTO\GameImportData;
-use App\DTO\ImportFetchStream;
 use App\DTO\ImportedGameData;
+use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Game;
 use App\Models\Season;
@@ -494,7 +494,7 @@ describe('import – error propagation', function () {
         $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(
             items: [
                 importedGame('Alabama', 'Georgia', 21, 14, '2024-09-07', '7:00 PM'),
-                importedGame('Unknown',  'Georgia',  0,  0, '2024-09-14', '3:30 PM'),
+                importedGame('Unknown', 'Georgia', 0, 0, '2024-09-14', '3:30 PM'),
             ],
             errors: ['Skipped CFBD game 0: missing start date.'],
         ));

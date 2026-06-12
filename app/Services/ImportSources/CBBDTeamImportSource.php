@@ -3,8 +3,8 @@
 namespace App\Services\ImportSources;
 
 use App\Clients\CBBDApiClient;
-use App\DTO\ImportFetchStream;
 use App\DTO\ImportedTeamData;
+use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 use App\Models\Sport;
 use App\Models\Team;

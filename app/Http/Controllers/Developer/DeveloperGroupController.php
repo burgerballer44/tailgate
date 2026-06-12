@@ -54,10 +54,6 @@ class DeveloperGroupController extends Controller
      * It also manages the active tab state based on the query parameter.
      * Depending on the active tab, it loads the necessary
      * relationships and data to be displayed in the view.
-     * 
-     * @param Request $request
-     * @param Group $group
-     * @return View
      */
     public function show(Request $request, Group $group): View
     {

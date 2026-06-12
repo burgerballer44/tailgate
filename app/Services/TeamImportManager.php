@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\DTO\ImportResult;
 use App\DTO\ImportedTeamData;
+use App\DTO\ImportResult;
 use App\DTO\TeamImportData;
 use App\DTO\ValidatedTeamData;
 use App\Exceptions\TeamImportException;
@@ -23,8 +23,8 @@ class TeamImportManager implements TeamImportManagerInterface
     /**
      * TeamImportManager constructor.
      *
-     * @param TeamCommandInterface $teamCommandService The service responsible for team commands (create/update).
-     * @param iterable $sources An iterable of available team import sources implementing TeamImportSourceInterface.
+     * @param  TeamCommandInterface  $teamCommandService  The service responsible for team commands (create/update).
+     * @param  iterable  $sources  An iterable of available team import sources implementing TeamImportSourceInterface.
      */
     public function __construct(
         private readonly TeamCommandInterface $teamCommandService,
@@ -103,7 +103,7 @@ class TeamImportManager implements TeamImportManagerInterface
      * @param  int  $processedCount  Number of teams already processed before this chunk (used for error numbering).
      * @param  array<int, string>  $errors  Accumulated errors array, passed by reference.
      * @param  array<string, array<string, Team>>  $teamLookupCache
-     * @return array{0: int, 1: int}  A tuple of [importedCount, updatedCount] for the chunk.
+     * @return array{0: int, 1: int} A tuple of [importedCount, updatedCount] for the chunk.
      */
     private function importChunk(array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): array
     {
@@ -150,8 +150,8 @@ class TeamImportManager implements TeamImportManagerInterface
      * - list fields (logos/social links) are merged and deduplicated
      * - sports are merged so cross-source imports can accumulate multiple sports
      *
-     * @param  ImportedTeamData  $team The incoming team data from the import source.
-     * @param  Team|null  $existingTeam The existing team record if found, or null if this team is new.
+     * @param  ImportedTeamData  $team  The incoming team data from the import source.
+     * @param  Team|null  $existingTeam  The existing team record if found, or null if this team is new.
      * @return array<string, mixed> An array of team data ready for validation and persistence.
      */
     private function buildTeamDataForPersist(ImportedTeamData $team, ?Team $existingTeam): array
@@ -233,8 +233,6 @@ class TeamImportManager implements TeamImportManagerInterface
      * Merge existing and incoming list-like values, preserving existing entries and
      * deduplicating by encoded content to prevent repeated links/assets.
      *
-     * @param  mixed  $existing
-     * @param  mixed  $incoming
      * @return array<int, mixed>|null
      */
     private function mergeLists(mixed $existing, mixed $incoming): ?array
@@ -267,7 +265,6 @@ class TeamImportManager implements TeamImportManagerInterface
      * Normalize a potential list value into a dense array or null.
      * Empty strings, null entries, and empty nested arrays are removed.
      *
-     * @param  mixed  $value
      * @return array<int, mixed>|null
      */
     private function normalizeList(mixed $value): ?array
@@ -333,11 +330,11 @@ class TeamImportManager implements TeamImportManagerInterface
 
         return $fallbackType ?? TeamType::COLLEGE->value;
     }
-    
+
     /**
      * Get the team import source instance matching the given key, or throw an exception if the key is invalid.
-     * 
-     * @param  string  $key The unique key identifying the desired team import source.
+     *
+     * @param  string  $key  The unique key identifying the desired team import source.
      * @return TeamImportSourceInterface The team import source instance matching the given key.
      */
     private function resolveSource(string $key): TeamImportSourceInterface
@@ -355,7 +352,7 @@ class TeamImportManager implements TeamImportManagerInterface
      * Determines the chunk size to use for the import operation based on the provided TeamImportData options.
      * Falls back to a default chunk size if the provided value is invalid or not set.
      *
-     * @param  TeamImportData  $data The data transfer object containing import options, including an optional 'chunk_size'.
+     * @param  TeamImportData  $data  The data transfer object containing import options, including an optional 'chunk_size'.
      * @return int The resolved chunk size to use for processing the import in batches.
      */
     private function resolveChunkSize(TeamImportData $data): int
@@ -370,7 +367,7 @@ class TeamImportManager implements TeamImportManagerInterface
     /**
      * Preloads teams matching the sport/conference combinations in the given
      * chunk into the lookup cache, minimizing database queries during the chunk import.
-     * 
+     *
      * @param  array<int, ImportedTeamData>  $teams
      * @param  array<string, array<string, Team>>  $teamLookupCache
      */

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\GameImportData;
+use App\DTO\ImportedGameData;
 use App\DTO\ImportResult;
 use App\DTO\ValidatedGameData;
 use App\Exceptions\GameImportException;
@@ -60,7 +61,7 @@ class GameImportManager implements GameImportManagerInterface
         $chunk = [];
         $teamLookupCache = [];
         $updatedCount = 0;
-        
+
         // process the fetch stream in chunks to manage memory usage and allow for batch processing of games
         foreach ($fetchStream->items() as $game) {
             $chunk[] = $game;
@@ -95,8 +96,9 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Resolves the import source based on the provided key.
      *
-     * @param string $key The key of the import source to resolve.
+     * @param  string  $key  The key of the import source to resolve.
      * @return GameImportSourceInterface The resolved import source instance.
+     *
      * @throws GameImportException If the specified import source is not found.
      */
     private function resolveSource(string $key): GameImportSourceInterface
@@ -113,7 +115,7 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Determines the chunk size for processing the import based on the provided data options or defaults.
      *
-     * @param GameImportData $data The game import data containing options for the import process.
+     * @param  GameImportData  $data  The game import data containing options for the import process.
      * @return int The resolved chunk size to use for processing the import.
      */
     private function resolveChunkSize(GameImportData $data): int
@@ -129,11 +131,11 @@ class GameImportManager implements GameImportManagerInterface
      * Imports a chunk of games into the specified season, handling team resolution, duplicate detection, and error collection.
      * Existing games (matched by home and away team) are updated with the latest data from the import source.
      *
-     * @param Season $season The season to which the games should be added.
-     * @param array<int, \App\DTO\ImportedGameData> $chunk The chunk of imported game data to process.
-     * @param int $processedCount The count of games processed before this chunk, used for error messaging.
-     * @param array<int, string> $errors A reference to an array where import errors will be collected.
-     * @param array<string, array<string, Team>> $teamLookupCache A reference to a cache for team lookups to optimize performance.
+     * @param  Season  $season  The season to which the games should be added.
+     * @param  array<int, ImportedGameData>  $chunk  The chunk of imported game data to process.
+     * @param  int  $processedCount  The count of games processed before this chunk, used for error messaging.
+     * @param  array<int, string>  $errors  A reference to an array where import errors will be collected.
+     * @param  array<string, array<string, Team>>  $teamLookupCache  A reference to a cache for team lookups to optimize performance.
      * @return array{0: int, 1: int} A tuple of [importedCount, updatedCount] for the chunk.
      */
     private function importChunk(Season $season, array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): array
@@ -232,9 +234,9 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Warms the team lookup cache for the given season and chunk of imported games.
      *
-     * @param Season $season The season for which to warm the team lookup cache.
-     * @param array<int, \App\DTO\ImportedGameData> $chunk The chunk of imported game data.
-     * @param array<string, array<string, Team>> $teamLookupCache A reference to the team lookup cache.
+     * @param  Season  $season  The season for which to warm the team lookup cache.
+     * @param  array<int, ImportedGameData>  $chunk  The chunk of imported game data.
+     * @param  array<string, array<string, Team>>  $teamLookupCache  A reference to the team lookup cache.
      */
     private function warmTeamLookupCache(Season $season, array $chunk, array &$teamLookupCache): void
     {
@@ -297,8 +299,8 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Resolves a team from the lookup cache based on the given team name.
      *
-     * @param array<string, array<string, Team>> $teamLookupCache The team lookup cache.
-     * @param string $teamName The name of the team to resolve.
+     * @param  array<string, array<string, Team>>  $teamLookupCache  The team lookup cache.
+     * @param  string  $teamName  The name of the team to resolve.
      * @return Team|null The resolved team or null if not found.
      */
     private function resolveTeamFromLookup(array $teamLookupCache, string $teamName): ?Team
@@ -318,8 +320,8 @@ class GameImportManager implements GameImportManagerInterface
      * Retrieves existing games for the given season that match any of the home team ID and away team ID pairs from the resolved games.
      * This is used to identify games that should be updated rather than created during the import process.
      *
-     * @param Season $season The season for which to check existing games.
-     * @param array<int, array<string, mixed>> $resolvedGames The resolved games with home team IDs and away team IDs.
+     * @param  Season  $season  The season for which to check existing games.
+     * @param  array<int, array<string, mixed>>  $resolvedGames  The resolved games with home team IDs and away team IDs.
      * @return array<string, Game> An associative array where keys are game signatures ('homeId|awayId') and values are the existing Game models.
      */
     private function existingGamesBySignature(Season $season, array $resolvedGames): array
@@ -350,8 +352,8 @@ class GameImportManager implements GameImportManagerInterface
      * Generates a unique signature for a game based on its home team ID and away team ID.
      * This is used to identify existing games during the import process — the teams define the matchup identity.
      *
-     * @param int $homeTeamId The ID of the home team.
-     * @param int $awayTeamId The ID of the away team.
+     * @param  int  $homeTeamId  The ID of the home team.
+     * @param  int  $awayTeamId  The ID of the away team.
      * @return string A unique signature string representing the game matchup.
      */
     private function gameSignature(int $homeTeamId, int $awayTeamId): string
@@ -362,7 +364,7 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Normalizes a team name by trimming whitespace and converting to lowercase.
      *
-     * @param string $teamName The team name to normalize.
+     * @param  string  $teamName  The team name to normalize.
      * @return string The normalized team name.
      */
     private function normalizeTeamName(string $teamName): string

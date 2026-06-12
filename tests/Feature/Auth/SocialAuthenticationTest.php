@@ -18,7 +18,7 @@ uses(RefreshDatabase::class);
 
 function fakeProviderUser(string $id, ?string $email, ?string $name = 'Google User'): ProviderUser
 {
-    $providerUser = \Mockery::mock(ProviderUser::class);
+    $providerUser = Mockery::mock(ProviderUser::class);
     $providerUser->allows('getId')->andReturn($id);
     $providerUser->allows('getEmail')->andReturn($email);
     $providerUser->allows('getName')->andReturn($name);
@@ -32,7 +32,7 @@ function fakeProviderUser(string $id, ?string $email, ?string $name = 'Google Us
 }
 
 test('google redirect route redirects to provider', function () {
-    $provider = \Mockery::mock(Provider::class);
+    $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('redirect')->once()->andReturn(redirect('https://accounts.google.com/o/oauth2/v2/auth'));
 
     Socialite::shouldReceive('driver')->once()->with('google')->andReturn($provider);
@@ -50,7 +50,7 @@ test('callback logs in an existing linked social account user', function () {
         'provider_user_id' => 'google-123',
     ]);
 
-    $provider = \Mockery::mock(Provider::class);
+    $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->once()->andReturn(fakeProviderUser(id: 'google-123', email: $user->email));
 
     Socialite::shouldReceive('driver')->once()->with('google')->andReturn($provider);
@@ -74,7 +74,7 @@ test('callback links provider account to an existing email user', function () {
         'email' => 'person@example.com',
     ]);
 
-    $provider = \Mockery::mock(Provider::class);
+    $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->once()->andReturn(fakeProviderUser(id: 'google-456', email: 'person@example.com', name: 'Person Example'));
 
     Socialite::shouldReceive('driver')->once()->with('google')->andReturn($provider);
@@ -93,7 +93,7 @@ test('callback links provider account to an existing email user', function () {
 });
 
 test('callback creates a new user and linked social account', function () {
-    $provider = \Mockery::mock(Provider::class);
+    $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->once()->andReturn(fakeProviderUser(
         id: 'google-789',
         email: 'new-person@example.com',
@@ -123,7 +123,7 @@ test('callback creates a new user and linked social account', function () {
 });
 
 test('callback redirects back to login with an error when provider email is missing', function () {
-    $provider = \Mockery::mock(Provider::class);
+    $provider = Mockery::mock(Provider::class);
     $provider->shouldReceive('user')->once()->andReturn(fakeProviderUser(id: 'google-no-email', email: null));
 
     Socialite::shouldReceive('driver')->once()->with('google')->andReturn($provider);

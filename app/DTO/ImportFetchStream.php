@@ -18,8 +18,8 @@ namespace App\DTO;
 class ImportFetchStream
 {
     /**
-     * @param \Generator<int, TItem, void, array<int, string>> $generator
-     *   A generator that yields imported DTO items and returns an array of error strings.
+     * @param  \Generator<int, TItem, void, array<int, string>>  $generator
+     *                                                                       A generator that yields imported DTO items and returns an array of error strings.
      */
     public function __construct(private readonly \Generator $generator) {}
 
@@ -49,8 +49,9 @@ class ImportFetchStream
      * Intended for use in tests and other contexts where a real generator is not needed.
      *
      * @template TFromArrayItem
-     * @param array<int, TFromArrayItem> $items
-     * @param array<int, string> $errors
+     *
+     * @param  array<int, TFromArrayItem>  $items
+     * @param  array<int, string>  $errors
      * @return self<TFromArrayItem>
      */
     public static function fromArray(array $items, array $errors = []): self

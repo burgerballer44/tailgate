@@ -1,20 +1,22 @@
 <?php
 
 use App\Clients\CFBDApiClient;
+use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 use App\Exceptions\TeamImportException;
 use App\Models\Sport;
 use App\Models\TeamType;
 use App\Services\ImportSources\CFBDTeamImportSource;
+use Mockery\MockInterface;
 
 /**
- * @return array{0: CFBDTeamImportSource, 1: \Mockery\MockInterface}
+ * @return array{0: CFBDTeamImportSource, 1: MockInterface}
  */
 function setupSource(): array
 {
-    /** @var \Mockery\MockInterface&CFBDApiClient $client */
-    $client = \Mockery::mock(CFBDApiClient::class);
+    /** @var MockInterface&CFBDApiClient $client */
+    $client = Mockery::mock(CFBDApiClient::class);
 
     return [new CFBDTeamImportSource($client), $client];
 }
@@ -52,10 +54,10 @@ function sampleTeam(array $overrides = []): array
 }
 
 /**
- * @param list<array<string, mixed>> $rows
- * @return \Generator<int, array<string, mixed>>
+ * @param  list<array<string, mixed>>  $rows
+ * @return Generator<int, array<string, mixed>>
  */
-function teamRowStream(array $rows): \Generator
+function teamRowStream(array $rows): Generator
 {
     foreach ($rows as $row) {
         yield $row;
@@ -65,7 +67,7 @@ function teamRowStream(array $rows): \Generator
 /**
  * Collects an ImportFetchStream into plain arrays for assertion.
  *
- * @return array{teams: list<\App\DTO\ImportedTeamData>, errors: list<string>}
+ * @return array{teams: list<ImportedTeamData>, errors: list<string>}
  */
 function collectStream(ImportFetchStream $stream): array
 {

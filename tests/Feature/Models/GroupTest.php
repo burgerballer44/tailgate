@@ -2,8 +2,8 @@
 
 use App\Models\Follow;
 use App\Models\Group;
-use App\Models\HtmlEntity;
 use App\Models\GroupRole;
+use App\Models\HtmlEntity;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;

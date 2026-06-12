@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 class Team extends Model
 {
     const UNKNOWN_ORGANIZATION = 'Unknown';
+
     const UNKNOWN_CONFERENCE = 'Unknown';
 
     use HasFactory;
@@ -116,16 +117,16 @@ class Team extends Model
 
         return new HtmlString(
             '<span class="inline-flex items-center gap-x-2 rounded-full bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200">'
-            . '<span class="h-3 w-3 rounded-full ring-1 ring-inset ring-black/10" style="background-color: ' . e($color) . ';"></span>'
-            . '<span>' . e($color) . '</span>'
-            . '</span>'
+            .'<span class="h-3 w-3 rounded-full ring-1 ring-inset ring-black/10" style="background-color: '.e($color).';"></span>'
+            .'<span>'.e($color).'</span>'
+            .'</span>'
         );
     }
 
     /**
      * Get a styled logo thumbnail badge for table display.
      */
-    public function getLogoBadgeAttribute(): HtmlString|null
+    public function getLogoBadgeAttribute(): ?HtmlString
     {
         if (! is_array($this->logos) || $this->logos === []) {
             return null;
@@ -139,8 +140,8 @@ class Team extends Model
 
         return new HtmlString(
             '<span class="inline-flex h-8 w-8 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-inset ring-slate-200">'
-            . '<img src="' . e($logoUrl) . '" alt="' . e($this->designation . ' logo') . '" class="h-full w-full object-contain" loading="lazy" />'
-            . '</span>'
+            .'<img src="'.e($logoUrl).'" alt="'.e($this->designation.' logo').'" class="h-full w-full object-contain" loading="lazy" />'
+            .'</span>'
         );
     }
 

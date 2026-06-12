@@ -19,8 +19,8 @@ use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\PlayerQueryInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 /**
  * GroupController handles user-facing group operations.
@@ -348,7 +348,7 @@ class GroupController extends Controller
      *
      * This method processes the follow team request and creates the follow relationship.
      *
-    * @param  FollowTeamRequest  $request  The validated request containing team data
+     * @param  FollowTeamRequest  $request  The validated request containing team data
      * @param  Group  $group  The group to follow the team
      * @return RedirectResponse Redirects back with success/error messages
      */

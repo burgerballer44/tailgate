@@ -83,7 +83,7 @@ class DeveloperTeamController extends Controller
 
         return redirect()->route('developer.teams.index');
     }
-    
+
     /**
      * Displays the team import form, providing available import sources and seasons for the user to select from.
      */
@@ -98,7 +98,7 @@ class DeveloperTeamController extends Controller
      * Handles the submission of the team import form, performing the import operation
      * and redirecting back to the team index with appropriate flash messages.
      *
-     * @param ImportTeamsRequest $request The validated request containing the team import data.
+     * @param  ImportTeamsRequest  $request  The validated request containing the team import data.
      * @return RedirectResponse A redirect response back to the team index page with flash messages indicating the result of the import operation.
      */
     public function storeImportedTeams(ImportTeamsRequest $request): RedirectResponse

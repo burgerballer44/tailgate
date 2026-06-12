@@ -6,13 +6,14 @@ use App\DTO\GameImportData;
 use App\Http\Requests\FormRequest;
 use App\Models\SeasonType;
 use App\Services\Contracts\GameImportManagerInterface;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\ValidationException;
 
 class ImportSeasonGamesRequest extends FormRequest
 {
-    public function __construct(private GameImportManagerInterface $manager) {}  
+    public function __construct(private GameImportManagerInterface $manager) {}
 
     public function authorize(): bool
     {
@@ -20,19 +21,19 @@ class ImportSeasonGamesRequest extends FormRequest
     }
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
         // custom validation rule to check if the provided source is valid based on the available sources from the GameImportManager
-        $checkSources = function(string $attribute, mixed $value, $fail) {
+        $checkSources = function (string $attribute, mixed $value, $fail) {
             $sources = $this->manager->availableSources();
             $sourceKeys = array_column($sources, 'value');
-            if (!in_array($value, $sourceKeys, true)) {
+            if (! in_array($value, $sourceKeys, true)) {
                 $fail("The selected {$attribute} is not a valid import source.");
             }
         };
-        
+
         return [
             'source' => ['required', 'string', $checkSources],
             'year' => ['required', 'integer', 'between:1900,2100'],

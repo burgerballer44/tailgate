@@ -4,9 +4,7 @@ Sports group prediction platform built with Laravel.
 
 ## Product goal
 
-Tailgate lets users form prediction groups around sports teams. Each member creates one or more "players" and submits score predictions for upcoming games. The core relationship is that a group follows a team, optionally scoped to a single sport for that team; seasons provide time-bound context for games and scores.
-
-If a new season starts, a group should still be following the same team without re-following. Upcoming games for that team in the new season should automatically flow into the prediction experience, filtered by sport when a sport-scoped follow is selected.
+Tailgate lets users form prediction groups around sports teams. Each member of a group creates one or more "players" and submits score predictions for upcoming games. The core relationship is that a group follows one or more teams, optionally scoped to a single sport for that team; seasons provide time-bound context for games and scores.
 
 The immediate goal is a working MVP where a regular user can move through the full loop without any developer tooling.
 
@@ -16,9 +14,7 @@ Tailgate has two distinct interfaces that are independent of each other but shar
 
 **User-facing interface** — the product experience. Everything a regular user interacts with: authentication, groups, players, and predictions. This is the primary focus of active development.
 
-**Developer admin section** — a separate interface for developers to manually create and manage data outside of the user flow. It exists to support development and testing: creating teams, seasons, and games via import pipelines, seeding groups, members, and players, and inspecting data directly. It is not a staging environment for user features and does not represent the intended user experience.
-
-Developer admin player management is intentionally administrative and unrestricted compared to user-facing flows: developers can create, view, edit, and delete players for any group member to support data setup and testing.
+**Developer admin section** — a separate interface for developers to manually create and manage data outside of the user flow. It exists to be an administrative backend. It is not a staging environment for user features and does not represent the intended user experience.
 
 Both interfaces call into the same command and query services (`PlayerCommandService`, `GameQueryService`, etc.), but they do so independently. The developer admin has its own controllers, routes, and views. The user-facing product has its own. Shared service logic should be written to accommodate both, and if it does not, it should be updated.
 
@@ -40,37 +36,12 @@ The MVP is complete when an approved group member can, without developer-panel a
 
 Everything else — leaderboards, prediction history, admin dashboards, notifications — is post-MVP.
 
-## Current state (May 2026)
-
-### What works for regular users today
-
-- Register, log in, verify email, reset password, Google social login.
-- Dashboard showing all groups the user belongs to or owns.
-- Create a group.
-- Join a group by invite code (creates a pending membership).
-- View group details once approved.
-- Manage players from the group page (create, edit, delete) for their own approved membership.
-- Group admin/owner actions: edit group name, approve/reject/remove members, follow or unfollow teams (optionally scoped to a sport).
-- Group admin/owner can manage players for any approved member from Manage group.
-
 ### What is missing for the MVP
 
 - **Game listing** — users have no view to see upcoming games for their group's followed teams.
 - **Score predictions** — users cannot submit predictions from the UI.
 
 These two items are the entire remaining scope of the MVP.
-
-### Shared service layer
-
-Both the user-facing product and the developer admin section call into the same command and query services. The following are available for user-facing controllers to use:
-
-- `PlayerCommandService` / `PlayerQueryService` — create, update, delete players; submit and manage scores.
-- `GameQueryService` — query games with filters; retrieve upcoming games for a team's active schedule windows.
-- `GroupQueryService` — check membership status, follow relationships, and member limits.
-- `StorePlayerRequest`, `SubmitScoreRequest` — existing form request classes that may need to be adapted for user-facing validation rules.
-- Factories and Pest test helpers for all core models.
-
-These services were initially exercised through the developer admin, so some method signatures or validation assumptions may reflect admin needs rather than user needs. Review and adjust them freely when building user-facing flows.
 
 ## Domain model
 

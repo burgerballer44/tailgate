@@ -4,8 +4,8 @@ use App\Exceptions\SocialAuthenticationException;
 use App\Models\User;
 use App\Services\SocialAuthenticationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Laravel\Socialite\Contracts\User as ProviderUser;
+use Tests\TestCase;
 
 use function Pest\Laravel\assertDatabaseHas;
 
@@ -16,7 +16,7 @@ function socialProviderUser(
     ?string $email,
     ?string $name = 'Social Name',
 ): ProviderUser {
-    $providerUser = \Mockery::mock(ProviderUser::class);
+    $providerUser = Mockery::mock(ProviderUser::class);
     $providerUser->allows('getId')->andReturn($id);
     $providerUser->allows('getEmail')->andReturn($email);
     $providerUser->allows('getName')->andReturn($name);
@@ -40,7 +40,7 @@ describe('resolveUserFromProvider', function () {
             'provider_user_id' => 'linked-123',
         ]);
 
-        $service = new SocialAuthenticationService();
+        $service = new SocialAuthenticationService;
 
         $resolvedUser = $service->resolveUserFromProvider(
             provider: 'google',
@@ -55,7 +55,7 @@ describe('resolveUserFromProvider', function () {
             'email' => 'existing@example.com',
         ]);
 
-        $service = new SocialAuthenticationService();
+        $service = new SocialAuthenticationService;
 
         $resolvedUser = $service->resolveUserFromProvider(
             provider: 'google',
@@ -73,7 +73,7 @@ describe('resolveUserFromProvider', function () {
     });
 
     test('creates a new user for first social login', function () {
-        $service = new SocialAuthenticationService();
+        $service = new SocialAuthenticationService;
 
         $resolvedUser = $service->resolveUserFromProvider(
             provider: 'google',
@@ -92,7 +92,7 @@ describe('resolveUserFromProvider', function () {
     });
 
     test('throws when provider does not return a user id', function () {
-        $service = new SocialAuthenticationService();
+        $service = new SocialAuthenticationService;
 
         $service->resolveUserFromProvider(
             provider: 'google',
@@ -101,7 +101,7 @@ describe('resolveUserFromProvider', function () {
     })->throws(SocialAuthenticationException::class, 'did not return a valid user id');
 
     test('throws when provider does not return an email for first-time login', function () {
-        $service = new SocialAuthenticationService();
+        $service = new SocialAuthenticationService;
 
         $service->resolveUserFromProvider(
             provider: 'google',

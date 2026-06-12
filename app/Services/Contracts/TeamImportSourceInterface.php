@@ -2,6 +2,7 @@
 
 namespace App\Services\Contracts;
 
+use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 
@@ -30,7 +31,7 @@ interface TeamImportSourceInterface
     /**
      * Fetch teams from this source based on the provided import data.
      *
-     * @return ImportFetchStream<\App\DTO\ImportedTeamData>
+     * @return ImportFetchStream<ImportedTeamData>
      */
     public function fetch(TeamImportData $data): ImportFetchStream;
 }

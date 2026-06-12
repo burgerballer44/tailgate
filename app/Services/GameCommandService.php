@@ -12,7 +12,7 @@ class GameCommandService implements GameCommandInterface
      * Create a new game with the provided data.
      * This method handles game creation logic, including setting season, teams, scores, and date/time.
      *
-        * @param  ValidatedGameData  $data  Validated game data including season, teams, scores, start date-time, and TBD flag.
+     * @param  ValidatedGameData  $data  Validated game data including season, teams, scores, start date-time, and TBD flag.
      * @return Game The created game instance.
      */
     public function create(ValidatedGameData $data): Game

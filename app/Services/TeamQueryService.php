@@ -22,8 +22,8 @@ class TeamQueryService implements TeamQueryInterface
     }
 
     /**
-    * Get teams available for the follow-team form.
-    */
+     * Get teams available for the follow-team form.
+     */
     public function getAvailableTeamsForFollow(): Collection
     {
         return Team::query()

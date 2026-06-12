@@ -9,15 +9,15 @@ interface TeamImportManagerInterface
 {
     /**
      * Get the available sources for team import.
-     * 
+     *
      * @return array<int, array<string, string>>
      */
     public function availableSources(): array;
 
     /**
      * Import teams based on the provided import data.
-     * 
-     * @param TeamImportData $data The data for the team import.
+     *
+     * @param  TeamImportData  $data  The data for the team import.
      * @return ImportResult The result of the team import.
      */
     public function import(TeamImportData $data): ImportResult;

@@ -11,11 +11,11 @@ trait ImportSourceDataHelpers
      * alternate keys can still provide data. If no non-null key is found,
      * the provided default is returned.
      * This is useful for handling inconsistent field naming across different import sources.
-      *
-      * @param  array<string, mixed>  $payload The raw data payload from the import source.
-      * @param  array<int, string>  $keys A list of possible keys to check in order of preference.
-      * @param  mixed  $default The default value to return if no keys are found with non-null values.
-      * @return mixed The value corresponding to the first found key with a non-null value, or the default.
+     *
+     * @param  array<string, mixed>  $payload  The raw data payload from the import source.
+     * @param  array<int, string>  $keys  A list of possible keys to check in order of preference.
+     * @param  mixed  $default  The default value to return if no keys are found with non-null values.
+     * @return mixed The value corresponding to the first found key with a non-null value, or the default.
      */
     protected function valueForAny(array $payload, array $keys, mixed $default): mixed
     {
@@ -37,9 +37,9 @@ trait ImportSourceDataHelpers
      *
      * This is a simpler version of valueForAny when only one key is expected.
      *
-     * @param  array<string, mixed>  $payload The raw data payload from the import source.
-     * @param  string  $key The key to look for in the payload.
-     * @param  mixed  $default The default value to return if the key is not found or its value is null.
+     * @param  array<string, mixed>  $payload  The raw data payload from the import source.
+     * @param  string  $key  The key to look for in the payload.
+     * @param  mixed  $default  The default value to return if the key is not found or its value is null.
      * @return mixed The value corresponding to the key if it exists and is not null, or the default.
      */
     protected function valueFor(array $payload, string $key, mixed $default): mixed
@@ -52,7 +52,7 @@ trait ImportSourceDataHelpers
      *
      * This is useful for cleaning up data from import sources where fields may be inconsistently typed or formatted.
      *
-     * @param  mixed  $value The value to normalize.
+     * @param  mixed  $value  The value to normalize.
      * @return string|null The trimmed string if the input is a non-empty string, or null otherwise.
      */
     protected function nullableString(mixed $value): ?string
@@ -72,7 +72,7 @@ trait ImportSourceDataHelpers
      * This method accepts hex colors in the format "#RRGGBB" and is case-insensitive.
      * It also treats the string "#null" (in any casing) as a null value to allow import sources to explicitly indicate no color.
      *
-     * @param  mixed  $value The value to normalize as a hex color.
+     * @param  mixed  $value  The value to normalize as a hex color.
      * @return string|null The normalized hex color string if valid, or null otherwise.
      */
     protected function nullableHexColor(mixed $value): ?string
@@ -92,7 +92,7 @@ trait ImportSourceDataHelpers
      * This method accepts either a full URL or a Twitter handle (with or without the '@' symbol).
      * If a handle is provided, it constructs the corresponding X.com URL. If the input is already a valid URL, it returns it as is.
      *
-     * @param  mixed  $value The value to normalize as a Twitter URL.
+     * @param  mixed  $value  The value to normalize as a Twitter URL.
      * @return string|null The normalized Twitter URL if valid, or null otherwise.
      */
     protected function normalizeTwitterUrl(mixed $value): ?string
@@ -122,7 +122,7 @@ trait ImportSourceDataHelpers
      *
      * This is useful for cleaning up list-like fields from import sources where the data may be inconsistently formatted as a single string, an array with empty values, or other variations.
      *
-     * @param  mixed  $value The value to normalize as an array.
+     * @param  mixed  $value  The value to normalize as an array.
      * @return array<int, mixed>|null A dense array of non-empty values if the input is valid, or null otherwise.
      */
     protected function nullableUrlArray(mixed $value): ?array

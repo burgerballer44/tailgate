@@ -25,7 +25,7 @@ trait GameValidationRulesTrait
     /**
      * Get the validation rules for storing a game.
      *
-        * @return array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function storeRules(): array
     {
@@ -35,7 +35,7 @@ trait GameValidationRulesTrait
     /**
      * Get the validation rules for updating a game.
      *
-        * @return array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function updateRules(): array
     {

@@ -2,8 +2,8 @@
 
 use App\Clients\CBBDApiClient;
 use App\DTO\GameImportData;
-use App\DTO\ImportFetchStream;
 use App\DTO\ImportedGameData;
+use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
 use App\Models\Sport;
@@ -49,10 +49,10 @@ function cbbdSampleGame(array $overrides = []): array
 }
 
 /**
- * @param list<array<string, mixed>> $rows
- * @return \Generator<int, array<string, mixed>>
+ * @param  list<array<string, mixed>>  $rows
+ * @return Generator<int, array<string, mixed>>
  */
-function cbbdGameRowStream(array $rows): \Generator
+function cbbdGameRowStream(array $rows): Generator
 {
     foreach ($rows as $row) {
         yield $row;

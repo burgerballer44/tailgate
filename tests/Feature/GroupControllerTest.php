@@ -6,7 +6,6 @@ use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\Player;
-use App\Models\Season;
 use App\Models\Sport;
 use App\Models\Team;
 use App\Models\User;

@@ -4,8 +4,8 @@ namespace App\Services\ImportSources;
 
 use App\Clients\CBBDApiClient;
 use App\DTO\GameImportData;
-use App\DTO\ImportFetchStream;
 use App\DTO\ImportedGameData;
+use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
 use App\Models\Sport;

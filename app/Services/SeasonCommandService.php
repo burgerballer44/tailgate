@@ -17,9 +17,9 @@ class SeasonCommandService implements SeasonCommandInterface
 
     /**
      * Create a new season with the provided data.
-    * This method handles season creation logic, including setting name, sport, season_type, and active state.
+     * This method handles season creation logic, including setting name, sport, season_type, and active state.
      *
-    * @param  ValidatedSeasonData  $data  Validated season data including name, sport, season_type, and active state.
+     * @param  ValidatedSeasonData  $data  Validated season data including name, sport, season_type, and active state.
      * @return Season The created season instance.
      */
     public function create(ValidatedSeasonData $data): Season
@@ -36,7 +36,7 @@ class SeasonCommandService implements SeasonCommandInterface
 
     /**
      * Update an existing season's information in the system.
-    * This method is used to modify season details such as name, sport, season_type, or active state.
+     * This method is used to modify season details such as name, sport, season_type, or active state.
      *
      * @param  Season  $season  The season to update.
      * @param  ValidatedSeasonData  $data  Validated data to update the season with.
@@ -73,7 +73,7 @@ class SeasonCommandService implements SeasonCommandInterface
      * This method creates a new game and associates it with the given season.
      *
      * @param  Season  $season  The season to add the game to.
-        * @param  ValidatedGameData  $data  Validated game data including teams, scores, start date-time, and TBD flag.
+     * @param  ValidatedGameData  $data  Validated game data including teams, scores, start date-time, and TBD flag.
      * @return Game The created game instance.
      */
     public function addGame(Season $season, ValidatedGameData $data): Game

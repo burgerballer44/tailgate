@@ -115,8 +115,8 @@ class DeveloperSeasonController extends Controller
 
     /**
      * Shows the form for importing games into a season.
-     * 
-     * @param Season $season The season to import games into.
+     *
+     * @param  Season  $season  The season to import games into.
      * @return View The view for the import form.
      */
     public function importGames(Season $season): View

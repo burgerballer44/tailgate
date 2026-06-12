@@ -48,10 +48,6 @@ class PlayerController extends Controller
 
     /**
      * Show the form to create a new player.
-     *
-     * @param  Group  $group
-     * @param  Member  $member
-     * @return View
      */
     public function create(Request $request, Group $group, Member $member): View
     {
@@ -71,11 +67,6 @@ class PlayerController extends Controller
 
     /**
      * Store a newly created player.
-     *
-     * @param  StorePlayerRequest  $request
-     * @param  Group  $group
-     * @param  Member  $member
-     * @return RedirectResponse
      */
     public function store(StorePlayerRequest $request, Group $group, Member $member): RedirectResponse
     {

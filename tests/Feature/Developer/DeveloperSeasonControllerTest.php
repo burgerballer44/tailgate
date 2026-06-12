@@ -5,8 +5,8 @@ use App\Models\Season;
 use App\Models\SeasonType;
 use App\Models\Sport;
 use App\Models\Team;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
     $this->user = signInDeveloperUser();
@@ -221,7 +221,7 @@ describe('viewing a season', function () {
 
         // visit the show page
         $response = $this->get(route('developer.seasons.show', $season));
-        
+
         // assert successful response
         $response->assertOk();
 
@@ -442,7 +442,7 @@ describe('importing season games', function () {
 
         // assert successful response
         $response->assertOk();
-        
+
         // assert view is returned
         $response->assertViewIs('developer.seasons.import-games');
 

@@ -11,9 +11,9 @@ class TeamCommandService implements TeamCommandInterface
 {
     /**
      * Create a new team with the provided data.
-    * This method handles team creation logic, including setting organization, designation, conference, type, and sport.
+     * This method handles team creation logic, including setting organization, designation, conference, type, and sport.
      *
-    * @param  ValidatedTeamData  $data  Validated team data including organization, designation, type, sport.
+     * @param  ValidatedTeamData  $data  Validated team data including organization, designation, type, sport.
      * @return Team The created team instance.
      */
     public function create(ValidatedTeamData $data): Team
@@ -43,7 +43,7 @@ class TeamCommandService implements TeamCommandInterface
 
     /**
      * Update an existing team's information in the system.
-        * This method is used to modify team details such as organization, designation, type, or sport.
+     * This method is used to modify team details such as organization, designation, type, or sport.
      *
      * @param  Team  $team  The team to update.
      * @param  ValidatedTeamData  $data  Validated data to update the team with.

@@ -51,8 +51,6 @@ class CFBDApiClient
 
     /**
      * Creates a new pending HTTP request with the appropriate base URL, headers and authentication for the CFBD API.
-     * 
-     * @return PendingRequest
      */
     private function request(): PendingRequest
     {
@@ -65,7 +63,7 @@ class CFBDApiClient
     /**
      * Sends a request to the specified CFBD API endpoint with the provided query parameters,
      * and returns a generator that yields each item in the response as an associative array.
-     * 
+     *
      * @param  array<string, mixed>  $query
      * @param  class-string<GameImportException|TeamImportException>  $exceptionClass
      * @return \Generator<int, array<string, mixed>>
@@ -100,11 +98,9 @@ class CFBDApiClient
         } catch (GameImportException|TeamImportException $exception) {
 
             throw $exception;
-
         } catch (Throwable $exception) {
 
             throw $this->newImportException($exceptionClass, 'CFBD returned an invalid response payload.', $exception);
-
         } finally {
 
             fclose($stream);
@@ -113,10 +109,9 @@ class CFBDApiClient
 
     /**
      * Sends a GET request to the specified CFBD API endpoint with the provided query parameters, using streaming to handle large responses.
-     * 
+     *
      * @param  array<string, mixed>  $query
      * @param  class-string<GameImportException|TeamImportException>  $exceptionClass
-     * @return Response
      */
     private function sendStreamRequest(string $endpoint, array $query, string $exceptionClass): Response
     {
@@ -136,7 +131,7 @@ class CFBDApiClient
 
     /**
      * Makes sure the CFBD API token is configured, throwing an appropriate exception if it is not.
-     * 
+     *
      * @param  class-string<GameImportException|TeamImportException>  $exceptionClass
      */
     private function ensureTokenConfigured(string $exceptionClass): void
@@ -148,7 +143,7 @@ class CFBDApiClient
 
     /**
      * Creates a new instance of the specified exception class with the provided message and optional previous exception.
-     * 
+     *
      * @param  class-string<GameImportException|TeamImportException>  $exceptionClass
      */
     private function newImportException(string $exceptionClass, string $message, ?Throwable $previous = null): GameImportException|TeamImportException

@@ -8,9 +8,9 @@ use App\Exceptions\TeamImportException;
 use App\Models\Sport;
 use App\Models\Team;
 use App\Models\TeamType;
-use App\Services\TeamImportManager;
 use App\Services\Contracts\TeamCommandInterface;
 use App\Services\Contracts\TeamImportSourceInterface;
+use App\Services\TeamImportManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -59,7 +59,7 @@ describe('import', function () {
             'type' => TeamType::COLLEGE->value,
         ]);
 
-        $source = \Mockery::mock(TeamImportSourceInterface::class);
+        $source = Mockery::mock(TeamImportSourceInterface::class);
         $source->allows('key')->andReturn('cfbd');
         $source->allows('label')->andReturn('CFBD API');
         $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(
@@ -70,7 +70,7 @@ describe('import', function () {
             errors: [],
         ));
 
-        $teamCommand = \Mockery::mock(TeamCommandInterface::class);
+        $teamCommand = Mockery::mock(TeamCommandInterface::class);
         $teamCommand
             ->shouldReceive('update')
             ->once()
@@ -111,7 +111,7 @@ describe('import', function () {
     });
 
     test('uses in-memory lookup to avoid duplicate creates within the same chunk', function () {
-        $source = \Mockery::mock(TeamImportSourceInterface::class);
+        $source = Mockery::mock(TeamImportSourceInterface::class);
         $source->allows('key')->andReturn('cfbd');
         $source->allows('label')->andReturn('CFBD API');
         $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(
@@ -128,7 +128,7 @@ describe('import', function () {
             'type' => TeamType::COLLEGE->value,
         ]);
 
-        $teamCommand = \Mockery::mock(TeamCommandInterface::class);
+        $teamCommand = Mockery::mock(TeamCommandInterface::class);
         $teamCommand
             ->shouldReceive('create')
             ->once()
@@ -163,7 +163,7 @@ describe('import', function () {
             'type' => TeamType::COLLEGE->value,
         ]);
 
-        $source = \Mockery::mock(TeamImportSourceInterface::class);
+        $source = Mockery::mock(TeamImportSourceInterface::class);
         $source->allows('key')->andReturn('cfbd');
         $source->allows('label')->andReturn('CFBD API');
         $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(
@@ -181,7 +181,7 @@ describe('import', function () {
             errors: [],
         ));
 
-        $teamCommand = \Mockery::mock(TeamCommandInterface::class);
+        $teamCommand = Mockery::mock(TeamCommandInterface::class);
         $teamCommand
             ->shouldReceive('update')
             ->once()
@@ -217,7 +217,7 @@ describe('import', function () {
 
     test('throws when the selected source does not exist', function () {
         $manager = new TeamImportManager(
-            teamCommandService: \Mockery::mock(TeamCommandInterface::class),
+            teamCommandService: Mockery::mock(TeamCommandInterface::class),
             sources: [],
         );
 

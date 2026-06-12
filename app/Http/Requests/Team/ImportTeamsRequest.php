@@ -5,12 +5,13 @@ namespace App\Http\Requests\Team;
 use App\DTO\TeamImportData;
 use App\Http\Requests\FormRequest;
 use App\Services\Contracts\TeamImportManagerInterface;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 
 class ImportTeamsRequest extends FormRequest
 {
-    public function __construct(private TeamImportManagerInterface $manager) {}    
+    public function __construct(private TeamImportManagerInterface $manager) {}
 
     public function authorize(): bool
     {
@@ -18,15 +19,15 @@ class ImportTeamsRequest extends FormRequest
     }
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
         // custom validation rule to check if the provided source is valid based on the available sources from the TeamImportManager
-        $checkSources = function(string $attribute, mixed $value, $fail) {
+        $checkSources = function (string $attribute, mixed $value, $fail) {
             $sources = $this->manager->availableSources();
             $sourceKeys = array_column($sources, 'value');
-            if (!in_array($value, $sourceKeys, true)) {
+            if (! in_array($value, $sourceKeys, true)) {
                 $fail("The selected {$attribute} is not a valid import source.");
             }
         };

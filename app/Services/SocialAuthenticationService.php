@@ -17,8 +17,8 @@ class SocialAuthenticationService
      * provided social authentication details. It handles linking social accounts to
      * existing users and creating new users when necessary.
      *
-     * @param string $provider The name of the authentication provider (e.g., 'google').
-     * @param ProviderUser $providerUser The user details returned by the authentication provider.
+     * @param  string  $provider  The name of the authentication provider (e.g., 'google').
+     * @param  ProviderUser  $providerUser  The user details returned by the authentication provider.
      * @return User The resolved local user account.
      *
      * @throws SocialAuthenticationException If the provider user details are invalid or incomplete.
@@ -27,7 +27,7 @@ class SocialAuthenticationService
     {
         $providerUserId = (string) $providerUser->getId();
 
-        if ('' === $providerUserId) {
+        if ($providerUserId === '') {
             throw new SocialAuthenticationException('The authentication provider did not return a valid user id.');
         }
 
@@ -53,7 +53,7 @@ class SocialAuthenticationService
             if ($email === null) {
                 throw new SocialAuthenticationException('The authentication provider did not return an email address.');
             }
-            
+
             // attempt to find an existing user with the same email address
             $user = User::query()->where('email', $email)->first();
 
@@ -65,7 +65,7 @@ class SocialAuthenticationService
                     'password' => null,
                     'email_verified_at' => now(),
                 ]);
-            // if an existing user is found but their email is not verified, mark it as verified
+                // if an existing user is found but their email is not verified, mark it as verified
             } elseif (! $user->hasVerifiedEmail()) {
                 $user->markEmailAsVerified();
             }
@@ -88,8 +88,8 @@ class SocialAuthenticationService
      * This method updates the email, avatar URL, raw profile data, and last login timestamp
      * of the given social account based on the information provided by the authentication provider.
      *
-     * @param SocialAccount $account The social account to update.
-     * @param ProviderUser $providerUser The latest user details from the authentication provider.
+     * @param  SocialAccount  $account  The social account to update.
+     * @param  ProviderUser  $providerUser  The latest user details from the authentication provider.
      */
     protected function updateSocialAccountMetadata(SocialAccount $account, ProviderUser $providerUser): void
     {
@@ -113,8 +113,8 @@ class SocialAuthenticationService
      * information provided by the authentication provider. It uses the provider's name if
      * available, or derives a name from the email address if not.
      *
-     * @param ProviderUser $providerUser The user details from the authentication provider.
-     * @param string $email The email address of the user.
+     * @param  ProviderUser  $providerUser  The user details from the authentication provider.
+     * @param  string  $email  The email address of the user.
      * @return string The resolved display name for the user.
      */
     protected function resolveName(ProviderUser $providerUser, string $email): string

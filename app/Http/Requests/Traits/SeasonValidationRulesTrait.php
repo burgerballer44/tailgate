@@ -11,7 +11,7 @@ trait SeasonValidationRulesTrait
     /**
      * Get the base validation rules for season fields.
      *
-    * @return array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function baseRules(): array
     {
@@ -25,7 +25,7 @@ trait SeasonValidationRulesTrait
     /**
      * Get the validation rules for storing a season.
      *
-    * @return array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function storeRules(): array
     {
@@ -37,7 +37,7 @@ trait SeasonValidationRulesTrait
     /**
      * Get the validation rules for updating a season.
      *
-    * @return array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function updateRules(): array
     {

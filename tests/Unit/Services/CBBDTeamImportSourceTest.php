@@ -1,20 +1,22 @@
 <?php
 
 use App\Clients\CBBDApiClient;
+use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 use App\Exceptions\TeamImportException;
 use App\Models\Sport;
 use App\Models\TeamType;
 use App\Services\ImportSources\CBBDTeamImportSource;
+use Mockery\MockInterface;
 
 /**
- * @return array{0: CBBDTeamImportSource, 1: \Mockery\MockInterface}
+ * @return array{0: CBBDTeamImportSource, 1: MockInterface}
  */
 function setupCBBDSource(): array
 {
-    /** @var \Mockery\MockInterface&CBBDApiClient $client */
-    $client = \Mockery::mock(CBBDApiClient::class);
+    /** @var MockInterface&CBBDApiClient $client */
+    $client = Mockery::mock(CBBDApiClient::class);
 
     return [new CBBDTeamImportSource($client), $client];
 }
@@ -45,10 +47,10 @@ function cbbdSampleTeam(array $overrides = []): array
 }
 
 /**
- * @param list<array<string, mixed>> $rows
- * @return \Generator<int, array<string, mixed>>
+ * @param  list<array<string, mixed>>  $rows
+ * @return Generator<int, array<string, mixed>>
  */
-function cbbdTeamRowStream(array $rows): \Generator
+function cbbdTeamRowStream(array $rows): Generator
 {
     foreach ($rows as $row) {
         yield $row;
@@ -56,7 +58,7 @@ function cbbdTeamRowStream(array $rows): \Generator
 }
 
 /**
- * @return array{teams: list<\App\DTO\ImportedTeamData>, errors: list<string>}
+ * @return array{teams: list<ImportedTeamData>, errors: list<string>}
  */
 function collectCBBDTeamStream(ImportFetchStream $stream): array
 {
