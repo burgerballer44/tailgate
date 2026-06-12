@@ -1,5 +1,11 @@
 ---
-applyTo: '**'
+applyTo:
+    - 'app/**/*.php'
+    - 'bootstrap/**/*.php'
+    - 'config/**/*.php'
+    - 'database/**/*.php'
+    - 'routes/**/*.php'
+    - 'tests/**/*.php'
 ---
 
 # GitHub Copilot Instructions for Laravel 13 Projects
@@ -28,7 +34,7 @@ applyTo: '**'
 
 ## ✅ Laravel 13 Project Structure & Conventions
 
-- Target Laravel ^13 (PHP ^8.4) unless the repo states otherwise.
+- Target Laravel ^13 and follow the PHP version constraint defined in `composer.json`.
 - Follow the official Laravel project structure:
     - `app/Http/Controllers` - Controllers
     - `app/Models` - Eloquent models
@@ -94,11 +100,9 @@ applyTo: '**'
 - Provide at least one negative test and one edge-case test for each feature.
 - Use **factories** for test data setup.
 - Use `beforeEach` for test setup where applicable.
-- Feature tests must be created for controller class methods.
-- Unit tests must be created for service class methods.
+- Feature tests should cover controller behavior and user-facing flows.
+- Unit tests should cover service/domain logic and helper classes.
 - Tests should be grouped by the method name in a `describe` function, with related tests placed in the same `describe` function.
-- Include feature tests for user-facing functionality.
-- Include unit tests for business logic, services, and helper classes.
 - Mock external services using Laravel's `Http::fake()` or equivalent.
 - Maintain high code coverage but focus on meaningful tests over 100% coverage obsession.
 
@@ -111,7 +115,7 @@ applyTo: '**'
     - **Idiomatic**: Follows language idioms, ecosystem conventions, and team style for reduced cognitive load.
     - **Domain-based**: Mirrors problem domain in language, types, structure, and boundaries.
 
-- Keep the **SOLID Principles** in mind but CUPID Principles take priority. THe SOLID principles are:
+- Keep the **SOLID Principles** in mind, but CUPID Principles take priority. The SOLID principles are:
     - Single Responsibility Principle (SRP)
     - Open/Closed Principle (OCP)
     - Liskov Substitution Principle (LSP)
@@ -134,7 +138,8 @@ applyTo: '**'
 
 ## ✅ Additional Copilot Behavior Preferences
 
-- Generate **strictly typed**, modern PHP code using latest language features.
+- Generate modern PHP code with explicit parameter, return, and property types wherever practical.
+- Do not add `declare(strict_types=1);`.
 - Prioritize **readable, clean, maintainable** code over cleverness.
 - Avoid legacy or deprecated Laravel patterns (facade overuse, logic-heavy views, etc.).
 - Suggest proper class placement based on Laravel directory structure.
