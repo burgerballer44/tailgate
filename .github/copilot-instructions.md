@@ -1,11 +1,5 @@
 ---
-applyTo:
-    - 'app/**/*.php'
-    - 'bootstrap/**/*.php'
-    - 'config/**/*.php'
-    - 'database/**/*.php'
-    - 'routes/**/*.php'
-    - 'tests/**/*.php'
+applyTo: '**'
 ---
 
 # GitHub Copilot Instructions for Laravel 13 Projects
