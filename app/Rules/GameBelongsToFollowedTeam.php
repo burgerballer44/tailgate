@@ -8,10 +8,14 @@ use App\Models\Group;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+/**
+ * Prevents score submissions for games outside a group's followed teams.
+ * Applies optional sport-scoped follow constraints when validating eligible games.
+ */
 class GameBelongsToFollowedTeam implements ValidationRule
 {
     /**
-     * Run the validation rule.
+     * Validates that the selected game is eligible for this group's follow configuration.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -45,7 +49,7 @@ class GameBelongsToFollowedTeam implements ValidationRule
     }
 
     /**
-     * Check if the game belongs to the team the group is following.
+     * Evaluates whether the game matches a followed team, including optional sport scoping.
      */
     private function gameTeamIsFollowed(Game $game, Follow $follow): bool
     {

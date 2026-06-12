@@ -5,12 +5,16 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+/**
+ * Blocks score updates once the related game is considered started.
+ * Uses date-only comparison for TBD start times and full timestamp comparison otherwise.
+ */
 class GameTimeNotPassedForUpdate implements ValidationRule
 {
     private const DATE_FORMAT = 'Y-m-d';
 
     /**
-     * Run the validation rule.
+     * Validates that score updates are still allowed for the related game start window.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

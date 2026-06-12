@@ -5,8 +5,8 @@ namespace App\DTO;
 readonly class ImportedTeamData
 {
     /**
-     * Holds the necessary information about a team that has been imported from an external source,
-     * including the team's organization name, designation, conference affiliation, abbreviation, colors, logos and social media links.
+     * Represents one normalized team record produced by an external import source.
+     * Includes identity, classification, visual metadata, and social links for team persistence workflows.
      *
      * @param  string  $organization  The full name of the team's organization (e.g. "University of Alabama").
      * @param  string  $sport  The sport the team participates in (e.g. "football", "basketball", etc.).

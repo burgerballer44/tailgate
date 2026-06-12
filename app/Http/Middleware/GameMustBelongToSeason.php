@@ -6,10 +6,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Restricts season-scoped routes to games that belong to the current season.
+ */
 class GameMustBelongToSeason
 {
     /**
-     * Handle an incoming request.
+     * Validates that the routed game is part of the routed season.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -20,6 +23,6 @@ class GameMustBelongToSeason
             return $next($request);
         }
 
-        return response()->json(['message' => 'Game cannot be found or is not part of the listed season.'], 404);
+        abort(404, 'Game cannot be found or is not part of the listed season.');
     }
 }

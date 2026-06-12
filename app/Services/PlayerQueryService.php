@@ -8,14 +8,17 @@ use App\Services\Contracts\PlayerQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Supports player retrieval for roster views and member-level player management.
+ * Provides stable filtering and ordering behavior for player read operations.
+ */
 class PlayerQueryService implements PlayerQueryInterface
 {
     /**
-     * Filter players based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
+     * Builds a player query from supported filters used by roster interfaces.
      *
      * @param  array  $query  An associative array of query parameters to filter players.
-     * @return Builder A query builder instance for the filtered players.
+     * @return Builder  A query builder instance for the filtered players.
      */
     public function query(array $query): Builder
     {
@@ -23,7 +26,7 @@ class PlayerQueryService implements PlayerQueryInterface
     }
 
     /**
-     * Get all players for a member in stable alphabetical order.
+     * Lists a member's players in stable alphabetical order for predictable UI rendering.
      */
     public function getAllForMember(Member $member): Collection
     {

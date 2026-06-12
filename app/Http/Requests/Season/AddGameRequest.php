@@ -11,7 +11,7 @@ class AddGameRequest extends FormRequest
     use GameValidationRulesTrait;
 
     /**
-     * Determine if the user is authorized to make this request.
+     * Authorizes this request in the current application context.
      */
     public function authorize(): bool
     {
@@ -19,7 +19,7 @@ class AddGameRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Defines validation rules for this request payload.
      *
      * @return array<string, mixed>
      */
@@ -36,7 +36,7 @@ class AddGameRequest extends FormRequest
     }
 
     /**
-     * Get the validated data as a ValidatedGameData object.
+     * Maps validated input into a  DTO.
      * This method is used to pass validated game data to the service layer.
      *
      * @return ValidatedGameData The validated game data transfer object.

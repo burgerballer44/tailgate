@@ -5,7 +5,8 @@ namespace App\DTO;
 readonly class ImportedGameData
 {
     /**
-     * Holds the data for a single imported game, including the teams, their conferences, scores, and the start time.
+     * Represents one normalized game record produced by an external import source.
+     * Includes matchup identity, conference context, score values, and start-time semantics.
      *
      * @param  string  $homeTeam  The name of the home team.
      * @param  string  $homeTeamConference  The conference of the home team.

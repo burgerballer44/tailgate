@@ -9,7 +9,7 @@ use Illuminate\Validation\Rules\Enum;
 trait SeasonValidationRulesTrait
 {
     /**
-     * Get the base validation rules for season fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, mixed>
      */
@@ -23,7 +23,7 @@ trait SeasonValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for storing a season.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, mixed>
      */
@@ -35,7 +35,7 @@ trait SeasonValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a season.
+     * Defines validation rules used when updating a .
      *
      * @return array<string, mixed>
      */

@@ -3,8 +3,8 @@
 namespace App\DTO;
 
 /**
- * Holds the result of an import operation, including the import source, a human-readable
- * label, the count of successfully imported and updated records, and any errors encountered.
+ * Summarizes the outcome of an import run for reporting and UI feedback.
+ * Tracks source identity, created/updated counts, and accumulated errors.
  *
  * @param  string  $source  The unique key for the import source (e.g. 'cfbd', 'csv').
  * @param  string  $sourceLabel  The human-readable label for the import source (e.g. 'CFBD').
@@ -23,7 +23,7 @@ readonly class ImportResult
     ) {}
 
     /**
-     * Returns true when at least one new record was successfully imported.
+     * Indicates whether the run created at least one new record.
      */
     public function hasImports(): bool
     {
@@ -31,7 +31,7 @@ readonly class ImportResult
     }
 
     /**
-     * Returns true when at least one existing record was updated during the import.
+     * Indicates whether the run updated at least one existing record.
      */
     public function hasUpdates(): bool
     {
@@ -39,7 +39,7 @@ readonly class ImportResult
     }
 
     /**
-     * Returns true when one or more errors occurred during the import.
+     * Indicates whether one or more import errors were recorded.
      */
     public function hasErrors(): bool
     {
@@ -47,8 +47,7 @@ readonly class ImportResult
     }
 
     /**
-     * Returns true when some records were imported but errors also occurred —
-     * i.e. a partial success.
+     * Indicates whether the run partially succeeded (imports occurred with accompanying errors).
      */
     public function isPartial(): bool
     {

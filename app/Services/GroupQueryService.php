@@ -6,14 +6,17 @@ use App\Models\Group;
 use App\Services\Contracts\GroupQueryInterface;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Powers group discovery and lookup workflows across listing and invite-based access.
+ * Keeps filtering and relationship loading behavior consistent for group read operations.
+ */
 class GroupQueryService implements GroupQueryInterface
 {
     /**
-     * Filter groups based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
+     * Builds a group query from supported filters for discovery and management views.
      *
      * @param  array  $query  An associative array of query parameters to filter groups.
-     * @return Builder A query builder instance for the filtered groups.
+     * @return Builder  A query builder instance for the filtered groups.
      */
     public function query(array $query): Builder
     {
@@ -38,11 +41,10 @@ class GroupQueryService implements GroupQueryInterface
     }
 
     /**
-     * Find a group by its invite code.
-     * This method retrieves a group using its unique invite code.
+     * Resolves a group from its invite code for join and validation flows.
      *
      * @param  string  $inviteCode  The invite code to search for.
-     * @return Group|null The group instance if found, null otherwise.
+     * @return Group|null  The group instance if found, null otherwise.
      */
     public function findByInviteCode(string $inviteCode): ?Group
     {

@@ -7,10 +7,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Restricts member-scoped routes to approved memberships.
+ */
 class MemberMustBeApproved
 {
     /**
-     * Handle an incoming request.
+     * Validates that the routed member exists and has approved status.
      */
     public function handle(Request $request, Closure $next): Response
     {

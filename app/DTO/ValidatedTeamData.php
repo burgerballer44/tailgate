@@ -6,8 +6,8 @@ use App\Models\Sport;
 use App\Models\TeamType;
 
 /**
- * Holds validated data for a team, including organization name, designation, conference, and related metadata.
- * This DTO normalizes and validates team information from various sources, converting raw data into properly typed entities.
+ * Represents normalized team input ready for create/update operations.
+ * Captures canonical team identity, classification, visual metadata, and sport associations.
  *
  * @param  string  $organization  The full name of the team's organization (e.g., "University of Alabama").
  * @param  string  $designation  The team's designation or nickname (e.g., "Alabama Crimson Tide").

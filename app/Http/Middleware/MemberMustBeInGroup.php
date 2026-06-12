@@ -6,10 +6,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Restricts member-scoped routes to members that belong to the current group.
+ */
 class MemberMustBeInGroup
 {
     /**
-     * Handle an incoming request.
+     * Validates that the routed member belongs to the routed group.
      */
     public function handle(Request $request, Closure $next): Response
     {

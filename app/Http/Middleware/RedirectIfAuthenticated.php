@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Prevents authenticated users from accessing guest-only routes.
+ */
 class RedirectIfAuthenticated
 {
     /**
-     * Handle an incoming request.
+     * Redirects authenticated users away from guest routes to the dashboard.
      *
      * @param  Closure(Request): (Response)  $next
      */

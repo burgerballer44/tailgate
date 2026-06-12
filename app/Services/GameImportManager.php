@@ -18,6 +18,10 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Coordinates the full game import pipeline from external sources into season schedules.
+ * Applies validation, batching, conflict handling, and result reporting for predictable import behavior.
+ */
 class GameImportManager implements GameImportManagerInterface
 {
     private const DEFAULT_IMPORT_CHUNK_SIZE = 500;
@@ -32,9 +36,9 @@ class GameImportManager implements GameImportManagerInterface
     ) {}
 
     /**
-     * Retrieves a list of available game import sources.
+     * Exposes game import sources and metadata for source selection UIs.
      *
-     * @return array<int, array<string, string>> An array of available import sources with their keys, labels, descriptions, and types.
+     * @return array<int, array<string, string>>  An array of available import sources with their keys, labels, descriptions, and types.
      */
     public function availableSources(): array
     {

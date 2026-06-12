@@ -3,8 +3,8 @@
 namespace App\DTO;
 
 /**
- * Holds validated data for a player, including the player name and optional member ID.
- * This DTO represents a player entity that may be associated with a group member.
+ * Represents normalized player input for roster management operations.
+ * Encodes player identity and optional member linkage in a persistence-ready structure.
  *
  * @param  string  $player_name  The name of the player.
  * @param  int|null  $member_id  The ID of the group member associated with this player, or null if unassociated.

@@ -10,14 +10,17 @@ use App\Services\Contracts\MemberQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Supports member retrieval for group administration, approvals, and roster views.
+ * Provides consistent filtering and relationship loading for member-centric read paths.
+ */
 class MemberQueryService implements MemberQueryInterface
 {
     /**
-     * Filter members based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
+     * Builds a member query from supported filters used by group administration views.
      *
      * @param  array  $query  An associative array of query parameters to filter members.
-     * @return Builder A query builder instance for the filtered members.
+     * @return Builder  A query builder instance for the filtered members.
      */
     public function query(array $query): Builder
     {
@@ -39,7 +42,7 @@ class MemberQueryService implements MemberQueryInterface
     }
 
     /**
-     * Get all approved members for a group with user and player count data.
+     * Loads approved members with user and player-count context for roster screens.
      */
     public function getApprovedMembersForGroup(Group $group): Collection
     {

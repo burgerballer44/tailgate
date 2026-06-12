@@ -7,10 +7,14 @@ use App\Models\GroupRole;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+/**
+ * Preserves minimum administrative coverage for group governance.
+ * Prevents demoting the final required admin without assigning a replacement first.
+ */
 class GroupAdminMinimum implements ValidationRule
 {
     /**
-     * Run the validation rule.
+     * Validates that admin role changes do not violate the minimum-admin requirement.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

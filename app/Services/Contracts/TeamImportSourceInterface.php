@@ -6,30 +6,35 @@ use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 
+/**
+ * Provides a team data feed from an external source (e.g., API, CSV).
+ * Implementations fetch and stream imported team data in a consistent format, abstracting away
+ * source-specific details and allowing multiple team sources to be swapped at runtime.
+ */
 interface TeamImportSourceInterface
 {
     /**
-     * Get the unique key for this team import source.
+     * Identifies the source with a stable key used in import requests.
      */
     public function key(): string;
 
     /**
-     * Get the human-readable label for this team import source.
+     * Provides the display label used in source selection interfaces.
      */
     public function label(): string;
 
     /**
-     * Get the type of this team import source (e.g. 'api', 'csv', etc.).
+     * Declares the transport/category of the source (for example API or file-based).
      */
     public function type(): string;
 
     /**
-     * Get the description of this team import source.
+     * Explains source behavior for operator-facing import selection screens.
      */
     public function description(): string;
 
     /**
-     * Fetch teams from this source based on the provided import data.
+     * Streams normalized team records for the requested import options.
      *
      * @return ImportFetchStream<ImportedTeamData>
      */

@@ -8,7 +8,7 @@ use App\Http\Requests\FormRequest;
 class StoreDeveloperPlayerRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Authorizes this request in the current application context.
      */
     public function authorize(): bool
     {
@@ -16,7 +16,7 @@ class StoreDeveloperPlayerRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Defines validation rules for this request payload.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -28,7 +28,7 @@ class StoreDeveloperPlayerRequest extends FormRequest
     }
 
     /**
-     * Get the validated data as a ValidatedPlayerData object.
+     * Maps validated input into a  DTO.
      */
     public function toDTO(): ValidatedPlayerData
     {

@@ -5,10 +5,15 @@ namespace App\Services\Contracts;
 use App\DTO\ImportResult;
 use App\DTO\TeamImportData;
 
+/**
+ * Orchestrates the end-to-end process of importing teams from various external sources into the system.
+ * Manages source discovery, delegates to the appropriate source for data fetching, handles validation
+ * and conflict resolution, and provides comprehensive import result reporting with error tracking.
+ */
 interface TeamImportManagerInterface
 {
     /**
-     * Get the available sources for team import.
+     * Lists import sources and metadata used by team import selection workflows.
      *
      * @return array<int, array<string, string>>
      */

@@ -12,7 +12,7 @@ class FollowTeamRequest extends FormRequest
     use FollowValidationRulesTrait;
 
     /**
-     * Determine if the user is authorized to make this request.
+     * Authorizes this request in the current application context.
      */
     public function authorize(): bool
     {
@@ -20,7 +20,7 @@ class FollowTeamRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Defines validation rules for this request payload.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -30,7 +30,7 @@ class FollowTeamRequest extends FormRequest
     }
 
     /**
-     * Get the validated data as a ValidatedFollowData object.
+     * Maps validated input into a  DTO.
      * This method is used to pass validated follow data to the service layer.
      *
      * @return ValidatedFollowData The validated follow data transfer object.

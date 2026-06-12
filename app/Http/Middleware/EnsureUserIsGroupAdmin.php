@@ -8,13 +8,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Restricts routes to approved group administrators.
+ */
 class EnsureUserIsGroupAdmin
 {
     /**
-     * Handle an incoming request.
-     *
-     * Ensures that the authenticated user is an approved group admin.
-     * If not, aborts with a 403 error.
+     * Validates that the authenticated user is an approved admin for the routed group.
      */
     public function handle(Request $request, Closure $next): Response
     {

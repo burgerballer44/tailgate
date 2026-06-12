@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Enforces role-based access for routes guarded by a required role value.
+ */
 class CheckRole
 {
     /**
-     * Handle an incoming request.
+     * Validates authentication and role membership before continuing the request.
      *
      * @param  Closure(Request): (Response)  $next
      */

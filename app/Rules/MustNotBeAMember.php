@@ -7,6 +7,10 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+/**
+ * Blocks add-member flows when the target user already belongs to the group.
+ * Protects membership integrity by preventing duplicate member records.
+ */
 class MustNotBeAMember implements DataAwareRule, ValidationRule
 {
     /**
@@ -17,7 +21,7 @@ class MustNotBeAMember implements DataAwareRule, ValidationRule
     protected $data = [];
 
     /**
-     * Set the data under validation.
+     * Captures request payload values needed for cross-field membership checks.
      *
      * @param  array<string, mixed>  $data
      */
@@ -29,7 +33,7 @@ class MustNotBeAMember implements DataAwareRule, ValidationRule
     }
 
     /**
-     * Run the validation rule.
+     * Validates that the target user is not already a member of the current group.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

@@ -7,14 +7,17 @@ use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
+/**
+ * Supports team discovery and selection workflows used across follow and scheduling features.
+ * Provides filtered team retrieval with predictable ordering and relationship loading.
+ */
 class TeamQueryService implements TeamQueryInterface
 {
     /**
-     * Filter teams based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
+     * Builds a team query from supported filters for discovery and admin listings.
      *
      * @param  array  $query  An associative array of query parameters to filter teams.
-     * @return Builder A query builder instance for the filtered teams.
+     * @return Builder  A query builder instance for the filtered teams.
      */
     public function query(array $query): Builder
     {
@@ -22,7 +25,7 @@ class TeamQueryService implements TeamQueryInterface
     }
 
     /**
-     * Get teams available for the follow-team form.
+     * Lists teams in deterministic order for follow-team selection workflows.
      */
     public function getAvailableTeamsForFollow(): Collection
     {

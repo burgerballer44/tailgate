@@ -8,6 +8,11 @@ use App\Models\User;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Retrieves member information and filters approved members within a group context.
+ * Provides member lookups, approved member listings with player counts, and member-user associations
+ * to support group membership management and member-specific features.
+ */
 interface MemberQueryInterface
 {
     public function query(array $query): Builder;

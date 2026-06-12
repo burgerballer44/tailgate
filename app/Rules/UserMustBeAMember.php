@@ -6,6 +6,10 @@ use Closure;
 use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+/**
+ * Enforces that user-scoped group actions target an existing group member.
+ * Supports owner and user identifiers from request data when resolving membership.
+ */
 class UserMustBeAMember implements DataAwareRule, ValidationRule
 {
     /**
@@ -16,7 +20,7 @@ class UserMustBeAMember implements DataAwareRule, ValidationRule
     protected $data = [];
 
     /**
-     * Set the data under validation.
+     * Captures request payload values needed to resolve the user being validated.
      *
      * @param  array<string, mixed>  $data
      */
@@ -28,7 +32,7 @@ class UserMustBeAMember implements DataAwareRule, ValidationRule
     }
 
     /**
-     * Run the validation rule.
+     * Validates that the referenced user currently belongs to the group.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

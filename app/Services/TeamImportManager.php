@@ -16,6 +16,10 @@ use App\Services\Contracts\TeamImportSourceInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
+/**
+ * Coordinates the full team import pipeline from external sources into local persistence.
+ * Applies validation, batching, conflict handling, and result reporting so imports remain reliable and observable.
+ */
 class TeamImportManager implements TeamImportManagerInterface
 {
     private const DEFAULT_IMPORT_CHUNK_SIZE = 500;
@@ -32,9 +36,9 @@ class TeamImportManager implements TeamImportManagerInterface
     ) {}
 
     /**
-     * Get the available sources for team import.
+     * Exposes team import sources and metadata for source selection UIs.
      *
-     * @return array<int, array<string, string>> An array of available team import sources with their details.
+     * @return array<int, array<string, string>>  An array of available team import sources with their details.
      */
     public function availableSources(): array
     {
@@ -99,11 +103,7 @@ class TeamImportManager implements TeamImportManagerInterface
      * Persists a single chunk of ImportedTeamData DTOs, updating existing teams and creating new ones.
      * Uses a batched DB lookup to preload all matching teams for the chunk, avoiding N+1 queries.
      *
-     * @param  array<int, ImportedTeamData>  $chunk
-     * @param  int  $processedCount  Number of teams already processed before this chunk (used for error numbering).
-     * @param  array<int, string>  $errors  Accumulated errors array, passed by reference.
-     * @param  array<string, array<string, Team>>  $teamLookupCache
-     * @return array{0: int, 1: int} A tuple of [importedCount, updatedCount] for the chunk.
+     * @return array{0: int, 1: int}  A tuple of [importedCount, updatedCount] for the chunk.
      */
     private function importChunk(array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): array
     {
@@ -332,10 +332,10 @@ class TeamImportManager implements TeamImportManagerInterface
     }
 
     /**
-     * Get the team import source instance matching the given key, or throw an exception if the key is invalid.
+     * Resolves a source key to the configured team import source implementation.
      *
      * @param  string  $key  The unique key identifying the desired team import source.
-     * @return TeamImportSourceInterface The team import source instance matching the given key.
+     * @return TeamImportSourceInterface  The team import source instance matching the given key.
      */
     private function resolveSource(string $key): TeamImportSourceInterface
     {

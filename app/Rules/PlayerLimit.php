@@ -6,10 +6,14 @@ use App\Models\Group;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+/**
+ * Enforces per-member player capacity based on requester privileges.
+ * Applies regular-member defaults or admin-managed group limits depending on route context.
+ */
 class PlayerLimit implements ValidationRule
 {
     /**
-     * Run the validation rule.
+     * Validates that the member can add another player in the current permission context.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

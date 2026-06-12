@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 trait GroupValidationRulesTrait
 {
     /**
-     * Get the base validation rules for group fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -22,7 +22,7 @@ trait GroupValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for admin group updates (includes owner validation).
+     * Defines admin-focused group update rules, including owner validation.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -34,7 +34,7 @@ trait GroupValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for creating a group.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, ValidationRule|array|string>
      */

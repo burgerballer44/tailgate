@@ -7,14 +7,17 @@ use App\Models\Sport;
 use App\Models\Team;
 use App\Services\Contracts\TeamCommandInterface;
 
+/**
+ * Executes team lifecycle actions and maintains team-to-sport associations.
+ * Centralizes persistence behavior for team identity, classification, and metadata.
+ */
 class TeamCommandService implements TeamCommandInterface
 {
     /**
-     * Create a new team with the provided data.
-     * This method handles team creation logic, including setting organization, designation, conference, type, and sport.
+     * Persists a new team with normalized identity, metadata, and sport associations.
      *
      * @param  ValidatedTeamData  $data  Validated team data including organization, designation, type, sport.
-     * @return Team The created team instance.
+     * @return Team  The created team instance.
      */
     public function create(ValidatedTeamData $data): Team
     {
@@ -42,12 +45,11 @@ class TeamCommandService implements TeamCommandInterface
     }
 
     /**
-     * Update an existing team's information in the system.
-     * This method is used to modify team details such as organization, designation, type, or sport.
+     * Applies identity, metadata, and sport-association changes to an existing team.
      *
      * @param  Team  $team  The team to update.
      * @param  ValidatedTeamData  $data  Validated data to update the team with.
-     * @return Team The updated team instance.
+     * @return Team  The updated team instance.
      */
     public function update(Team $team, ValidatedTeamData $data): Team
     {
@@ -89,8 +91,7 @@ class TeamCommandService implements TeamCommandInterface
     }
 
     /**
-     * Delete a team from the system.
-     * This method permanently removes the team.
+     * Removes a team record from persistence.
      *
      * @param  Team  $team  The team to delete.
      */

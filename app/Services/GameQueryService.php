@@ -8,14 +8,17 @@ use App\Models\Team;
 use App\Services\Contracts\GameQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 
+/**
+ * Centralizes game retrieval for scheduling and scoring flows.
+ * Supports filtering by season, teams, and start-time status while keeping query construction consistent.
+ */
 class GameQueryService implements GameQueryInterface
 {
     /**
-     * Filter games based on the provided query parameters.
-     * This method returns a query builder instance that can be further modified or executed.
+     * Builds a game query from supported filter inputs used by listing endpoints.
      *
      * @param  array  $filters  An associative array of query parameters to filter games.
-     * @return Builder A query builder instance for the filtered games.
+     * @return Builder  A query builder instance for the filtered games.
      */
     public function query(array $filters): Builder
     {
@@ -41,11 +44,10 @@ class GameQueryService implements GameQueryInterface
     }
 
     /**
-     * Get available teams for a season based on the season's sport.
-     * This method retrieves teams that participate in the same sport as the season, used for game creation and editing.
+     * Resolves eligible teams for a season so game forms only show valid matchups.
      *
      * @param  Season  $season  The season to get available teams for.
-     * @return array An associative array of team organizations keyed by team ID.
+     * @return array  An associative array of team organizations keyed by team ID.
      */
     public function getAvailableTeamsForSeason(Season $season): array
     {

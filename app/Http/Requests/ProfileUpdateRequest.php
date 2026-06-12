@@ -10,7 +10,7 @@ use Illuminate\Validation\Rules\Enum;
 class ProfileUpdateRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
+     * Defines validation rules for this request payload.
      *
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */

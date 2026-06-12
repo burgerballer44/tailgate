@@ -8,6 +8,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Contracts\User as ProviderUser;
 
+/**
+ * Resolves provider identities into local accounts during social sign-in.
+ * Handles account linking, metadata synchronization, and first-time user creation within a single flow.
+ */
 class SocialAuthenticationService
 {
     /**

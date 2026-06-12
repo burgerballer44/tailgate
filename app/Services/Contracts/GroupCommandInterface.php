@@ -11,6 +11,11 @@ use App\Models\Group;
 use App\Models\Member;
 use App\Models\Player;
 
+/**
+ * Manages the complete lifecycle of group operations and nested entities within a group.
+ * Handles group creation and updates, adding and removing members, managing member players,
+ * and handling team follows, providing the core coordination point for group administration.
+ */
 interface GroupCommandInterface
 {
     public function create(ValidatedGroupData $data): Group;

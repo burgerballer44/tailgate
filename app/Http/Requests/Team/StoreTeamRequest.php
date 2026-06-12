@@ -16,7 +16,7 @@ class StoreTeamRequest extends FormRequest
     }
 
     /**
-     * Determine if the user is authorized to make this request.
+     * Authorizes this request in the current application context.
      */
     public function authorize(): bool
     {
@@ -24,7 +24,7 @@ class StoreTeamRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Defines validation rules for this request payload.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -34,7 +34,7 @@ class StoreTeamRequest extends FormRequest
     }
 
     /**
-     * Get the validated data as a ValidatedTeamData object.
+     * Maps validated input into a  DTO.
      * This method is used to pass validated team data to the service layer.
      *
      * @return ValidatedTeamData The validated team data transfer object.

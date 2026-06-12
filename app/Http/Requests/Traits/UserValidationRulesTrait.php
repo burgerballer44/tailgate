@@ -12,7 +12,7 @@ use Illuminate\Validation\Rules\Enum;
 trait UserValidationRulesTrait
 {
     /**
-     * Get the base validation rules for user fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -27,7 +27,7 @@ trait UserValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for storing a user.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -39,7 +39,7 @@ trait UserValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a user.
+     * Defines validation rules used when updating a .
      *
      * @param  User  $user  The user being updated
      * @return array<string, ValidationRule|array|string>

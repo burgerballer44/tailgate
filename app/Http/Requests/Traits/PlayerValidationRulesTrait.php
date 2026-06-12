@@ -9,7 +9,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 trait PlayerValidationRulesTrait
 {
     /**
-     * Get the base validation rules for player fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -21,7 +21,7 @@ trait PlayerValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for storing a player.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -33,7 +33,7 @@ trait PlayerValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a player.
+     * Defines validation rules used when updating a .
      *
      * @return array<string, ValidationRule|array|string>
      */

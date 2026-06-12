@@ -13,7 +13,7 @@ use Illuminate\Validation\Rules\Enum;
 trait MemberValidationRulesTrait
 {
     /**
-     * Get the base validation rules for member fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -26,7 +26,7 @@ trait MemberValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for creating a member.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -39,7 +39,7 @@ trait MemberValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a member.
+     * Defines validation rules used when updating a .
      *
      * @return array<string, ValidationRule|array|string>
      */

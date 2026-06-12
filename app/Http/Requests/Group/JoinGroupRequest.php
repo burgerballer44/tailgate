@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 class JoinGroupRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Authorizes this request in the current application context.
      */
     public function authorize(): bool
     {
@@ -16,7 +16,7 @@ class JoinGroupRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Defines validation rules for this request payload.
      *
      * @return array<string, ValidationRule|array|string>
      */

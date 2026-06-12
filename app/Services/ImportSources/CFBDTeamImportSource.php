@@ -12,6 +12,10 @@ use App\Models\TeamType;
 use App\Services\Contracts\TeamImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
 
+/**
+ * Supplies football team data from the CFBD API in the normalized team import shape.
+ * Maps source-specific payloads into application-ready team records and metadata.
+ */
 class CFBDTeamImportSource implements TeamImportSourceInterface
 {
     use ImportSourceDataHelpers;

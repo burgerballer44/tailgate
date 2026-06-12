@@ -8,6 +8,11 @@ use App\Models\Member;
 use App\Models\Player;
 use App\Models\Score;
 
+/**
+ * Manages player creation, updates, and score submission workflows within a member context.
+ * Handles player information management and the complete game score lifecycle (submit, update, delete),
+ * supporting member-based player rosters and game prediction scoring.
+ */
 interface PlayerCommandInterface
 {
     public function createForMember(Member $member, ValidatedPlayerData $data): Player;

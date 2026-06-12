@@ -6,10 +6,14 @@ use App\Services\Contracts\GroupQueryInterface;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+/**
+ * Enforces configured group member capacity before allowing new memberships.
+ * Prevents over-allocation of groups that have reached their limit.
+ */
 class GroupMemberLimit implements ValidationRule
 {
     /**
-     * Run the validation rule.
+     * Validates that the group can accept another member under its configured capacity.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

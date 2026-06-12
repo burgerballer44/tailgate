@@ -3,7 +3,7 @@
 namespace App\DTO;
 
 /**
- * Generic streaming result from an import source fetch.
+ * Wraps streamed import items and deferred fetch errors in one transport object.
  *
  * Rather than buffering all fetched DTOs into an array, this class wraps a PHP Generator
  * that yields items one at a time. This keeps peak memory proportional to processing chunk size
@@ -24,7 +24,8 @@ class ImportFetchStream
     public function __construct(private readonly \Generator $generator) {}
 
     /**
-     * Returns the generator for iteration. Callers must fully exhaust this before calling errors().
+     * Exposes the item stream for incremental processing.
+     * Callers must fully exhaust this before calling errors().
      *
      * @return \Generator<int, TItem>
      */
@@ -34,7 +35,7 @@ class ImportFetchStream
     }
 
     /**
-     * Returns the error strings collected during the fetch.
+     * Exposes fetch-time errors accumulated while the stream was consumed.
      * This must only be called after items() has been fully iterated.
      *
      * @return array<int, string>
@@ -45,8 +46,7 @@ class ImportFetchStream
     }
 
     /**
-     * Convenience factory for creating a stream backed by a plain array.
-     * Intended for use in tests and other contexts where a real generator is not needed.
+     * Builds a stream wrapper from in-memory items for tests and non-streaming contexts.
      *
      * @template TFromArrayItem
      *

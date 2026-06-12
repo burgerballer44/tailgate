@@ -5,7 +5,7 @@ namespace App\Http\Requests\Traits;
 trait GameValidationRulesTrait
 {
     /**
-     * Get the base validation rules for game fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, mixed>
      */
@@ -23,7 +23,7 @@ trait GameValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for storing a game.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, mixed>
      */
@@ -33,7 +33,7 @@ trait GameValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a game.
+     * Defines validation rules used when updating a .
      *
      * @return array<string, mixed>
      */

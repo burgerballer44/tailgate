@@ -6,8 +6,8 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 
 /**
- * Holds validated data for a game, including team IDs, scores, season information, and start time details.
- * This DTO normalizes and validates game information from various sources for database persistence.
+ * Represents normalized game input used by scheduling and scoring workflows.
+ * Encapsulates teams, season, scores, and start-time semantics in a persistence-ready shape.
  *
  * @param  int  $season_id  The ID of the season the game belongs to.
  * @param  int  $home_team_id  The ID of the home team.

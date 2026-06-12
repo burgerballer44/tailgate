@@ -9,15 +9,18 @@ use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Services\Contracts\MemberCommandInterface;
 
+/**
+ * Executes membership lifecycle actions within group administration workflows.
+ * Centralizes role and status persistence for consistent member management behavior.
+ */
 class MemberCommandService implements MemberCommandInterface
 {
     /**
-     * Create a new member for a specific group.
-     * This method handles member creation logic within a group context.
+     * Adds a member to a group with normalized role and status defaults.
      *
      * @param  Group  $group  The group to add the member to.
      * @param  ValidatedMemberData  $data  Validated member data including user_id and role.
-     * @return Member The created member instance.
+     * @return Member  The created member instance.
      */
     public function createForGroup(Group $group, ValidatedMemberData $data): Member
     {
@@ -31,12 +34,11 @@ class MemberCommandService implements MemberCommandInterface
     }
 
     /**
-     * Update a member's information.
-     * This method modifies member details.
+     * Applies role and status changes to an existing member.
      *
      * @param  Member  $member  The member to update.
      * @param  ValidatedMemberData  $data  Validated data containing member information to update.
-     * @return Member The updated member instance.
+     * @return Member  The updated member instance.
      */
     public function update(Member $member, ValidatedMemberData $data): Member
     {
@@ -57,8 +59,7 @@ class MemberCommandService implements MemberCommandInterface
     }
 
     /**
-     * Delete a member from the system.
-     * This method permanently removes the member.
+     * Removes a member record while enforcing minimum-admin safety constraints.
      *
      * @param  Member  $member  The member to delete.
      *

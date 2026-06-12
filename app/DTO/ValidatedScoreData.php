@@ -3,8 +3,8 @@
 namespace App\DTO;
 
 /**
- * Holds validated data for a game score prediction, including player ID, game ID, and team score predictions.
- * This DTO represents a single player's prediction for a specific game, validated for database persistence.
+ * Represents normalized score prediction input for player-game submissions.
+ * Captures prediction values and optional player/game references in a persistence-ready shape.
  *
  * @param  int|null  $player_id  The ID of the player making the prediction, or null for system-generated predictions.
  * @param  int|null  $game_id  The ID of the game being predicted, or null if the game is not yet determined.

@@ -6,8 +6,8 @@ use App\Models\UserRole;
 use App\Models\UserStatus;
 
 /**
- * Holds validated data for a user, including name, email, optional password, and user role and status enums.
- * This DTO ensures user information is properly typed and validated before database persistence or authentication.
+ * Represents normalized user input for account lifecycle operations.
+ * Encodes identity, credentials, status, and role data in a consistent, typed structure.
  *
  * @param  string  $name  The full name of the user.
  * @param  string  $email  The email address of the user (should be validated as unique before persistence).

@@ -8,15 +8,18 @@ use App\Services\Contracts\UserCommandInterface;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
+/**
+ * Executes user account lifecycle actions, including creation, profile edits, and credential changes.
+ * Ensures password handling and account updates remain centralized and consistent.
+ */
 class UserCommandService implements UserCommandInterface
 {
     /**
-     * Create a new user with the provided data.
-     * This method handles user creation logic, including password hashing.
-     * If password is null, a random password is generated.
+     * Persists a new user account and guarantees credential hashing.
+     * Generates a random password when one is not supplied.
      *
      * @param  ValidatedUserData  $data  Validated user data including name, email, password, status, role.
-     * @return User The created user instance.
+     * @return User  The created user instance.
      */
     public function create(ValidatedUserData $data): User
     {
@@ -34,12 +37,11 @@ class UserCommandService implements UserCommandInterface
     }
 
     /**
-     * Update a user's profile information (name, email, status, role).
-     * This method is used to modify user profile details.
+     * Applies profile metadata changes to an existing user account.
      *
      * @param  User  $user  The user to update.
      * @param  ValidatedUserData  $data  Validated data containing profile information to update.
-     * @return User The updated user instance.
+     * @return User  The updated user instance.
      */
     public function updateProfile(User $user, ValidatedUserData $data): User
     {
@@ -64,12 +66,11 @@ class UserCommandService implements UserCommandInterface
     }
 
     /**
-     * Change a user's password.
-     * This method updates the user's password after hashing it.
+     * Replaces a user's password using the application's hashing strategy.
      *
      * @param  User  $user  The user whose password to change.
      * @param  string  $newPassword  The new plain text password.
-     * @return User The updated user instance.
+     * @return User  The updated user instance.
      */
     public function changePassword(User $user, string $newPassword): User
     {
@@ -80,13 +81,12 @@ class UserCommandService implements UserCommandInterface
     }
 
     /**
-     * Reset a user's password during password reset flow.
-     * This method updates the user's password and sets the remember_token.
+     * Completes password-reset persistence, including remember-token rotation.
      *
      * @param  User  $user  The user whose password to reset.
      * @param  string  $newPassword  The new plain text password.
      * @param  string|null  $rememberToken  The remember token to set.
-     * @return User The updated user instance.
+     * @return User  The updated user instance.
      */
     public function resetPassword(User $user, string $newPassword, string $rememberToken): User
     {
@@ -99,8 +99,7 @@ class UserCommandService implements UserCommandInterface
     }
 
     /**
-     * Delete a user from the system.
-     * This method permanently removes the user.
+     * Removes a user account from persistence.
      *
      * @param  User  $user  The user to delete.
      */
@@ -110,11 +109,10 @@ class UserCommandService implements UserCommandInterface
     }
 
     /**
-     * Hash a plain text password.
-     * This utility method hashes the provided password using the framework's hashing mechanism.
+     * Produces the framework-standard hash for a plain-text password.
      *
      * @param  string  $password  The plain text password to hash.
-     * @return string The hashed password.
+     * @return string  The hashed password.
      */
     public static function hashPassword(string $password): string
     {
@@ -122,12 +120,11 @@ class UserCommandService implements UserCommandInterface
     }
 
     /**
-     * Check if a plain text password matches a hashed password.
-     * This utility method verifies if the provided plain text password corresponds to the given hashed password.
+     * Verifies a plain-text password against a stored hash.
      *
      * @param  string  $password  The plain text password to check.
      * @param  string  $hashedPassword  The hashed password to compare against.
-     * @return bool True if the passwords match, false otherwise.
+     * @return bool  True if the passwords match, false otherwise.
      */
     public static function checkPassword(string $password, string $hashedPassword): bool
     {

@@ -5,8 +5,8 @@ namespace App\DTO;
 readonly class TeamImportData
 {
     /**
-     * Holds the necessary information to perform a team import from a given source.
-     * The options array can contain any additional parameters needed to fetch and process the team data from the source.
+     * Captures source selection and runtime options for a team import request.
+     * The options array carries source-specific parameters used during fetch and normalization.
      *
      * @param  string  $source  The unique key for the team import source (e.g. 'cfbd', 'csv', etc.).
      * @param  array<string, mixed>  $options  Additional options for the team import, specific to the source.

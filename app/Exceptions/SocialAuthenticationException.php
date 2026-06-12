@@ -5,7 +5,7 @@ namespace App\Exceptions;
 use RuntimeException;
 
 /**
- * Exception thrown when an error occurs during social authentication operations.
- * This may include provider connection failures, missing credentials, or invalid user data from the provider.
+ * Represents failures during third-party authentication and account linking.
+ * Used when provider identity data is missing, invalid, or cannot be safely mapped to a local user.
  */
 class SocialAuthenticationException extends RuntimeException {}

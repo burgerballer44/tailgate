@@ -12,7 +12,7 @@ class UpdateGroupRequest extends FormRequest
     use GroupValidationRulesTrait;
 
     /**
-     * Determine if the user is authorized to make this request.
+     * Authorizes this request in the current application context.
      */
     public function authorize(): bool
     {
@@ -20,7 +20,7 @@ class UpdateGroupRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Defines validation rules for this request payload.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -30,7 +30,7 @@ class UpdateGroupRequest extends FormRequest
     }
 
     /**
-     * Get the validated data as a ValidatedGroupData object.
+     * Maps validated input into a  DTO.
      * This method is used to pass validated group data to the service layer.
      *
      * @return ValidatedGroupData The validated group data transfer object.

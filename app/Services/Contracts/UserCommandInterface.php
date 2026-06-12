@@ -5,6 +5,11 @@ namespace App\Services\Contracts;
 use App\DTO\ValidatedUserData;
 use App\Models\User;
 
+/**
+ * Manages user account creation, profile updates, and password management.
+ * Handles user account setup, profile modifications, password changes, and password resets,
+ * supporting user authentication and account administration workflows.
+ */
 interface UserCommandInterface
 {
     public function create(ValidatedUserData $data): User;

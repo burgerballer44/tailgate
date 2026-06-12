@@ -9,6 +9,10 @@ use App\Models\Season;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\SeasonCommandInterface;
 
+/**
+ * Executes season lifecycle actions, including persistence of season metadata and related games.
+ * Centralizes season creation and update behavior for consistent league management.
+ */
 class SeasonCommandService implements SeasonCommandInterface
 {
     public function __construct(
@@ -16,11 +20,10 @@ class SeasonCommandService implements SeasonCommandInterface
     ) {}
 
     /**
-     * Create a new season with the provided data.
-     * This method handles season creation logic, including setting name, sport, season_type, and active state.
+     * Persists a new season with normalized sport, type, and activation state.
      *
      * @param  ValidatedSeasonData  $data  Validated season data including name, sport, season_type, and active state.
-     * @return Season The created season instance.
+     * @return Season  The created season instance.
      */
     public function create(ValidatedSeasonData $data): Season
     {
@@ -35,12 +38,11 @@ class SeasonCommandService implements SeasonCommandInterface
     }
 
     /**
-     * Update an existing season's information in the system.
-     * This method is used to modify season details such as name, sport, season_type, or active state.
+     * Applies metadata and activation changes to an existing season.
      *
      * @param  Season  $season  The season to update.
      * @param  ValidatedSeasonData  $data  Validated data to update the season with.
-     * @return Season The updated season instance.
+     * @return Season  The updated season instance.
      */
     public function update(Season $season, ValidatedSeasonData $data): Season
     {
@@ -58,8 +60,7 @@ class SeasonCommandService implements SeasonCommandInterface
     }
 
     /**
-     * Delete a season from the system.
-     * This method permanently removes the season.
+     * Removes a season record from persistence.
      *
      * @param  Season  $season  The season to delete.
      */
@@ -69,12 +70,11 @@ class SeasonCommandService implements SeasonCommandInterface
     }
 
     /**
-     * Add a game to a season.
-     * This method creates a new game and associates it with the given season.
+     * Creates and attaches a new game within the provided season context.
      *
      * @param  Season  $season  The season to add the game to.
      * @param  ValidatedGameData  $data  Validated game data including teams, scores, start date-time, and TBD flag.
-     * @return Game The created game instance.
+     * @return Game  The created game instance.
      */
     public function addGame(Season $season, ValidatedGameData $data): Game
     {

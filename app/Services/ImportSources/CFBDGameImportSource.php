@@ -15,6 +15,10 @@ use App\Traits\ImportSourceDataHelpers;
 use Carbon\CarbonImmutable;
 use Throwable;
 
+/**
+ * Supplies football schedule data from the CFBD API in the normalized game import shape.
+ * Enforces sport compatibility and maps source payloads into application-ready game records.
+ */
 class CFBDGameImportSource implements GameImportSourceInterface
 {
     use ImportSourceDataHelpers;

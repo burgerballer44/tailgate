@@ -12,6 +12,10 @@ use App\Models\TeamType;
 use App\Services\Contracts\TeamImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
 
+/**
+ * Supplies basketball team data from the CBBD API in the normalized team import shape.
+ * Maps source-specific payloads into application-ready team records and metadata.
+ */
 class CBBDTeamImportSource implements TeamImportSourceInterface
 {
     use ImportSourceDataHelpers;

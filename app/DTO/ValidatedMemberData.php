@@ -6,8 +6,8 @@ use App\Models\GroupRole;
 use App\Models\MemberStatus;
 
 /**
- * Holds validated data for a group member, including the user ID, optional role, and membership status.
- * This DTO represents a user's membership in a group with their permissions and approval status.
+ * Represents normalized membership input for group member lifecycle operations.
+ * Encodes target user, role, and approval status in a persistence-ready structure.
  *
  * @param  int|null  $user_id  The ID of the user being added as a member, or null for pending invitations.
  * @param  GroupRole|null  $role  The optional role enum defining the member's permissions within the group (e.g., Owner, Moderator, Member).

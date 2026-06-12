@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 trait FollowValidationRulesTrait
 {
     /**
-     * Get the base validation rules for follow fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -27,7 +27,7 @@ trait FollowValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for storing a follow.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -37,7 +37,7 @@ trait FollowValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a follow.
+     * Defines validation rules used when updating a .
      *
      * @return array<string, ValidationRule|array|string>
      */

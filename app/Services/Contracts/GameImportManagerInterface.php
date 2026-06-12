@@ -6,10 +6,15 @@ use App\DTO\GameImportData;
 use App\DTO\ImportResult;
 use App\Models\Season;
 
+/**
+ * Orchestrates the end-to-end process of importing games from various external sources into a season.
+ * Manages source discovery, delegates to the appropriate source for data fetching, handles validation
+ * and conflict resolution, and provides comprehensive import result reporting with error tracking.
+ */
 interface GameImportManagerInterface
 {
     /**
-     * Get the available sources for game import.
+     * Lists import sources and metadata used by game import selection workflows.
      *
      * @return array<int, array<string, string>>
      */

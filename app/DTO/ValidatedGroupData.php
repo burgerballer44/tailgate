@@ -3,8 +3,8 @@
 namespace App\DTO;
 
 /**
- * Holds validated data for a group, including the group name, owner ID, and optional member and player limits.
- * This DTO represents group information that has been validated and normalized for database persistence.
+ * Represents normalized group input used by group lifecycle workflows.
+ * Captures ownership and optional membership/player constraints for persistence.
  *
  * @param  string  $name  The name of the group.
  * @param  int  $owner_id  The ID of the user who owns the group.

@@ -11,7 +11,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 trait ScoreValidationRulesTrait
 {
     /**
-     * Get the base validation rules for score fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -24,7 +24,7 @@ trait ScoreValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for storing a score.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -37,7 +37,7 @@ trait ScoreValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a score.
+     * Defines validation rules used when updating a .
      *
      * @return array<string, ValidationRule|array|string>
      */

@@ -9,7 +9,7 @@ use Illuminate\Validation\Rules\Enum;
 trait TeamValidationRulesTrait
 {
     /**
-     * Get the base validation rules for team fields.
+     * Defines shared validation rules for  fields.
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -34,7 +34,7 @@ trait TeamValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for storing a team.
+     * Defines validation rules used when creating a .
      *
      * @return array<string, ValidationRule|array|string>
      */
@@ -44,7 +44,7 @@ trait TeamValidationRulesTrait
     }
 
     /**
-     * Get the validation rules for updating a team.
+     * Defines validation rules used when updating a .
      *
      * @return array<string, ValidationRule|array|string>
      */
