@@ -3,7 +3,7 @@
     mainDescription="Details of the player."
     :mainActions="[
         ['text' => 'Edit Player', 'route' => 'developer.groups.members.players.edit', 'params' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid]],
-        ['text' => 'Submit Score', 'route' => 'developer.groups.members.players.submit-score.create', 'params' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid]],
+        ['text' => 'Submit Prediction', 'route' => 'developer.groups.members.players.submit-prediction.create', 'params' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid]],
     ]"
 >
     <x-breadcrumb
@@ -35,13 +35,13 @@
         ]"
     />
 
-    {{-- Scores Section --}}
+    {{-- Predictions Section --}}
     <div class="mt-8">
-        <h2 class="mb-4 text-lg font-semibold">Scores</h2>
+        <h2 class="mb-4 text-lg font-semibold">Predictions</h2>
         <x-tables.full-width
-            heading="Scores"
+            heading="Predictions"
             :headers="['Game', 'Home Prediction', 'Away Prediction', 'Submitted At', 'Actions']"
-            :rows="$scores"
+            :rows="$predictions"
             :columns="[
                 'game.homeTeam.name . \' vs \' . game.awayTeam.name',
                 'home_team_prediction',
@@ -51,21 +51,21 @@
             :rowActions="[
                 [
                     'label' => 'Edit',
-                    'route' => 'developer.groups.members.players.scores.edit',
-                    'routeParams' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid, 'score' => 'ulid'],
+                    'route' => 'developer.groups.members.players.predictions.edit',
+                    'routeParams' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid, 'prediction' => 'ulid'],
                 ],
                 [
                     'label' => 'Delete',
                     'type' => 'form',
-                    'route' => 'developer.groups.members.players.scores.destroy',
-                    'routeParams' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid, 'score' => 'ulid'],
-                    'confirm' => 'Are you sure you want to delete this score?'
+                    'route' => 'developer.groups.members.players.predictions.destroy',
+                    'routeParams' => ['group' => $group->ulid, 'member' => $member->ulid, 'player' => $player->ulid, 'prediction' => 'ulid'],
+                    'confirm' => 'Are you sure you want to delete this prediction?'
                 ]
             ]"
         ></x-tables.full-width>
 
         <div class="mt-4">
-            {{ $scores->links() }}
+            {{ $predictions->links() }}
         </div>
     </div>
 </x-layouts.app>

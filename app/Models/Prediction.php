@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
-class Score extends Model
+class Prediction extends Model
 {
     use HasFactory;
 
@@ -57,8 +57,8 @@ class Score extends Model
      */
     protected static function booted(): void
     {
-        static::creating(function ($score) {
-            $score->ulid = Str::ulid();
+        static::creating(function ($prediction) {
+            $prediction->ulid = Str::ulid();
         });
     }
 

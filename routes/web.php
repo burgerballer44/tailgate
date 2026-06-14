@@ -153,11 +153,11 @@ Route::middleware('auth')->group(function () {
 
             Route::resource('groups.members.players', DeveloperPlayerController::class);
 
-            Route::get('groups/{group}/members/{member}/players/{player}/submit-score', [DeveloperPlayerController::class, 'createScore'])->name('groups.members.players.submit-score.create');
-            Route::post('groups/{group}/members/{member}/players/{player}/submit-score', [DeveloperPlayerController::class, 'submitScore'])->name('groups.members.players.submit-score');
-            Route::get('groups/{group}/members/{member}/players/{player}/scores/{score}/edit', [DeveloperPlayerController::class, 'editScore'])->name('groups.members.players.scores.edit');
-            Route::patch('groups/{group}/members/{member}/players/{player}/scores/{score}', [DeveloperPlayerController::class, 'updateScore'])->name('groups.members.players.scores.update');
-            Route::delete('groups/{group}/members/{member}/players/{player}/scores/{score}', [DeveloperPlayerController::class, 'destroyScore'])->name('groups.members.players.scores.destroy');
+            Route::get('groups/{group}/members/{member}/players/{player}/submit-prediction', [DeveloperPlayerController::class, 'createPrediction'])->name('groups.members.players.submit-prediction.create');
+            Route::post('groups/{group}/members/{member}/players/{player}/submit-prediction', [DeveloperPlayerController::class, 'submitPrediction'])->name('groups.members.players.submit-prediction');
+            Route::get('groups/{group}/members/{member}/players/{player}/predictions/{prediction}/edit', [DeveloperPlayerController::class, 'editPrediction'])->name('groups.members.players.predictions.edit');
+            Route::patch('groups/{group}/members/{member}/players/{player}/predictions/{prediction}', [DeveloperPlayerController::class, 'updatePrediction'])->name('groups.members.players.predictions.update');
+            Route::delete('groups/{group}/members/{member}/players/{player}/predictions/{prediction}', [DeveloperPlayerController::class, 'destroyPrediction'])->name('groups.members.players.predictions.destroy');
         });
     });
 });

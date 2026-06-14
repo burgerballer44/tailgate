@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use App\Models\Prediction;
 
 class Game extends Model
 {
@@ -101,11 +102,11 @@ class Game extends Model
     }
 
     /**
-     * Scores
+     * Predictions
      */
-    public function scores(): HasMany
+    public function predictions(): HasMany
     {
-        return $this->hasMany(Score::class);
+        return $this->hasMany(Prediction::class);
     }
 
     /**

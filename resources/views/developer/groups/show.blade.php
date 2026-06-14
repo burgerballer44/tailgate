@@ -20,7 +20,7 @@
             'details' => 'Details',
             'members' => 'Members',
             'players' => 'Players',
-            'scores' => 'Scores',
+            'predictions' => 'Predictions',
         ];
     @endphp
 
@@ -265,13 +265,13 @@
         </div>
     @endif
 
-    @if ($activeTab === 'scores')
+    @if ($activeTab === 'predictions')
         <div class="mt-8">
-            <h2 class="mb-4 text-lg font-semibold">Recent Scores</h2>
+            <h2 class="mb-4 text-lg font-semibold">Recent Predictions</h2>
             <x-tables.full-width
-                heading="Scores"
+                heading="Predictions"
                 :headers="['Player', 'Member', 'Game', 'Prediction', 'Submitted', 'Actions']"
-                :rows="$scores"
+                :rows="$predictions"
                 :columns="[
                     'player.player_name',
                     'player.member.user.name',
@@ -282,21 +282,21 @@
                 :rowActions="[
                     [
                         'label' => 'Edit',
-                        'route' => 'developer.groups.members.players.scores.edit',
-                        'routeParams' => ['group' => $group->ulid, 'member' => 'player.member.ulid', 'player' => 'player.ulid', 'score' => 'ulid'],
+                        'route' => 'developer.groups.members.players.predictions.edit',
+                        'routeParams' => ['group' => $group->ulid, 'member' => 'player.member.ulid', 'player' => 'player.ulid', 'prediction' => 'ulid'],
                     ],
                     [
                         'label' => 'Delete',
                         'type' => 'form',
-                        'route' => 'developer.groups.members.players.scores.destroy',
-                        'routeParams' => ['group' => $group->ulid, 'member' => 'player.member.ulid', 'player' => 'player.ulid', 'score' => 'ulid'],
-                        'confirm' => 'Are you sure you want to delete this score?'
+                        'route' => 'developer.groups.members.players.predictions.destroy',
+                        'routeParams' => ['group' => $group->ulid, 'member' => 'player.member.ulid', 'player' => 'player.ulid', 'prediction' => 'ulid'],
+                        'confirm' => 'Are you sure you want to delete this prediction?'
                     ]
                 ]"
             ></x-tables.full-width>
 
             <div class="mt-6 px-4 sm:px-6 lg:px-8">
-                {{ $scores->links() }}
+                {{ $predictions->links() }}
             </div>
         </div>
     @endif

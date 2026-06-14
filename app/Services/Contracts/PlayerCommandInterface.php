@@ -3,14 +3,14 @@
 namespace App\Services\Contracts;
 
 use App\DTO\ValidatedPlayerData;
-use App\DTO\ValidatedScoreData;
+use App\DTO\ValidatedPredictionData;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Score;
+use App\Models\Prediction;
 
 /**
- * Manages player creation, updates, and score submission workflows within a member context.
- * Handles player information management and the complete game score lifecycle (submit, update, delete),
+ * Manages player creation, updates, and prediction submission workflows within a member context.
+ * Handles player information management and the complete game prediction lifecycle (submit, update, delete),
  * supporting member-based player rosters and game prediction scoring.
  */
 interface PlayerCommandInterface
@@ -21,9 +21,9 @@ interface PlayerCommandInterface
 
     public function delete(Player $player): void;
 
-    public function submitScore(Player $player, ValidatedScoreData $data): Score;
+    public function submitPrediction(Player $player, ValidatedPredictionData $data): Prediction;
 
-    public function updateScore(Score $score, ValidatedScoreData $data): Score;
+    public function updatePrediction(Prediction $prediction, ValidatedPredictionData $data): Prediction;
 
-    public function deleteScore(Score $score): void;
+    public function deletePrediction(Prediction $prediction): void;
 }

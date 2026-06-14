@@ -3,7 +3,7 @@
 namespace App\DTO;
 
 /**
- * Represents normalized score prediction input for player-game submissions.
+ * Represents normalized prediction input for player-game submissions.
  * Captures prediction values and optional player/game references in a persistence-ready shape.
  *
  * @param  int|null  $player_id  The ID of the player making the prediction, or null for system-generated predictions.
@@ -11,7 +11,7 @@ namespace App\DTO;
  * @param  int  $home_team_prediction  The predicted score for the home team.
  * @param  int  $away_team_prediction  The predicted score for the away team.
  */
-readonly class ValidatedScoreData
+readonly class ValidatedPredictionData
 {
     public function __construct(
         public ?int $player_id,

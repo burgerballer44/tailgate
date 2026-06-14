@@ -4,7 +4,7 @@ Sports group prediction platform built with Laravel.
 
 ## Product goal
 
-Tailgate lets users form prediction groups around sports teams. Each member of a group creates one or more "players" and submits score predictions for upcoming games. The core relationship is that a group follows one or more teams, optionally scoped to a single sport for that team; seasons provide time-bound context for games and scores.
+Tailgate lets users form prediction groups around sports teams. Each member of a group creates one or more "players" and submits predictions for upcoming games. The core relationship is that a group follows one or more teams, optionally scoped to a single sport for that team; seasons provide time-bound context for games and predictions.
 
 The immediate goal is a working MVP where a regular user can move through the full loop without any developer tooling.
 
@@ -31,7 +31,7 @@ The MVP is complete when an approved group member can, without developer-panel a
 
 1. Create one or more players under their group membership.
 2. See the upcoming games for the teams their group is following.
-3. Submit a score prediction (home and away score) for each game, per player.
+3. Submit a prediction (home and away values) for each game, per player.
 4. See confirmation that their predictions are saved.
 
 Everything else — leaderboards, prediction history, admin dashboards, notifications — is post-MVP.
@@ -39,7 +39,7 @@ Everything else — leaderboards, prediction history, admin dashboards, notifica
 ### What is missing for the MVP
 
 - **Game listing** — users have no view to see upcoming games for their group's followed teams.
-- **Score predictions** — users cannot submit predictions from the UI.
+- **Prediction submissions** — users cannot submit predictions from the UI.
 
 These two items are the entire remaining scope of the MVP.
 
@@ -49,7 +49,7 @@ These two items are the entire remaining scope of the MVP.
 - **Group** — shared prediction space with invite code and member limit.
 - **Member** — join table between user and group; has a role (admin/member) and status (pending/approved).
 - **Player** — prediction identity belonging to a member; a member can have multiple players per group.
-- **Score** — a player's predicted home/away score for a specific game.
+- **Prediction** — a player's predicted home/away score for a specific game.
 - **Team, Season, Game** — sports schedule entities managed via developer tools and import pipelines. Seasons are contexts for games, not the source of follow relationships.
 - **Follow** — a group's commitment to follow a specific team independent of season boundaries, with an optional sport scope to limit eligible games to a single sport.
 
@@ -101,7 +101,7 @@ Scope:
 - Add routes and controller actions to list upcoming games for a group membership.
 - Show games even when prediction is closed (for example, inactive season), with clear status badges.
 - Respect follow filters: team follow and optional sport scope.
-- Keep this slice read-only; no score entry yet.
+- Keep this slice read-only; no prediction entry yet.
 
 Definition of done:
 
@@ -125,7 +125,7 @@ Required rules to implement in this slice:
 - One prediction per player per game (upsert behavior).
 - Edits allowed until lock time.
 - Basic validation and eligibility checks:
-  non-negative integer scores, eligible followed team/sport, and submission within allowed window.
+  non-negative integer predictions, eligible followed team/sport, and submission within allowed window.
 
 Scope:
 
@@ -141,7 +141,7 @@ Definition of done:
 Testing focus:
 
 - Happy path for create and update before lock.
-- Validation failures (invalid scores, ineligible game, unauthorized player).
+- Validation failures (invalid predictions, ineligible game, unauthorized player).
 - Out-of-window behavior (post-lock and inactive season).
 - Authorization boundaries for member/group access.
 
@@ -151,7 +151,7 @@ Goal: add at least one optional rule to support more competitive groups without 
 
 MVP optional rule:
 
-- Group-wide unique score predictions per game (admin toggle).
+- Group-wide unique predictions per game (admin toggle).
 
 Deferred optional rules (post-MVP, same policy framework):
 
@@ -163,12 +163,12 @@ Scope:
 
 - Add group-level prediction policy setting for uniqueness.
 - Enforce uniqueness during prediction create/update.
-- Show clear conflict messaging when a submitted score is disallowed by policy.
+- Show clear conflict messaging when a submitted prediction is disallowed by policy.
 
 Definition of done:
 
 - Group admin can enable/disable uniqueness policy.
-- Members receive immediate, understandable feedback when a duplicate score is blocked.
+- Members receive immediate, understandable feedback when a duplicate prediction is blocked.
 
 Testing focus:
 

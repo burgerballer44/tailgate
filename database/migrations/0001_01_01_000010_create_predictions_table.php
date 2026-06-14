@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scores', function (Blueprint $table) {
+        Schema::create('predictions', function (Blueprint $table) {
             $table->id();
             $table->ulid('ulid')->unique();
             $table->unsignedBigInteger('player_id');
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scores');
+        Schema::dropIfExists('predictions');
     }
 };

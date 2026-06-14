@@ -1,11 +1,11 @@
 <?php
 
 use App\DTO\ValidatedPlayerData;
-use App\DTO\ValidatedScoreData;
+use App\DTO\ValidatedPredictionData;
 use App\Models\Game;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Score;
+use App\Models\Prediction;
 use App\Services\PlayerCommandService;
 use Illuminate\Support\Str;
 
@@ -73,39 +73,39 @@ describe('delete player', function () {
     });
 });
 
-describe('submit score', function () {
+describe('submit prediction', function () {
     test('with valid data', function () {
         // create player and game
         $player = Player::factory()->create();
         $game = Game::factory()->create();
 
-        // score data
+        // prediction data
         $data = [
             'game_id' => $game->id,
             'home_team_prediction' => 2,
             'away_team_prediction' => 1,
         ];
 
-        // submit score
-        $score = $this->service->submitScore($player, ValidatedScoreData::fromArray($data));
+        // submit prediction
+        $prediction = $this->service->submitPrediction($player, ValidatedPredictionData::fromArray($data));
 
-        // verify score exists in database
-        $this->assertDatabaseHas('scores', [
+        // verify prediction exists in database
+        $this->assertDatabaseHas('predictions', [
             'player_id' => $player->id,
             'game_id' => $game->id,
             'home_team_prediction' => 2,
             'away_team_prediction' => 1,
         ]);
 
-        expect($score)->toBeInstanceOf(Score::class);
-        expect($score->player_id)->toBe($player->id);
+        expect($prediction)->toBeInstanceOf(Prediction::class);
+        expect($prediction->player_id)->toBe($player->id);
     });
 });
 
-describe('update score', function () {
+describe('update prediction', function () {
     test('with valid data', function () {
-        // create existing score
-        $score = Score::factory()->create([
+        // create existing prediction
+        $prediction = Prediction::factory()->create([
             'home_team_prediction' => 1,
             'away_team_prediction' => 0,
         ]);
@@ -116,28 +116,28 @@ describe('update score', function () {
             'away_team_prediction' => 2,
         ];
 
-        // update the score
-        $updatedScore = $this->service->updateScore($score, ValidatedScoreData::fromArray($data));
+        // update the prediction
+        $updatedPrediction = $this->service->updatePrediction($prediction, ValidatedPredictionData::fromArray($data));
 
-        // verify score updated in database
-        $this->assertDatabaseHas('scores', [
+        // verify prediction updated in database
+        $this->assertDatabaseHas('predictions', [
             'home_team_prediction' => 3,
             'away_team_prediction' => 2,
         ]);
-        expect($updatedScore->home_team_prediction)->toBe(3);
-        expect($updatedScore->away_team_prediction)->toBe(2);
+        expect($updatedPrediction->home_team_prediction)->toBe(3);
+        expect($updatedPrediction->away_team_prediction)->toBe(2);
     });
 });
 
-describe('delete score', function () {
-    test('removes score from database', function () {
-        // create existing score
-        $score = Score::factory()->create();
+describe('delete prediction', function () {
+    test('removes prediction from database', function () {
+        // create existing prediction
+        $prediction = Prediction::factory()->create();
 
-        // delete the score
-        $this->service->deleteScore($score);
+        // delete the prediction
+        $this->service->deletePrediction($prediction);
 
-        // verify score removed from database
-        $this->assertDatabaseMissing('scores', ['id' => $score->id]);
+        // verify prediction removed from database
+        $this->assertDatabaseMissing('predictions', ['id' => $prediction->id]);
     });
 });

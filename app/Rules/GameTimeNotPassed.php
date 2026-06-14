@@ -7,7 +7,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * Blocks score submissions once a game is considered started.
+ * Blocks prediction submissions once a game is considered started.
  * Uses date-only comparison for TBD start times and full timestamp comparison otherwise.
  */
 class GameTimeNotPassed implements ValidationRule
@@ -15,7 +15,7 @@ class GameTimeNotPassed implements ValidationRule
     private const DATE_FORMAT = 'Y-m-d';
 
     /**
-     * Validates that the game has not reached its lock time for score submission.
+     * Validates that the game has not reached its lock time for prediction submission.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

@@ -121,12 +121,12 @@
             />
         </x-groups.section-card>
 
-        {{-- Scores --}}
-        {{-- TODO: wire up PlayerQueryService / ScoreQueryService for historical results --}}
-        <x-groups.section-card title="Scores & results" description="How your predictions compared to final scores.">
+        {{-- Predictions --}}
+        {{-- TODO: wire up PlayerQueryService / PredictionQueryService for historical results --}}
+        <x-groups.section-card title="Predictions & results" description="How your predictions compared to final scores.">
             <x-empty-state
                 title="No results yet"
-                description="Completed game results and your prediction scores will show here."
+                description="Completed game results and your predictions will show here."
                 :buttonText="null"
                 :buttonRoute="null"
             />

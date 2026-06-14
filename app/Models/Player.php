@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use App\Models\Prediction;
 
 class Player extends Model
 {
@@ -70,9 +71,9 @@ class Player extends Model
         return $builder;
     }
 
-    public function scores(): HasMany
+    public function predictions(): HasMany
     {
-        return $this->hasMany(Score::class);
+        return $this->hasMany(Prediction::class);
     }
 
     public function member(): BelongsTo

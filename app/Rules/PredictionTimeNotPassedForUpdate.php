@@ -6,20 +6,20 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * Blocks score updates once the related game is considered started.
+ * Blocks prediction updates once the related game is considered started.
  * Uses date-only comparison for TBD start times and full timestamp comparison otherwise.
  */
-class GameTimeNotPassedForUpdate implements ValidationRule
+class PredictionTimeNotPassedForUpdate implements ValidationRule
 {
     private const DATE_FORMAT = 'Y-m-d';
 
     /**
-     * Validates that score updates are still allowed for the related game start window.
+     * Validates that prediction updates are still allowed for the related game start window.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $score = request()->route('score');
-        $game = $score->game;
+        $prediction = request()->route('prediction');
+        $game = $prediction->game;
 
         $gameDateTime = date_create_immutable((string) $game->start_date_time);
 

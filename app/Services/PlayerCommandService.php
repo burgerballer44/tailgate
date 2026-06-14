@@ -3,15 +3,15 @@
 namespace App\Services;
 
 use App\DTO\ValidatedPlayerData;
-use App\DTO\ValidatedScoreData;
+use App\DTO\ValidatedPredictionData;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Score;
+use App\Models\Prediction;
 use App\Services\Contracts\PlayerCommandInterface;
 
 /**
  * Executes player lifecycle actions within member-owned rosters.
- * Covers player persistence and score submission workflows used by prediction features.
+ * Covers player persistence and prediction submission workflows used by prediction features.
  */
 class PlayerCommandService implements PlayerCommandInterface
 {
@@ -63,54 +63,54 @@ class PlayerCommandService implements PlayerCommandInterface
      */
     public function delete(Player $player): void
     {
-        $player->delete();
+        $player->newQuery()->whereKey($player->getKey())->delete();
     }
 
     /**
-     * Persists a new score prediction for a player-game pairing.
+     * Persists a new prediction for a player-game pairing.
      *
-     * @param  Player  $player  The player to submit the score for.
-     * @param  ValidatedScoreData  $data  Validated score data.
-     * @return Score  The created score instance.
+     * @param  Player  $player  The player to submit the prediction for.
+     * @param  ValidatedPredictionData  $data  Validated prediction data.
+     * @return Prediction  The created prediction instance.
      */
-    public function submitScore(Player $player, ValidatedScoreData $data): Score
+    public function submitPrediction(Player $player, ValidatedPredictionData $data): Prediction
     {
-        $scoreData = [
+        $predictionData = [
             'game_id' => $data->game_id,
             'home_team_prediction' => $data->home_team_prediction,
             'away_team_prediction' => $data->away_team_prediction,
         ];
 
-        return $player->scores()->create($scoreData);
+        return $player->predictions()->create($predictionData);
     }
 
     /**
-     * Applies prediction changes to an existing score record.
+     * Applies prediction changes to an existing prediction record.
      *
-     * @param  Score  $score  The score to update.
-     * @param  ValidatedScoreData  $data  Validated data containing score information to update.
-     * @return Score  The updated score instance.
+     * @param  Prediction  $prediction  The prediction to update.
+     * @param  ValidatedPredictionData  $data  Validated data containing prediction information to update.
+     * @return Prediction  The updated prediction instance.
      */
-    public function updateScore(Score $score, ValidatedScoreData $data): Score
+    public function updatePrediction(Prediction $prediction, ValidatedPredictionData $data): Prediction
     {
         $updateData = [
             'home_team_prediction' => $data->home_team_prediction,
             'away_team_prediction' => $data->away_team_prediction,
         ];
 
-        $score->fill($updateData);
-        $score->save();
+        $prediction->fill($updateData);
+        $prediction->save();
 
-        return $score;
+        return $prediction;
     }
 
     /**
-     * Removes a submitted score record from persistence.
+     * Removes a submitted prediction record from persistence.
      *
-     * @param  Score  $score  The score to delete.
+     * @param  Prediction  $prediction  The prediction to delete.
      */
-    public function deleteScore(Score $score): void
+    public function deletePrediction(Prediction $prediction): void
     {
-        $score->delete();
+        $prediction->newQuery()->whereKey($prediction->getKey())->delete();
     }
 }

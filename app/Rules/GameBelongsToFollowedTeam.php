@@ -9,7 +9,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * Prevents score submissions for games outside a group's followed teams.
+ * Prevents prediction submissions for games outside a group's followed teams.
  * Applies optional sport-scoped follow constraints when validating eligible games.
  */
 class GameBelongsToFollowedTeam implements ValidationRule
@@ -24,7 +24,7 @@ class GameBelongsToFollowedTeam implements ValidationRule
         $game = Game::query()->with('season')->find($value);
 
         if (! $group instanceof Group || ! $game) {
-            $fail('Cannot submit a score for a game in a team you are not following.');
+            $fail('Cannot submit a prediction for a game in a team you are not following.');
 
             return;
         }
@@ -34,7 +34,7 @@ class GameBelongsToFollowedTeam implements ValidationRule
             : $group->follows()->get();
 
         if ($follows->isEmpty()) {
-            $fail('Cannot submit a score for a game in a team you are not following.');
+            $fail('Cannot submit a prediction for a game in a team you are not following.');
 
             return;
         }
@@ -44,7 +44,7 @@ class GameBelongsToFollowedTeam implements ValidationRule
         );
 
         if (! $matchesAnyFollow) {
-            $fail('Cannot submit a score for a game in a team you are not following.');
+            $fail('Cannot submit a prediction for a game in a team you are not following.');
         }
     }
 

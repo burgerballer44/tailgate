@@ -1,4 +1,7 @@
-<x-layouts.app mainHeading="Edit Score" mainDescription="Edit the score prediction.">
+<x-layouts.app
+    mainHeading="Submit Prediction for {{ $player->player_name }}"
+    mainDescription="Submit a prediction for a game."
+>
     <x-breadcrumb
         :breadcrumbs="[
             ['text' => 'Home', 'url' => route('dashboard')],
@@ -8,17 +11,17 @@
             ['text' => $member->user->name, 'url' => route('developer.groups.members.show', [$group, $member])],
             ['text' => 'Players', 'url' => route('developer.groups.members.players.index', [$group, $member])],
             ['text' => $player->player_name, 'url' => route('developer.groups.members.players.show', [$group, $member, $player])],
-            ['text' => 'Edit Score', 'active' => true],
+            ['text' => 'Submit Prediction', 'active' => true],
         ]"
     />
 
-    <x-form.developer.score
-        :score="$score"
+    <x-form.developer.prediction
+        :prediction="null"
         :player="$player"
         :group="$group"
         :member="$member"
-        :games="collect()"
-        :action="route('developer.groups.members.players.scores.update', [$group, $member, $player, $score])"
-        :method="'PUT'"
+        :games="$games"
+        :action="route('developer.groups.members.players.submit-prediction', [$group, $member, $player])"
+        :method="'POST'"
     />
 </x-layouts.app>

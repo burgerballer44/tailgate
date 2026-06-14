@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Developer\StoreDeveloperPlayerRequest;
-use App\Http\Requests\Group\SubmitScoreRequest;
+use App\Http\Requests\Group\SubmitPredictionRequest;
 use App\Http\Requests\Group\UpdatePlayerRequest;
-use App\Http\Requests\Group\UpdateScoreRequest;
+use App\Http\Requests\Group\UpdatePredictionRequest;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Score;
+use App\Models\Prediction;
 use App\Services\Contracts\PlayerCommandInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -55,7 +55,7 @@ class DeveloperPlayerController extends Controller
             'group' => $group,
             'member' => $member,
             'player' => $player->load('member.user'),
-            'scores' => $player->scores()->with(['game.homeTeam', 'game.awayTeam'])->paginate(),
+            'predictions' => $player->predictions()->with(['game.homeTeam', 'game.awayTeam'])->paginate(),
         ]);
     }
 
@@ -86,14 +86,14 @@ class DeveloperPlayerController extends Controller
         return redirect()->route('developer.groups.members.players.index', [$group, $member]);
     }
 
-    public function createScore(Group $group, Member $member, Player $player): View
+    public function createPrediction(Group $group, Member $member, Player $player): View
     {
-        // Get games that are available for scoring (based on group follows)
+        // Get games that are available for predictions (based on group follows)
         $games = Game::whereHas('season.follows', function ($query) use ($group) {
             $query->where('group_id', $group->id);
         })->with(['homeTeam', 'awayTeam'])->get();
 
-        return view('developer.players.submit-score', [
+        return view('developer.players.submit-prediction', [
             'group' => $group,
             'member' => $member,
             'player' => $player,
@@ -101,39 +101,39 @@ class DeveloperPlayerController extends Controller
         ]);
     }
 
-    public function submitScore(SubmitScoreRequest $request, Group $group, Member $member, Player $player): RedirectResponse
+    public function submitPrediction(SubmitPredictionRequest $request, Group $group, Member $member, Player $player): RedirectResponse
     {
-        $this->playerCommandService->submitScore($player, $request->toDTO());
+        $this->playerCommandService->submitPrediction($player, $request->toDTO());
 
-        $this->setFlashAlert('success', 'Score submitted successfully!');
+        $this->setFlashAlert('success', 'Prediction submitted successfully!');
 
         return redirect()->route('developer.groups.members.players.show', [$group, $member, $player]);
     }
 
-    public function updateScore(UpdateScoreRequest $request, Group $group, Member $member, Player $player, Score $score): RedirectResponse
+    public function updatePrediction(UpdatePredictionRequest $request, Group $group, Member $member, Player $player, Prediction $prediction): RedirectResponse
     {
-        $this->playerCommandService->updateScore($score, $request->toDTO());
+        $this->playerCommandService->updatePrediction($prediction, $request->toDTO());
 
-        $this->setFlashAlert('success', 'Score updated successfully!');
+        $this->setFlashAlert('success', 'Prediction updated successfully!');
 
         return redirect()->route('developer.groups.members.players.show', [$group, $member, $player]);
     }
 
-    public function editScore(Group $group, Member $member, Player $player, Score $score): View
+    public function editPrediction(Group $group, Member $member, Player $player, Prediction $prediction): View
     {
-        return view('developer.players.edit-score', [
+        return view('developer.players.edit-prediction', [
             'group' => $group,
             'member' => $member,
             'player' => $player,
-            'score' => $score,
+            'prediction' => $prediction,
         ]);
     }
 
-    public function destroyScore(Group $group, Member $member, Player $player, Score $score): RedirectResponse
+    public function destroyPrediction(Group $group, Member $member, Player $player, Prediction $prediction): RedirectResponse
     {
-        $this->playerCommandService->deleteScore($score);
+        $this->playerCommandService->deletePrediction($prediction);
 
-        $this->setFlashAlert('success', 'Score deleted successfully!');
+        $this->setFlashAlert('success', 'Prediction deleted successfully!');
 
         return redirect()->route('developer.groups.members.players.show', [$group, $member, $player]);
     }

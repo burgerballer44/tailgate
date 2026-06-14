@@ -4,13 +4,13 @@ namespace Database\Factories;
 
 use App\Models\Game;
 use App\Models\Player;
-use App\Models\Score;
+use App\Models\Prediction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Score>
+ * @extends Factory<Prediction>
  */
-class ScoreFactory extends Factory
+class PredictionFactory extends Factory
 {
     /**
      * Define the model's default state.

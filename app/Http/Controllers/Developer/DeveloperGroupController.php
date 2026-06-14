@@ -8,7 +8,7 @@ use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Group;
-use App\Models\Score;
+use App\Models\Prediction;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Contracts\GroupCommandInterface;
@@ -28,14 +28,14 @@ class DeveloperGroupController extends Controller
     {
         return view('developer.groups.index', [
             'groups' => $this->groupQueryService->query($request->query())->paginate(),
-            'users' => User::get(),
+            'users' => User::query()->get(),
         ]);
     }
 
     public function create(): View
     {
         return view('developer.groups.create', [
-            'users' => User::get(),
+            'users' => User::query()->get(),
         ]);
     }
 
@@ -50,7 +50,7 @@ class DeveloperGroupController extends Controller
 
     /**
      * The show method handles displaying the details of a specific group,
-     * including its members, players, and scores.
+    * including its members, players, and predictions.
      * It also manages the active tab state based on the query parameter.
      * Depending on the active tab, it loads the necessary
      * relationships and data to be displayed in the view.
@@ -58,7 +58,7 @@ class DeveloperGroupController extends Controller
     public function show(Request $request, Group $group): View
     {
         // these are the valid tabs that can be displayed in the group details view
-        $validTabs = ['details', 'members', 'players', 'scores'];
+        $validTabs = ['details', 'members', 'players', 'predictions'];
 
         // determine the active tab based on the query parameter, defaulting to 'details' if not provided or invalid
         $activeTab = in_array($request->query('tab'), $validTabs, true)
@@ -78,9 +78,9 @@ class DeveloperGroupController extends Controller
             $group->load('players.member.user');
         }
 
-        $scores = null;
-        if ($activeTab === 'scores') {
-            $scores = Score::query()
+        $predictions = null;
+        if ($activeTab === 'predictions') {
+            $predictions = Prediction::query()
                 ->whereHas('player.member', fn ($query) => $query->where('group_id', $group->id))
                 ->with([
                     'player.member.user',
@@ -88,13 +88,13 @@ class DeveloperGroupController extends Controller
                     'game.awayTeam',
                 ])
                 ->latest()
-                ->paginate(perPage: 20, pageName: 'scores_page')
-                ->appends(['tab' => 'scores']);
+                ->paginate(perPage: 20, pageName: 'predictions_page')
+                ->appends(['tab' => 'predictions']);
         }
 
         return view('developer.groups.show', [
             'group' => $group,
-            'scores' => $scores,
+            'predictions' => $predictions,
             'activeTab' => $activeTab,
         ]);
     }
@@ -103,7 +103,7 @@ class DeveloperGroupController extends Controller
     {
         return view('developer.groups.edit', [
             'group' => $group,
-            'users' => User::get(),
+            'users' => User::query()->get(),
         ]);
     }
 

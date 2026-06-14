@@ -1,10 +1,10 @@
-@props(['score' => null, 'player' => null, 'group' => null, 'member' => null, 'games' => collect(), 'action' => '', 'method' => 'POST'])
+@props(['prediction' => null, 'player' => null, 'group' => null, 'member' => null, 'games' => collect(), 'action' => '', 'method' => 'POST'])
 
 <x-forms.multi-section-form :action="$action" :method="$method">
     <x-slot name="sections">
         <x-forms.form-section
-            title="Score prediction"
-            description="Select a game and enter your predicted final scores for the home and away teams."
+            title="Prediction"
+            description="Select a game and enter your prediction for the home and away teams."
         >
             @if ($method === 'POST' && $games->isNotEmpty())
                 <div>
@@ -12,7 +12,7 @@
                         name="game_id"
                         label="Game"
                         :required="true"
-                        :value="old('game_id', $score?->game_id)"
+                        :value="old('game_id', $prediction?->game_id)"
                         :options="['' => ''] + $games->mapWithKeys(fn($game) => [$game->id => $game->homeTeam->name . ' vs ' . $game->awayTeam->name . ' (' . $game->start_date_time . ($game->start_time_tbd ? ', TBD' : '') . ')'])->toArray()"
                     />
                     <x-inputs.input-error class="mt-2" :messages="$errors->get('game_id')" />
@@ -26,7 +26,7 @@
                     name="home_team_prediction"
                     type="number"
                     class="mt-1 block w-full"
-                    :value="old('home_team_prediction', $score?->home_team_prediction)"
+                    :value="old('home_team_prediction', $prediction?->home_team_prediction)"
                     required
                     min="0"
                     autocomplete="home_team_prediction"
@@ -41,7 +41,7 @@
                     name="away_team_prediction"
                     type="number"
                     class="mt-1 block w-full"
-                    :value="old('away_team_prediction', $score?->away_team_prediction)"
+                    :value="old('away_team_prediction', $prediction?->away_team_prediction)"
                     required
                     min="0"
                     autocomplete="away_team_prediction"
