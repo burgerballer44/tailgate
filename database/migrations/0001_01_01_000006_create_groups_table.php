@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('member_limit');
             $table->integer('player_limit');
             $table->integer('follow_limit');
+            $table->json('enabled_prediction_policies')->nullable();
             $table->timestamps();
 
             $table->foreign('owner_id')->references('id')->on('users')->onDelete('cascade');

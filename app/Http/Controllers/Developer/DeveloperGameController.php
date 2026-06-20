@@ -54,7 +54,10 @@ class DeveloperGameController extends Controller implements HasMiddleware
 
         $this->setFlashAlert('success', 'Game created successfully!');
 
-        return redirect()->route('developer.seasons.games.index', $season);
+        return redirect()->route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+        ]);
     }
 
     public function show(Season $season, Game $game): View
@@ -80,7 +83,10 @@ class DeveloperGameController extends Controller implements HasMiddleware
 
         $this->setFlashAlert('success', 'Game updated successfully!');
 
-        return redirect()->route('developer.seasons.games.index', $season);
+        return redirect()->route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+        ]);
     }
 
     public function destroy(Season $season, Game $game): RedirectResponse
@@ -89,6 +95,9 @@ class DeveloperGameController extends Controller implements HasMiddleware
 
         $this->setFlashAlert('success', 'Game deleted successfully!');
 
-        return redirect()->route('developer.seasons.games.index', $season);
+        return redirect()->route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+        ]);
     }
 }

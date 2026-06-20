@@ -76,6 +76,10 @@ class GroupCommandService implements GroupCommandInterface
             $updateData['owner_id'] = $data->owner_id;
         }
 
+        if ($data->enabled_prediction_policies !== null) {
+            $updateData['enabled_prediction_policies'] = $data->enabled_prediction_policies;
+        }
+
         $group->fill($updateData);
         $group->save();
 
@@ -89,7 +93,7 @@ class GroupCommandService implements GroupCommandInterface
      */
     public function delete(Group $group): void
     {
-        $group->delete();
+        Group::destroy($group->getKey());
     }
 
     /**

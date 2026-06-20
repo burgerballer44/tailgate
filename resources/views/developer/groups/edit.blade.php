@@ -11,6 +11,7 @@
     <x-form.developer.group
         :group="$group"
         :users="$users"
+        :groupPolicies="$groupPolicies"
         :action="route('developer.groups.update', $group)"
         :method="'PUT'"
     />

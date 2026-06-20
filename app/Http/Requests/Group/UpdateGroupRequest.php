@@ -5,7 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -26,7 +26,10 @@ class UpdateGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->developerUpdateRules();
+        return array_merge($this->developerUpdateRules(), [
+            'enabled_prediction_policies' => ['sometimes', 'array'],
+            'enabled_prediction_policies.*' => ['string', 'distinct', 'in:'.implode(',', $this->groupPolicyKeys())],
+        ]);
     }
 
     /**
@@ -37,6 +40,25 @@ class UpdateGroupRequest extends FormRequest
      */
     public function toDTO(): ValidatedGroupData
     {
-        return ValidatedGroupData::fromArray($this->validated());
+        $validated = $this->validated();
+
+        if (! array_key_exists('enabled_prediction_policies', $validated)) {
+            $validated['enabled_prediction_policies'] = [];
+        }
+
+        return ValidatedGroupData::fromArray($validated);
+    }
+
+    /**
+     * Gets the list of valid group-level prediction policy keys from the PredictionPolicyEvaluator service.
+     * 
+     * @return array<int, string>
+     */
+    private function groupPolicyKeys(): array
+    {
+        return array_values(array_map(
+            static fn ($rule): string => $rule->key(),
+            app(PredictionPolicyEvaluatorInterface::class)->groupRules(),
+        ));
     }
 }

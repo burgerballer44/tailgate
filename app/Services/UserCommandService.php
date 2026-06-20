@@ -105,7 +105,7 @@ class UserCommandService implements UserCommandInterface
      */
     public function delete(User $user): void
     {
-        $user->delete();
+        User::destroy($user->getKey());
     }
 
     /**

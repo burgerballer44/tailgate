@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
+use App\Exceptions\PredictionPolicyViolationException;
 use App\Http\Requests\Developer\StoreDeveloperPlayerRequest;
 use App\Http\Requests\Group\SubmitPredictionRequest;
 use App\Http\Requests\Group\UpdatePlayerRequest;
@@ -103,18 +104,30 @@ class DeveloperPlayerController extends Controller
 
     public function submitPrediction(SubmitPredictionRequest $request, Group $group, Member $member, Player $player): RedirectResponse
     {
-        $this->playerCommandService->submitPrediction($player, $request->toDTO());
+        try {
+            $this->playerCommandService->submitPrediction($player, $request->toDTO());
 
-        $this->setFlashAlert('success', 'Prediction submitted successfully!');
+            $this->setFlashAlert('success', 'Prediction submitted successfully!');
+        } catch (PredictionPolicyViolationException $exception) {
+            $this->setFlashAlert('error', $exception->getMessage());
+
+            return redirect()->back()->withInput();
+        }
 
         return redirect()->route('developer.groups.members.players.show', [$group, $member, $player]);
     }
 
     public function updatePrediction(UpdatePredictionRequest $request, Group $group, Member $member, Player $player, Prediction $prediction): RedirectResponse
     {
-        $this->playerCommandService->updatePrediction($prediction, $request->toDTO());
+        try {
+            $this->playerCommandService->updatePrediction($prediction, $request->toDTO());
 
-        $this->setFlashAlert('success', 'Prediction updated successfully!');
+            $this->setFlashAlert('success', 'Prediction updated successfully!');
+        } catch (PredictionPolicyViolationException $exception) {
+            $this->setFlashAlert('error', $exception->getMessage());
+
+            return redirect()->back()->withInput();
+        }
 
         return redirect()->route('developer.groups.members.players.show', [$group, $member, $player]);
     }

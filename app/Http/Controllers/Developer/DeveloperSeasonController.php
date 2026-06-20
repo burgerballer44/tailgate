@@ -72,6 +72,7 @@ class DeveloperSeasonController extends Controller
             $games = $this->gameQueryService
                 ->query(array_merge($request->all(), ['season_id' => $season->id]))
                 ->with('homeTeam', 'awayTeam')
+                ->orderBy('start_date_time')
                 ->paginate()
                 ->withQueryString();
 

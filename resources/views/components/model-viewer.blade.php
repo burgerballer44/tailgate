@@ -66,7 +66,13 @@
 
                 <div class="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5">
                     <dt class="text-sm font-medium text-slate-500">{{ $label }}</dt>
-                    <dd class="mt-1 break-words text-sm text-slate-900 sm:col-span-2 sm:mt-0">{{ $displayValue }}</dd>
+                    <dd class="mt-1 break-words text-sm text-slate-900 sm:col-span-2 sm:mt-0">
+                        @if ($displayValue instanceof \Illuminate\Contracts\Support\Htmlable)
+                            {!! $displayValue->toHtml() !!}
+                        @else
+                            {{ $displayValue }}
+                        @endif
+                    </dd>
                 </div>
             @endforeach
         </dl>

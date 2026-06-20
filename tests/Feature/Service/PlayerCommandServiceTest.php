@@ -2,15 +2,21 @@
 
 use App\DTO\ValidatedPlayerData;
 use App\DTO\ValidatedPredictionData;
+use App\DTO\PredictionPolicyEvaluationResult;
+use App\DTO\PredictionPolicyViolation;
+use App\Exceptions\PredictionPolicyViolationException;
 use App\Models\Game;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Prediction;
+use App\Models\Season;
+use App\Models\PredictionPolicyScope;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\PlayerCommandService;
 use Illuminate\Support\Str;
 
 beforeEach(function () {
-    $this->service = new PlayerCommandService;
+    $this->service = new PlayerCommandService();
 });
 
 describe('create player for member', function () {
@@ -77,7 +83,12 @@ describe('submit prediction', function () {
     test('with valid data', function () {
         // create player and game
         $player = Player::factory()->create();
-        $game = Game::factory()->create();
+        $season = Season::factory()->active()->create();
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'start_date_time' => now()->addDay()->format('Y-m-d H:i:s'),
+            'start_time_tbd' => false,
+        ]);
 
         // prediction data
         $data = [
@@ -100,12 +111,54 @@ describe('submit prediction', function () {
         expect($prediction)->toBeInstanceOf(Prediction::class);
         expect($prediction->player_id)->toBe($player->id);
     });
+
+    test('throws a prediction policy violation exception when the evaluator reports violations', function () {
+        $violation = new PredictionPolicyViolation(
+            key: 'prediction-lock-time',
+            label: 'Prediction lock time',
+            description: 'Predictions cannot be submitted or updated after the scheduled game start time.',
+            scope: PredictionPolicyScope::APP,
+        );
+        $result = new PredictionPolicyEvaluationResult([$violation]);
+        $evaluator = \Mockery::mock(PredictionPolicyEvaluatorInterface::class);
+        $evaluator->shouldReceive('evaluate')->once()->andReturn($result);
+
+        $service = new PlayerCommandService($evaluator);
+        $player = Player::factory()->create();
+        $season = Season::factory()->active()->create();
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'start_date_time' => now()->addDay()->format('Y-m-d H:i:s'),
+            'start_time_tbd' => false,
+        ]);
+
+        $data = [
+            'game_id' => $game->id,
+            'home_team_prediction' => 2,
+            'away_team_prediction' => 1,
+        ];
+
+        try {
+            $service->submitPrediction($player, ValidatedPredictionData::fromArray($data));
+
+            $this->fail('Expected a PredictionPolicyViolationException to be thrown.');
+        } catch (PredictionPolicyViolationException $exception) {
+            expect($exception->getMessage())->toBe($result->summary());
+            expect($exception->result())->toBe($result);
+        }
+    });
 });
 
 describe('update prediction', function () {
     test('with valid data', function () {
         // create existing prediction
+        $season = Season::factory()->active()->create();
         $prediction = Prediction::factory()->create([
+            'game_id' => Game::factory()->create([
+                'season_id' => $season->id,
+                'start_date_time' => now()->addDay()->format('Y-m-d H:i:s'),
+                'start_time_tbd' => false,
+            ])->id,
             'home_team_prediction' => 1,
             'away_team_prediction' => 0,
         ]);
@@ -126,6 +179,45 @@ describe('update prediction', function () {
         ]);
         expect($updatedPrediction->home_team_prediction)->toBe(3);
         expect($updatedPrediction->away_team_prediction)->toBe(2);
+    });
+
+    test('throws a prediction policy violation exception when the evaluator reports violations', function () {
+        $violation = new PredictionPolicyViolation(
+            key: 'prediction-lock-time',
+            label: 'Prediction lock time',
+            description: 'Predictions cannot be submitted or updated after the scheduled game start time.',
+            scope: PredictionPolicyScope::APP,
+        );
+        $result = new PredictionPolicyEvaluationResult([$violation]);
+        $evaluator = \Mockery::mock(PredictionPolicyEvaluatorInterface::class);
+        $evaluator->shouldReceive('evaluate')->once()->andReturn($result);
+
+        $service = new PlayerCommandService($evaluator);
+        $season = Season::factory()->active()->create();
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'start_date_time' => now()->addDay()->format('Y-m-d H:i:s'),
+            'start_time_tbd' => false,
+        ]);
+        $prediction = Prediction::factory()->create([
+            'game_id' => $game->id,
+            'home_team_prediction' => 1,
+            'away_team_prediction' => 0,
+        ]);
+
+        $data = [
+            'home_team_prediction' => 3,
+            'away_team_prediction' => 2,
+        ];
+
+        try {
+            $service->updatePrediction($prediction, ValidatedPredictionData::fromArray($data));
+
+            $this->fail('Expected a PredictionPolicyViolationException to be thrown.');
+        } catch (PredictionPolicyViolationException $exception) {
+            expect($exception->getMessage())->toBe($result->summary());
+            expect($exception->result())->toBe($result);
+        }
     });
 });
 

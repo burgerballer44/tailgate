@@ -15,6 +15,7 @@ use App\Http\Controllers\Developer\DeveloperGameController;
 use App\Http\Controllers\Developer\DeveloperGroupController;
 use App\Http\Controllers\Developer\DeveloperMemberController;
 use App\Http\Controllers\Developer\DeveloperPlayerController;
+use App\Http\Controllers\Developer\DeveloperRuleController;
 use App\Http\Controllers\Developer\DeveloperSeasonController;
 use App\Http\Controllers\Developer\DeveloperTeamController;
 use App\Http\Controllers\Developer\DeveloperUserController;
@@ -129,6 +130,8 @@ Route::middleware('auth')->group(function () {
         // Only users with developer privileges can access these routes.
         // These routes are all inntended for managing the application data outside of normal user interactions.
         Route::prefix('developer')->name('developer.')->middleware('role:Developer')->group(function () {
+            Route::get('rules', [DeveloperRuleController::class, 'index'])->name('rules.index');
+
             Route::resource('users', DeveloperUserController::class);
 
             Route::get('teams/import-teams', [DeveloperTeamController::class, 'importTeams'])->name('teams.import-teams');

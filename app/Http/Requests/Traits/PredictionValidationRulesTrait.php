@@ -3,8 +3,6 @@
 namespace App\Http\Requests\Traits;
 
 use App\Rules\GameBelongsToFollowedTeam;
-use App\Rules\GameTimeNotPassed;
-use App\Rules\PredictionTimeNotPassedForUpdate;
 use App\Rules\NoPredictionSubmitted;
 
 trait PredictionValidationRulesTrait
@@ -31,7 +29,7 @@ trait PredictionValidationRulesTrait
     {
         return array_merge($this->baseRules(), [
             'player_id' => ['required', 'exists:players,id'],
-            'game_id' => ['required', 'exists:games,id', new GameBelongsToFollowedTeam, new GameTimeNotPassed, new NoPredictionSubmitted],
+            'game_id' => ['required', 'exists:games,id', new GameBelongsToFollowedTeam, new NoPredictionSubmitted],
         ]);
     }
 
@@ -43,7 +41,7 @@ trait PredictionValidationRulesTrait
     protected function updateRules(): array
     {
         return array_merge($this->baseRules(), [
-            'prediction_id' => ['required', new PredictionTimeNotPassedForUpdate],
+            'prediction_id' => ['required'],
         ]);
     }
 }

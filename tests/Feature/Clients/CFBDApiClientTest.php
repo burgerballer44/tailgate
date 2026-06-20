@@ -14,6 +14,13 @@ function getCFBDApiClient($token = 'test-token'): CFBDApiClient
 }
 
 describe('fetchGames', function () {
+    test('uses the expected provider code', function () {
+        $client = getCFBDApiClient();
+        $providerCodeMethod = new ReflectionMethod($client, 'providerCode');
+
+        expect($providerCodeMethod->invoke($client))->toBe('CFBD');
+    });
+
     test('throws when token is blank string', function () {
         $client = getCFBDApiClient('');
 
@@ -85,8 +92,16 @@ describe('fetchGames', function () {
 
         $client = getCFBDApiClient();
 
-        iterator_to_array($client->fetchGames(['year' => 2026]), preserve_keys: false);
-    })->throws(GameImportException::class, 'CFBD API request failed:');
+        try {
+            iterator_to_array($client->fetchGames(['year' => 2026]), preserve_keys: false);
+
+            $this->fail('Expected GameImportException to be thrown.');
+        } catch (GameImportException $exception) {
+            expect($exception->getMessage())
+                ->toContain('CFBD API request failed: HTTP request returned status code 500:')
+                ->toContain('{"message":"Server error"}');
+        }
+    });
 
     test('throws when games payload is invalid json', function () {
         Http::fake([
@@ -162,8 +177,16 @@ describe('fetchTeams', function () {
 
         $client = getCFBDApiClient();
 
-        iterator_to_array($client->fetchTeams(['year' => 2026]), preserve_keys: false);
-    })->throws(TeamImportException::class, 'CFBD API request failed:');
+        try {
+            iterator_to_array($client->fetchTeams(['year' => 2026]), preserve_keys: false);
+
+            $this->fail('Expected TeamImportException to be thrown.');
+        } catch (TeamImportException $exception) {
+            expect($exception->getMessage())
+                ->toContain('CFBD API request failed: HTTP request returned status code 500:')
+                ->toContain('{"message":"Server error"}');
+        }
+    });
 
     test('throws when teams payload is invalid json', function () {
         Http::fake([

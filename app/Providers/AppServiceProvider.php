@@ -13,6 +13,7 @@ use App\Services\Contracts\MemberCommandInterface;
 use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\PlayerCommandInterface;
 use App\Services\Contracts\PlayerQueryInterface;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\SeasonCommandInterface;
 use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\TeamCommandInterface;
@@ -33,6 +34,7 @@ use App\Services\MemberCommandService;
 use App\Services\MemberQueryService;
 use App\Services\PlayerCommandService;
 use App\Services\PlayerQueryService;
+use App\Services\PredictionPolicyEvaluatorService;
 use App\Services\SeasonCommandService;
 use App\Services\SeasonQueryService;
 use App\Services\TeamCommandService;
@@ -99,6 +101,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MemberQueryInterface::class, MemberQueryService::class);
         $this->app->bind(GroupCommandInterface::class, GroupCommandService::class);
         $this->app->bind(GroupQueryInterface::class, GroupQueryService::class);
+        $this->app->bind(PredictionPolicyEvaluatorInterface::class, PredictionPolicyEvaluatorService::class);
     }
 
     /**

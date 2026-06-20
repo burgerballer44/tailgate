@@ -6,6 +6,7 @@ use App\DTO\ImportedGameData;
 use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
+use App\Models\SeasonType;
 use App\Models\Sport;
 use App\Services\ImportSources\CBBDGameImportSource;
 use Tests\TestCase;
@@ -29,7 +30,7 @@ function CBBDImportData(array $options = []): GameImportData
 {
     return new GameImportData(
         source: 'cbbd',
-        options: $options ?: ['year' => 2024, 'season_type' => 'regular'],
+        options: $options ?: ['year' => 2024, 'season_type' => SeasonType::REGULAR->value],
     );
 }
 
@@ -105,11 +106,11 @@ describe('fetch - sport guard', function () {
 });
 
 describe('fetch - API client query parameters', function () {
-    test('passes supported options to the client', function () {
+    test('translates Regular Season to the CBBD regular season slug before calling the client', function () {
         $season = cbbdSeasonWithSport(Sport::BASKETBALL);
         $data = CBBDImportData([
             'year' => 2025,
-            'season_type' => 'regular',
+            'season_type' => SeasonType::REGULAR->value,
             'conference' => 'ACC',
             'team' => 'Duke',
             'start_date' => '2025-11-01',
@@ -122,6 +123,33 @@ describe('fetch - API client query parameters', function () {
             ->with([
                 'year' => 2025,
                 'seasonType' => 'regular',
+                'conference' => 'ACC',
+                'team' => 'Duke',
+                'startDate' => '2025-11-01',
+                'endDate' => '2025-12-01',
+            ])
+            ->andReturn(cbbdGameRowStream([]));
+
+        $this->source->fetch($season, $data);
+    });
+
+    test('translates Postseason to the CBBD postseason slug before calling the client', function () {
+        $season = cbbdSeasonWithSport(Sport::BASKETBALL);
+        $data = CBBDImportData([
+            'year' => 2025,
+            'season_type' => SeasonType::POST->value,
+            'conference' => 'ACC',
+            'team' => 'Duke',
+            'start_date' => '2025-11-01',
+            'end_date' => '2025-12-01',
+        ]);
+
+        $this->client
+            ->shouldReceive('fetchGames')
+            ->once()
+            ->with([
+                'year' => 2025,
+                'seasonType' => 'postseason',
                 'conference' => 'ACC',
                 'team' => 'Duke',
                 'startDate' => '2025-11-01',

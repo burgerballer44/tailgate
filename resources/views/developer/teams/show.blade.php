@@ -21,6 +21,10 @@
             tone="info"
             :fields="[
                 [
+                    'label' => 'Display Name',
+                    'value' => $team->display_name,
+                ],
+                [
                     'label' => 'Organization',
                     'value' => $team->organization,
                 ],

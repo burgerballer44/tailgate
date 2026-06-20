@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\DTO\ValidatedMemberData;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\MemberCommandInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,6 +61,16 @@ class Group extends Model
         'member_limit',
         'player_limit',
         'follow_limit',
+        'enabled_prediction_policies',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'enabled_prediction_policies' => 'array',
     ];
 
     /**
@@ -90,6 +101,9 @@ class Group extends Model
             }
             if (! $group->follow_limit) {
                 $group->follow_limit = self::INITIAL_FOLLOW_LIMIT;
+            }
+            if ($group->enabled_prediction_policies === null) {
+                $group->enabled_prediction_policies = [];
             }
         });
 
@@ -207,5 +221,35 @@ class Group extends Model
             : $this->isFollowingTeam();
 
         return new HtmlString(HtmlEntity::forBoolean($isFollowing)->entity());
+    }
+
+    /**
+     * Get enabled prediction policy labels as display-ready badge markup.
+     */
+    public function getEnabledPredictionPoliciesDisplayAttribute(): HtmlString|string
+    {
+        $enabledPolicyKeys = $this->enabled_prediction_policies ?? [];
+
+        if ($enabledPolicyKeys === []) {
+            return 'None enabled';
+        }
+
+        $labelsByKey = collect(app(PredictionPolicyEvaluatorInterface::class)->groupRules())
+            ->mapWithKeys(fn ($rule): array => [$rule->key() => $rule->label()]);
+
+        $badges = collect($enabledPolicyKeys)
+            ->map(fn (string $policyKey): string => (string) ($labelsByKey[$policyKey] ?? $policyKey))
+            ->map(fn (string $label): string => '<span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200">'.e($label).'</span>')
+            ->implode(' ');
+
+        return new HtmlString('<div class="flex flex-wrap gap-2">'.$badges.'</div>');
+    }
+
+    /**
+     * Determine whether the given prediction policy is enabled for this group.
+     */
+    public function isPredictionPolicyEnabled(string $policyKey): bool
+    {
+        return in_array($policyKey, $this->enabled_prediction_policies ?? [], true);
     }
 }

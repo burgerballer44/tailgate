@@ -15,6 +15,7 @@
                                     buttonClass="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium inline-flex items-center gap-x-1.5"
                                     linkClass="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                                     :items="[
+                                        ['label' => 'Rules', 'route' => 'developer.rules.index'],
                                         ['label' => 'Users', 'route' => 'developer.users.index'],
                                         ['label' => 'Groups', 'route' => 'developer.groups.index'],
                                         ['label' => 'Teams', 'route' => 'developer.teams.index'],

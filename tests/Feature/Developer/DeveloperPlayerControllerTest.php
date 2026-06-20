@@ -1,9 +1,18 @@
 <?php
 
+use App\DTO\PredictionPolicyEvaluationResult;
+use App\DTO\PredictionPolicyViolation;
+use App\Exceptions\PredictionPolicyViolationException;
+use App\Models\Follow;
+use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\Player;
+use App\Models\Prediction;
+use App\Models\PredictionPolicyScope;
+use App\Models\Season;
+use App\Services\Contracts\PlayerCommandInterface;
 
 beforeEach(function () {
     $this->user = signInDeveloperUser();
@@ -31,7 +40,7 @@ describe('index', function () {
     });
 });
 
-describe('creating a player', function () {
+describe('create', function () {
     test('shows create form', function () {
         // create a group and member
         $group = Group::factory()->create();
@@ -50,7 +59,9 @@ describe('creating a player', function () {
         $response->assertViewHas('group', $group);
         $response->assertViewHas('member', $member);
     });
+});
 
+describe('store', function () {
     test('works', function () {
         // create a group and member
         $group = Group::factory()->create();
@@ -155,7 +166,7 @@ describe('creating a player', function () {
     });
 });
 
-describe('viewing a player', function () {
+describe('show', function () {
     test('works', function () {
         // create a group, member, and player
         $group = Group::factory()->create();
@@ -178,7 +189,7 @@ describe('viewing a player', function () {
     });
 });
 
-describe('updating player', function () {
+describe('edit', function () {
     test('shows edit form', function () {
         // create a group, member, and player
         $group = Group::factory()->create();
@@ -199,7 +210,9 @@ describe('updating player', function () {
         $response->assertViewHas('member', $member);
         $response->assertViewHas('player', $player);
     });
+});
 
+describe('update', function () {
     test('updates a player', function () {
         // create a group, member, and player
         $group = Group::factory()->create();
@@ -241,7 +254,7 @@ describe('updating player', function () {
     });
 });
 
-describe('deleting a player', function () {
+describe('destroy', function () {
     test('works', function () {
         // create a group, member, and player
         $group = Group::factory()->create();
@@ -275,5 +288,111 @@ describe('deleting a player', function () {
 
         // assert flash message
         expect(session('alert')['message'])->toBe('Player removed successfully!');
+    });
+});
+
+describe('submitPrediction', function () {
+    test('submit prediction shows policy violation message and redirects back with input', function () {
+        $group = Group::factory()->create();
+        $member = Member::factory()->create(['group_id' => $group->id]);
+        $player = Player::factory()->create(['member_id' => $member->id]);
+
+        $season = Season::factory()->active()->create();
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'start_date_time' => now()->addHour()->format('Y-m-d H:i:s'),
+            'start_time_tbd' => false,
+        ]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $game->home_team_id,
+            'sport' => null,
+        ]);
+
+        $result = new PredictionPolicyEvaluationResult([
+            new PredictionPolicyViolation(
+                key: 'group-unique-prediction',
+                label: 'Unique group prediction',
+                description: 'When enabled for a group, only one prediction for a game may exist within that group.',
+                scope: PredictionPolicyScope::GROUP,
+            ),
+        ]);
+
+        $this->mock(PlayerCommandInterface::class, function ($mock) use ($player, $result): void {
+            $mock->shouldReceive('submitPrediction')
+                ->once()
+                ->withArgs(function ($boundPlayer, $dto) use ($player): bool {
+                    return $boundPlayer instanceof Player
+                        && $boundPlayer->id === $player->id
+                        && $dto instanceof \App\DTO\ValidatedPredictionData;
+                })
+                ->andThrow(new PredictionPolicyViolationException($result));
+        });
+
+        $response = $this->from(route('developer.groups.members.players.submit-prediction.create', [$group, $member, $player]))
+            ->post(route('developer.groups.members.players.submit-prediction', [$group, $member, $player]), [
+                'player_id' => $player->id,
+                'game_id' => $game->id,
+                'home_team_prediction' => 17,
+                'away_team_prediction' => 14,
+            ]);
+
+        $response->assertRedirect(route('developer.groups.members.players.submit-prediction.create', [$group, $member, $player]));
+        expect(session('alert')['type'])->toBe('error');
+        expect(session('alert')['message'])->toContain('Prediction submission violates the following policies');
+        expect(session('_old_input.game_id'))->toBe($game->id);
+    });
+});
+
+describe('updatePrediction', function () {
+    test('update prediction shows policy violation message and redirects back with input', function () {
+        $group = Group::factory()->create();
+        $member = Member::factory()->create(['group_id' => $group->id]);
+        $player = Player::factory()->create(['member_id' => $member->id]);
+
+        $season = Season::factory()->active()->create();
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'start_date_time' => now()->addHour()->format('Y-m-d H:i:s'),
+            'start_time_tbd' => false,
+        ]);
+
+        $prediction = Prediction::factory()->create([
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+        ]);
+
+        $result = new PredictionPolicyEvaluationResult([
+            new PredictionPolicyViolation(
+                key: 'prediction-lock-time',
+                label: 'Prediction lock time',
+                description: 'Predictions cannot be submitted or updated after the scheduled game start time.',
+                scope: PredictionPolicyScope::APP,
+            ),
+        ]);
+
+        $this->mock(PlayerCommandInterface::class, function ($mock) use ($prediction, $result): void {
+            $mock->shouldReceive('updatePrediction')
+                ->once()
+                ->withArgs(function ($boundPrediction, $dto) use ($prediction): bool {
+                    return $boundPrediction instanceof Prediction
+                        && $boundPrediction->id === $prediction->id
+                        && $dto instanceof \App\DTO\ValidatedPredictionData;
+                })
+                ->andThrow(new PredictionPolicyViolationException($result));
+        });
+
+        $response = $this->from(route('developer.groups.members.players.predictions.edit', [$group, $member, $player, $prediction]))
+            ->patch(route('developer.groups.members.players.predictions.update', [$group, $member, $player, $prediction]), [
+                'prediction_id' => $prediction->id,
+                'home_team_prediction' => 28,
+                'away_team_prediction' => 24,
+            ]);
+
+        $response->assertRedirect(route('developer.groups.members.players.predictions.edit', [$group, $member, $player, $prediction]));
+        expect(session('alert')['type'])->toBe('error');
+        expect(session('alert')['message'])->toContain('Prediction submission violates the following policies');
+        expect(session('_old_input.home_team_prediction'))->toBe(28);
     });
 });

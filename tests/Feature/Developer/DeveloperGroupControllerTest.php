@@ -218,6 +218,24 @@ describe('viewing a group', function () {
         $response->assertViewHas('group', $group);
     });
 
+    test('details tab shows enabled group rules', function () {
+        $group = Group::factory()->create([
+            'enabled_prediction_policies' => [
+                'group-unique-prediction',
+                'minimum-lead-time-before-lock',
+            ],
+        ]);
+
+        $response = $this->get(route('developer.groups.show', $group));
+
+        $response->assertOk();
+        $response->assertSee('Rules');
+        $response->assertSee('Unique group prediction');
+        $response->assertSee('When enabled for a group, only one prediction for a game may exist within that group.');
+        $response->assertSee('Minimum lead time before lock');
+        $response->assertSee('Predictions must be submitted at least 30 minutes before the scheduled game start time.');
+    });
+
     test('players tab action links resolve nested route params', function () {
         $group = Group::factory()->create();
         $member = Member::factory()->create(['group_id' => $group->id]);
@@ -250,6 +268,14 @@ describe('updating group', function () {
         // assert data is passed to view
         $response->assertViewHas('group', $group);
         $response->assertViewHas('users');
+        $response->assertViewHas('groupPolicies');
+
+        $groupPolicies = $response->viewData('groupPolicies');
+        $groupPolicyKeys = $groupPolicies->map(fn ($policy) => $policy->key())->all();
+
+        expect($groupPolicies)->toBeInstanceOf(Collection::class);
+        expect($groupPolicyKeys)->toContain('group-unique-prediction');
+        expect($groupPolicyKeys)->toContain('minimum-lead-time-before-lock');
     });
 
     test('updates a group', function () {
@@ -262,17 +288,22 @@ describe('updating group', function () {
         $updateData = [
             'name' => 'Updated Name',
             'owner_id' => $group->owner->id,
+            'enabled_prediction_policies' => [
+                'group-unique-prediction',
+                'minimum-lead-time-before-lock',
+            ],
         ];
 
         // patch the group data
         $response = $this->patch(route('developer.groups.update', $group), $updateData);
 
-        // should redirect to index
-        $response->assertRedirect(route('developer.groups.index'));
+        // should redirect to show
+        $response->assertRedirect(route('developer.groups.show', $group));
 
         // verify group was updated
         $group->refresh();
         expect($group->name)->toBe($updateData['name']);
+        expect($group->enabled_prediction_policies)->toBe($updateData['enabled_prediction_policies']);
     });
 
     test('flashes success message on update', function () {
@@ -329,13 +360,18 @@ describe('deleting a group', function () {
 describe('follow team', function () {
     test('shows follow team form', function () {
         $group = Group::factory()->create();
-        Team::factory()->create();
+        $team = Team::factory()->create([
+            'organization' => 'North Carolina',
+            'designation' => 'Tar Heels',
+            'abbreviation' => 'UNC',
+        ]);
 
         $response = $this->get(route('developer.groups.follow-team.create', $group));
 
         $response->assertOk();
         $response->assertViewIs('developer.groups.follow-team');
         $response->assertViewHas(['group', 'teams']);
+        $response->assertSee($team->display_name);
     });
 
     test('follows multiple teams up to follow limit', function () {

@@ -76,6 +76,6 @@ class MemberCommandService implements MemberCommandInterface
             throw new \Exception('Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.');
         }
 
-        $member->delete();
+        Member::destroy($member->getKey());
     }
 }

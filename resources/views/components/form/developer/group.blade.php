@@ -1,4 +1,11 @@
-@props(['group' => null, 'users' => collect(), 'action' => '', 'method' => 'POST'])
+@props([
+    'group' => null,
+    'users' => collect(),
+    'groupPolicies' => collect(), 'action' => '', 'method' => 'POST'])
+
+@php
+    $enabledPolicyKeys = old('enabled_prediction_policies', $group?->enabled_prediction_policies ?? []);
+@endphp
 
 <x-forms.multi-section-form :action="$action" :method="$method">
     <x-slot name="sections">
@@ -31,6 +38,32 @@
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('owner_id')" />
             </div>
+
+            @if ($group !== null && $groupPolicies->isNotEmpty())
+                <div class="mt-4">
+                    <label for="enabled_prediction_policies" class="block font-semibold">Enabled prediction policies</label>
+                    <p class="mt-1 text-sm text-gray-600">Select group-level prediction policies to enforce for this group.</p>
+
+                    <div class="mt-2 space-y-3">
+                        @foreach ($groupPolicies as $policy)
+                            <div>
+                                <x-form.checkbox
+                                    id="prediction_policy_{{ $policy->key() }}"
+                                    name="enabled_prediction_policies[]"
+                                    :label="$policy->label()"
+                                    :value="$policy->key()"
+                                    :checked="in_array($policy->key(), $enabledPolicyKeys, true)"
+                                    labelClass="text-sm"
+                                />
+                                <p class="ms-6 text-xs text-gray-500">{{ $policy->description() }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('enabled_prediction_policies')" />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('enabled_prediction_policies.*')" />
+                </div>
+            @endif
         </x-forms.form-section>
     </x-slot>
 

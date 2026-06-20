@@ -301,6 +301,40 @@ describe('viewing a season', function () {
         expect($games->count())->toBe(1);
         expect($games->first()->id)->toBe($matchingGame->id);
     });
+
+    test('season games tab is ordered by start date time', function () {
+        $season = Season::factory()->create();
+
+        $homeTeam = Team::factory()->withSports([$season->sport])->create();
+        $awayTeam = Team::factory()->withSports([$season->sport])->create();
+
+        $laterGame = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'start_date_time' => '2026-09-10 19:30:00',
+        ]);
+
+        $earlierGame = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+            'start_date_time' => '2026-09-03 19:30:00',
+        ]);
+
+        $response = $this->get(route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+        ]));
+
+        $response->assertOk();
+        $response->assertViewIs('developer.seasons.show');
+
+        $games = $response->viewData('games');
+        $orderedGameIds = collect($games->items())->pluck('id')->values()->all();
+
+        expect($orderedGameIds)->toBe([$earlierGame->id, $laterGame->id]);
+    });
 });
 
 describe('updating season', function () {

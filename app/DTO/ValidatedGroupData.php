@@ -10,6 +10,7 @@ namespace App\DTO;
  * @param  int  $owner_id  The ID of the user who owns the group.
  * @param  int|null  $member_limit  The maximum number of members allowed in the group, or null for no limit.
  * @param  int|null  $player_limit  The maximum number of players allowed in the group, or null for no limit.
+ * @param  array<int, string>|null  $enabled_prediction_policies  Group-level prediction policy keys enabled for this group.
  */
 readonly class ValidatedGroupData
 {
@@ -18,6 +19,7 @@ readonly class ValidatedGroupData
         public int $owner_id,
         public ?int $member_limit,
         public ?int $player_limit,
+        public ?array $enabled_prediction_policies = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -27,6 +29,9 @@ readonly class ValidatedGroupData
             owner_id: (int) $data['owner_id'],
             member_limit: isset($data['member_limit']) ? (int) $data['member_limit'] : null,
             player_limit: isset($data['player_limit']) ? (int) $data['player_limit'] : null,
+            enabled_prediction_policies: isset($data['enabled_prediction_policies'])
+                ? array_values(array_filter((array) $data['enabled_prediction_policies']))
+                : null,
         );
     }
 }

@@ -62,6 +62,6 @@ class GameCommandService implements GameCommandInterface
      */
     public function delete(Game $game): void
     {
-        $game->delete();
+        Game::destroy($game->getKey());
     }
 }

@@ -9,6 +9,7 @@ use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
 use App\Models\Sport;
+use App\Models\SeasonType;
 use App\Models\Team;
 use App\Services\Contracts\GameImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
@@ -58,7 +59,7 @@ class CFBDGameImportSource implements GameImportSourceInterface
         // get the game stream from the CFBD API using the provided query options
         $rawGameStream = $this->client->fetchGames([
             'year' => $data->options['year'] ?? null,
-            'seasonType' => $data->options['season_type'] ?? null,
+            'seasonType' => $this->translateSeasonTypeForClient($data->options['season_type'] ?? null),
             'week' => $data->options['week'] ?? null,
         ]);
 
@@ -116,5 +117,25 @@ class CFBDGameImportSource implements GameImportSourceInterface
                 return $errors;
             })(),
         );
+    }
+
+    /**
+     * Translates application season types into the values expected by the CFBD API.
+     */
+    private function translateSeasonTypeForClient(mixed $seasonType): ?string
+    {
+        if ($seasonType instanceof SeasonType) {
+            $seasonType = $seasonType->value;
+        }
+
+        if (! is_string($seasonType) || blank($seasonType)) {
+            return null;
+        }
+
+        return match ($seasonType) {
+            SeasonType::REGULAR->value => 'regular',
+            SeasonType::POST->value => 'postseason',
+            default => $seasonType,
+        };
     }
 }

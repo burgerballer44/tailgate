@@ -80,8 +80,11 @@ describe('creating a game', function () {
         // post the game data
         $response = $this->post(route('developer.seasons.games.store', $season), $gameData);
 
-        // should redirect to index
-        $response->assertRedirect(route('developer.seasons.games.index', $season));
+        // should redirect to the season games tab
+        $response->assertRedirect(route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+        ]));
 
         // there should be 1 game in the db
         $this->assertDatabaseCount('games', 1);
@@ -136,7 +139,10 @@ describe('creating a game', function () {
         ];
 
         $this->post(route('developer.seasons.games.store', $season), $gameData)
-            ->assertRedirect(route('developer.seasons.games.index', $season));
+            ->assertRedirect(route('developer.seasons.show', [
+                'season' => $season,
+                'tab' => 'games',
+            ]));
 
         $this->assertDatabaseHas('games', [
             'season_id' => $season->id,
@@ -162,7 +168,10 @@ describe('creating a game', function () {
         ];
 
         $this->post(route('developer.seasons.games.store', $season), $gameData)
-            ->assertRedirect(route('developer.seasons.games.index', $season));
+            ->assertRedirect(route('developer.seasons.show', [
+                'season' => $season,
+                'tab' => 'games',
+            ]));
 
         $this->assertDatabaseHas('games', [
             'season_id' => $season->id,
@@ -264,7 +273,10 @@ describe('updating a game', function () {
         $response = $this->patch(route('developer.seasons.games.update', [$season, $game]), $updateData);
 
         // should redirect
-        $response->assertRedirect(route('developer.seasons.games.index', $season));
+        $response->assertRedirect(route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+        ]));
 
         // verify game was updated
         $game->refresh();
@@ -342,8 +354,11 @@ describe('deleting a game', function () {
         // delete the game
         $response = $this->delete(route('developer.seasons.games.destroy', [$season, $game]));
 
-        // should redirect to index
-        $response->assertRedirect(route('developer.seasons.games.index', $season));
+        // should redirect to the season games tab
+        $response->assertRedirect(route('developer.seasons.show', [
+            'season' => $season,
+            'tab' => 'games',
+        ]));
 
         // there should be 0 games in the db
         $this->assertDatabaseCount('games', 0);

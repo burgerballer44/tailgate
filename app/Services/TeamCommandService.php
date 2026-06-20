@@ -97,6 +97,6 @@ class TeamCommandService implements TeamCommandInterface
      */
     public function delete(Team $team): void
     {
-        $team->delete();
+        Team::destroy($team->getKey());
     }
 }

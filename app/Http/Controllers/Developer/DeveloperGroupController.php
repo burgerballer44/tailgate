@@ -12,6 +12,7 @@ use App\Models\Prediction;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Contracts\GroupCommandInterface;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,8 @@ class DeveloperGroupController extends Controller
 {
     public function __construct(
         private GroupCommandInterface $groupCommandService,
-        private GroupQueryInterface $groupQueryService
+        private GroupQueryInterface $groupQueryService,
+        private PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator,
     ) {}
 
     public function index(Request $request): View
@@ -65,9 +67,13 @@ class DeveloperGroupController extends Controller
             ? $request->query('tab')
             : 'details';
 
+        $enabledGroupRules = [];
+
         if ($activeTab === 'details') {
             $group->load(['owner', 'follows.team'])
                 ->loadCount(['members', 'players']);
+
+            $enabledGroupRules = $this->predictionPolicyEvaluator->enabledGroupRules($group);
         }
 
         if ($activeTab === 'members') {
@@ -96,6 +102,7 @@ class DeveloperGroupController extends Controller
             'group' => $group,
             'predictions' => $predictions,
             'activeTab' => $activeTab,
+            'enabledGroupRules' => $enabledGroupRules,
         ]);
     }
 
@@ -104,6 +111,7 @@ class DeveloperGroupController extends Controller
         return view('developer.groups.edit', [
             'group' => $group,
             'users' => User::query()->get(),
+            'groupPolicies' => collect($this->predictionPolicyEvaluator->groupRules()),
         ]);
     }
 
@@ -113,7 +121,7 @@ class DeveloperGroupController extends Controller
 
         $this->setFlashAlert('success', 'Group updated successfully!');
 
-        return redirect()->route('developer.groups.index');
+        return redirect()->route('developer.groups.show', $group);
     }
 
     public function destroy(Group $group): RedirectResponse

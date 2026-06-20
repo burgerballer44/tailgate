@@ -140,4 +140,37 @@ describe('model defaults and accessors', function () {
 
         expect($group->follow_html_entity->toHtml())->toBe(HtmlEntity::CHECK_MARK->entity());
     });
+
+    test('stores enabled prediction policies as an array', function () {
+        $group = Group::factory()->create([
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]);
+
+        expect($group->enabled_prediction_policies)->toBe(['group-unique-prediction']);
+        expect($group->isPredictionPolicyEnabled('group-unique-prediction'))->toBeTrue();
+        expect($group->isPredictionPolicyEnabled('season-active'))->toBeFalse();
+    });
+
+    test('enabled_prediction_policies_display returns labels for enabled policy keys', function () {
+        $group = Group::factory()->create([
+            'enabled_prediction_policies' => [
+                'group-unique-prediction',
+                'minimum-lead-time-before-lock',
+            ],
+        ]);
+
+        $display = $group->enabled_prediction_policies_display;
+
+        expect($display)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($display->toHtml())->toContain('Unique group prediction');
+        expect($display->toHtml())->toContain('Minimum lead time before lock');
+    });
+
+    test('enabled_prediction_policies_display returns none enabled when no policies are selected', function () {
+        $group = Group::factory()->create([
+            'enabled_prediction_policies' => [],
+        ]);
+
+        expect($group->enabled_prediction_policies_display)->toBe('None enabled');
+    });
 });

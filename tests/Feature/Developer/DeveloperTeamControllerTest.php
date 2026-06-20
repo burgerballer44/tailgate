@@ -215,7 +215,11 @@ describe('creating a team', function () {
 describe('viewing a team', function () {
     test('works', function () {
         // create a team
-        $team = Team::factory()->create();
+        $team = Team::factory()->create([
+            'organization' => 'North Carolina',
+            'designation' => 'Tar Heels',
+            'abbreviation' => 'UNC',
+        ]);
 
         // visit the show page
         $response = $this->get(route('developer.teams.show', $team));
@@ -228,6 +232,7 @@ describe('viewing a team', function () {
 
         // assert team is passed to view
         $response->assertViewHas('team', $team);
+        $response->assertSee($team->display_name);
     });
 });
 

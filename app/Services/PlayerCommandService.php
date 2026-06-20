@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\DTO\ValidatedPlayerData;
 use App\DTO\ValidatedPredictionData;
+use App\Exceptions\PredictionPolicyViolationException;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Services\Contracts\PlayerCommandInterface;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
+use App\Services\PredictionPolicyEvaluatorService;
 
 /**
  * Executes player lifecycle actions within member-owned rosters.
@@ -15,6 +18,10 @@ use App\Services\Contracts\PlayerCommandInterface;
  */
 class PlayerCommandService implements PlayerCommandInterface
 {
+    public function __construct(
+        private ?PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator = new PredictionPolicyEvaluatorService()
+    ) {}
+
     /**
      * Adds a player to a member roster using normalized player input.
      *
@@ -63,7 +70,7 @@ class PlayerCommandService implements PlayerCommandInterface
      */
     public function delete(Player $player): void
     {
-        $player->newQuery()->whereKey($player->getKey())->delete();
+        Player::destroy($player->getKey());
     }
 
     /**
@@ -72,9 +79,16 @@ class PlayerCommandService implements PlayerCommandInterface
      * @param  Player  $player  The player to submit the prediction for.
      * @param  ValidatedPredictionData  $data  Validated prediction data.
      * @return Prediction  The created prediction instance.
+     * @throws PredictionPolicyViolationException  If the prediction violates any business rules.
      */
     public function submitPrediction(Player $player, ValidatedPredictionData $data): Prediction
     {
+        $result = $this->predictionPolicyEvaluator->evaluate($player, $data);
+
+        if ($result->hasViolations()) {
+            throw new PredictionPolicyViolationException($result);
+        }
+
         $predictionData = [
             'game_id' => $data->game_id,
             'home_team_prediction' => $data->home_team_prediction,
@@ -90,9 +104,16 @@ class PlayerCommandService implements PlayerCommandInterface
      * @param  Prediction  $prediction  The prediction to update.
      * @param  ValidatedPredictionData  $data  Validated data containing prediction information to update.
      * @return Prediction  The updated prediction instance.
+     * @throws PredictionPolicyViolationException  If the updated prediction violates any business rules.
      */
     public function updatePrediction(Prediction $prediction, ValidatedPredictionData $data): Prediction
     {
+        $result = $this->predictionPolicyEvaluator->evaluate($prediction->player, $data, $prediction);
+
+        if ($result->hasViolations()) {
+            throw new PredictionPolicyViolationException($result);
+        }
+
         $updateData = [
             'home_team_prediction' => $data->home_team_prediction,
             'away_team_prediction' => $data->away_team_prediction,
@@ -111,6 +132,6 @@ class PlayerCommandService implements PlayerCommandInterface
      */
     public function deletePrediction(Prediction $prediction): void
     {
-        $prediction->newQuery()->whereKey($prediction->getKey())->delete();
+        Prediction::destroy($prediction->getKey());
     }
 }
