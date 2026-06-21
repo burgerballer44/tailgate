@@ -9,6 +9,7 @@ use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Group;
 use App\Models\Prediction;
+use App\Models\Sport;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Contracts\GroupCommandInterface;
@@ -188,8 +189,11 @@ class DeveloperGroupController extends Controller
     public function createFollowTeam(Group $group): View
     {
         $teams = Team::all();
+        $sportOptions = collect(Sport::cases())
+            ->mapWithKeys(fn (Sport $sport): array => [$sport->value => $sport->value])
+            ->toArray();
 
-        return view('developer.groups.follow-team', compact('group', 'teams'));
+        return view('developer.groups.follow-team', compact('group', 'teams', 'sportOptions'));
     }
 
     /**

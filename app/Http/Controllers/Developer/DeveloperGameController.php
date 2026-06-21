@@ -7,6 +7,7 @@ use App\Http\Middleware\GameMustBelongToSeason;
 use App\Http\Requests\Season\AddGameRequest;
 use App\Http\Requests\Season\UpdateGameRequest;
 use App\Models\Game;
+use App\Models\HtmlEntity;
 use App\Models\Season;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\GameQueryInterface;
@@ -105,6 +106,7 @@ class DeveloperGameController extends Controller implements HasMiddleware
         return view('developer.games.show', [
             'season' => $season,
             'game' => $game,
+            'startTimeTbdIndicator' => ($game->start_time_tbd ? HtmlEntity::QUESTION_MARK : HtmlEntity::CHECK_MARK)->character(),
         ]);
     }
 

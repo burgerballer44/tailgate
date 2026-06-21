@@ -1,4 +1,4 @@
-@props(['group' => null, 'teams' => collect(), 'action' => '', 'method' => 'POST'])
+@props(['group' => null, 'teams' => collect(), 'sportOptions' => [], 'action' => '', 'method' => 'POST'])
 
 <form action="{{ $action }}" method="POST" class="rounded-lg bg-white p-6 shadow-md">
     @csrf
@@ -23,7 +23,7 @@
             label="Sport scope"
             :required="false"
             :value="old('sport')"
-            :options="['' => 'All sports'] + collect(\App\Models\Sport::cases())->mapWithKeys(fn ($sport) => [$sport->value => $sport->value])->toArray()"
+            :options="['' => 'All sports'] + $sportOptions"
         />
         <x-inputs.input-error class="mt-2" :messages="$errors->get('sport')" />
     </div>

@@ -13,6 +13,9 @@
         :member="null"
         :group="$group"
         :users="$users ?? collect()"
+        :role-options="$roleOptions"
+        :status-options="$statusOptions"
+        :default-status="$defaultStatus"
         :action="route('developer.groups.members.store', $group)"
         :method="'POST'"
     />

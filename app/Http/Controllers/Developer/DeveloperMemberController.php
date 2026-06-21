@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Group\StoreMemberRequest;
 use App\Http\Requests\Group\UpdateMemberRequest;
 use App\Models\Group;
+use App\Models\GroupRole;
 use App\Models\Member;
+use App\Models\MemberStatus;
 use App\Models\User;
 use App\Services\Contracts\MemberCommandInterface;
 use Illuminate\Contracts\View\View;
@@ -50,7 +52,14 @@ class DeveloperMemberController extends Controller
     {
         return view('developer.members.create', [
             'group' => $group,
-            'users' => User::get()->makeVisible(['id']),
+            'users' => User::query()->get()->makeVisible(['id']),
+            'roleOptions' => collect(GroupRole::cases())
+                ->mapWithKeys(fn (GroupRole $role): array => [$role->value => $role->value])
+                ->toArray(),
+            'statusOptions' => collect(MemberStatus::cases())
+                ->mapWithKeys(fn (MemberStatus $status): array => [$status->value => $status->value])
+                ->toArray(),
+            'defaultStatus' => MemberStatus::APPROVED->value,
         ]);
     }
 
@@ -98,7 +107,14 @@ class DeveloperMemberController extends Controller
         return view('developer.members.edit', [
             'group' => $group,
             'member' => $member,
-            'users' => User::get()->makeVisible(['id']),
+            'users' => User::query()->get()->makeVisible(['id']),
+            'roleOptions' => collect(GroupRole::cases())
+                ->mapWithKeys(fn (GroupRole $role): array => [$role->value => $role->value])
+                ->toArray(),
+            'statusOptions' => collect(MemberStatus::cases())
+                ->mapWithKeys(fn (MemberStatus $status): array => [$status->value => $status->value])
+                ->toArray(),
+            'defaultStatus' => MemberStatus::APPROVED->value,
         ]);
     }
 

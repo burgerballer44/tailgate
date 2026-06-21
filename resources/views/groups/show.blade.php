@@ -1,7 +1,6 @@
 @php
     $followDescription = 'No team followed yet.';
     $follows = $group->follow_collection;
-    $regularMemberPlayerLimit = \App\Models\Group::REGULAR_MEMBER_PLAYER_LIMIT;
     if ($follows->isNotEmpty()) {
         $followDescription = $follows->count().' team'.($follows->count() === 1 ? '' : 's').' followed';
     }

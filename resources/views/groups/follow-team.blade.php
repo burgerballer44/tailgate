@@ -16,6 +16,7 @@
         <x-form.follow-team
             :group="$group"
             :teams="$teams"
+            :sport-options="$sportOptions"
             :action="route('groups.follow-team', $group)"
             :method="'POST'"
         />

@@ -12,6 +12,7 @@ use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Models\Sport;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
@@ -180,6 +181,7 @@ class GroupController extends Controller
             'currentMember' => $currentMember,
             'memberPlayers' => $memberPlayers,
             'playerCount' => $memberPlayers->count(),
+            'regularMemberPlayerLimit' => Group::REGULAR_MEMBER_PLAYER_LIMIT,
         ]);
     }
 
@@ -340,8 +342,11 @@ class GroupController extends Controller
     public function createFollowTeam(Group $group): View
     {
         $teams = $this->teamQueryService->getAvailableTeamsForFollow();
+        $sportOptions = collect(Sport::cases())
+            ->mapWithKeys(fn (Sport $sport): array => [$sport->value => $sport->value])
+            ->toArray();
 
-        return view('groups.follow-team', compact('group', 'teams'));
+        return view('groups.follow-team', compact('group', 'teams', 'sportOptions'));
     }
 
     /**

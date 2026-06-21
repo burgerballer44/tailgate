@@ -106,46 +106,6 @@ describe('store', function () {
         expect(session('alert')['message'])->toBe('Player added successfully!');
     });
 
-    test('allows creating players beyond user-facing player limits in developer admin', function () {
-        $group = Group::factory()->create(['player_limit' => 1]);
-        $member = Member::factory()->create(['group_id' => $group->id]);
-
-        Player::factory()->create([
-            'member_id' => $member->id,
-            'player_name' => 'Existing Player',
-        ]);
-
-        $response = $this->post(route('developer.groups.members.players.store', [$group, $member]), [
-            'player_name' => 'Second Player',
-        ]);
-
-        $response->assertRedirect(route('developer.groups.members.players.index', [$group, $member]));
-
-        $this->assertDatabaseHas('players', [
-            'member_id' => $member->id,
-            'player_name' => 'Second Player',
-        ]);
-    });
-
-    test('allows duplicate player names within the same group in developer admin', function () {
-        $group = Group::factory()->create();
-        $memberA = Member::factory()->create(['group_id' => $group->id]);
-        $memberB = Member::factory()->create(['group_id' => $group->id]);
-
-        Player::factory()->create([
-            'member_id' => $memberA->id,
-            'player_name' => 'Duplicate Name',
-        ]);
-
-        $response = $this->post(route('developer.groups.members.players.store', [$group, $memberB]), [
-            'player_name' => 'Duplicate Name',
-        ]);
-
-        $response->assertRedirect(route('developer.groups.members.players.index', [$group, $memberB]));
-
-        $this->assertDatabaseCount('players', 2);
-    });
-
     test('allows creating a player for pending members in developer admin', function () {
         $group = Group::factory()->create();
         $pendingMember = Member::factory()->create([

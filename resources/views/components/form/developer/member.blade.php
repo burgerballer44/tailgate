@@ -1,4 +1,4 @@
-@props(['member' => null, 'group' => null, 'users' => collect(), 'action' => '', 'method' => 'POST'])
+@props(['member' => null, 'group' => null, 'users' => collect(), 'roleOptions' => [], 'statusOptions' => [], 'defaultStatus' => null, 'action' => '', 'method' => 'POST'])
 
 <x-forms.multi-section-form :action="$action" :method="$method">
     <x-slot name="sections">
@@ -25,7 +25,7 @@
                     label="Role"
                     :required="true"
                     :value="old('role', $member?->role)"
-                    :options="['' => ''] + collect(\App\Models\GroupRole::cases())->mapWithKeys(fn($role) => [$role->value => $role->value])->toArray()"
+                    :options="['' => ''] + $roleOptions"
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('role')" />
             </div>
@@ -35,8 +35,8 @@
                     name="status"
                     label="Status"
                     :required="true"
-                    :value="old('status', $member?->status ?? \App\Models\MemberStatus::APPROVED->value)"
-                    :options="['' => ''] + collect(\App\Models\MemberStatus::cases())->mapWithKeys(fn($status) => [$status->value => $status->value])->toArray()"
+                    :value="old('status', $member?->status ?? $defaultStatus)"
+                    :options="['' => ''] + $statusOptions"
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('status')" />
             </div>
