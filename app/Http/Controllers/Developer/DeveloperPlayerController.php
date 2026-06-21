@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
 use App\Exceptions\PredictionPolicyViolationException;
-use App\Http\Requests\Developer\StoreDeveloperPlayerRequest;
+use App\Http\Requests\Group\StorePlayerRequest;
 use App\Http\Requests\Group\SubmitPredictionRequest;
 use App\Http\Requests\Group\UpdatePlayerRequest;
 use App\Http\Requests\Group\UpdatePredictionRequest;
@@ -65,12 +65,12 @@ class DeveloperPlayerController extends Controller
     /**
      * Create a player for the selected member.
      *
-     * @param StoreDeveloperPlayerRequest $request Validated request containing new player details.
+     * @param StorePlayerRequest $request Validated request containing new player details.
      * @param Group $group Route-bound group context for post-create navigation.
      * @param Member $member Route-bound member receiving the new player.
      * @return RedirectResponse Redirects to the member's player index after creation.
      */
-    public function store(StoreDeveloperPlayerRequest $request, Group $group, Member $member): RedirectResponse
+    public function store(StorePlayerRequest $request, Group $group, Member $member): RedirectResponse
     {
         $this->playerCommandService->createForMember($member, $request->toDTO());
 
