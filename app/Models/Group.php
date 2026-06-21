@@ -23,22 +23,46 @@ class Group extends Model
 
     // TODO: move these to an enum
 
-    // the length of the invite code generated for a group upon creation
+    /**
+     * Length of the invite code generated for a group on creation.
+     *
+     * @var int
+     */
     public const LENGTH_INVITE_CODE = 10;
 
-    // initial maximum number of members in a group
+    /**
+     * Default member limit assigned to newly created groups.
+     *
+     * @var int
+     */
     public const INITIAL_MEMBER_LIMIT = 30;
 
-    // initial maximum number of players for a player who can have multiple
+    /**
+     * Default player limit for groups that allow multiple players.
+     *
+     * @var int
+     */
     public const INITIAL_PLAYER_LIMIT = 3;
 
-    // default player limit for regular self-service member management
+    /**
+     * Default player limit for standard self-service membership flows.
+     *
+     * @var int
+     */
     public const REGULAR_MEMBER_PLAYER_LIMIT = 1;
 
-    // initial maximum number of teams a group can follow
+    /**
+     * Default follow limit assigned to newly created groups.
+     *
+     * @var int
+     */
     public const INITIAL_FOLLOW_LIMIT = 1;
 
-    // minimum number of admins that have to be in a group
+    /**
+     * Minimum number of admins that must remain in a group.
+     *
+     * @var int
+     */
     public const MIN_NUMBER_ADMINS = 1;
 
     /**
@@ -74,17 +98,19 @@ class Group extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers and defaults.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -119,10 +145,16 @@ class Group extends Model
     }
 
     /**
-     * Scope to filter groups based on the provided filters.
+     * Filter groups by search term and exact field matches.
+     *
+     * Supported filters are `q`, `owner_id`, and `name`.
+     *
+     * @param Builder $builder The query builder to constrain.
+     * @param array<string, mixed> $filters Associative filter input from the caller.
+     * @return Builder The constrained builder instance.
      */
     #[Scope]
-    public static function filter(Builder $builder, array $filters)
+    public static function filter(Builder $builder, array $filters): Builder
     {
         if ($q = $filters['q'] ?? null) {
             $builder->where(function ($query) use ($q) {
@@ -142,43 +174,84 @@ class Group extends Model
         return $builder;
     }
 
+    /**
+     * Get the owning user for the group.
+     *
+     * @return BelongsTo The owner relationship.
+     */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the membership record for the owner when it exists.
+     *
+     * @return HasOne The owner's member record relationship.
+     */
     public function ownerMember(): HasOne
     {
         return $this->hasOne(Member::class)->where('user_id', $this->owner_id);
     }
 
+    /**
+     * Get the direct follow record for this group.
+     *
+     * @return HasOne The primary follow relationship.
+     */
     public function follow(): HasOne
     {
         return $this->hasOne(Follow::class);
     }
 
+    /**
+     * Get all follow records associated with the group.
+     *
+     * @return HasMany The follow collection relationship.
+     */
     public function follows(): HasMany
     {
         return $this->hasMany(Follow::class);
     }
 
+    /**
+     * Get the admin membership records for the group.
+     *
+     * @return HasMany The admin membership relationship.
+     */
     public function admin(): HasMany
     {
         return $this->hasMany(Member::class)->where('role', GroupRole::GROUP_ADMIN);
     }
 
+    /**
+     * Get all membership records for the group.
+     *
+     * @return HasMany The member relationship.
+     */
     public function members(): HasMany
     {
         return $this->hasMany(Member::class);
     }
 
+    /**
+     * Get the players that belong to the group's members.
+     *
+     * @return HasManyThrough The player relationship reached through members.
+     */
     public function players(): HasManyThrough
     {
         return $this->hasManyThrough(Player::class, Member::class);
     }
 
     /**
-     * Check if the given user is an admin or the owner of the group.
+     * Check whether the given user can administer the group.
+     *
+     * This reuses an already-loaded members relation when available to avoid an
+     * extra lookup in common authorization paths.
+     *
+     * @param User $user The user to evaluate.
+     * @return bool True when the user owns the group or has an admin member record.
      */
     public function isAdminOrOwner(User $user): bool
     {
@@ -187,6 +260,8 @@ class Group extends Model
         }
 
         $member = $this->relationLoaded('members')
+            // Prefer the hydrated relation when possible so authorization checks do not
+            // trigger an additional query during list rendering or policy evaluation.
             ? $this->members->first(fn (Member $member) => $member->user_id === $user->id)
             : $this->members()->where('user_id', $user->id)->first();
 
@@ -194,7 +269,9 @@ class Group extends Model
     }
 
     /**
-     * Check if the group is following a team.
+     * Determine whether the group currently follows at least one team.
+     *
+     * @return bool True when any follow record exists.
      */
     public function isFollowingTeam(): bool
     {
@@ -202,17 +279,22 @@ class Group extends Model
     }
 
     /**
-     * Get follows as a loaded collection when available.
+     * Get follows as a collection, reusing a loaded relation when available.
+     *
+     * @return Collection<int, Follow> The loaded or freshly queried follow collection.
      */
     public function getFollowCollectionAttribute(): Collection
     {
+        // Keep the caller's eager-loaded collection intact so display code does not trigger a second query.
         return $this->relationLoaded('follows')
             ? $this->follows
             : $this->follows()->with('team')->get();
     }
 
     /**
-     * Get the group's follow state as an HTML entity.
+     * Render the group's follow state as a single HTML entity.
+     *
+     * @return HtmlString The icon used in compact views.
      */
     public function getFollowHtmlEntityAttribute(): HtmlString
     {
@@ -224,7 +306,9 @@ class Group extends Model
     }
 
     /**
-     * Get enabled prediction policy labels as display-ready badge markup.
+     * Render enabled prediction policy labels as badge markup.
+     *
+     * @return HtmlString|string A badge wrapper for enabled policies or a plain fallback when none are enabled.
      */
     public function getEnabledPredictionPoliciesDisplayAttribute(): HtmlString|string
     {
@@ -234,6 +318,7 @@ class Group extends Model
             return 'None enabled';
         }
 
+        // Resolve labels from the evaluator so the UI stays aligned with the active rule registry.
         $labelsByKey = collect(app(PredictionPolicyEvaluatorInterface::class)->groupRules())
             ->mapWithKeys(fn ($rule): array => [$rule->key() => $rule->label()]);
 
@@ -246,7 +331,10 @@ class Group extends Model
     }
 
     /**
-     * Determine whether the given prediction policy is enabled for this group.
+     * Determine whether a prediction policy key is enabled for the group.
+     *
+     * @param string $policyKey The policy key to check.
+     * @return bool True when the configured policy list contains the key.
      */
     public function isPredictionPolicyEnabled(string $policyKey): bool
     {

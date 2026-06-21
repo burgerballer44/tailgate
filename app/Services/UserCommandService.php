@@ -18,8 +18,8 @@ class UserCommandService implements UserCommandInterface
      * Persists a new user account and guarantees credential hashing.
      * Generates a random password when one is not supplied.
      *
-     * @param  ValidatedUserData  $data  Validated user data including name, email, password, status, role.
-     * @return User  The created user instance.
+    * @param ValidatedUserData $data Validated user data including profile and account state.
+    * @return User The created user instance.
      */
     public function create(ValidatedUserData $data): User
     {
@@ -39,9 +39,9 @@ class UserCommandService implements UserCommandInterface
     /**
      * Applies profile metadata changes to an existing user account.
      *
-     * @param  User  $user  The user to update.
-     * @param  ValidatedUserData  $data  Validated data containing profile information to update.
-     * @return User  The updated user instance.
+        * @param User $user The user to update.
+        * @param ValidatedUserData $data Validated data to apply to the user.
+        * @return User The updated user instance.
      */
     public function updateProfile(User $user, ValidatedUserData $data): User
     {
@@ -68,9 +68,9 @@ class UserCommandService implements UserCommandInterface
     /**
      * Replaces a user's password using the application's hashing strategy.
      *
-     * @param  User  $user  The user whose password to change.
-     * @param  string  $newPassword  The new plain text password.
-     * @return User  The updated user instance.
+        * @param User $user The user whose password should change.
+        * @param string $newPassword The new plain-text password.
+        * @return User The updated user instance.
      */
     public function changePassword(User $user, string $newPassword): User
     {
@@ -83,10 +83,10 @@ class UserCommandService implements UserCommandInterface
     /**
      * Completes password-reset persistence, including remember-token rotation.
      *
-     * @param  User  $user  The user whose password to reset.
-     * @param  string  $newPassword  The new plain text password.
-     * @param  string|null  $rememberToken  The remember token to set.
-     * @return User  The updated user instance.
+        * @param User $user The user whose password should be reset.
+        * @param string $newPassword The new plain-text password.
+        * @param string $rememberToken The remember token to persist after the reset.
+        * @return User The updated user instance.
      */
     public function resetPassword(User $user, string $newPassword, string $rememberToken): User
     {
@@ -101,7 +101,8 @@ class UserCommandService implements UserCommandInterface
     /**
      * Removes a user account from persistence.
      *
-     * @param  User  $user  The user to delete.
+     * @param User $user The user to delete.
+     * @return void
      */
     public function delete(User $user): void
     {
@@ -111,8 +112,8 @@ class UserCommandService implements UserCommandInterface
     /**
      * Produces the framework-standard hash for a plain-text password.
      *
-     * @param  string  $password  The plain text password to hash.
-     * @return string  The hashed password.
+     * @param string $password The plain-text password to hash.
+     * @return string The hashed password.
      */
     public static function hashPassword(string $password): string
     {
@@ -122,9 +123,9 @@ class UserCommandService implements UserCommandInterface
     /**
      * Verifies a plain-text password against a stored hash.
      *
-     * @param  string  $password  The plain text password to check.
-     * @param  string  $hashedPassword  The hashed password to compare against.
-     * @return bool  True if the passwords match, false otherwise.
+     * @param string $password The plain-text password to check.
+     * @param string $hashedPassword The stored hashed password.
+     * @return bool True when the passwords match.
      */
     public static function checkPassword(string $password, string $hashedPassword): bool
     {

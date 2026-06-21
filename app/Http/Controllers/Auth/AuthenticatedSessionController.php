@@ -12,7 +12,9 @@ use Illuminate\View\View;
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * Display the login view.
+     * Show the login screen for guest users.
+     *
+     * @return View The login page view.
      */
     public function create(): View
     {
@@ -20,7 +22,11 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle an incoming authentication request.
+     * Authenticate the submitted credentials, refresh the session, and record the login time.
+     *
+     * @param  LoginRequest  $request  The validated login request containing credentials and session state.
+     * @return RedirectResponse The intended redirect after a successful login.
+     * @throws \Illuminate\Validation\ValidationException When authentication fails or is rate limited.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -36,7 +42,10 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Destroy an authenticated session.
+     * Log the current user out and invalidate the session.
+     *
+     * @param  Request  $request  The active request whose session should be cleared.
+     * @return RedirectResponse A redirect to the public landing page after logout.
      */
     public function destroy(Request $request): RedirectResponse
     {

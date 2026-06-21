@@ -16,8 +16,8 @@ class TeamCommandService implements TeamCommandInterface
     /**
      * Persists a new team with normalized identity, metadata, and sport associations.
      *
-     * @param  ValidatedTeamData  $data  Validated team data including organization, designation, type, sport.
-     * @return Team  The created team instance.
+    * @param ValidatedTeamData $data Validated team data including identity, metadata, and sports.
+    * @return Team The created team instance with any sport relations attached.
      */
     public function create(ValidatedTeamData $data): Team
     {
@@ -47,9 +47,9 @@ class TeamCommandService implements TeamCommandInterface
     /**
      * Applies identity, metadata, and sport-association changes to an existing team.
      *
-     * @param  Team  $team  The team to update.
-     * @param  ValidatedTeamData  $data  Validated data to update the team with.
-     * @return Team  The updated team instance.
+        * @param Team $team The team to update.
+        * @param ValidatedTeamData $data Validated data to apply to the team.
+        * @return Team The updated team instance.
      */
     public function update(Team $team, ValidatedTeamData $data): Team
     {
@@ -93,7 +93,8 @@ class TeamCommandService implements TeamCommandInterface
     /**
      * Removes a team record from persistence.
      *
-     * @param  Team  $team  The team to delete.
+     * @param Team $team The team to delete.
+     * @return void
      */
     public function delete(Team $team): void
     {

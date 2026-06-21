@@ -12,9 +12,11 @@ use Illuminate\Validation\Rules\Enum;
 trait UserValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for user data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Validates that the user has a name, unique email, and valid status and role enum values.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base user field validation rules.
      */
     protected function baseRules(): array
     {
@@ -27,9 +29,11 @@ trait UserValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a user.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Requires a unique email address that does not already exist in the system.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -39,10 +43,12 @@ trait UserValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a .
+     * Define validation rules for updating a user.
      *
-     * @param  User  $user  The user being updated
-     * @return array<string, ValidationRule|array|string>
+     * Allows email to be updated while remaining unique, except for the user's current email address.
+     *
+     * @param User $user The user being updated; used to exclude their current email from uniqueness check.
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user update validation rules.
      */
     protected function updateRules(User $user): array
     {

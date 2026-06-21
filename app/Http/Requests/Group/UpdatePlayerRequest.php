@@ -12,7 +12,12 @@ class UpdatePlayerRequest extends FormRequest
     use PlayerValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize group members to update player information.
+     *
+     * Authorization is checked at the controller or policy level to ensure the user has permission
+     * to modify the player within the group context.
+     *
+     * @return bool Always true; group-level authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,12 @@ class UpdatePlayerRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the group player update request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Allows updating the player name and optionally reassigning the player to a different member.
+     * Updated player names must still be unique within the group.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player field validation rules.
      */
     public function rules(): array
     {
@@ -30,8 +38,7 @@ class UpdatePlayerRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated player data to the service layer.
+     * Transform validated player data into a data transfer object for the service layer.
      *
      * @return ValidatedPlayerData The validated player data transfer object.
      */

@@ -12,7 +12,18 @@ use Illuminate\Support\Collection;
  */
 interface TeamQueryInterface
 {
+    /**
+     * Build a team query from supported filters.
+     *
+     * @param array<string, mixed> $query Associative query parameters used to filter teams.
+     * @return Builder The filtered team query.
+     */
     public function query(array $query): Builder;
 
+    /**
+     * Get the teams that can be shown in follow-team selection workflows.
+     *
+     * @return Collection<int, \App\Models\Team> The team list ordered for stable display.
+     */
     public function getAvailableTeamsForFollow(): Collection;
 }

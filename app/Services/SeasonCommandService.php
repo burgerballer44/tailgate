@@ -15,6 +15,11 @@ use App\Services\Contracts\SeasonCommandInterface;
  */
 class SeasonCommandService implements SeasonCommandInterface
 {
+    /**
+     * Create a season coordinator that delegates game creation.
+     *
+     * @param GameCommandInterface $gameCommandService The service used to create games inside a season.
+     */
     public function __construct(
         private GameCommandInterface $gameCommandService
     ) {}
@@ -22,8 +27,8 @@ class SeasonCommandService implements SeasonCommandInterface
     /**
      * Persists a new season with normalized sport, type, and activation state.
      *
-     * @param  ValidatedSeasonData  $data  Validated season data including name, sport, season_type, and active state.
-     * @return Season  The created season instance.
+     * @param ValidatedSeasonData $data Validated season data including identity and activation state.
+     * @return Season The created season instance.
      */
     public function create(ValidatedSeasonData $data): Season
     {
@@ -40,9 +45,9 @@ class SeasonCommandService implements SeasonCommandInterface
     /**
      * Applies metadata and activation changes to an existing season.
      *
-     * @param  Season  $season  The season to update.
-     * @param  ValidatedSeasonData  $data  Validated data to update the season with.
-     * @return Season  The updated season instance.
+        * @param Season $season The season to update.
+        * @param ValidatedSeasonData $data Validated data to apply to the season.
+        * @return Season The updated season instance.
      */
     public function update(Season $season, ValidatedSeasonData $data): Season
     {
@@ -62,7 +67,8 @@ class SeasonCommandService implements SeasonCommandInterface
     /**
      * Removes a season record from persistence.
      *
-     * @param  Season  $season  The season to delete.
+     * @param Season $season The season to delete.
+     * @return void
      */
     public function delete(Season $season): void
     {
@@ -72,9 +78,9 @@ class SeasonCommandService implements SeasonCommandInterface
     /**
      * Creates and attaches a new game within the provided season context.
      *
-     * @param  Season  $season  The season to add the game to.
-     * @param  ValidatedGameData  $data  Validated game data including teams, scores, start date-time, and TBD flag.
-     * @return Game  The created game instance.
+        * @param Season $season The season to add the game to.
+        * @param ValidatedGameData $data Validated game data including teams, scores, and start time.
+        * @return Game The created game instance.
      */
     public function addGame(Season $season, ValidatedGameData $data): Game
     {

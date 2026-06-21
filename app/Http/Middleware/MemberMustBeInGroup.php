@@ -13,6 +13,14 @@ class MemberMustBeInGroup
 {
     /**
      * Validates that the routed member belongs to the routed group.
+     *
+     * Returning 404 for both missing bindings and ownership mismatches avoids
+     * leaking whether a member exists outside the current group.
+     *
+     * @param Request $request The current request, used to resolve the routed group and member.
+     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @return Response The downstream response when the member belongs to the group.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the group or member is missing or the member does not belong to the group.
      */
     public function handle(Request $request, Closure $next): Response
     {

@@ -12,9 +12,19 @@ use Illuminate\Support\Str;
 
 class Team extends Model
 {
-    const UNKNOWN_ORGANIZATION = 'Unknown';
+    /**
+     * Placeholder organization name used when source data is incomplete.
+     *
+     * @var string
+     */
+    public const UNKNOWN_ORGANIZATION = 'Unknown';
 
-    const UNKNOWN_CONFERENCE = 'Unknown';
+    /**
+     * Placeholder conference name used when source data is incomplete.
+     *
+     * @var string
+     */
+    public const UNKNOWN_CONFERENCE = 'Unknown';
 
     use HasFactory;
 
@@ -54,17 +64,19 @@ class Team extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -75,6 +87,8 @@ class Team extends Model
 
     /**
      * Get the sports associated with the team.
+     *
+     * @return HasMany The sports relationship.
      */
     public function sports(): HasMany
     {
@@ -82,10 +96,9 @@ class Team extends Model
     }
 
     /**
-     * Get the team's sports as HTML entities for compact table display.
+     * Render the team's sports as compact HTML entities.
      *
-     * Methods ending with "Attribute" are treated as accessors in Laravel.
-     * This allows you to access $team->sports_html_entities directly.
+     * @return HtmlString The sports icon markup used in table views.
      */
     public function getSportsHtmlEntitiesAttribute(): HtmlString
     {
@@ -98,10 +111,9 @@ class Team extends Model
     }
 
     /**
-     * Get a styled color badge for table display.
+     * Render the team's color as a badge when the value is a valid hex code.
      *
-     * Returns an HtmlString when the color is a valid hex code, the raw color
-     * string when present but invalid, or null when no color is set.
+     * @return HtmlString|string|null A badge for valid colors, the raw string for invalid values, or null when unset.
      */
     public function getColorBadgeAttribute(): HtmlString|string|null
     {
@@ -124,7 +136,9 @@ class Team extends Model
     }
 
     /**
-     * Get a styled logo thumbnail badge for table display.
+     * Render the first team logo as a thumbnail badge when a valid URL exists.
+     *
+     * @return HtmlString|null The logo badge or null when no valid logo URL is available.
      */
     public function getLogoBadgeAttribute(): ?HtmlString
     {
@@ -146,7 +160,9 @@ class Team extends Model
     }
 
     /**
-     * Get a friendly display name for the team.
+     * Build a friendly display name for the team.
+     *
+     * @return string The display name, or "Unknown Team" when source fields are empty.
      */
     public function getDisplayNameAttribute(): string
     {
@@ -167,10 +183,16 @@ class Team extends Model
     }
 
     /**
-     * Scope to filter teams based on the provided filters.
+     * Filter teams by search term, sport, and type.
+     *
+     * Supported filters are `q`, `sport`, and `type`.
+     *
+     * @param Builder $builder The query builder to constrain.
+     * @param array<string, mixed> $query Associative filter input from the caller.
+     * @return Builder The constrained builder instance.
      */
     #[Scope]
-    protected function filter(Builder $builder, array $query)
+    protected function filter(Builder $builder, array $query): Builder
     {
         if ($q = $query['q'] ?? null) {
             $builder->where(function ($query) use ($q) {
@@ -190,5 +212,7 @@ class Team extends Model
         if (isset($query['type'])) {
             $builder->where('type', $query['type']);
         }
+
+        return $builder;
     }
 }

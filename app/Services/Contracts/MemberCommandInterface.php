@@ -13,9 +13,29 @@ use App\Models\Member;
  */
 interface MemberCommandInterface
 {
+    /**
+     * Create a new member within the given group.
+     *
+     * @param Group $group The group to add the member to.
+     * @param ValidatedMemberData $data The normalized membership payload.
+     * @return Member The created member instance.
+     */
     public function createForGroup(Group $group, ValidatedMemberData $data): Member;
 
+    /**
+     * Update an existing member.
+     *
+     * @param Member $member The member to update.
+     * @param ValidatedMemberData $data The normalized membership payload.
+     * @return Member The updated member instance.
+     */
     public function update(Member $member, ValidatedMemberData $data): Member;
 
+    /**
+     * Delete a member.
+     *
+     * @param Member $member The member to delete.
+     * @return void
+     */
     public function delete(Member $member): void;
 }

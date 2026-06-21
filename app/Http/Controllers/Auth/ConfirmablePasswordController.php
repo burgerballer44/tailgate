@@ -12,7 +12,9 @@ use Illuminate\View\View;
 class ConfirmablePasswordController extends Controller
 {
     /**
-     * Show the confirm password view.
+     * Show the confirmation screen used before sensitive actions.
+     *
+     * @return View The confirm-password view.
      */
     public function show(): View
     {
@@ -20,7 +22,11 @@ class ConfirmablePasswordController extends Controller
     }
 
     /**
-     * Confirm the user's password.
+     * Confirm the current password and stamp the session with the confirmation time.
+     *
+     * @param  Request  $request  The current request containing the entered password.
+     * @return RedirectResponse A redirect to the intended protected page once confirmation succeeds.
+     * @throws \Illuminate\Validation\ValidationException When the supplied password does not match.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -33,9 +39,6 @@ class ConfirmablePasswordController extends Controller
             ]);
         }
 
-        // Password is valid; mark the password as confirmed for this session.
-        // The time is stored as a UNIX timestamp and will be used to determine
-        // if the password confirmation has expired based on the given timeout.
         $request->session()->put('auth.password_confirmed_at', time());
 
         return redirect()->intended(route('dashboard'));

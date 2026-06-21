@@ -22,16 +22,32 @@ enum HtmlEntity: string
     case FOOTBALL = '&#127944;';
     case QUESTION_MARK = '&#10067;';
 
+    /**
+     * Map a boolean value to the matching status icon.
+     *
+     * @param bool $value The boolean state to represent.
+     * @return self The check mark for true or the red X for false.
+     */
     public static function forBoolean(bool $value): self
     {
         return $value ? self::CHECK_MARK : self::RED_X;
     }
 
+    /**
+     * Get the raw HTML entity value.
+     *
+     * @return string The entity string stored by the enum case.
+     */
     public function entity(): string
     {
         return $this->value;
     }
 
+    /**
+     * Decode the HTML entity into its Unicode character.
+     *
+     * @return string The decoded character representation.
+     */
     public function character(): string
     {
         return html_entity_decode($this->value, ENT_QUOTES | ENT_HTML5, 'UTF-8');

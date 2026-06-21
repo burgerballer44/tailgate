@@ -35,17 +35,19 @@ class Player extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -55,10 +57,16 @@ class Player extends Model
     }
 
     /**
-     * Scope to filter players based on the provided filters.
+     * Filter players by member and name search.
+     *
+     * Supported filters are `member_id` and `q`.
+     *
+     * @param Builder $builder The query builder to constrain.
+     * @param array<string, mixed> $filters Associative filter input from the caller.
+     * @return Builder The constrained builder instance.
      */
     #[Scope]
-    protected function filter(Builder $builder, array $filters)
+    protected function filter(Builder $builder, array $filters): Builder
     {
         if (isset($filters['member_id'])) {
             $builder->where('member_id', $filters['member_id']);
@@ -71,11 +79,21 @@ class Player extends Model
         return $builder;
     }
 
+    /**
+     * Get the predictions submitted for the player.
+     *
+     * @return HasMany The player's prediction collection.
+     */
     public function predictions(): HasMany
     {
         return $this->hasMany(Prediction::class);
     }
 
+    /**
+     * Get the member that owns the player profile.
+     *
+     * @return BelongsTo The owning member relationship.
+     */
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);

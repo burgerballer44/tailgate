@@ -12,7 +12,12 @@ class UpdateMemberRequest extends FormRequest
     use MemberValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize group administrators to update member roles and status.
+     *
+     * Authorization is checked at the controller or policy level to ensure only group admins
+     * can modify member roles and status within the group.
+     *
+     * @return bool Always true; group admin authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,12 @@ class UpdateMemberRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the group member update request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Allows updating a member's role and status. Role changes enforce a minimum admin requirement
+     * to prevent removing all admins from the group.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member field validation rules.
      */
     public function rules(): array
     {
@@ -30,8 +38,7 @@ class UpdateMemberRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated member data to the service layer.
+     * Transform validated member data into a data transfer object for the service layer.
      *
      * @return ValidatedMemberData The validated member data transfer object.
      */

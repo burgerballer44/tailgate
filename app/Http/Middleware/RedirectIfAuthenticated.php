@@ -15,7 +15,15 @@ class RedirectIfAuthenticated
     /**
      * Redirects authenticated users away from guest routes to the dashboard.
      *
-     * @param  Closure(Request): (Response)  $next
+     * Empty guard lists fall back to Laravel's default guard so the middleware
+     * continues to behave correctly when applied without explicit guard names.
+     *
+     * @param Request $request The current request, used for guard resolution and downstream handling.
+     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @param string ...$guards Guard names to check in order before allowing the request to continue.
+     * @return Response A redirect to the dashboard for authenticated users, or the downstream response for guests.
+     * @throws \Illuminate\Routing\Exceptions\UrlGenerationException When the dashboard route is not registered.
+     *
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {

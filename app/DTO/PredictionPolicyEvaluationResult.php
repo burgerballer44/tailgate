@@ -15,7 +15,7 @@ use App\DTO\PredictionPolicyViolation;
 readonly class PredictionPolicyEvaluationResult
 {
     /**
-     * @param  array<int, PredictionPolicyViolation>  $violations
+     * @param array<int, PredictionPolicyViolation> $violations Zero or more policy violations recorded during evaluation.
      */
     public function __construct(
         public array $violations = [],
@@ -23,6 +23,8 @@ readonly class PredictionPolicyEvaluationResult
 
     /**
      * Returns true when no policy violations were recorded.
+     *
+     * @return bool True if the submission passed all policies; false if any violation exists.
      */
     public function isValid(): bool
     {
@@ -31,6 +33,8 @@ readonly class PredictionPolicyEvaluationResult
 
     /**
      * Returns true when at least one policy violation exists.
+     *
+     * @return bool True if one or more violations were recorded; false if the result is valid.
      */
     public function hasViolations(): bool
     {
@@ -38,7 +42,10 @@ readonly class PredictionPolicyEvaluationResult
     }
 
     /**
-     * Builds a readable message summarizing the evaluation outcome.
+     * Returns a human-readable message summarizing the evaluation outcome.
+     *
+     * @return string A plain-language summary suitable for display; individual violations
+     *     are joined with " | " so the full context fits in a single UI message.
      */
     public function summary(): string
     {

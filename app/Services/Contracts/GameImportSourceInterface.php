@@ -16,30 +16,38 @@ interface GameImportSourceInterface
 {
     /**
      * Identifies the source with a stable key used in import requests.
+     *
+     * @return string The source key.
      */
     public function key(): string;
 
     /**
      * Provides the display label used in source selection interfaces.
+     *
+     * @return string The source label.
      */
     public function label(): string;
 
     /**
      * Declares the transport/category of the source (for example API or file-based).
+     *
+     * @return string The source type.
      */
     public function type(): string;
 
     /**
      * Explains source behavior for operator-facing import selection screens.
+     *
+     * @return string The source description.
      */
     public function description(): string;
 
     /**
      * Streams normalized game records for the requested season and import options.
      *
-     * @param  Season  $season  The season to fetch games for.
-     * @param  GameImportData  $data  The data for the game import.
-     * @return ImportFetchStream<ImportedGameData>  The stream of fetched games.
+     * @param Season $season The season to fetch games for.
+     * @param GameImportData $data Import source selection and runtime options.
+     * @return ImportFetchStream<ImportedGameData> A stream of normalized game DTOs and fetch-time errors.
      */
     public function fetch(Season $season, GameImportData $data): ImportFetchStream;
 }

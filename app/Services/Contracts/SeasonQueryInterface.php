@@ -13,9 +13,26 @@ use Illuminate\Support\Collection;
  */
 interface SeasonQueryInterface
 {
+    /**
+     * Build a season query from supported filters.
+     *
+     * @param array<string, mixed> $query Associative query parameters used to filter seasons.
+     * @return Builder The filtered season query.
+     */
     public function query(array $query): Builder;
 
+    /**
+     * Load a season with its games and related teams.
+     *
+     * @param Season $season The season to load.
+     * @return Season The same season instance with nested relationships loaded.
+     */
     public function loadWithGames(Season $season): Season;
 
+    /**
+     * Get active seasons available for follow workflows.
+     *
+     * @return Collection<int, \App\Models\Season> Active seasons ordered for selection UIs.
+     */
     public function getAvailableSeasonsForFollow(): Collection;
 }

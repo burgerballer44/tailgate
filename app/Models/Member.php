@@ -35,17 +35,19 @@ class Member extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -55,10 +57,16 @@ class Member extends Model
     }
 
     /**
-     * Scope to filter members based on the provided filters.
+     * Filter members by user, group, and status.
+     *
+     * Supported filters are `user_id`, `group_id`, and `status`.
+     *
+     * @param Builder $builder The query builder to constrain.
+     * @param array<string, mixed> $filters Associative filter input from the caller.
+     * @return Builder The constrained builder instance.
      */
     #[Scope]
-    public static function filter(Builder $builder, array $filters)
+    public static function filter(Builder $builder, array $filters): Builder
     {
         if (isset($filters['user_id'])) {
             $builder->where('user_id', $filters['user_id']);
@@ -75,23 +83,40 @@ class Member extends Model
         return $builder;
     }
 
+    /**
+     * Get the players that belong to the member.
+     *
+     * @return HasMany The player collection relationship.
+     */
     public function players(): HasMany
     {
         return $this->hasMany(Player::class);
     }
 
+    /**
+     * Get the user that owns the member record.
+     *
+     * @return BelongsTo The owning user relationship.
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the group that owns the member record.
+     *
+     * @return BelongsTo The owning group relationship.
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }
 
     /**
-     * Check if the member is pending approval.
+     * Check whether the member is still awaiting approval.
+     *
+     * @return bool True when the member status is pending.
      */
     public function isPending(): bool
     {
@@ -99,7 +124,9 @@ class Member extends Model
     }
 
     /**
-     * Check if the member is approved.
+     * Check whether the member has been approved.
+     *
+     * @return bool True when the member status is approved.
      */
     public function isApproved(): bool
     {
@@ -107,7 +134,9 @@ class Member extends Model
     }
 
     /**
-     * Check if the member is the owner of the group.
+     * Check whether this membership belongs to the group owner.
+     *
+     * @return bool True when the member user is the group's owner.
      */
     public function isOwner(): bool
     {
@@ -115,7 +144,9 @@ class Member extends Model
     }
 
     /**
-     * Check if the member has admin role.
+     * Check whether the member has the group admin role.
+     *
+     * @return bool True when the role is the admin role.
      */
     public function isAdmin(): bool
     {
@@ -123,11 +154,18 @@ class Member extends Model
     }
 
     /**
-     * Check if the member can be removed by the given user.
+     * Check whether the given user is allowed to remove this member.
+     *
+     * Removal is only allowed for approved non-owner members when the acting
+     * user can administer the group.
+     *
+     * @param User $user The user attempting the removal.
+     * @return bool True when the removal is permitted.
      */
     public function canBeRemovedBy(User $user): bool
     {
         return $this->isApproved()
+            // Owners are protected even when the acting user has admin access.
             && ! $this->isOwner()
             && $this->group->isAdminOrOwner($user);
     }

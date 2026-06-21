@@ -4,7 +4,6 @@ namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\FormRequest;
 use Illuminate\Auth\Events\Lockout;
-use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -13,7 +12,12 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
-     * Authorizes this request in the current application context.
+     * Allow any guest to submit the login form.
+     *
+     * The actual authentication check happens in authenticate(), so authorization only needs to
+     * permit the request to reach validation.
+     *
+     * @return bool True because the login form is available to unauthenticated users.
      */
     public function authorize(): bool
     {
@@ -21,9 +25,9 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Define the credential fields required to attempt authentication.
      *
-     * @return array<string, Rule|array|string>
+     * @return array<string, Rule|array|string> The email and password fields accepted by the login form.
      */
     public function rules(): array
     {
@@ -34,9 +38,11 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Attempt to authenticate the submitted credentials and update the rate limiter.
      *
-     * @throws ValidationException
+     * @return void
+     * @throws ValidationException When the credentials are invalid or the request is rate limited.
+     *
      */
     public function authenticate(): void
     {
@@ -54,9 +60,11 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Ensure the login request is not rate limited.
+     * Guard the login flow against excessive failed attempts.
      *
-     * @throws ValidationException
+     * @return void
+     * @throws ValidationException When the request has already exceeded the allowed attempt count.
+     *
      */
     public function ensureIsNotRateLimited(): void
     {
@@ -77,7 +85,12 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Builds the login throttle key used for rate limiting.
+     * Build the per-user throttle key used by the login rate limiter.
+     *
+     * The email and IP are combined so repeated failures from the same client are grouped while
+     * still allowing different accounts to be rate limited independently.
+     *
+     * @return string The normalized rate-limit key used by RateLimiter.
      */
     public function throttleKey(): string
     {

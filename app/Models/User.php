@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -44,7 +45,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get the attributes that should be cast.
      *
-     * @return array<string, string>
+     * @return array<string, string> Attribute cast definitions used by Eloquent.
      */
     protected function casts(): array
     {
@@ -56,44 +57,51 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
-        // generate ULID on creating
         static::creating(function ($user) {
             $user->ulid = Str::ulid();
         });
     }
 
     /**
-     * Get the members for the user.
+     * Get the membership records for the user.
+     *
+     * @return HasMany The user's membership collection.
      */
-    public function members()
+    public function members(): HasMany
     {
         return $this->hasMany(Member::class);
     }
 
     /**
-     * Get social accounts linked to this user.
+     * Get the social accounts linked to the user.
+     *
+     * @return HasMany The linked social account collection.
      */
-    public function socialAccounts()
+    public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
     }
 
     /**
      * Check whether this user can sign in with a local password.
+     *
+     * @return bool True when a hashed password exists.
      */
     public function hasPassword(): bool
     {
@@ -101,7 +109,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if the user is the owner of the given group.
+     * Check whether the user owns the given group.
+     *
+     * @param Group $group The group being checked.
+     * @return bool True when the user is the group owner.
      */
     public function isOwnerOf(Group $group): bool
     {
@@ -110,6 +121,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the user's membership status for the given group.
+     *
+     * The method expects the group's members relation to be loaded, so callers
+     * can avoid repeated lookups when they already have the collection in memory.
+     *
+     * @param Group $group The group to inspect.
+     * @return string|null The membership status value, or null when no membership exists.
      */
     public function getMembershipStatus(Group $group): ?string
     {
@@ -119,7 +136,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if the user can access the given group.
+     * Check whether the user can access the given group.
+     *
+     * @param Group $group The group being checked.
+     * @return bool True when the user owns the group or has an approved membership.
      */
     public function canAccessGroup(Group $group): bool
     {
@@ -127,7 +147,9 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the user's email verification state as an HTML entity.
+     * Render the email verification state as an HTML entity.
+     *
+     * @return HtmlString The verification icon used in compact displays.
      */
     public function getVerifiedHtmlEntityAttribute(): HtmlString
     {
@@ -135,20 +157,26 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Activate the user by setting their status to ACTIVE.
+     * Mark the user as active without persisting the change immediately.
      *
-     * @return void
+     * @return void The status is updated on the model instance and can be saved by the caller.
      */
-    public function activate()
+    public function activate(): void
     {
         $this->status = UserStatus::ACTIVE;
     }
 
     /**
-     * Scope to filter users based on the provided filters.
+     * Filter users by search term, status, and role.
+     *
+     * Supported filters are `q`, `status`, and `role`.
+     *
+     * @param Builder $builder The query builder to constrain.
+     * @param array<string, mixed> $query Associative filter input from the caller.
+     * @return Builder The constrained builder instance.
      */
     #[Scope]
-    protected function filter(Builder $builder, array $query)
+    protected function filter(Builder $builder, array $query): Builder
     {
         if ($q = $query['q'] ?? null) {
             $builder->where(function ($query) use ($q) {
@@ -164,5 +192,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($role = $query['role'] ?? null) {
             $builder->where('role', $role);
         }
+
+        return $builder;
     }
 }

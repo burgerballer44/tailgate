@@ -21,6 +21,15 @@ use Throwable;
 
 class DeveloperSeasonController extends Controller
 {
+    /**
+     * Build the developer season controller with season and game services.
+     *
+     * @param SeasonCommandInterface $seasonCommandService Service for season create, update, and delete operations.
+     * @param SeasonQueryInterface $seasonQueryService Service for querying seasons for list views.
+     * @param GameImportManagerInterface $gameImportManager Service used to import games from external providers.
+     * @param GameQueryInterface $gameQueryService Service used to query season games and team options.
+     * @return void Initializes controller dependencies.
+     */
     public function __construct(
         private SeasonCommandInterface $seasonCommandService,
         private SeasonQueryInterface $seasonQueryService,
@@ -28,6 +37,12 @@ class DeveloperSeasonController extends Controller
         private GameQueryInterface $gameQueryService,
     ) {}
 
+    /**
+     * Display a paginated list of seasons with available enum-backed filters.
+     *
+     * @param Request $request Incoming request containing optional season filters.
+     * @return View Renders the developer season index.
+     */
     public function index(Request $request): View
     {
         return view('developer.seasons.index', [
@@ -37,6 +52,11 @@ class DeveloperSeasonController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating a season.
+     *
+     * @return View Renders the developer season create form.
+     */
     public function create()
     {
         return view('developer.seasons.create', [
@@ -45,6 +65,12 @@ class DeveloperSeasonController extends Controller
         ]);
     }
 
+    /**
+     * Persist a new season from validated payload data.
+     *
+     * @param StoreSeasonRequest $request Validated request containing season attributes.
+     * @return RedirectResponse Redirects to the season index after successful creation.
+     */
     public function store(StoreSeasonRequest $request): RedirectResponse
     {
         $this->seasonCommandService->create($request->toDTO());
@@ -54,8 +80,16 @@ class DeveloperSeasonController extends Controller
         return redirect()->route('developer.seasons.index');
     }
 
+    /**
+     * Show season details or games depending on the requested tab.
+     *
+     * @param Request $request Incoming request that can include the active tab and game filters.
+     * @param Season $season Route-bound season being viewed.
+     * @return View Renders the season detail page with tab-specific data.
+     */
     public function show(Request $request, Season $season): View
     {
+        // Restricting tabs here prevents accidental eager loads from arbitrary query values.
         $validTabs = ['details', 'games'];
         $activeTab = in_array($request->query('tab'), $validTabs, true)
             ? $request->query('tab')
@@ -87,6 +121,12 @@ class DeveloperSeasonController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for editing a season.
+     *
+     * @param Season $season Route-bound season being edited.
+     * @return View Renders the developer season edit form.
+     */
     public function edit(Season $season): View
     {
         return view('developer.seasons.edit', [
@@ -96,6 +136,13 @@ class DeveloperSeasonController extends Controller
         ]);
     }
 
+    /**
+     * Update an existing season.
+     *
+     * @param UpdateSeasonRequest $request Validated request containing updated season attributes.
+     * @param Season $season Route-bound season that will be updated.
+     * @return RedirectResponse Redirects to the season index after update.
+     */
     public function update(UpdateSeasonRequest $request, Season $season): RedirectResponse
     {
         $this->seasonCommandService->update($season, $request->toDTO());
@@ -105,6 +152,12 @@ class DeveloperSeasonController extends Controller
         return redirect()->route('developer.seasons.index');
     }
 
+    /**
+     * Delete a season.
+     *
+     * @param Season $season Route-bound season to delete.
+     * @return RedirectResponse Redirects to the season index after deletion.
+     */
     public function destroy(Season $season): RedirectResponse
     {
         $this->seasonCommandService->delete($season);
@@ -115,10 +168,10 @@ class DeveloperSeasonController extends Controller
     }
 
     /**
-     * Shows the form for importing games into a season.
+        * Show the game import form for a specific season.
      *
-     * @param  Season  $season  The season to import games into.
-     * @return View The view for the import form.
+        * @param Season $season Route-bound season that receives imported games.
+        * @return View Renders the import form with available source providers.
      */
     public function importGames(Season $season): View
     {
@@ -130,6 +183,13 @@ class DeveloperSeasonController extends Controller
         ]);
     }
 
+    /**
+     * Import games into a season and surface a summarized outcome message.
+     *
+     * @param ImportSeasonGamesRequest $request Validated import request with provider and season metadata.
+     * @param Season $season Route-bound season receiving imported records.
+     * @return RedirectResponse Redirects to either the import form (on failure) or season detail page (on completion).
+     */
     public function storeImportedGames(ImportSeasonGamesRequest $request, Season $season): RedirectResponse
     {
         try {
@@ -146,6 +206,7 @@ class DeveloperSeasonController extends Controller
             return redirect()->route('developer.seasons.import-games', $season)->withInput();
         }
 
+        // We intentionally keep partial success visible because imports can include mixed valid/invalid rows.
         $hasChanges = $result->hasImports() || $result->hasUpdates();
         $summaryParts = [];
 

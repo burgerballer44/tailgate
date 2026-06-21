@@ -15,15 +15,15 @@ interface TeamImportManagerInterface
     /**
      * Lists import sources and metadata used by team import selection workflows.
      *
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string, string>> Source metadata for import selection UIs.
      */
     public function availableSources(): array;
 
     /**
      * Import teams based on the provided import data.
      *
-     * @param  TeamImportData  $data  The data for the team import.
-     * @return ImportResult The result of the team import.
+     * @param TeamImportData $data The import source selection and runtime options.
+     * @return ImportResult A summary of imported, updated, and skipped teams.
      */
     public function import(TeamImportData $data): ImportResult;
 }

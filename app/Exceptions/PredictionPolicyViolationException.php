@@ -14,16 +14,19 @@ use RuntimeException;
 class PredictionPolicyViolationException extends RuntimeException
 {
     /**
-     * @param  PredictionPolicyEvaluationResult  $result  Full evaluation result with violations.
+     * @param PredictionPolicyEvaluationResult $result The full evaluation result carrying all recorded violations.
      */
     public function __construct(private readonly PredictionPolicyEvaluationResult $result)
     {
-        // Keep RuntimeException message in sync with policy evaluation output.
+        // Keeps the RuntimeException message in sync with the structured evaluation output
+        // so callers that catch the base exception still get a readable description.
         parent::__construct($result->summary());
     }
 
     /**
      * Returns the underlying policy evaluation result.
+     *
+     * @return PredictionPolicyEvaluationResult The result object containing all recorded violations.
      */
     public function result(): PredictionPolicyEvaluationResult
     {

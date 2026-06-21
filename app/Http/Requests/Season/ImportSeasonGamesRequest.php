@@ -13,19 +13,39 @@ use Illuminate\Validation\ValidationException;
 
 class ImportSeasonGamesRequest extends FormRequest
 {
+    /**
+     * Construct a game import request with dependency injection.
+     *
+     * @param GameImportManagerInterface $manager The service that provides available import sources.
+     */
     public function __construct(private GameImportManagerInterface $manager) {}
 
+    /**
+     * Authorize administrators to import games for a season.
+     *
+     * Authorization is checked at the controller or policy level to ensure only administrators
+     * can trigger game imports from external data sources.
+     *
+     * @return bool Always true; admin authorization is enforced elsewhere.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * @return array<string, ValidationRule|array|string>
+     * Validate the game import request data.
+     *
+     * Ensures the import source is valid (checked against available sources from GameImportManager),
+     * year is within acceptable range, and optional filters are properly formatted.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The import field validation rules.
      */
     public function rules(): array
     {
-        // custom validation rule to check if the provided source is valid based on the available sources from the GameImportManager
+        // Validate that the provided source is available from the GameImportManager.
+        // This approach ensures validation rules stay synchronized with configured import sources,
+        // preventing attempts to import from removed or invalid sources.
         $checkSources = function (string $attribute, mixed $value, $fail) {
             $sources = $this->manager->availableSources();
             $sourceKeys = array_column($sources, 'value');
@@ -42,6 +62,13 @@ class ImportSeasonGamesRequest extends FormRequest
         ];
     }
 
+    /**
+     * Transform validated import data into a DTO for the game import service.
+     *
+     * Filters out null option values to pass only configured options to the import manager.
+     *
+     * @return GameImportData The import configuration transfer object.
+     */
     public function toDTO(): GameImportData
     {
         $validated = $this->validated();
@@ -57,7 +84,14 @@ class ImportSeasonGamesRequest extends FormRequest
     }
 
     /**
-     * Handle a failed validation attempt.
+     * Handle a failed validation attempt with flash messaging.
+     *
+     * JSON requests receive the standard Laravel validation response. Browser requests receive
+     * a flash alert in addition to the validation exception to provide user-facing feedback.
+     *
+     * @param Validator $validator The validator instance containing failed rules.
+     * @return void
+     * @throws ValidationException Always thrown with appropriate error bag and redirect location.
      */
     protected function failedValidation(Validator $validator)
     {

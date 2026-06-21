@@ -5,15 +5,17 @@ namespace App\DTO;
 /**
  * Represents normalized group input used by group lifecycle workflows.
  * Captures ownership and optional membership/player constraints for persistence.
- *
- * @param  string  $name  The name of the group.
- * @param  int  $owner_id  The ID of the user who owns the group.
- * @param  int|null  $member_limit  The maximum number of members allowed in the group, or null for no limit.
- * @param  int|null  $player_limit  The maximum number of players allowed in the group, or null for no limit.
- * @param  array<int, string>|null  $enabled_prediction_policies  Group-level prediction policy keys enabled for this group.
  */
 readonly class ValidatedGroupData
 {
+    /**
+     * @param string $name The name of the group.
+     * @param int $owner_id The ID of the user who owns the group.
+     * @param int|null $member_limit The maximum number of members allowed, or null for no limit.
+     * @param int|null $player_limit The maximum number of players allowed, or null for no limit.
+     * @param array<int, string>|null $enabled_prediction_policies Group-level prediction policy keys
+     *     enabled for this group, or null to inherit the application defaults.
+     */
     public function __construct(
         public string $name,
         public int $owner_id,
@@ -22,6 +24,12 @@ readonly class ValidatedGroupData
         public ?array $enabled_prediction_policies = null,
     ) {}
 
+    /**
+     * Constructs an instance from a raw associative array, typically from a validated form request.
+     *
+     * @param array<string, mixed> $data Raw input data containing group name, owner, and optional limit fields.
+     * @return self
+     */
     public static function fromArray(array $data): self
     {
         return new self(

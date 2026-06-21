@@ -15,8 +15,8 @@ class GroupQueryService implements GroupQueryInterface
     /**
      * Builds a group query from supported filters for discovery and management views.
      *
-     * @param  array  $query  An associative array of query parameters to filter groups.
-     * @return Builder  A query builder instance for the filtered groups.
+    * @param array<string, mixed> $query Associative query parameters used to filter groups.
+    * @return Builder The filtered group query with owner and follow context eager loaded.
      */
     public function query(array $query): Builder
     {
@@ -43,8 +43,8 @@ class GroupQueryService implements GroupQueryInterface
     /**
      * Resolves a group from its invite code for join and validation flows.
      *
-     * @param  string  $inviteCode  The invite code to search for.
-     * @return Group|null  The group instance if found, null otherwise.
+     * @param string $inviteCode The invite code to search for.
+     * @return Group|null The matching group when found, or null when the code is invalid.
      */
     public function findByInviteCode(string $inviteCode): ?Group
     {
@@ -53,11 +53,10 @@ class GroupQueryService implements GroupQueryInterface
 
     /**
      * Check if a user is already a member of a group.
-     * This method determines if a specific user is already a member of the given group.
      *
-     * @param  Group  $group  The group to check membership in.
-     * @param  int  $userId  The ID of the user to check.
-     * @return bool True if the user is already a member, false otherwise.
+     * @param Group $group The group to inspect.
+     * @param int $userId The user ID being checked.
+     * @return bool True when the group's members relation contains the user.
      */
     public function isUserAlreadyMember(Group $group, int $userId): bool
     {
@@ -67,8 +66,8 @@ class GroupQueryService implements GroupQueryInterface
     /**
      * Check if the group has reached its member limit.
      *
-     * @param  Group  $group  The group to check.
-     * @return bool True if the member limit is reached, false otherwise.
+     * @param Group $group The group to inspect.
+     * @return bool True when the group member count meets or exceeds the configured limit.
      */
     public function isGroupMemberLimitReached(Group $group): bool
     {

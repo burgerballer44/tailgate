@@ -13,6 +13,11 @@ class PredictionMustBelongToPlayer
 {
     /**
      * Validates that the routed prediction belongs to the routed player.
+     *
+     * @param Request $request The current request, used to resolve the routed player and prediction.
+     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @return Response The downstream response when the prediction belongs to the player.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the player or prediction is missing or the prediction does not belong to the player.
      */
     public function handle(Request $request, Closure $next): Response
     {

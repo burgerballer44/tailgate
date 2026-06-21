@@ -20,12 +20,26 @@ use Throwable;
 
 class DeveloperTeamController extends Controller
 {
+    /**
+     * Build the developer team controller with write, read, and import services.
+     *
+     * @param TeamCommandInterface $teamCommandService Service responsible for team create, update, and delete actions.
+     * @param TeamQueryInterface $teamQueryService Service used to query teams for index and filters.
+     * @param TeamImportManagerInterface $teamImportManager Service orchestrating external team imports.
+     * @return void Initializes controller dependencies.
+     */
     public function __construct(
         private TeamCommandInterface $teamCommandService,
         private TeamQueryInterface $teamQueryService,
         private TeamImportManagerInterface $teamImportManager,
     ) {}
 
+    /**
+     * Display a paginated list of teams with sport and type filter options.
+     *
+     * @param Request $request Incoming request that can include team search filters.
+     * @return View Renders the developer team index.
+     */
     public function index(Request $request): View
     {
         return view('developer.teams.index', [
@@ -35,6 +49,11 @@ class DeveloperTeamController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating a team.
+     *
+     * @return View Renders the developer team create form.
+     */
     public function create()
     {
         return view('developer.teams.create', [
@@ -43,6 +62,12 @@ class DeveloperTeamController extends Controller
         ]);
     }
 
+    /**
+     * Persist a new team from validated payload data.
+     *
+     * @param StoreTeamRequest $request Validated request containing team attributes.
+     * @return RedirectResponse Redirects to the team index after a successful create.
+     */
     public function store(StoreTeamRequest $request): RedirectResponse
     {
         $this->teamCommandService->create($request->toDTO());
@@ -52,11 +77,23 @@ class DeveloperTeamController extends Controller
         return redirect()->route('developer.teams.index');
     }
 
+    /**
+     * Display a single team record.
+     *
+     * @param Team $team Route-bound team being viewed.
+     * @return View Renders the developer team detail page.
+     */
     public function show(Team $team): View
     {
         return view('developer.teams.show', ['team' => $team]);
     }
 
+    /**
+     * Show the form for editing a team.
+     *
+     * @param Team $team Route-bound team being edited.
+     * @return View Renders the developer team edit form.
+     */
     public function edit(Team $team): View
     {
         return view('developer.teams.edit', [
@@ -66,6 +103,13 @@ class DeveloperTeamController extends Controller
         ]);
     }
 
+    /**
+     * Update an existing team.
+     *
+     * @param UpdateTeamRequest $request Validated request containing updated team attributes.
+     * @param Team $team Route-bound team that will be updated.
+     * @return RedirectResponse Redirects to the team index after a successful update.
+     */
     public function update(UpdateTeamRequest $request, Team $team): RedirectResponse
     {
         $this->teamCommandService->update($team, $request->toDTO());
@@ -75,6 +119,12 @@ class DeveloperTeamController extends Controller
         return redirect()->route('developer.teams.index');
     }
 
+    /**
+     * Delete a team.
+     *
+     * @param Team $team Route-bound team to delete.
+     * @return RedirectResponse Redirects to the team index after deletion.
+     */
     public function destroy(Team $team): RedirectResponse
     {
         $this->teamCommandService->delete($team);
@@ -85,7 +135,9 @@ class DeveloperTeamController extends Controller
     }
 
     /**
-     * Displays the team import form, providing available import sources and seasons for the user to select from.
+     * Display the team import form with available external providers.
+     *
+     * @return View Renders the import screen used to choose an import source.
      */
     public function importTeams(): View
     {
@@ -95,11 +147,10 @@ class DeveloperTeamController extends Controller
     }
 
     /**
-     * Handles the submission of the team import form, performing the import operation
-     * and redirecting back to the team index with appropriate flash messages.
+        * Import teams from the selected external source.
      *
-     * @param  ImportTeamsRequest  $request  The validated request containing the team import data.
-     * @return RedirectResponse A redirect response back to the team index page with flash messages indicating the result of the import operation.
+        * @param ImportTeamsRequest $request Validated request that defines source and import options.
+        * @return RedirectResponse Redirects to either the import form (when failed) or team index (when import completes).
      */
     public function storeImportedTeams(ImportTeamsRequest $request): RedirectResponse
     {

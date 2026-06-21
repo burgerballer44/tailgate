@@ -13,7 +13,19 @@ use Illuminate\Database\Eloquent\Collection;
  */
 interface PlayerQueryInterface
 {
+    /**
+     * Build a player query from supported filters.
+     *
+     * @param array<string, mixed> $query Associative query parameters used to filter players.
+     * @return Builder The filtered player query.
+     */
     public function query(array $query): Builder;
 
+    /**
+     * Load all players for a member in stable display order.
+     *
+     * @param Member $member The member whose players should be loaded.
+     * @return Collection<int, \App\Models\Player> The member's roster ordered alphabetically.
+     */
     public function getAllForMember(Member $member): Collection;
 }

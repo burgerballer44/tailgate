@@ -52,17 +52,19 @@ class Game extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -73,9 +75,8 @@ class Game extends Model
 
     /**
      * Get the home team for this game.
-     * This relation retrieves the team playing at home to display game details.
      *
-     * @return BelongsTo The home team relationship.
+     * @return BelongsTo The home-team relationship used for display and scoring.
      */
     public function homeTeam(): BelongsTo
     {
@@ -84,9 +85,8 @@ class Game extends Model
 
     /**
      * Get the away team for this game.
-     * This relation retrieves the team playing away to display game details.
      *
-     * @return BelongsTo The away team relationship.
+     * @return BelongsTo The away-team relationship used for display and scoring.
      */
     public function awayTeam(): BelongsTo
     {
@@ -94,7 +94,9 @@ class Game extends Model
     }
 
     /**
-     * Season
+     * Get the season that owns this game.
+     *
+     * @return BelongsTo The season relationship for the game.
      */
     public function season(): BelongsTo
     {
@@ -102,7 +104,9 @@ class Game extends Model
     }
 
     /**
-     * Predictions
+     * Get the predictions made for this game.
+     *
+     * @return HasMany The game prediction collection.
      */
     public function predictions(): HasMany
     {
@@ -111,6 +115,8 @@ class Game extends Model
 
     /**
      * Get the start time TBD state as an HTML entity for human-friendly display.
+     *
+     * @return HtmlString The icon representing whether the game start time is still TBD.
      */
     public function getStartTimeTbdHtmlEntityAttribute(): HtmlString
     {

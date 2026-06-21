@@ -11,6 +11,11 @@ enum Sport: string
     case BASKETBALL = 'Basketball';
     case FOOTBALL = 'Football';
 
+    /**
+     * Get the icon used to represent the sport in compact UI surfaces.
+     *
+     * @return HtmlEntity The HTML entity mapped to the sport.
+     */
     public function htmlEntity(): HtmlEntity
     {
         return match ($this) {

@@ -19,6 +19,11 @@ use Illuminate\Routing\Controllers\Middleware;
 
 class DeveloperGameController extends Controller implements HasMiddleware
 {
+    /**
+     * Register route middleware that ensures nested game routes cannot cross seasons.
+     *
+     * @return array<int, Middleware> Middleware definitions scoped to routes that accept both season and game bindings.
+     */
     public static function middleware(): array
     {
         return [
@@ -26,12 +31,27 @@ class DeveloperGameController extends Controller implements HasMiddleware
         ];
     }
 
+    /**
+     * Build the developer game controller with game and season command/query services.
+     *
+     * @param GameCommandInterface $gameCommandService Service for updating and deleting existing games.
+     * @param GameQueryInterface $gameQueryService Service for listing games and resolving selectable teams.
+     * @param SeasonCommandInterface $seasonCommandService Service for adding new games to a season.
+     * @return void Initializes controller dependencies.
+     */
     public function __construct(
         private GameCommandInterface $gameCommandService,
         private GameQueryInterface $gameQueryService,
         private SeasonCommandInterface $seasonCommandService
     ) {}
 
+    /**
+     * Display games for a season in a paginated list.
+     *
+     * @param Season $season Route-bound season whose games are being listed.
+     * @param Request $request Incoming request context for pagination and future filters.
+     * @return View Renders the developer season games index.
+     */
     public function index(Season $season, Request $request): View
     {
         return view('developer.games.index', [
@@ -40,6 +60,12 @@ class DeveloperGameController extends Controller implements HasMiddleware
         ]);
     }
 
+    /**
+     * Show the form for creating a game inside a specific season.
+     *
+     * @param Season $season Route-bound season that will own the new game.
+     * @return View Renders the game create form with season-eligible teams.
+     */
     public function create(Season $season): View
     {
         return view('developer.games.create', [
@@ -48,6 +74,13 @@ class DeveloperGameController extends Controller implements HasMiddleware
         ]);
     }
 
+    /**
+     * Store a new game under the selected season.
+     *
+     * @param Season $season Route-bound season receiving the new game.
+     * @param AddGameRequest $request Validated request containing the game payload.
+     * @return RedirectResponse Redirects back to the season page with the games tab selected.
+     */
     public function store(Season $season, AddGameRequest $request): RedirectResponse
     {
         $game = $this->seasonCommandService->addGame($season, $request->toDTO());
@@ -60,6 +93,13 @@ class DeveloperGameController extends Controller implements HasMiddleware
         ]);
     }
 
+    /**
+     * Display a single game that belongs to the current season.
+     *
+     * @param Season $season Route-bound season context for the nested game route.
+     * @param Game $game Route-bound game record validated by middleware to belong to the season.
+     * @return View Renders the game detail page.
+     */
     public function show(Season $season, Game $game): View
     {
         return view('developer.games.show', [
@@ -68,6 +108,13 @@ class DeveloperGameController extends Controller implements HasMiddleware
         ]);
     }
 
+    /**
+     * Show the form for editing a game in the selected season.
+     *
+     * @param Season $season Route-bound season context for the nested game route.
+     * @param Game $game Route-bound game being edited.
+     * @return View Renders the game edit form with season-eligible teams.
+     */
     public function edit(Season $season, Game $game): View
     {
         return view('developer.games.edit', [
@@ -77,6 +124,14 @@ class DeveloperGameController extends Controller implements HasMiddleware
         ]);
     }
 
+    /**
+     * Update an existing game.
+     *
+     * @param Season $season Route-bound season context for post-update navigation.
+     * @param Game $game Route-bound game being updated.
+     * @param UpdateGameRequest $request Validated request containing updated game fields.
+     * @return RedirectResponse Redirects back to the season page with the games tab selected.
+     */
     public function update(Season $season, Game $game, UpdateGameRequest $request): RedirectResponse
     {
         $this->gameCommandService->update($game, $request->toDTO());
@@ -89,6 +144,13 @@ class DeveloperGameController extends Controller implements HasMiddleware
         ]);
     }
 
+    /**
+     * Delete a game from the selected season.
+     *
+     * @param Season $season Route-bound season context for post-delete navigation.
+     * @param Game $game Route-bound game to delete.
+     * @return RedirectResponse Redirects back to the season page with the games tab selected.
+     */
     public function destroy(Season $season, Game $game): RedirectResponse
     {
         $this->gameCommandService->delete($game);

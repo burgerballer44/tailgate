@@ -19,8 +19,8 @@ class MemberQueryService implements MemberQueryInterface
     /**
      * Builds a member query from supported filters used by group administration views.
      *
-     * @param  array  $query  An associative array of query parameters to filter members.
-     * @return Builder  A query builder instance for the filtered members.
+    * @param array<string, mixed> $query Associative query parameters used to filter members.
+    * @return Builder The filtered member query.
      */
     public function query(array $query): Builder
     {
@@ -43,6 +43,9 @@ class MemberQueryService implements MemberQueryInterface
 
     /**
      * Loads approved members with user and player-count context for roster screens.
+        *
+        * @param Group $group The group whose approved members should be loaded.
+        * @return Collection<int, Member> Approved members ordered by user ID with user and player counts loaded.
      */
     public function getApprovedMembersForGroup(Group $group): Collection
     {
@@ -56,6 +59,12 @@ class MemberQueryService implements MemberQueryInterface
 
     /**
      * Resolve the approved member record for a specific group and user.
+     *
+     * @param Group $group The group to inspect.
+     * @param User $user The user whose approved membership should be resolved.
+     * @return Member The approved member record for the given user.
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException If the user is not an approved member of the group.
      */
     public function findApprovedMemberForGroupAndUser(Group $group, User $user): Member
     {

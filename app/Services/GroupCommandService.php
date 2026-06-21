@@ -20,6 +20,12 @@ use App\Services\Contracts\PlayerCommandInterface;
  */
 class GroupCommandService implements GroupCommandInterface
 {
+    /**
+     * Create a group coordinator that delegates member and player operations.
+     *
+     * @param MemberCommandInterface $memberCommandService The service used for nested member operations.
+     * @param PlayerCommandInterface $playerCommandService The service used for nested player operations.
+     */
     public function __construct(
         private MemberCommandInterface $memberCommandService,
         private PlayerCommandInterface $playerCommandService,

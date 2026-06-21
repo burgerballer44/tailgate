@@ -13,6 +13,9 @@ class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
+    *
+    * @param Request $request Current request used to resolve the authenticated user.
+    * @return View Profile edit page populated with the signed-in user.
      */
     public function edit(Request $request): View
     {
@@ -23,6 +26,11 @@ class ProfileController extends Controller
 
     /**
      * Update the user's profile information.
+        *
+        * Resets email verification when the email address changes so account trust remains accurate.
+        *
+        * @param ProfileUpdateRequest $request Validated profile update payload.
+        * @return RedirectResponse Redirect back to the profile page with a status marker.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -39,6 +47,9 @@ class ProfileController extends Controller
 
     /**
      * Delete the user's account.
+        *
+        * @param Request $request Current request containing password confirmation input and session state.
+        * @return RedirectResponse Redirect to the landing page after account deletion and session invalidation.
      */
     public function destroy(Request $request): RedirectResponse
     {

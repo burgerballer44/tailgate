@@ -10,9 +10,25 @@ use Illuminate\Validation\Rules\Enum;
 class ProfileUpdateRequest extends FormRequest
 {
     /**
-     * Defines validation rules for this request payload.
+     * Authorize the current user to update their profile.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
+     * Any authenticated user may update their own profile information. Authorization is enforced
+     * at the controller level by ensuring the requested user matches the authenticated user.
+     *
+     * @return bool Always true since the request is only available to authenticated users.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Validate the editable profile attributes for the current user.
+     *
+     * Defines the validation rules for user profile updates including name, email, and role.
+     * Email must be unique across the application except for the current user's existing email.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string> The profile fields accepted by the edit form.
      */
     public function rules(): array
     {

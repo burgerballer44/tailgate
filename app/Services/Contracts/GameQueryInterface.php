@@ -12,7 +12,19 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
  */
 interface GameQueryInterface
 {
+    /**
+     * Build a game query from supported filters.
+     *
+     * @param array<string, mixed> $filters Associative query parameters used to filter games.
+     * @return Builder The filtered game query.
+     */
     public function query(array $filters): Builder;
 
+    /**
+     * Resolve teams eligible for a season's game forms.
+     *
+     * @param Season $season The season whose sport determines eligible teams.
+     * @return array<int, string> Team organizations keyed by team ID for form selection.
+     */
     public function getAvailableTeamsForSeason(Season $season): array;
 }

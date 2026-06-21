@@ -10,6 +10,14 @@ class UpdateSeasonRequest extends FormRequest
 {
     use SeasonValidationRulesTrait;
 
+    /**
+     * Prepare the data for validation by converting the active field to a boolean.
+     *
+     * This ensures that the checkbox field is properly converted to a boolean value before
+     * validation runs, allowing the validation rules to expect a boolean type.
+     *
+     * @return void
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -18,7 +26,12 @@ class UpdateSeasonRequest extends FormRequest
     }
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize administrators to update a season.
+     *
+     * Authorization is checked at the controller or policy level to ensure only administrators
+     * can modify season configuration.
+     *
+     * @return bool Always true; admin authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -26,9 +39,11 @@ class UpdateSeasonRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the season update request data.
      *
-     * @return array<string, mixed>
+     * Ensures the updated season name, sport, season type, and active flag conform to season requirements.
+     *
+     * @return array<string, mixed> The season field validation rules.
      */
     public function rules(): array
     {
@@ -36,8 +51,7 @@ class UpdateSeasonRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated season data to the service layer.
+     * Transform validated season data into a data transfer object for the service layer.
      *
      * @return ValidatedSeasonData The validated season data transfer object.
      */

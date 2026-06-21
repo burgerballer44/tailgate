@@ -17,8 +17,8 @@ class UserQueryService implements UserQueryInterface
     /**
      * Builds a user query from supported filters for account administration views.
      *
-     * @param  array  $query  An associative array of query parameters to filter users.
-     * @return Builder  A query builder instance for the filtered users.
+     * @param array<string, mixed> $query Associative query parameters used to filter users.
+     * @return Builder The filtered user query.
      */
     public function query(array $query): Builder
     {
@@ -28,18 +28,18 @@ class UserQueryService implements UserQueryInterface
     /**
      * Loads groups visible to the user through ownership or membership relationships.
      *
-     * @param  User  $user  The user to get accessible groups for.
-     * @return Collection  The collection of accessible groups.
+     * @param User $user The user whose accessible groups should be loaded.
+     * @return Collection<int, Group> Groups owned by or shared with the user, with ownership and matching membership loaded.
      */
     public function getAccessibleGroups(User $user): Collection
     {
-        return Group::where('owner_id', $user->id)
+        return Group::where('owner_id', '=', $user->id, 'and')
             ->orWhereHas('members', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('user_id', '=', $user->id, 'and');
             })
             ->with('owner')
             ->with(['members' => function ($query) use ($user) {
-                $query->where('user_id', $user->id);
+                $query->where('user_id', '=', $user->id, 'and');
             }])
             ->get();
     }

@@ -41,17 +41,19 @@ class Follow extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -60,18 +62,34 @@ class Follow extends Model
         });
     }
 
+    /**
+     * Get the team being followed.
+     *
+     * @return BelongsTo The followed team relationship.
+     */
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
+    /**
+     * Get the group that owns the follow.
+     *
+     * @return BelongsTo The owning group relationship.
+     */
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
     }
 
     /**
-     * Get the follow sport display value as an icon or all-sports label.
+     * Render the followed sport as one or more HTML entities.
+     *
+     * When a specific sport is stored, a single icon is returned. When the sport
+     * is absent, the accessor falls back to all available sports to represent an
+     * all-sports follow.
+     *
+     * @return HtmlString The sport icon markup used in compact displays.
      */
     public function getSportDisplayAttribute(): HtmlString
     {

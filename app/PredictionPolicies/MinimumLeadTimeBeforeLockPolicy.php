@@ -17,6 +17,8 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
 
     /**
      * Returns the stable policy key used for configuration and display.
+     *
+     * @return string Unique machine-readable key used for policy configuration and violation records.
      */
     public function key(): string
     {
@@ -25,6 +27,8 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
 
     /**
      * Returns the short label used in UI and violation summaries.
+     *
+     * @return string Human-readable name displayed in violation messages and policy management screens.
      */
     public function label(): string
     {
@@ -33,6 +37,8 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
 
     /**
      * Explains the business rule enforced by this policy.
+     *
+     * @return string Full human-readable description of the constraint, suitable for user-facing display.
      */
     public function description(): string
     {
@@ -41,6 +47,8 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
 
     /**
      * Identifies this rule as a group-level policy.
+     *
+     * @return PredictionPolicyScope Indicates whether this policy is enforced globally or only when enabled per group.
      */
     public function scope(): PredictionPolicyScope
     {
@@ -49,6 +57,13 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
 
     /**
      * Returns true when the submission occurs at least 30 minutes before kickoff.
+     *
+     * If the game's start time cannot be parsed as a valid datetime, the check is
+     * skipped and the submission is allowed through — an unparseable time is treated
+     * as no time rather than blocking all predictions for that game.
+     *
+     * @param PredictionPolicyContext $context The submission context including the player, group, game, and prediction data.
+     * @return bool True if the submission is within the required lead time; false triggers a violation.
      */
     public function passes(PredictionPolicyContext $context): bool
     {

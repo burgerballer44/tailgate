@@ -15,6 +15,14 @@ class EnsureUserIsGroupAdmin
 {
     /**
      * Validates that the authenticated user is an approved admin for the routed group.
+     *
+     * This middleware depends on route-model binding for both the group and the
+     * authenticated user, and returns 403 to avoid revealing membership details.
+     *
+     * @param Request $request The current request, used to resolve the routed group and authenticated user.
+     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @return Response The downstream response when the user is an approved group admin.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the user is missing or is not an approved group admin.
      */
     public function handle(Request $request, Closure $next): Response
     {

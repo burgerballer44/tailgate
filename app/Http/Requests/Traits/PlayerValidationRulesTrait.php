@@ -9,9 +9,11 @@ use Illuminate\Contracts\Validation\ValidationRule;
 trait PlayerValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for player data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Validates that the player has a non-empty name as a string.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base player field validation rules.
      */
     protected function baseRules(): array
     {
@@ -21,9 +23,12 @@ trait PlayerValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a player in a group.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the player name is unique within the group and the group has not exceeded its
+     * player limit.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -33,9 +38,11 @@ trait PlayerValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a .
+     * Define validation rules for updating a player.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Allows changing the player name and optionally reassigning the player to a different member.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player update validation rules.
      */
     protected function updateRules(): array
     {

@@ -16,16 +16,16 @@ interface GameImportManagerInterface
     /**
      * Lists import sources and metadata used by game import selection workflows.
      *
-     * @return array<int, array<string, string>>
+     * @return array<int, array<string, string>> Source metadata for import selection UIs.
      */
     public function availableSources(): array;
 
     /**
      * Import games into a season.
      *
-     * @param  Season  $season  The season to import games into.
-     * @param  GameImportData  $data  The data for the game import.
-     * @return ImportResult The result of the game import.
+     * @param Season $season The season receiving the imported schedule.
+     * @param GameImportData $data The import source selection and runtime options.
+     * @return ImportResult A summary of imported, updated, and skipped games.
      */
     public function import(Season $season, GameImportData $data): ImportResult;
 }

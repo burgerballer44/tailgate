@@ -12,7 +12,12 @@ class UpdateGroupRequest extends FormRequest
     use GroupValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize group administrators to update group settings.
+     *
+     * Authorization is checked at the controller or policy level to ensure only group admins
+     * can modify group configuration and prediction policies.
+     *
+     * @return bool Always true; group admin authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,12 @@ class UpdateGroupRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the group update request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Allows admins to update group name, member and player limits, and enabled prediction policies.
+     * The owner can only be changed by developers using a separate endpoint.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group field validation rules.
      */
     public function rules(): array
     {
@@ -33,8 +41,9 @@ class UpdateGroupRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated group data to the service layer.
+     * Transform validated group data into a data transfer object for the service layer.
+     *
+     * Ensures enabled_prediction_policies is always an array, even if not provided in the request.
      *
      * @return ValidatedGroupData The validated group data transfer object.
      */
@@ -50,9 +59,12 @@ class UpdateGroupRequest extends FormRequest
     }
 
     /**
-     * Gets the list of valid group-level prediction policy keys from the PredictionPolicyEvaluator service.
-     * 
-     * @return array<int, string>
+     * Get the list of valid group-level prediction policy keys.
+     *
+     * Retrieves policy keys from the PredictionPolicyEvaluator service to ensure validation
+     * rules stay synchronized with available policies, preventing stale validation rules.
+     *
+     * @return array<int, string> List of enabled prediction policy keys.
      */
     private function groupPolicyKeys(): array
     {

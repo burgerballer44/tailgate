@@ -12,7 +12,12 @@ class StorePlayerRequest extends FormRequest
     use PlayerValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize group members to create a player in the group.
+     *
+     * Authorization is checked at the controller or policy level to ensure the user has permission
+     * to add players to the group (e.g., group admin or designated role).
+     *
+     * @return bool Always true; group-level authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,12 @@ class StorePlayerRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the group player creation request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the player name is unique within the group and the group has not exceeded its
+     * player limit. Validates the player_name field.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player field validation rules.
      */
     public function rules(): array
     {
@@ -30,8 +38,7 @@ class StorePlayerRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated player data to the service layer.
+     * Transform validated player data into a data transfer object for the service layer.
      *
      * @return ValidatedPlayerData The validated player data transfer object.
      */

@@ -22,28 +22,51 @@ class CFBDTeamImportSource implements TeamImportSourceInterface
 
     public function __construct(private readonly CFBDApiClient $client) {}
 
+    /**
+     * Get the stable import key used to select this CFBD source.
+     *
+     * @return string The source key consumed by import managers and forms.
+     */
     public function key(): string
     {
         return 'cfbd';
     }
 
+    /**
+     * Get the human-readable label shown in source selection UIs.
+     *
+     * @return string The display label for this source.
+     */
     public function label(): string
     {
         return 'CFBD API';
     }
 
+    /**
+     * Identify this source as API-backed.
+     *
+     * @return string The source transport type used for display and grouping.
+     */
     public function type(): string
     {
         return 'api';
     }
 
+    /**
+     * Describe the data feed for operator-facing import screens.
+     *
+     * @return string A short description of the CFBD football team feed.
+     */
     public function description(): string
     {
         return 'Imports football teams from CollegeFootballData.';
     }
 
     /**
-     * @return ImportFetchStream<ImportedTeamData>
+     * Stream normalized CFBD team records for the requested import options.
+     *
+     * @param TeamImportData $data Import options including year and conference filters.
+     * @return ImportFetchStream<ImportedTeamData> A stream of normalized team DTOs plus any fetch-time errors.
      */
     public function fetch(TeamImportData $data): ImportFetchStream
     {

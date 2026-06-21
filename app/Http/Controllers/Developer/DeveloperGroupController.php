@@ -20,12 +20,26 @@ use Illuminate\Http\Request;
 
 class DeveloperGroupController extends Controller
 {
+    /**
+     * Build the developer group controller with group command/query and policy services.
+     *
+     * @param GroupCommandInterface $groupCommandService Service for group write operations.
+     * @param GroupQueryInterface $groupQueryService Service for group list and filter queries.
+     * @param PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator Service for resolving enabled prediction policies.
+     * @return void Initializes controller dependencies.
+     */
     public function __construct(
         private GroupCommandInterface $groupCommandService,
         private GroupQueryInterface $groupQueryService,
         private PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator,
     ) {}
 
+    /**
+     * Display a paginated list of groups for the developer UI.
+     *
+     * @param Request $request Incoming request with optional list filters.
+     * @return View Renders the developer group index.
+     */
     public function index(Request $request): View
     {
         return view('developer.groups.index', [
@@ -34,6 +48,11 @@ class DeveloperGroupController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for creating a group in the developer UI.
+     *
+     * @return View Renders the group create form with assignable users.
+     */
     public function create(): View
     {
         return view('developer.groups.create', [
@@ -41,6 +60,12 @@ class DeveloperGroupController extends Controller
         ]);
     }
 
+    /**
+     * Persist a new group from validated request data.
+     *
+     * @param StoreGroupRequest $request Validated request containing group fields.
+     * @return RedirectResponse Redirects to the developer group index after creation.
+     */
     public function store(StoreGroupRequest $request): RedirectResponse
     {
         $this->groupCommandService->create($request->toDTO());
@@ -51,18 +76,20 @@ class DeveloperGroupController extends Controller
     }
 
     /**
-     * The show method handles displaying the details of a specific group,
-    * including its members, players, and predictions.
-     * It also manages the active tab state based on the query parameter.
-     * Depending on the active tab, it loads the necessary
-     * relationships and data to be displayed in the view.
+     * Display a group's details using tab-specific data loading.
+     *
+     * This conditional loading keeps tab switches cheap and avoids eager loading
+     * large prediction datasets when the user only needs summary information.
+     *
+     * @param Request $request Incoming request that can specify the active details tab.
+     * @param Group $group Route-bound group being inspected.
+     * @return View Renders the developer group detail page with tab-specific payload data.
      */
     public function show(Request $request, Group $group): View
     {
-        // these are the valid tabs that can be displayed in the group details view
+        // Whitelisting tabs prevents arbitrary relation loads from malformed query values.
         $validTabs = ['details', 'members', 'players', 'predictions'];
 
-        // determine the active tab based on the query parameter, defaulting to 'details' if not provided or invalid
         $activeTab = in_array($request->query('tab'), $validTabs, true)
             ? $request->query('tab')
             : 'details';
@@ -106,6 +133,12 @@ class DeveloperGroupController extends Controller
         ]);
     }
 
+    /**
+     * Show the form for editing an existing group.
+     *
+     * @param Group $group Route-bound group being edited.
+     * @return View Renders the developer group edit form.
+     */
     public function edit(Group $group): View
     {
         return view('developer.groups.edit', [
@@ -115,6 +148,13 @@ class DeveloperGroupController extends Controller
         ]);
     }
 
+    /**
+     * Update an existing group.
+     *
+     * @param UpdateGroupRequest $request Validated request containing updated group data.
+     * @param Group $group Route-bound group that will be updated.
+     * @return RedirectResponse Redirects to the group detail page after update.
+     */
     public function update(UpdateGroupRequest $request, Group $group): RedirectResponse
     {
         $this->groupCommandService->update($group, $request->toDTO());
@@ -124,6 +164,12 @@ class DeveloperGroupController extends Controller
         return redirect()->route('developer.groups.show', $group);
     }
 
+    /**
+     * Delete a group.
+     *
+     * @param Group $group Route-bound group to delete.
+     * @return RedirectResponse Redirects to the group index after deletion.
+     */
     public function destroy(Group $group): RedirectResponse
     {
         $this->groupCommandService->delete($group);
@@ -133,6 +179,12 @@ class DeveloperGroupController extends Controller
         return redirect()->route('developer.groups.index');
     }
 
+    /**
+     * Show the form used to follow a team from within a group.
+     *
+     * @param Group $group Route-bound group that will own the follow.
+     * @return View Renders the follow-team form with all teams.
+     */
     public function createFollowTeam(Group $group): View
     {
         $teams = Team::all();
@@ -140,6 +192,13 @@ class DeveloperGroupController extends Controller
         return view('developer.groups.follow-team', compact('group', 'teams'));
     }
 
+    /**
+     * Attach a followed team to a group.
+     *
+     * @param FollowTeamRequest $request Validated request identifying the team to follow.
+     * @param Group $group Route-bound group receiving the follow relationship.
+     * @return RedirectResponse Redirects to the group detail page on success or back on failure.
+     */
     public function followTeam(FollowTeamRequest $request, Group $group): RedirectResponse
     {
         try {
@@ -155,6 +214,13 @@ class DeveloperGroupController extends Controller
         }
     }
 
+    /**
+     * Remove a followed team from a group.
+     *
+     * @param Group $group Route-bound group that owns the follow.
+     * @param Follow $follow Route-bound follow relationship to remove.
+     * @return RedirectResponse Redirects to the group detail page after removal.
+     */
     public function removeFollow(Group $group, Follow $follow): RedirectResponse
     {
         $this->groupCommandService->removeFollow($group, $follow);

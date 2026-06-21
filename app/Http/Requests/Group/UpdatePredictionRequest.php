@@ -11,7 +11,12 @@ class UpdatePredictionRequest extends FormRequest
     use PredictionValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize group members to update their prediction.
+     *
+     * Authorization is checked at the controller or policy level to ensure the user can only
+     * update predictions for their own player in the group.
+     *
+     * @return bool Always true; group-level authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -19,9 +24,12 @@ class UpdatePredictionRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the prediction update request data.
      *
-    * @return array<string, array|string>
+     * Ensures both team predictions are non-negative integers. The prediction_id must be provided
+     * to identify which prediction is being updated.
+     *
+     * @return array<string, array|string> The prediction field validation rules.
      */
     public function rules(): array
     {
@@ -29,8 +37,7 @@ class UpdatePredictionRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a DTO.
-     * This method is used to pass validated prediction data to the service layer.
+     * Transform validated prediction data into a data transfer object for the service layer.
      *
      * @return ValidatedPredictionData The validated prediction data transfer object.
      */

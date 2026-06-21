@@ -10,7 +10,7 @@ trait EnumToArray
     /**
      * Lists enum case names in declaration order.
      *
-     * @return array<int, string>
+     * @return array<int, string> All case names as plain strings, ordered by declaration.
      */
     public static function names(): array
     {
@@ -20,7 +20,7 @@ trait EnumToArray
     /**
      * Lists enum backing values in declaration order.
      *
-     * @return array<int, string|int>
+     * @return array<int, string|int> All backing values as strings or ints, ordered by declaration.
      */
     public static function values(): array
     {
@@ -30,7 +30,7 @@ trait EnumToArray
     /**
      * Builds a value-to-name map suitable for select inputs.
      *
-     * @return array<string|int, string>
+     * @return array<string|int, string> Associative array keyed by backing value with case name as the label.
      */
     public static function array(): array
     {

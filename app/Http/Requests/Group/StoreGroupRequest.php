@@ -12,7 +12,13 @@ class StoreGroupRequest extends FormRequest
     use GroupValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize any authenticated user to create a group.
+     *
+     * Any authenticated user may create a group and will automatically become its owner.
+     * Authorization is based on authentication status alone; group ownership is enforced by
+     * automatically setting the owner_id to the authenticated user.
+     *
+     * @return bool Always true for authenticated users.
      */
     public function authorize(): bool
     {
@@ -20,9 +26,9 @@ class StoreGroupRequest extends FormRequest
     }
 
     /**
-     * Defines human-friendly attribute labels for validation errors.
+     * Provide human-friendly attribute labels for validation error messages.
      *
-     * @return array<string, string>
+     * @return array<string, string> Display names for the name and owner_id fields.
      */
     public function attributes(): array
     {
@@ -33,11 +39,13 @@ class StoreGroupRequest extends FormRequest
     }
 
     /**
-     * Normalizes request data before validation runs.
+     * Prepare the data for validation by automatically setting the group owner.
      *
-     * Automatically set the owner_id to the currently authenticated user's ID
-     * if it's not already provided in the request. This ensures that groups
-     * are always created with the correct ownership.
+     * If no owner_id is provided in the request, automatically set it to the currently authenticated
+     * user's ID. This ensures that groups are always created with the correct ownership without
+     * requiring the client to pass the owner_id explicitly.
+     *
+     * @return void
      */
     protected function prepareForValidation(): void
     {
@@ -49,9 +57,11 @@ class StoreGroupRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the group creation request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Enforces that the group has a name and a valid owner (user).
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group field validation rules.
      */
     public function rules(): array
     {
@@ -59,8 +69,7 @@ class StoreGroupRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated group data to the service layer.
+     * Transform validated group data into a data transfer object for the service layer.
      *
      * @return ValidatedGroupData The validated group data transfer object.
      */

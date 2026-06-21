@@ -17,16 +17,23 @@ use App\PredictionPolicies\UniqueGroupPredictionPolicy;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\PredictionPolicyRuleInterface;
 
+/**
+ * Evaluates prediction submissions against application-wide and group-specific policy rules.
+ */
 class PredictionPolicyEvaluatorService implements PredictionPolicyEvaluatorInterface
 {
     /**
-     * Evaluate a prediction submission by constructing the policy context,
-     * running app-level rules, then running only the enabled group-level rules.
+     * Evaluate a prediction submission by building policy context and collecting rule violations.
      *
-     * The player's group is loaded up front so the evaluator can safely resolve
-     * group-specific policy toggles without callers having to preload relations.
-     * App-level rules are always evaluated. Group-level rules are filtered down
-     * to the rules enabled on the player's group before they are executed.
+     * App-level rules always run. Group-level rules only run when the group has
+     * enabled the matching policy key.
+     *
+     * @param Player $player The player submitting or updating a prediction.
+     * @param ValidatedPredictionData $submission The normalized prediction payload.
+     * @param Prediction|null $prediction The existing prediction when evaluating an update, or null for a new submission.
+     * @return PredictionPolicyEvaluationResult The collected evaluation outcome, including any recorded violations.
+     *
+     * @throws \RuntimeException When the player does not belong to a group or the target game cannot be resolved.
      */
     public function evaluate(Player $player, ValidatedPredictionData $submission, ?Prediction $prediction = null): PredictionPolicyEvaluationResult
     {
@@ -87,7 +94,7 @@ class PredictionPolicyEvaluatorService implements PredictionPolicyEvaluatorInter
 
     /**
      * Gets the list of app-level rules that are always enforced for every prediction submission.
-     * 
+        *
      * @return array<int, PredictionPolicyRuleInterface>
      */
     public function appRules(): array
@@ -100,7 +107,7 @@ class PredictionPolicyEvaluatorService implements PredictionPolicyEvaluatorInter
 
     /**
      * Gets the list of available group-level rules that can be enabled on a per-group basis.
-     * 
+        *
      * @return array<int, PredictionPolicyRuleInterface>
      */
     public function groupRules(): array
@@ -113,7 +120,8 @@ class PredictionPolicyEvaluatorService implements PredictionPolicyEvaluatorInter
 
     /**
      * Gets the list of enabled group-level rules for the given group.
-     * 
+        *
+        * @param Group $group The group whose enabled policy keys should be resolved.
      * @return array<int, PredictionPolicyRuleInterface>
      */
     public function enabledGroupRules(Group $group): array

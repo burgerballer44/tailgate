@@ -8,7 +8,12 @@ enum MemberStatus: string
 {
     use EnumToArray;
 
-    case PENDING = 'Pending'; // awaiting approval
-    case APPROVED = 'Approved'; // approved member
-    case REJECTED = 'Rejected'; // rejected member, but we keep the record
+    /** Awaiting approval from a group admin. */
+    case PENDING = 'Pending';
+
+    /** Approved and able to participate in the group. */
+    case APPROVED = 'Approved';
+
+    /** Rejected by the group, but retained for history and auditing. */
+    case REJECTED = 'Rejected';
 }

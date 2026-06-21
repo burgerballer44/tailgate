@@ -5,9 +5,12 @@ namespace App\Http\Requests\Traits;
 trait GameValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for game data.
      *
-     * @return array<string, mixed>
+     * Ensures both teams exist and are different, scores are non-negative, start date is properly
+     * formatted, and the start_time_tbd flag is a boolean. These rules apply to both creation and updates.
+     *
+     * @return array<string, mixed> The game field validation rules.
      */
     protected function baseRules(): array
     {
@@ -23,9 +26,9 @@ trait GameValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a game.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed> The game field validation rules.
      */
     protected function storeRules(): array
     {
@@ -33,9 +36,9 @@ trait GameValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a .
+     * Define validation rules for updating a game.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed> The game field validation rules.
      */
     protected function updateRules(): array
     {

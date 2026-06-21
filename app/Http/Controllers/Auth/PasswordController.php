@@ -10,12 +10,21 @@ use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller
 {
+    /**
+     * Build the password controller with the user command service.
+     *
+     * @param UserCommandInterface $userCommandService Service used to mutate user credentials.
+     * @return void Initializes controller dependencies.
+     */
     public function __construct(
         private UserCommandInterface $userCommandService
     ) {}
 
     /**
-     * Update the user's password.
+     * Update the authenticated user's password and keep the flow in the profile area.
+     *
+     * @param  Request  $request  The current request containing the password change payload.
+     * @return RedirectResponse A redirect back to the password form after the update attempt.
      */
     public function update(Request $request): RedirectResponse
     {

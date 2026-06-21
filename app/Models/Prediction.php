@@ -43,17 +43,19 @@ class Prediction extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -62,11 +64,21 @@ class Prediction extends Model
         });
     }
 
+    /**
+     * Get the game being predicted.
+     *
+     * @return BelongsTo The predicted game relationship.
+     */
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
     }
 
+    /**
+     * Get the player that submitted the prediction.
+     *
+     * @return BelongsTo The predicting player relationship.
+     */
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);

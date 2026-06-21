@@ -18,6 +18,11 @@ use App\Services\PredictionPolicyEvaluatorService;
  */
 class PlayerCommandService implements PlayerCommandInterface
 {
+    /**
+     * Create a player coordinator with optional policy evaluation support.
+     *
+     * @param PredictionPolicyEvaluatorInterface|null $predictionPolicyEvaluator The evaluator used to validate prediction submissions; defaults to the concrete service when omitted.
+     */
     public function __construct(
         private ?PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator = new PredictionPolicyEvaluatorService()
     ) {}

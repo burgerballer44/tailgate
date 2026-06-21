@@ -8,7 +8,12 @@ use App\Http\Requests\FormRequest;
 class StoreDeveloperPlayerRequest extends FormRequest
 {
     /**
-     * Authorizes this request in the current application context.
+     * Authorize the developer to create player records programmatically.
+     *
+     * This endpoint is available to developers for testing and integration purposes. Authorization
+     * should be enforced at the controller level to ensure only authorized developers can access this functionality.
+     *
+     * @return bool Always true; controller-level authorization is required.
      */
     public function authorize(): bool
     {
@@ -16,9 +21,9 @@ class StoreDeveloperPlayerRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the player name field required for developer player creation.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player_name field validation rules.
      */
     public function rules(): array
     {
@@ -28,7 +33,9 @@ class StoreDeveloperPlayerRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
+     * Transform validated player data into a data transfer object for the service layer.
+     *
+     * @return ValidatedPlayerData The validated player data transfer object.
      */
     public function toDTO(): ValidatedPlayerData
     {

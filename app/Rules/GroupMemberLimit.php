@@ -14,6 +14,11 @@ class GroupMemberLimit implements ValidationRule
 {
     /**
      * Validates that the group can accept another member under its configured capacity.
+     *
+     * @param string $attribute The dot-notation field name being validated.
+     * @param mixed $value The value under validation.
+     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
+     * @return void
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

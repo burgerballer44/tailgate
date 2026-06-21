@@ -17,8 +17,8 @@ class GameQueryService implements GameQueryInterface
     /**
      * Builds a game query from supported filter inputs used by listing endpoints.
      *
-     * @param  array  $filters  An associative array of query parameters to filter games.
-     * @return Builder  A query builder instance for the filtered games.
+    * @param array<string, mixed> $filters Associative query parameters used to filter games.
+    * @return Builder The filtered game query.
      */
     public function query(array $filters): Builder
     {
@@ -46,8 +46,8 @@ class GameQueryService implements GameQueryInterface
     /**
      * Resolves eligible teams for a season so game forms only show valid matchups.
      *
-     * @param  Season  $season  The season to get available teams for.
-     * @return array  An associative array of team organizations keyed by team ID.
+     * @param Season $season The season whose sport determines eligible teams.
+     * @return array<int, string> Team organizations keyed by team ID for form select inputs.
      */
     public function getAvailableTeamsForSeason(Season $season): array
     {

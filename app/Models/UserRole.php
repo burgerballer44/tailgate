@@ -8,6 +8,9 @@ enum UserRole: string
 {
     use EnumToArray;
 
-    case REGULAR = 'Regular'; // the average user, normal people who sign up
-    case DEVELOPER = 'Developer'; // an important person who can do whatever
+    /** Standard user account with normal access. */
+    case REGULAR = 'Regular';
+
+    /** Elevated internal account used for developer-only workflows. */
+    case DEVELOPER = 'Developer';
 }

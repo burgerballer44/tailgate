@@ -14,6 +14,8 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
 {
     /**
      * Returns the stable policy key used for configuration and display.
+     *
+     * @return string Unique machine-readable key used for policy configuration and violation records.
      */
     public function key(): string
     {
@@ -22,6 +24,8 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
 
     /**
      * Returns the short label used in UI and violation summaries.
+     *
+     * @return string Human-readable name displayed in violation messages and policy management screens.
      */
     public function label(): string
     {
@@ -30,6 +34,8 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
 
     /**
      * Explains the business rule enforced by this policy.
+     *
+     * @return string Full human-readable description of the constraint, suitable for user-facing display.
      */
     public function description(): string
     {
@@ -38,6 +44,8 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
 
     /**
      * Identifies this rule as an app-level policy.
+     *
+     * @return PredictionPolicyScope Indicates whether this policy is enforced globally or only when enabled per group.
      */
     public function scope(): PredictionPolicyScope
     {
@@ -46,6 +54,13 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
 
     /**
      * Returns true when the related season exists and is active.
+     *
+     * The nullsafe operator is used because a game may theoretically exist without
+     * a season relationship loaded; in that case the policy fails closed (returns false)
+     * to prevent predictions on orphaned games.
+     *
+     * @param PredictionPolicyContext $context The submission context including the player, group, game, and prediction data.
+     * @return bool True if the game's season is present and active; false triggers a violation.
      */
     public function passes(PredictionPolicyContext $context): bool
     {

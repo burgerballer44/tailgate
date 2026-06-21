@@ -17,8 +17,8 @@ class PlayerQueryService implements PlayerQueryInterface
     /**
      * Builds a player query from supported filters used by roster interfaces.
      *
-     * @param  array  $query  An associative array of query parameters to filter players.
-     * @return Builder  A query builder instance for the filtered players.
+     * @param array<string, mixed> $query Associative query parameters used to filter players.
+     * @return Builder The filtered player query.
      */
     public function query(array $query): Builder
     {
@@ -27,6 +27,9 @@ class PlayerQueryService implements PlayerQueryInterface
 
     /**
      * Lists a member's players in stable alphabetical order for predictable UI rendering.
+     *
+     * @param Member $member The member whose players should be loaded.
+     * @return Collection<int, Player> The player's roster ordered alphabetically by name.
      */
     public function getAllForMember(Member $member): Collection
     {

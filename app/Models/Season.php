@@ -45,17 +45,19 @@ class Season extends Model
     ];
 
     /**
-     * Get the route key for the model.
+     * Use the ULID instead of the numeric ID for route model binding.
      *
-     * @return string
+     * @return string The route key column name.
      */
-    public function getRouteKeyName()
+    public function getRouteKeyName(): string
     {
         return 'ulid';
     }
 
     /**
-     * Perform any actions required after the model boots.
+     * Register model lifecycle hooks used to seed identifiers.
+     *
+     * @return void
      */
     protected static function booted(): void
     {
@@ -66,6 +68,8 @@ class Season extends Model
 
     /**
      * Get the games associated with the season.
+     *
+     * @return HasMany The season game relationship.
      */
     public function games(): HasMany
     {
@@ -73,7 +77,9 @@ class Season extends Model
     }
 
     /**
-     * Get the season sport as an HTML entity for compact table display.
+     * Render the season sport as an icon when the stored value maps cleanly.
+     *
+     * @return HtmlString|string An icon when the sport is known, otherwise the raw stored value.
      */
     public function getSportHtmlEntityAttribute(): HtmlString|string
     {
@@ -87,7 +93,9 @@ class Season extends Model
     }
 
     /**
-     * Get the season active state as an HTML entity for compact table display.
+     * Render the active flag as a compact HTML entity.
+     *
+     * @return HtmlString The active-state icon used in tables and badges.
      */
     public function getActiveHtmlEntityAttribute(): HtmlString
     {
@@ -95,10 +103,16 @@ class Season extends Model
     }
 
     /**
-     * Scope a query to filter seasons based on provided criteria.
+     * Filter seasons by search term, sport, and season type.
+     *
+     * Supported filters are `q`, `sport`, and `season_type`.
+     *
+     * @param Builder $builder The query builder to constrain.
+     * @param array<string, mixed> $query Associative filter input from the caller.
+     * @return Builder The constrained builder instance.
      */
     #[Scope]
-    protected function filter(Builder $builder, array $query)
+    protected function filter(Builder $builder, array $query): Builder
     {
         if ($q = $query['q'] ?? null) {
             $builder->where(function ($query) use ($q) {

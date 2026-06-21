@@ -15,15 +15,21 @@ class GroupAdminMinimum implements ValidationRule
 {
     /**
      * Validates that admin role changes do not violate the minimum-admin requirement.
+     *
+     * A group must always have at least one admin. This prevents demoting the last
+     * remaining admin without first promoting another member, which would leave the
+     * group without governance.
+     *
+     * @param string $attribute The dot-notation field name being validated.
+     * @param mixed $value The new role value being assigned.
+     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
+     * @return void
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $group = request()->route('group');
         $member = request()->route('member');
 
-        // if the minimum number of admins has been reached AND
-        // the member being updated is the only admin AND
-        // the role is being updated to something els
         if (
             $group->admin->count() == Group::MIN_NUMBER_ADMINS &&
             $group->admin->first() == $member &&

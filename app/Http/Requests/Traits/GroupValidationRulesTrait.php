@@ -8,9 +8,12 @@ use Illuminate\Contracts\Validation\ValidationRule;
 trait GroupValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for group data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Allows optional updates to group name and member/player limits while ensuring they conform
+     * to reasonable constraints.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base group field validation rules.
      */
     public function baseRules(): array
     {
@@ -22,9 +25,12 @@ trait GroupValidationRulesTrait
     }
 
     /**
-     * Defines admin-focused group update rules, including owner validation.
+     * Define validation rules for developer group updates including owner changes.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Allows developers to change group ownership, which is restricted from the user-facing update endpoint.
+     * The new owner must exist as a user in the system.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The admin group field validation rules.
      */
     public function developerUpdateRules(): array
     {
@@ -34,9 +40,11 @@ trait GroupValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a group.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Requires a group name and valid owner. The owner must exist as a user and be a member of the system.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group creation validation rules.
      */
     public function storeRules(): array
     {

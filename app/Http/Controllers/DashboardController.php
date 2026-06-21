@@ -15,25 +15,24 @@ use Illuminate\Http\Request;
  */
 class DashboardController extends Controller
 {
+    /**
+     * Build the dashboard controller with the query service used to fetch user-scoped data.
+     *
+     * @param UserQueryInterface $userQueryService Service responsible for querying user dashboard data.
+        * @return void Initializes controller dependencies.
+     */
     public function __construct(private UserQueryInterface $userQueryService) {}
 
     /**
-     * Display the user dashboard.
+     * Render the authenticated user's dashboard and the groups they can access.
      *
-     * This method retrieves and displays the authenticated user's dashboard,
-     * which shows their groups, quick stats, and provides navigation to key features.
-     * The dashboard acts as the entry point after login, helping users understand
-     * their current state in the application and guiding them toward next actions.
-     *
-     * @param  Request  $request  The incoming HTTP request containing user session data
-     * @return View Returns the dashboard view with user-specific data
+     * @param  Request  $request  The active request used to resolve the signed-in user.
+     * @return View The dashboard view populated with the user and accessible groups.
      */
     public function index(Request $request): View
     {
-        // get the authenticated user
         $user = $request->user();
 
-        // retrieve all groups the user can access: groups they own or are members of
         $groups = $this->userQueryService->getAccessibleGroups($user);
 
         return view('dashboard', [

@@ -13,6 +13,11 @@ class PlayerMustBelongToMember
 {
     /**
      * Validates that the routed player belongs to the routed member.
+     *
+     * @param Request $request The current request, used to resolve the routed member and player.
+     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @return Response The downstream response when the player belongs to the member.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the member or player is missing or the player does not belong to the member.
      */
     public function handle(Request $request, Closure $next): Response
     {

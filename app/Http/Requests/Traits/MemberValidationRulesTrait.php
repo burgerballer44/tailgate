@@ -13,9 +13,11 @@ use Illuminate\Validation\Rules\Enum;
 trait MemberValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for group member data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Validates that the member role is valid and, if provided, the status is a valid enum value.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base member field validation rules.
      */
     protected function baseMemberRules(): array
     {
@@ -26,9 +28,12 @@ trait MemberValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a group member.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the user exists, is not already a member of the group, and the group has not
+     * reached its member limit. Status is required when creating a member.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member creation validation rules.
      */
     protected function createMemberRules(): array
     {
@@ -39,9 +44,12 @@ trait MemberValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a .
+     * Define validation rules for updating a group member.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Allows changing a member's role while enforcing a minimum admin requirement to prevent
+     * removing all administrators from the group.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member update validation rules.
      */
     protected function updateMemberRules(): array
     {

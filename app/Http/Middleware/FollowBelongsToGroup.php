@@ -13,6 +13,14 @@ class FollowBelongsToGroup
 {
     /**
      * Validates that the routed follow belongs to the routed group.
+     *
+     * Returning 404 for both missing bindings and mismatched ownership keeps the
+     * route from exposing whether the follow exists outside the group.
+     *
+     * @param Request $request The current request, used to resolve the routed group and follow.
+     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @return Response The downstream response when the follow belongs to the group.
+     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the group or follow is missing or the follow does not belong to the group.
      */
     public function handle(Request $request, Closure $next): Response
     {

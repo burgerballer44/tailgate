@@ -12,7 +12,12 @@ class FollowTeamRequest extends FormRequest
     use FollowValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize the authenticated user to follow a team.
+     *
+     * Any authenticated user may follow a team. Authorization is checked at the controller or
+     * policy level to ensure the user has permission within their group context.
+     *
+     * @return bool Always true; group-level authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,11 @@ class FollowTeamRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the team follow request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the team exists and, if provided, that the sport is valid for that team.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team_id and sport validation rules.
      */
     public function rules(): array
     {
@@ -30,8 +37,7 @@ class FollowTeamRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated follow data to the service layer.
+     * Transform validated team follow data into a data transfer object for the service layer.
      *
      * @return ValidatedFollowData The validated follow data transfer object.
      */

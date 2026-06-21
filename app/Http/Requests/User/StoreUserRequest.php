@@ -12,7 +12,12 @@ class StoreUserRequest extends FormRequest
     use UserValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize administrators to create a new user.
+     *
+     * Authorization is checked at the controller or policy level to ensure only administrators
+     * can create new user accounts.
+     *
+     * @return bool Always true; admin authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,12 @@ class StoreUserRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the user creation request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the user has a unique email, valid status and role enums, and all required fields.
+     * Email uniqueness prevents duplicate accounts in the system.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user field validation rules.
      */
     public function rules(): array
     {
@@ -30,8 +38,7 @@ class StoreUserRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated user data to the service layer.
+     * Transform validated user data into a data transfer object for the service layer.
      *
      * @return ValidatedUserData The validated user data transfer object.
      */

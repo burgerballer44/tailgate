@@ -9,9 +9,11 @@ use Illuminate\Validation\Rules\Enum;
 trait SeasonValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for season data.
      *
-     * @return array<string, mixed>
+     * Validates that the season has a name and valid sport and season type enum values.
+     *
+     * @return array<string, mixed> The base season field validation rules.
      */
     protected function baseRules(): array
     {
@@ -23,9 +25,11 @@ trait SeasonValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a season.
      *
-     * @return array<string, mixed>
+     * Requires a season name, sport, and season type. The active flag is a boolean.
+     *
+     * @return array<string, mixed> The season creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -35,9 +39,11 @@ trait SeasonValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a .
+     * Define validation rules for updating a season.
      *
-     * @return array<string, mixed>
+     * Allows updating season name, sport, season type, and active status.
+     *
+     * @return array<string, mixed> The season update validation rules.
      */
     protected function updateRules(): array
     {

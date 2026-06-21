@@ -15,12 +15,20 @@ use Illuminate\View\View;
 
 class NewPasswordController extends Controller
 {
+    /**
+     * Build the password reset controller with user command operations.
+     *
+     * @param UserCommandInterface $userCommandService Service responsible for persisting password updates.
+     */
     public function __construct(
         private UserCommandInterface $userCommandService
     ) {}
 
     /**
-     * Display the password reset view.
+     * Show the password reset form that accepts a token and new credentials.
+     *
+     * @param  Request  $request  The current request that carries the password reset token.
+     * @return View The reset-password view.
      */
     public function create(Request $request): View
     {
@@ -28,9 +36,11 @@ class NewPasswordController extends Controller
     }
 
     /**
-     * Handle an incoming new password request.
+     * Reset the user's password, rotate the remember token, and log the event.
      *
-     * @throws ValidationException
+     * @param  Request  $request  The current request containing the reset token and credentials.
+     * @return RedirectResponse A redirect to the login screen after a successful reset.
+     * @throws ValidationException When the reset payload fails validation or the broker rejects it.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -40,9 +50,6 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
@@ -51,10 +58,6 @@ class NewPasswordController extends Controller
                 event(new PasswordReset($user));
             }
         );
-
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
 
         if ($status == Password::PASSWORD_RESET) {
             $this->setFlashAlert('success', __($status));

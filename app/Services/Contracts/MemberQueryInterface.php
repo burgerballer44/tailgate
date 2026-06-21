@@ -15,9 +15,28 @@ use Illuminate\Database\Eloquent\Collection;
  */
 interface MemberQueryInterface
 {
+    /**
+     * Build a member query from supported filters.
+     *
+     * @param array<string, mixed> $query Associative query parameters used to filter members.
+     * @return Builder The filtered member query.
+     */
     public function query(array $query): Builder;
 
+    /**
+     * Load approved members for a group with user and player-count context.
+     *
+     * @param Group $group The group whose approved members should be loaded.
+     * @return Collection<int, \App\Models\Member> Approved members ordered for roster display.
+     */
     public function getApprovedMembersForGroup(Group $group): Collection;
 
+    /**
+     * Resolve the approved member record for a specific group and user.
+     *
+     * @param Group $group The group to inspect.
+     * @param User $user The user whose membership should be resolved.
+     * @return Member The approved member record for the given user.
+     */
     public function findApprovedMemberForGroupAndUser(Group $group, User $user): Member;
 }

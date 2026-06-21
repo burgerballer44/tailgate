@@ -12,7 +12,12 @@ class UpdateUserRequest extends FormRequest
     use UserValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize administrators to update a user.
+     *
+     * Authorization is checked at the controller or policy level to ensure only administrators
+     * can modify user account information.
+     *
+     * @return bool Always true; admin authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,13 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the user update request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the updated email is unique except for the current user, and status and role
+     * enums are valid. Retrieves the user from the route parameter to validate against
+     * the correct user record.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user field validation rules.
      */
     public function rules(): array
     {
@@ -32,8 +41,7 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated user data to the service layer.
+     * Transform validated user data into a data transfer object for the service layer.
      *
      * @return ValidatedUserData The validated user data transfer object.
      */

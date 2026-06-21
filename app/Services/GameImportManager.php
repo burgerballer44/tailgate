@@ -27,7 +27,11 @@ class GameImportManager implements GameImportManagerInterface
     private const DEFAULT_IMPORT_CHUNK_SIZE = 500;
 
     /**
-     * @param  iterable<int, GameImportSourceInterface>  $sources
+     * Create a game import coordinator with the configured command services and source registry.
+     *
+     * @param SeasonCommandInterface $seasonCommandService The service responsible for creating games within a season.
+     * @param GameCommandInterface $gameCommandService The service responsible for updating existing games.
+     * @param iterable<int, GameImportSourceInterface> $sources Available game import sources keyed by iteration order.
      */
     public function __construct(
         private readonly SeasonCommandInterface $seasonCommandService,
@@ -38,7 +42,7 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Exposes game import sources and metadata for source selection UIs.
      *
-     * @return array<int, array<string, string>>  An array of available import sources with their keys, labels, descriptions, and types.
+     * @return array<int, array<string, string>> Available source metadata for import selection UIs.
      */
     public function availableSources(): array
     {
@@ -53,6 +57,15 @@ class GameImportManager implements GameImportManagerInterface
             ->all();
     }
 
+    /**
+     * Import games for a season, resolving teams and updating or creating rows as needed.
+     *
+     * @param Season $season The season receiving the imported schedule.
+     * @param GameImportData $data Import source selection and runtime options.
+     * @return ImportResult A summary of imported, updated, and skipped games.
+     *
+     * @throws GameImportException When the requested source key is unavailable or the source rejects the request.
+     */
     public function import(Season $season, GameImportData $data): ImportResult
     {
         $source = $this->resolveSource($data->source);

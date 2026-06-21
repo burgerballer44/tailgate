@@ -21,9 +21,9 @@ class TeamSport extends Model
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Cast the stored sport value to the Sport enum.
      *
-     * @return array<string, string>
+     * @return array<string, string> Attribute cast definitions used by Eloquent.
      */
     protected function casts(): array
     {
@@ -34,6 +34,8 @@ class TeamSport extends Model
 
     /**
      * Get the team that owns the team sport.
+     *
+     * @return BelongsTo The owning team relationship.
      */
     public function team(): BelongsTo
     {

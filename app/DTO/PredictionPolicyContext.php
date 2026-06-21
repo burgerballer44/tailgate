@@ -16,11 +16,11 @@ use App\Models\Prediction;
 readonly class PredictionPolicyContext
 {
     /**
-     * @param  Player  $player  The player attempting to submit or update a prediction.
-     * @param  Group  $group  The player's group used for group-level policy checks.
-     * @param  Game  $game  The game being predicted.
-     * @param  ValidatedPredictionData  $submission  The normalized incoming prediction payload.
-     * @param  Prediction|null  $prediction  Existing prediction when evaluating updates.
+     * @param Player $player The player attempting to submit or update a prediction.
+     * @param Group $group The player's group used for group-level policy checks.
+     * @param Game $game The game being predicted.
+     * @param ValidatedPredictionData $submission The normalized incoming prediction payload.
+     * @param Prediction|null $prediction Existing prediction when evaluating updates; null for new submissions.
      */
     public function __construct(
         public Player $player,

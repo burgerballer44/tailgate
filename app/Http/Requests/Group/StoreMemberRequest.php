@@ -12,7 +12,12 @@ class StoreMemberRequest extends FormRequest
     use MemberValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize group administrators to add members to a group.
+     *
+     * Authorization is checked at the controller or policy level to ensure only group admins
+     * can invite or add new members to the group.
+     *
+     * @return bool Always true; group admin authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -20,9 +25,12 @@ class StoreMemberRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the group member creation request data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the user exists, is not already a member of the group, and the group can accept
+     * additional members. Also validates the role and status assignments.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member field validation rules.
      */
     public function rules(): array
     {
@@ -30,8 +38,7 @@ class StoreMemberRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated member data to the service layer.
+     * Transform validated member data into a data transfer object for the service layer.
      *
      * @return ValidatedMemberData The validated member data transfer object.
      */

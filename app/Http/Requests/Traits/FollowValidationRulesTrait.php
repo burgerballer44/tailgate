@@ -8,9 +8,11 @@ use Illuminate\Validation\Rule;
 trait FollowValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for team follow data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Ensures the team exists and the specified sport is valid for that team if provided.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team and sport validation rules.
      */
     protected function baseRules(): array
     {
@@ -27,9 +29,9 @@ trait FollowValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a follow relationship.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team follow validation rules.
      */
     protected function storeRules(): array
     {
@@ -37,9 +39,9 @@ trait FollowValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a .
+     * Define validation rules for updating a follow relationship.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team follow validation rules.
      */
     protected function updateRules(): array
     {

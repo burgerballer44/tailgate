@@ -189,8 +189,9 @@ class GroupController extends Controller
      * This method displays the group management form where admins can
      * manage group settings, approve/reject join requests, and manage members.
      *
-     * @param  Group  $group  The group to edit
-     * @return View Returns the group edit view
+        * @param Request $request The incoming request used to resolve member-selection context.
+        * @param Group $group The group to edit.
+        * @return View Returns the group edit view.
      */
     public function edit(Request $request, Group $group): View
     {

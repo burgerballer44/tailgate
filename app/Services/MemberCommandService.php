@@ -18,9 +18,9 @@ class MemberCommandService implements MemberCommandInterface
     /**
      * Adds a member to a group with normalized role and status defaults.
      *
-     * @param  Group  $group  The group to add the member to.
-     * @param  ValidatedMemberData  $data  Validated member data including user_id and role.
-     * @return Member  The created member instance.
+    * @param Group $group The group to add the member to.
+    * @param ValidatedMemberData $data Validated member data including the user and optional role/status.
+    * @return Member The created member instance.
      */
     public function createForGroup(Group $group, ValidatedMemberData $data): Member
     {
@@ -36,9 +36,9 @@ class MemberCommandService implements MemberCommandInterface
     /**
      * Applies role and status changes to an existing member.
      *
-     * @param  Member  $member  The member to update.
-     * @param  ValidatedMemberData  $data  Validated data containing member information to update.
-     * @return Member  The updated member instance.
+        * @param Member $member The member to update.
+        * @param ValidatedMemberData $data Validated data to apply to the member.
+        * @return Member The updated member instance.
      */
     public function update(Member $member, ValidatedMemberData $data): Member
     {
@@ -61,7 +61,8 @@ class MemberCommandService implements MemberCommandInterface
     /**
      * Removes a member record while enforcing minimum-admin safety constraints.
      *
-     * @param  Member  $member  The member to delete.
+        * @param Member $member The member to delete.
+        * @return void
      *
      * @throws \Exception If deleting would violate admin minimum requirements.
      */

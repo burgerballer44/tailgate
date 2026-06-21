@@ -16,8 +16,8 @@ class TeamQueryService implements TeamQueryInterface
     /**
      * Builds a team query from supported filters for discovery and admin listings.
      *
-     * @param  array  $query  An associative array of query parameters to filter teams.
-     * @return Builder  A query builder instance for the filtered teams.
+     * @param array<string, mixed> $query Associative query parameters used by Team::filter().
+     * @return Builder The filtered team query with sports eager loaded for display.
      */
     public function query(array $query): Builder
     {
@@ -26,6 +26,8 @@ class TeamQueryService implements TeamQueryInterface
 
     /**
      * Lists teams in deterministic order for follow-team selection workflows.
+     *
+     * @return Collection<int, Team> The complete team collection ordered for stable UI rendering.
      */
     public function getAvailableTeamsForFollow(): Collection
     {

@@ -25,10 +25,10 @@ class TeamImportManager implements TeamImportManagerInterface
     private const DEFAULT_IMPORT_CHUNK_SIZE = 500;
 
     /**
-     * TeamImportManager constructor.
+     * Create a team import coordinator with the configured command service and source registry.
      *
-     * @param  TeamCommandInterface  $teamCommandService  The service responsible for team commands (create/update).
-     * @param  iterable  $sources  An iterable of available team import sources implementing TeamImportSourceInterface.
+     * @param TeamCommandInterface $teamCommandService The service responsible for team create and update operations.
+     * @param iterable<int, TeamImportSourceInterface> $sources Available team import sources keyed by iteration order.
      */
     public function __construct(
         private readonly TeamCommandInterface $teamCommandService,
@@ -38,7 +38,7 @@ class TeamImportManager implements TeamImportManagerInterface
     /**
      * Exposes team import sources and metadata for source selection UIs.
      *
-     * @return array<int, array<string, string>>  An array of available team import sources with their details.
+     * @return array<int, array<string, string>> Available source metadata for import selection UIs.
      */
     public function availableSources(): array
     {
@@ -53,6 +53,14 @@ class TeamImportManager implements TeamImportManagerInterface
             ->all();
     }
 
+    /**
+     * Import teams from the configured source, batching work to keep memory usage bounded.
+     *
+     * @param TeamImportData $data Import source selection and runtime options.
+     * @return ImportResult A summary of imported, updated, and skipped teams.
+     *
+     * @throws TeamImportException When the requested source key is unavailable.
+     */
     public function import(TeamImportData $data): ImportResult
     {
         $source = $this->resolveSource($data->source);

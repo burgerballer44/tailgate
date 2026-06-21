@@ -15,8 +15,8 @@ class GameCommandService implements GameCommandInterface
     /**
      * Persists a new game using normalized season, team, score, and time inputs.
      *
-     * @param  ValidatedGameData  $data  Validated game data including season, teams, scores, start date-time, and TBD flag.
-     * @return Game  The created game instance.
+    * @param ValidatedGameData $data Validated game data including teams, scores, and start time.
+    * @return Game The created game instance.
      */
     public function create(ValidatedGameData $data): Game
     {
@@ -36,8 +36,9 @@ class GameCommandService implements GameCommandInterface
     /**
      * Applies schedule and scoring changes to an existing game.
      *
-     * @param  Game  $game  The game to update.
-     * @param  ValidatedGameData  $data  Validated data to update the game with.
+        * @param Game $game The game to update.
+        * @param ValidatedGameData $data Validated data to apply to the game.
+        * @return void
      */
     public function update(Game $game, ValidatedGameData $data): void
     {
@@ -58,7 +59,8 @@ class GameCommandService implements GameCommandInterface
     /**
      * Removes a game record from persistence.
      *
-     * @param  Game  $game  The game to delete.
+     * @param Game $game The game to delete.
+     * @return void
      */
     public function delete(Game $game): void
     {

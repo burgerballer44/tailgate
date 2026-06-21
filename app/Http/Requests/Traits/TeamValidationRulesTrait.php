@@ -9,9 +9,12 @@ use Illuminate\Validation\Rules\Enum;
 trait TeamValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for  fields.
+     * Define base validation rules for team data.
      *
-     * @return array<string, ValidationRule|array|string>
+     * Validates all team fields including organization, designation, conference, logos, social media links,
+     * team type, and supported sports. Color must be a valid hex code if provided.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base team field validation rules.
      */
     protected function baseRules(): array
     {
@@ -34,9 +37,9 @@ trait TeamValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a .
+     * Define validation rules for creating a team.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -44,9 +47,9 @@ trait TeamValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a .
+     * Define validation rules for updating a team.
      *
-     * @return array<string, ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team update validation rules.
      */
     protected function updateRules(): array
     {
@@ -54,7 +57,12 @@ trait TeamValidationRulesTrait
     }
 
     /**
-     * Decode JSON fields submitted as strings into arrays for validation.
+     * Decode JSON string fields into arrays for validation and storage.
+     *
+     * Form submissions may serialize complex fields as JSON strings. This method converts them
+     * back to arrays so validation rules can properly validate array structure.
+     *
+     * @return void
      */
     protected function prepareTeamJsonFields(): void
     {
@@ -62,6 +70,15 @@ trait TeamValidationRulesTrait
         $this->decodeJsonArrayField('social_media');
     }
 
+    /**
+     * Decode a JSON field if it is a string, merging the result back into request data.
+     *
+     * This helper is used to convert JSON-encoded form fields into PHP arrays. It silently
+     * ignores invalid JSON or non-string values, leaving them unchanged for validation to handle.
+     *
+     * @param string $field The field name to decode.
+     * @return void
+     */
     private function decodeJsonArrayField(string $field): void
     {
         $value = $this->input($field);

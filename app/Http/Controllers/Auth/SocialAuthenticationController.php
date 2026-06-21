@@ -16,6 +16,8 @@ class SocialAuthenticationController extends Controller
 {
     /**
      * Redirect the user to the Google authentication page.
+     *
+     * @return RedirectResponse Redirect response to the provider authorization endpoint.
      */
     public function redirect(): RedirectResponse
     {
@@ -24,6 +26,10 @@ class SocialAuthenticationController extends Controller
 
     /**
      * Handle the Google OAuth callback and authenticate the resolved user.
+     *
+     * @param Request $request Current HTTP request used to regenerate the authenticated session.
+     * @param SocialAuthenticationService $socialAuthenticationService Service that maps provider users to local users.
+     * @return RedirectResponse Redirects to dashboard on success or back to login with an error message.
      */
     public function callback(Request $request, SocialAuthenticationService $socialAuthenticationService): RedirectResponse
     {

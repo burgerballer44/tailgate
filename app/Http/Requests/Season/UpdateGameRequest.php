@@ -11,7 +11,12 @@ class UpdateGameRequest extends FormRequest
     use GameValidationRulesTrait;
 
     /**
-     * Authorizes this request in the current application context.
+     * Authorize administrators to update a game.
+     *
+     * Authorization is checked at the controller or policy level to ensure only season administrators
+     * can modify game details.
+     *
+     * @return bool Always true; admin authorization is enforced elsewhere.
      */
     public function authorize(): bool
     {
@@ -19,15 +24,25 @@ class UpdateGameRequest extends FormRequest
     }
 
     /**
-     * Defines validation rules for this request payload.
+     * Validate the game update request data.
      *
-     * @return array<string, mixed>
+     * Ensures the updated season, teams, scores, and start time conform to game rules.
+     *
+     * @return array<string, mixed> The game field validation rules.
      */
     public function rules(): array
     {
         return $this->updateRules();
     }
 
+    /**
+     * Prepare the data for validation by converting the start_time_tbd field to a boolean.
+     *
+     * This ensures that the checkbox field is properly converted to a boolean value before
+     * validation runs, allowing the validation rules to expect a boolean type.
+     *
+     * @return void
+     */
     protected function prepareForValidation(): void
     {
         $this->merge([
@@ -36,8 +51,7 @@ class UpdateGameRequest extends FormRequest
     }
 
     /**
-     * Maps validated input into a  DTO.
-     * This method is used to pass validated game data to the service layer.
+     * Transform validated game data into a data transfer object for the service layer.
      *
      * @return ValidatedGameData The validated game data transfer object.
      */

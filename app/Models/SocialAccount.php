@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Social login identity linked to a user account.
+ */
 class SocialAccount extends Model
 {
     use HasFactory;
@@ -26,9 +29,9 @@ class SocialAccount extends Model
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Cast the stored profile payload and login timestamp into native types.
      *
-     * @return array<string, string>
+     * @return array<string, string> Attribute cast definitions used by Eloquent.
      */
     protected function casts(): array
     {
@@ -40,6 +43,8 @@ class SocialAccount extends Model
 
     /**
      * Get the user that owns the social account.
+     *
+     * @return BelongsTo The owning user relationship.
      */
     public function user(): BelongsTo
     {

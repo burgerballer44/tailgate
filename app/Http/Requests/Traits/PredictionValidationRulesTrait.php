@@ -8,9 +8,11 @@ use App\Rules\NoPredictionSubmitted;
 trait PredictionValidationRulesTrait
 {
     /**
-     * Defines shared validation rules for prediction fields.
+     * Define base validation rules for prediction data.
      *
-    * @return array<string, array|string>
+     * Validates that both team predictions are non-negative integers, typically representing scores.
+     *
+     * @return array<string, array|string> The base prediction field validation rules.
      */
     protected function baseRules(): array
     {
@@ -21,9 +23,12 @@ trait PredictionValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when creating a prediction.
+     * Define validation rules for creating a prediction.
      *
-    * @return array<string, array|string>
+     * Ensures the player and game exist, the game belongs to a team the user is following, and
+     * no prediction has already been submitted for this game by this player.
+     *
+     * @return array<string, array|string> The prediction creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -34,9 +39,11 @@ trait PredictionValidationRulesTrait
     }
 
     /**
-     * Defines validation rules used when updating a prediction.
+     * Define validation rules for updating a prediction.
      *
-    * @return array<string, array|string>
+     * Requires identification of which prediction is being updated via prediction_id.
+     *
+     * @return array<string, array|string> The prediction update validation rules.
      */
     protected function updateRules(): array
     {

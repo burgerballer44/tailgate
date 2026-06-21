@@ -13,10 +13,10 @@ use App\Models\PredictionPolicyScope;
 readonly class PredictionPolicyViolation
 {
     /**
-     * @param  string  $key  Stable policy identifier used for matching and analytics.
-     * @param  string  $label  Human-readable policy name.
-     * @param  string  $description  Human-readable reason the policy failed.
-     * @param  PredictionPolicyScope  $scope  Policy scope (app-level or group-level).
+     * @param string $key Stable policy identifier used for matching and analytics.
+     * @param string $label Human-readable policy name.
+     * @param string $description Human-readable reason the policy failed.
+     * @param PredictionPolicyScope $scope Policy scope (app-level or group-level).
      */
     public function __construct(
         public string $key,
@@ -27,6 +27,8 @@ readonly class PredictionPolicyViolation
 
     /**
      * Returns a compact, user-facing summary line for this violation.
+     *
+     * @return string A formatted string combining the policy label and the failure reason.
      */
     public function toSummary(): string
     {
