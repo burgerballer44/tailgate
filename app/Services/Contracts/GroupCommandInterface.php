@@ -4,6 +4,7 @@ namespace App\Services\Contracts;
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
+use App\DTO\ValidatedGroupPoliciesData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
 use App\Models\Follow;
@@ -34,6 +35,15 @@ interface GroupCommandInterface
      * @return Group The updated group instance.
      */
     public function update(Group $group, ValidatedGroupData $data): Group;
+
+    /**
+     * Update only group-level optional prediction policies.
+     *
+     * @param Group $group The group to update.
+     * @param ValidatedGroupPoliciesData $data The normalized policy payload.
+     * @return Group The updated group instance.
+     */
+    public function updatePolicies(Group $group, ValidatedGroupPoliciesData $data): Group;
 
     /**
      * Delete a group.

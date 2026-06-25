@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Traits;
 
 use App\Rules\UserMustBeAMember;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 
 trait GroupValidationRulesTrait
 {
@@ -52,5 +52,21 @@ trait GroupValidationRulesTrait
             'name' => 'required|string|max:255',
             'owner_id' => ['required', 'exists:users,id'],
         ];
+    }
+
+    /**
+     * Returns the valid string keys for group-level prediction policies.
+     *
+     * Resolved from the PredictionPolicyEvaluator service so that adding a new policy
+     * class automatically makes its key a valid input value without touching validation code.
+     *
+     * @return array<int, string>
+     */
+    public function groupPolicyKeys(): array
+    {
+        return array_values(array_map(
+            static fn ($rule): string => $rule->key(),
+            app(PredictionPolicyEvaluatorInterface::class)->groupRules(),
+        ));
     }
 }

@@ -26,8 +26,8 @@ class UserUpdateGroupRequest extends FormRequest
     /**
      * Validate the user-initiated group update request data.
      *
-     * Allows group owners to update basic group information. More sensitive fields like
-     * owner changes are not included; use the admin endpoint for those modifications.
+     * Allows group owners to update basic group information.
+     * Sensitive fields like owner changes are not included.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group field validation rules.
      */

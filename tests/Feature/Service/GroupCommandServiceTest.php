@@ -2,6 +2,7 @@
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
+use App\DTO\ValidatedGroupPoliciesData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
 use App\Models\Follow;
@@ -76,6 +77,43 @@ describe('update group', function () {
             'member_limit' => 20,
         ]);
         expect($updatedGroup->name)->toBe('New Name');
+    });
+});
+
+describe('update group policies', function () {
+    test('updates only enabled prediction policies', function () {
+        $group = Group::factory()->create([
+            'name' => 'Original Name',
+            'owner_id' => User::factory()->create()->id,
+            'member_limit' => 21,
+            'player_limit' => 4,
+            'enabled_prediction_policies' => [],
+        ]);
+
+        $updatedGroup = $this->service->updatePolicies($group, ValidatedGroupPoliciesData::fromArray([
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]));
+
+        $group->refresh();
+
+        expect($updatedGroup->enabled_prediction_policies)->toBe(['group-unique-prediction']);
+        expect($group->enabled_prediction_policies)->toBe(['group-unique-prediction']);
+        expect($group->name)->toBe('Original Name');
+        expect($group->member_limit)->toBe(21);
+        expect($group->player_limit)->toBe(4);
+    });
+
+    test('clears enabled prediction policies when payload is empty', function () {
+        $group = Group::factory()->create([
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]);
+
+        $this->service->updatePolicies($group, ValidatedGroupPoliciesData::fromArray([
+            'enabled_prediction_policies' => [],
+        ]));
+
+        $group->refresh();
+        expect($group->enabled_prediction_policies)->toBe([]);
     });
 });
 

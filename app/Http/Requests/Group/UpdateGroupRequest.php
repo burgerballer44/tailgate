@@ -5,7 +5,6 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
-use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -58,19 +57,5 @@ class UpdateGroupRequest extends FormRequest
         return ValidatedGroupData::fromArray($validated);
     }
 
-    /**
-     * Get the list of valid group-level prediction policy keys.
-     *
-     * Retrieves policy keys from the PredictionPolicyEvaluator service to ensure validation
-     * rules stay synchronized with available policies, preventing stale validation rules.
-     *
-     * @return array<int, string> List of enabled prediction policy keys.
-     */
-    private function groupPolicyKeys(): array
-    {
-        return array_values(array_map(
-            static fn ($rule): string => $rule->key(),
-            app(PredictionPolicyEvaluatorInterface::class)->groupRules(),
-        ));
-    }
 }
+

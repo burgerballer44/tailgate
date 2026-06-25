@@ -56,6 +56,23 @@
                     <p class="mt-1 font-mono text-sm font-semibold tracking-widest text-gray-900">{{ $group->invite_code }}</p>
                 </div>
             </div>
+
+            @php
+                $enabledPolicies = $group->enabled_prediction_policies ?? [];
+                $policyLabels = collect($availableGroupPolicies)->keyBy(fn ($p) => $p->key());
+            @endphp
+            @if (! empty($enabledPolicies))
+                <div class="mt-4 border-t border-gray-100 px-6 py-4">
+                    <p class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Active prediction rules</p>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($enabledPolicies as $policyKey)
+                            <span class="inline-flex items-center rounded-full bg-navy/10 px-2.5 py-0.5 text-xs font-medium text-navy">
+                                {{ $policyLabels->get($policyKey)?->label() ?? $policyKey }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </x-groups.section-card>
 
         {{-- My Players --}}

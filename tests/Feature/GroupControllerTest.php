@@ -463,6 +463,106 @@ describe('update', function () {
     });
 });
 
+describe('updatePolicies', function () {
+    test('updates group prediction policies for owner', function () {
+        $originalName = 'Policy Test Group';
+        $originalMemberLimit = 19;
+        $originalPlayerLimit = 7;
+
+        $group = Group::factory()->create([
+            'owner_id' => $this->user->id,
+            'name' => $originalName,
+            'member_limit' => $originalMemberLimit,
+            'player_limit' => $originalPlayerLimit,
+            'enabled_prediction_policies' => [],
+        ]);
+
+        $response = $this->patch(route('groups.update-policies', $group), [
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]);
+
+        $response->assertRedirect(route('groups.show', $group));
+        $group->refresh();
+        expect($group->enabled_prediction_policies)->toBe(['group-unique-prediction']);
+        expect($group->name)->toBe($originalName);
+        expect($group->member_limit)->toBe($originalMemberLimit);
+        expect($group->player_limit)->toBe($originalPlayerLimit);
+        expect($group->owner_id)->toBe($this->user->id);
+    });
+
+    test('clears group prediction policies when no checkbox is selected', function () {
+        $group = Group::factory()->create([
+            'owner_id' => $this->user->id,
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]);
+
+        $response = $this->patch(route('groups.update-policies', $group), []);
+
+        $response->assertRedirect(route('groups.show', $group));
+        $group->refresh();
+        expect($group->enabled_prediction_policies)->toBe([]);
+    });
+
+    test('updates group prediction policies for admin', function () {
+        $group = Group::factory()->create([
+            'enabled_prediction_policies' => [],
+        ]);
+
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->patch(route('groups.update-policies', $group), [
+            'enabled_prediction_policies' => ['minimum-lead-time-before-lock'],
+        ]);
+
+        $response->assertRedirect(route('groups.show', $group));
+        $group->refresh();
+        expect($group->enabled_prediction_policies)->toBe(['minimum-lead-time-before-lock']);
+    });
+
+    test('rejects invalid policy keys', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+
+        $response = $this->patch(route('groups.update-policies', $group), [
+            'enabled_prediction_policies' => ['not-a-valid-policy'],
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasErrors('enabled_prediction_policies.0');
+    });
+
+    test('denies update policies to regular members', function () {
+        $group = Group::factory()->create();
+
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->patch(route('groups.update-policies', $group), [
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]);
+
+        $response->assertForbidden();
+    });
+
+    test('flashes success message on policy update', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+
+        $this->patch(route('groups.update-policies', $group), [
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ])->assertRedirect();
+
+        expect(session('alert')['message'])->toBe('Prediction policies updated successfully!');
+    });
+});
+
 describe('approveMember', function () {
     test('approves pending member for owner', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);

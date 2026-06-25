@@ -36,6 +36,51 @@
             </x-forms.multi-section-form>
         </x-groups.section-card>
 
+        {{-- Prediction policies --}}
+        <x-groups.section-card title="Prediction policies" description="Configure optional rules for prediction submissions in this group.">
+            <form method="POST" action="{{ route('groups.update-policies', $group) }}">
+                @csrf
+                @method('PATCH')
+
+                <div class="space-y-4">
+                    <p class="text-xs text-gray-500">
+                        The following rules are always active for every group and cannot be disabled:
+                        <strong>Prediction lock time</strong> (submissions close when the game starts) and
+                        <strong>Season active</strong> (submissions are blocked when the season is inactive).
+                    </p>
+
+                    @if ($availableGroupPolicies)
+                        <div class="space-y-3">
+                            @foreach ($availableGroupPolicies as $policy)
+                                <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 px-4 py-3 hover:bg-gray-50">
+                                    <input
+                                        type="checkbox"
+                                        name="enabled_prediction_policies[]"
+                                        value="{{ $policy->key() }}"
+                                        class="mt-0.5 h-4 w-4 rounded border-gray-300 text-navy focus:ring-navy"
+                                        {{ $group->isPredictionPolicyEnabled($policy->key()) ? 'checked' : '' }}
+                                    >
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ $policy->label() }}</p>
+                                        <p class="mt-0.5 text-xs text-gray-500">{{ $policy->description() }}</p>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500">No optional policies are available.</p>
+                    @endif
+
+                    <x-inputs.input-error :messages="$errors->get('enabled_prediction_policies')" />
+                    <x-inputs.input-error :messages="$errors->get('enabled_prediction_policies.*')" />
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <x-buttons.primary-button type="submit">Save policies</x-buttons.primary-button>
+                </div>
+            </form>
+        </x-groups.section-card>
+
         {{-- Followed teams --}}
         <x-groups.section-card title="Followed teams" description="The teams this group follows for predictions.">
             @php

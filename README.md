@@ -2,9 +2,13 @@
 
 Sports group prediction platform built with Laravel.
 
+## How Tailgate was inspired
+
+Tailgate was inspired by a real life family and friend group who like to make score predictions on the games for their favorite college football team. The goal was to predict the outcome of each game in the season, and then compare predictions against actual results to see who was the most accurate. All scores were tracked on an excel sheet. Family members and friends would submit their scores by texting the organizer, who would then update the master spreadsheet. The process was manual and time-consuming, and there was no easy way for participants to see their predictions or how they were doing compared to others. After each game result, an updated spreadsheet would be shared by email, showing the latest cumulative results. There were rules for what scores could be submitted by participants, such as the first to submit a score would get that score and no duplicates were allowed. The organizer had to enforce these rules manually, which added to the workload. For the point system, it was the absolute value of the difference between the predicted and actual score for each team, and the participant with the lowest total points at the end of the season was declared the winner. Anytime a player correctly guessed the exact score, they would get a special recognition, and a special 7 points would be subtracted from their total score as a bonus. The group had fun with the competition, but the manual process was a barrier to participation and enjoyment. Tailgate was created to automate this process, making it easier for participants to submit their predictions, track their performance, and enjoy the competition without the hassle of manual scorekeeping. There are some nuances to the people who submit scores. Some people are kids who do not have phones, so they submit their predictions through their parents. Some people like to submit their scors early, while others wait until the last minute. You are only allowed to submit one unique score per game but there was discussion about whether to allow duplicate scores that do not earn points. The organizer has to keep track of all of this manually, which can be a lot of work. For example allowing non unique scores woul allow a true prediction to be submitted even if the unique score was already taken, but it would also allow for more gaming of the system and make it less competitive.
+
 ## Product goal
 
-Tailgate lets users form prediction groups around sports teams. Each member of a group creates one or more "players" and submits predictions for upcoming games. The core relationship is that a group follows one or more teams, optionally scoped to a single sport for that team; seasons provide time-bound context for games and predictions.
+Tailgate lets users form prediction groups around their favorite sports teams. Each member of a group creates one or more "players" and submits predictions for upcoming games. The core relationship is that a group follows one or more teams, optionally scoped to a single sport for that team; seasons provide time-bound context for games and predictions.
 
 The immediate goal is a working MVP where a regular user can move through the full loop without any developer tooling.
 
@@ -36,12 +40,23 @@ The MVP is complete when an approved group member can, without developer-panel a
 
 Everything else — leaderboards, prediction history, admin dashboards, notifications — is post-MVP.
 
-### What is missing for the MVP
+### Implementation status
 
-- **Game listing** — users have no view to see upcoming games for their group's followed teams.
-- **Prediction submissions** — users cannot submit predictions from the UI.
+**Completed:**
 
-These two items are the entire remaining scope of the MVP.
+- Player management (Phase 1) — approved members can create, edit, and delete their own players; group admins can manage players for all approved members. Full feature and authorization test coverage.
+- Group management — create groups, invite members, approve/reject member requests, assign admin roles, manage team follows with optional sport scope.
+- Authentication — user registration, email verification, secure login, password reset, and Google OAuth integration.
+- Prediction policy framework — four core policies (lock time, season active gate, unique group predictions, minimum lead time) with full service-layer implementation and test coverage. Policies are evaluated and enforced at submission time.
+- Data import pipeline — automated imports from College Football Data (CFBD) and College Basketball Data (CBBD) APIs for teams, seasons, and games. Developer admin has UI for triggering imports.
+- Developer admin interface — complete CRUD for all entities (users, teams, seasons, games, groups, members, players, predictions) with separate controllers, routes, and views.
+
+**Not yet completed (user-facing only):**
+
+- Game listing view — users have no route, controller, or view to see upcoming games for their group's followed teams. Backend query service exists; awaiting UI.
+- Prediction submission UI — users cannot submit or edit predictions via the web interface. Backend service layer (`PlayerCommandService::submitPrediction()` and `updatePrediction()`) is complete and tested; awaiting form, route, and controller wiring.
+
+These two UI components are the entire remaining scope of the MVP.
 
 ## Domain model
 
@@ -52,6 +67,47 @@ These two items are the entire remaining scope of the MVP.
 - **Prediction** — a player's predicted home/away score for a specific game.
 - **Team, Season, Game** — sports schedule entities managed via developer tools and import pipelines. Seasons are contexts for games, not the source of follow relationships.
 - **Follow** — a group's commitment to follow a specific team independent of season boundaries, with an optional sport scope to limit eligible games to a single sport.
+
+## Real-life to code mapping
+
+The inspiration story describes one family group and their manual prediction process. Tailgate generalizes this into a platform that supports many independent groups with automated workflows. Here's how the real-life scenario maps to the application code and domain:
+
+**Family and friend group** → `Group`  
+One group in the real-life story; Tailgate supports unlimited independent groups, each with its own members, players, and prediction policies.
+
+**Organizer** → Group `Member` with admin role  
+In the real-life version, one person managed everything. In Tailgate, the admin role can be held by multiple members and reassigned as needed.
+
+**Participants in the group** → `Member` (under a `Group`)  
+Each participant joins a group and has a role (admin or regular member) and status (pending or approved).
+
+**Individual participant creating a "player" name for predictions** → `Player`  
+A member can create multiple players in a group; each player represents a distinct prediction identity. A child might submit under their parent's account through their own player.
+
+**Submitting a score by texting the organizer** → Submitting a `Prediction` through the UI  
+Instead of texting and having the organizer manually enter data, members submit predictions directly via the web interface for their players. Predictions are created and updated until the game locks.
+
+**The team they follow** → `Follow` (group → team relationship)  
+The real-life group followed one team. Tailgate groups can follow multiple teams up to their `follow_limit` (default: 1), and can span multiple seasons automatically.
+
+**Limiting prediction scope to one sport** → `Follow` with sport scope  
+A follow can optionally specify a sport (e.g., only college football); `null` means all sports for that team.
+
+**Excel spreadsheet rules (first to submit wins, no duplicates)** → `Prediction` policy framework  
+Tailgate enforces rules automatically through the prediction policy system rather than manual enforcement. Policies include lock time, season activity gates, and optional competitive rules.
+
+**Organizer manually checking and enforcing rules** → Prediction policy validation  
+The application validates all policies at submission time and provides immediate user feedback, eliminating manual work and human error.
+
+**Tracking predictions and scores across the season** → `Season`, `Prediction`, `Game`  
+Seasons provide time windows for games; predictions are stored permanently and linked to games and players. Scoring and leaderboards are computed post-MVP.
+
+**Key scaling differences:**
+
+- **Single group → many groups:** Tailgate is a multi-tenant prediction platform. Each group is independent with its own members, players, teams, and prediction rules.
+- **Centralized organizer → distributed admin role:** Any member with admin privileges can manage group settings, members, and policies. The role is not tied to a single person.
+- **Manual enforcement → automated policies:** Prediction policies are evaluated automatically at submission time, eliminating manual work and human error.
+- **Extensible rule system:** Beyond the MVP, groups can enable optional competitive rules (like enforcing unique predictions per game) without requiring manual tracking.
 
 ## Follow direction (May 2026)
 
@@ -82,7 +138,7 @@ This split keeps product behavior clear: "we follow this team" is durable, optio
 
 Work through these phases in sequence. Each phase should be treated as a vertical slice — routes, controller, views, and tests together before moving on.
 
-### Phase 1: Player management (completed)
+### Phase 1: Player management (completed ✅)
 
 User-facing player management has been implemented with role-aware behavior:
 
@@ -92,85 +148,74 @@ User-facing player management has been implemented with role-aware behavior:
 - Admin-managed creation follows the group's `player_limit` for the selected member.
 - Feature coverage exists for create/edit/delete paths, limit enforcement, and authorization boundaries.
 
-### Phase 2A: Upcoming games listing (read-only slice)
+### Phase 2A: Upcoming games listing (read-only slice) — IN PROGRESS
 
-Goal: deliver immediate user value by letting approved members see upcoming games for their group's followed teams before prediction submission is introduced.
+**Backend status:** `GameQueryService` exists with methods to fetch games for a group, filtering by team follows and optional sport scope.
 
-Scope:
+**Frontend scope:**
 
 - Add routes and controller actions to list upcoming games for a group membership.
 - Show games even when prediction is closed (for example, inactive season), with clear status badges.
 - Respect follow filters: team follow and optional sport scope.
 - Keep this slice read-only; no prediction entry yet.
 
-Definition of done:
+**Definition of done:**
 
 - An approved member can open a game list page and understand which games are open or closed for prediction.
 - Empty states explain why no games are currently available.
 
-Testing focus:
+**Testing focus:**
 
 - Authorization: only approved members can access the page.
 - Filtering: only games for followed teams and allowed sport scope appear.
 - Status display: open vs closed is correctly derived from season status and game start time.
 
-### Phase 2B: Core prediction submission (required policy rules)
+### Phase 2B: Core prediction submission — READY FOR INTEGRATION
 
-Goal: complete the MVP prediction loop with the required prediction policy rules.
+**Backend status:** Fully complete and tested.
 
-Required rules to implement in this slice:
+- `PlayerCommandService::submitPrediction()` and `updatePrediction()` exist with full policy evaluation.
+- All four core policies are implemented and tested: lock time, season active gate, optional unique group predictions, and optional minimum lead time.
+- Form request validation rules are ready: `GameBelongsToFollowedTeam`, `NoPredictionSubmitted`.
+- Full feature and unit test coverage exists in `tests/Feature/Service/` and `tests/Feature/PredictionPolicies/`.
 
-- Prediction lock time at scheduled game start.
-- Season activity gate for submission (inactive seasons visible but closed).
-- One prediction per player per game (upsert behavior).
-- Edits allowed until lock time.
-- Basic validation and eligibility checks:
-  non-negative integer predictions, eligible followed team/sport, and submission within allowed window.
-
-Scope:
+**Frontend scope:**
 
 - Add create/store/update prediction actions and form UI from the game listing flow.
-- Keep prediction model per-player (not per-membership).
+- Reuse the existing prediction form structure (home/away score inputs) from the developer admin views.
 - Provide user-facing validation and lock-state messages.
 
-Definition of done:
+**Definition of done:**
 
 - An approved member can submit and edit predictions for open games and see confirmation.
 - Submissions outside policy are rejected with clear errors.
 
-Testing focus:
+**Testing focus:**
 
 - Happy path for create and update before lock.
 - Validation failures (invalid predictions, ineligible game, unauthorized player).
 - Out-of-window behavior (post-lock and inactive season).
 - Authorization boundaries for member/group access.
 
-### Phase 2C: Optional competitive policy (admin opt-in)
+### Phase 2C: Optional competitive policy (admin opt-in) — READY FOR INTEGRATION
 
-Goal: add at least one optional rule to support more competitive groups without blocking MVP launch.
+**Backend status:** Fully complete and tested.
 
-MVP optional rule:
+- `UniqueGroupPredictionPolicy` is implemented and enforced during submission.
+- Group-level policy toggle is present on the `Group` model as a feature flag.
+- Full feature test coverage exists in `tests/Feature/PredictionPolicies/UniqueGroupPredictionPolicyTest.php`.
 
-- Group-wide unique predictions per game (admin toggle).
+**Frontend scope:**
 
-Deferred optional rules (post-MVP, same policy framework):
-
-- Duplicate handling mode (reject vs allow non-scoring duplicate).
-- Blind picks visibility mode.
-- Minimum lead time before lock.
-
-Scope:
-
-- Add group-level prediction policy setting for uniqueness.
-- Enforce uniqueness during prediction create/update.
+- Add group-level prediction policy setting for uniqueness (admin-only toggle).
 - Show clear conflict messaging when a submitted prediction is disallowed by policy.
 
-Definition of done:
+**Definition of done:**
 
 - Group admin can enable/disable uniqueness policy.
 - Members receive immediate, understandable feedback when a duplicate prediction is blocked.
 
-Testing focus:
+**Testing focus:**
 
 - Policy toggle behavior and authorization (admin-only policy changes).
 - Uniqueness enforcement across players in the same group/game.
@@ -189,3 +234,44 @@ Connect the completed flows into the existing navigation:
 - Review any service or model changes made during phases 1–3 and ensure they are consistent with the rest of the codebase.
 - Ensure all new routes, controllers, and service methods have test coverage.
 - Remove or reconcile any developer-panel assumptions that were found to conflict with the real user flows.
+
+## What is accessible where
+
+### User-facing interface
+
+Available to authenticated, email-verified users:
+
+- Authentication (register, login, logout, password reset, Google OAuth)
+- Group management (create, join by invite code, view group details)
+- Member management (request to join, view approval status; admins can approve/reject/remove members and assign roles)
+- Team follow management (create, remove follows; optional sport scope)
+- Player management (create, edit, delete; self-service capped at player limit; admins can manage all members' players)
+
+**Not yet available to users:**
+
+- Viewing upcoming games for followed teams
+- Submitting or editing predictions
+
+### Developer admin interface
+
+Available only to users with the `Developer` role. Provides complete CRUD access to:
+
+- Users and authentication state
+- Teams and team imports (trigger CFBD/CBBD API imports)
+- Seasons and game imports (trigger external API imports)
+- Games and game results
+- Groups, members, and member roles
+- Players
+- **Prediction submission and editing** (currently the only place users can submit predictions)
+- Prediction policy settings and evaluation
+
+The developer admin is a full-featured backend for testing and manual data management. It is not a staging environment for user features.
+
+## Authentication & OAuth
+
+The application supports two authentication methods:
+
+- **Email/password** via Laravel's standard auth system with email verification.
+- **Google OAuth** via `SocialAuthenticationController`, which automatically creates or retrieves users and links social accounts.
+
+Both flows log users in with the same session.

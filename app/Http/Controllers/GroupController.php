@@ -6,6 +6,7 @@ use App\DTO\ValidatedMemberData;
 use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\JoinGroupRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\UpdateGroupPoliciesRequest;
 use App\Http\Requests\Group\UserUpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Group;
@@ -18,6 +19,7 @@ use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
 use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\PlayerQueryInterface;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -44,6 +46,7 @@ class GroupController extends Controller
         private MemberCommandInterface $memberCommandService,
         private MemberQueryInterface $memberQueryService,
         private PlayerQueryInterface $playerQueryService,
+        private PredictionPolicyEvaluatorInterface $policyEvaluator,
         private TeamQueryInterface $teamQueryService,
     ) {}
 
@@ -182,6 +185,7 @@ class GroupController extends Controller
             'memberPlayers' => $memberPlayers,
             'playerCount' => $memberPlayers->count(),
             'regularMemberPlayerLimit' => Group::REGULAR_MEMBER_PLAYER_LIMIT,
+            'availableGroupPolicies' => $this->policyEvaluator->groupRules(),
         ]);
     }
 
@@ -231,6 +235,7 @@ class GroupController extends Controller
             'approvedMembers' => $approvedMembers,
             'selectedMember' => $selectedMember,
             'managedPlayers' => $managedPlayers,
+            'availableGroupPolicies' => $this->policyEvaluator->groupRules(),
         ]);
     }
 
@@ -249,6 +254,20 @@ class GroupController extends Controller
         $this->groupCommandService->update($group, $request->toDTO($group->owner_id));
 
         $this->setFlashAlert('success', 'Group updated successfully!');
+
+        return redirect()->route('groups.show', $group);
+    }
+
+    /**
+     * Update group-level optional prediction policies.
+     *
+     * App-level policies remain always-on and are not configurable here.
+     */
+    public function updatePolicies(UpdateGroupPoliciesRequest $request, Group $group): RedirectResponse
+    {
+        $this->groupCommandService->updatePolicies($group, $request->toDTO());
+
+        $this->setFlashAlert('success', 'Prediction policies updated successfully!');
 
         return redirect()->route('groups.show', $group);
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
+use App\DTO\ValidatedGroupPoliciesData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
 use App\Models\Follow;
@@ -87,6 +88,23 @@ class GroupCommandService implements GroupCommandInterface
         }
 
         $group->fill($updateData);
+        $group->save();
+
+        return $group;
+    }
+
+    /**
+     * Applies only group-level optional prediction policy updates.
+     *
+     * @param Group $group The group to update.
+     * @param ValidatedGroupPoliciesData $data Validated policy data to persist.
+     * @return Group The updated group instance.
+     */
+    public function updatePolicies(Group $group, ValidatedGroupPoliciesData $data): Group
+    {
+        $group->fill([
+            'enabled_prediction_policies' => $data->enabled_prediction_policies,
+        ]);
         $group->save();
 
         return $group;
