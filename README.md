@@ -161,14 +161,12 @@ User-facing player management has been implemented with role-aware behavior:
 
 **Definition of done:**
 
-- An approved member can open a game list page and understand which games are open or closed for prediction.
-- Empty states explain why no games are currently available.
+- An approved member can see a list of upcoming games for their group's followed teams, with correct open/closed status and filtering by sport scope.
 
 **Testing focus:**
 
 - Authorization: only approved members can access the page.
 - Filtering: only games for followed teams and allowed sport scope appear.
-- Status display: open vs closed is correctly derived from season status and game start time.
 
 ### Phase 2B: Core prediction submission — READY FOR INTEGRATION
 
@@ -197,18 +195,18 @@ User-facing player management has been implemented with role-aware behavior:
 - Out-of-window behavior (post-lock and inactive season).
 - Authorization boundaries for member/group access.
 
-### Phase 2C: Optional competitive policy (admin opt-in) — READY FOR INTEGRATION
+### Phase 2C: Optional competitive policy (admin opt-in) — COMPLETE
 
-**Backend status:** Fully complete and tested.
+**Status:** Fully complete and tested.
 
 - `UniqueGroupPredictionPolicy` is implemented and enforced during submission.
 - Group-level policy toggle is present on the `Group` model as a feature flag.
 - Full feature test coverage exists in `tests/Feature/PredictionPolicies/UniqueGroupPredictionPolicyTest.php`.
 
-**Frontend scope:**
+**Frontend status:** Complete.
 
-- Add group-level prediction policy setting for uniqueness (admin-only toggle).
-- Show clear conflict messaging when a submitted prediction is disallowed by policy.
+- Group-level prediction policy settings are available to group admins in the group edit view.
+- Conflict messaging is shown when a submitted prediction is disallowed by policy.
 
 **Definition of done:**
 

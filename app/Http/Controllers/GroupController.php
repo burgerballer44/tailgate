@@ -3,24 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\DTO\ValidatedMemberData;
+use App\Exceptions\PredictionPolicyViolationException;
 use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\JoinGroupRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\SubmitPredictionRequest;
 use App\Http\Requests\Group\UpdateGroupPoliciesRequest;
+use App\Http\Requests\Group\UpdatePredictionRequest;
 use App\Http\Requests\Group\UserUpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Models\Player;
+use App\Models\Prediction;
 use App\Models\Sport;
+use App\Services\Contracts\PlayerCommandInterface;
 use App\Services\Contracts\GroupCommandInterface;
+use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
 use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\PlayerQueryInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\TeamQueryInterface;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,8 +51,10 @@ class GroupController extends Controller
     public function __construct(
         private GroupCommandInterface $groupCommandService,
         private GroupQueryInterface $groupQueryService,
+        private GameQueryInterface $gameQueryService,
         private MemberCommandInterface $memberCommandService,
         private MemberQueryInterface $memberQueryService,
+        private PlayerCommandInterface $playerCommandService,
         private PlayerQueryInterface $playerQueryService,
         private PredictionPolicyEvaluatorInterface $policyEvaluator,
         private TeamQueryInterface $teamQueryService,
@@ -167,26 +177,173 @@ class GroupController extends Controller
         // get the authenticated user
         $user = $request->user();
 
-        // load core group context used by the user-facing group details page
-        $group->load(['owner', 'follows.team'])->loadCount('members');
+        $validTabs = ['details', 'players', 'upcoming-games'];
 
-        // resolve the current signed-in approved member record for this group.
+        $activeTab = in_array($request->query('tab'), $validTabs, true)
+            ? $request->query('tab')
+            : 'details';
+
+        // Follow data is used for summary text and details tab rendering.
+        $group->load(['follows.team']);
+
+        // Resolve the current signed-in approved member record once for all tabs.
         $currentMember = $this->memberQueryService->findApprovedMemberForGroupAndUser(
             $group,
             $user
         );
 
-        // get all players for this member
-        $memberPlayers = $this->playerQueryService->getAllForMember($currentMember);
+        if ($activeTab === 'details') {
+            $group->load('owner')->loadCount('members');
+        }
+
+        $memberPlayers = collect();
+        if (in_array($activeTab, ['players', 'upcoming-games'], true)) {
+            $memberPlayers = $this->playerQueryService->getAllForMember($currentMember);
+        }
+
+        $upcomingGames = collect();
+        $predictionLookup = [];
+        if ($activeTab === 'upcoming-games') {
+            $upcomingGames = $this->gameQueryService->getUpcomingGamesForGroup($group);
+
+            if ($memberPlayers->isNotEmpty() && $upcomingGames->isNotEmpty()) {
+                $predictions = Prediction::query()
+                    ->whereIn('player_id', $memberPlayers->pluck('id'))
+                    ->whereIn('game_id', $upcomingGames->pluck('id'))
+                    ->get();
+
+                foreach ($predictions as $prediction) {
+                    $predictionLookup[$prediction->game_id.':'.$prediction->player_id] = [
+                        'id' => $prediction->id,
+                        'ulid' => $prediction->ulid,
+                        'home_team_prediction' => $prediction->home_team_prediction,
+                        'away_team_prediction' => $prediction->away_team_prediction,
+                    ];
+                }
+            }
+        }
 
         return view('groups.show', [
             'group' => $group,
+            'activeTab' => $activeTab,
             'currentMember' => $currentMember,
             'memberPlayers' => $memberPlayers,
             'playerCount' => $memberPlayers->count(),
+            'upcomingGames' => $upcomingGames,
+            'predictionLookup' => $predictionLookup,
             'regularMemberPlayerLimit' => Group::REGULAR_MEMBER_PLAYER_LIMIT,
             'availableGroupPolicies' => $this->policyEvaluator->groupRules(),
         ]);
+    }
+
+    /**
+     * Store a new prediction from the user-facing upcoming-games flow.
+     */
+    public function storePrediction(SubmitPredictionRequest $request, Group $group, Player $player): RedirectResponse|JsonResponse
+    {
+        $currentMember = $this->memberQueryService->findApprovedMemberForGroupAndUser(
+            $group,
+            $request->user()
+        );
+
+        if ($player->member_id !== $currentMember->id) {
+            abort(403, 'You can only submit predictions for your own players.');
+        }
+
+        try {
+            $prediction = $this->playerCommandService->submitPrediction($player, $request->toDTO());
+
+            $this->setFlashAlert('success', 'Prediction submitted successfully!');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Prediction submitted successfully!',
+                    'prediction' => [
+                        'id' => $prediction->id,
+                        'ulid' => $prediction->ulid,
+                        'game_id' => $prediction->game_id,
+                        'player_id' => $prediction->player_id,
+                        'home_team_prediction' => $prediction->home_team_prediction,
+                        'away_team_prediction' => $prediction->away_team_prediction,
+                    ],
+                ]);
+            }
+        } catch (PredictionPolicyViolationException $exception) {
+            $this->setFlashAlert('error', $exception->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                    'errors' => [
+                        'prediction' => [$exception->getMessage()],
+                    ],
+                ], 422);
+            }
+
+            return redirect()
+                ->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games'])
+                ->withErrors(['prediction' => $exception->getMessage()])
+                ->withInput();
+        }
+
+        return redirect()->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']);
+    }
+
+    /**
+     * Update an existing prediction from the user-facing upcoming-games flow.
+     */
+    public function updatePrediction(UpdatePredictionRequest $request, Group $group, Player $player, Prediction $prediction): RedirectResponse|JsonResponse
+    {
+        $currentMember = $this->memberQueryService->findApprovedMemberForGroupAndUser(
+            $group,
+            $request->user()
+        );
+
+        if ($player->member_id !== $currentMember->id) {
+            abort(403, 'You can only update predictions for your own players.');
+        }
+
+        if ($prediction->player_id !== $player->id) {
+            abort(404, 'Prediction cannot be found for this player.');
+        }
+
+        try {
+            $updatedPrediction = $this->playerCommandService->updatePrediction($prediction, $request->toDTO());
+
+            $this->setFlashAlert('success', 'Prediction updated successfully!');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Prediction updated successfully!',
+                    'prediction' => [
+                        'id' => $updatedPrediction->id,
+                        'ulid' => $updatedPrediction->ulid,
+                        'game_id' => $updatedPrediction->game_id,
+                        'player_id' => $updatedPrediction->player_id,
+                        'home_team_prediction' => $updatedPrediction->home_team_prediction,
+                        'away_team_prediction' => $updatedPrediction->away_team_prediction,
+                    ],
+                ]);
+            }
+        } catch (PredictionPolicyViolationException $exception) {
+            $this->setFlashAlert('error', $exception->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $exception->getMessage(),
+                    'errors' => [
+                        'prediction' => [$exception->getMessage()],
+                    ],
+                ], 422);
+            }
+
+            return redirect()
+                ->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games'])
+                ->withErrors(['prediction' => $exception->getMessage()])
+                ->withInput();
+        }
+
+        return redirect()->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']);
     }
 
     /**

@@ -2,8 +2,10 @@
 
 namespace App\Services\Contracts;
 
+use App\Models\Group;
 use App\Models\Season;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
  * Retrieves game information with flexible filtering and relationship loading.
@@ -27,4 +29,15 @@ interface GameQueryInterface
      * @return array<int, string> Team organizations keyed by team ID for form selection.
      */
     public function getAvailableTeamsForSeason(Season $season): array;
+
+    /**
+     * Get upcoming games that are eligible for a group's follows.
+     *
+     * A game is eligible when either team matches a followed team and, when the
+     * follow has sport scope, the game season sport matches that scope.
+     *
+     * @param Group $group The group whose follow configuration defines eligible games.
+     * @return Collection<int, \App\Models\Game> Upcoming games sorted by start date-time.
+     */
+    public function getUpcomingGamesForGroup(Group $group): Collection;
 }

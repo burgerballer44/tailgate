@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Group;
 use App\Models\Game;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\Contracts\GameQueryInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 /**
  * Centralizes game retrieval for scheduling and scoring flows.
@@ -54,5 +56,60 @@ class GameQueryService implements GameQueryInterface
         return Team::whereHas('sports', function ($query) use ($season) {
             $query->where('sport', $season->sport);
         })->get()->pluck('organization', 'id')->toArray();
+    }
+
+    /**
+     * Get upcoming games available to a group based on followed teams and optional sport scope.
+     *
+     * @param Group $group The group whose follows determine eligible games.
+     * @return Collection<int, Game> Upcoming games sorted by start date-time.
+     */
+    public function getUpcomingGamesForGroup(Group $group): Collection
+    {
+        $group->loadMissing('follows');
+
+        if ($group->follows->isEmpty()) {
+            return collect();
+        }
+
+        $now = now();
+        $today = $now->toDateString();
+
+        $query = Game::query()
+            ->with(['season', 'homeTeam', 'awayTeam'])
+            ->where(function (Builder $followQuery) use ($group) {
+                foreach ($group->follows as $follow) {
+                    $followQuery->orWhere(function (Builder $eligibleGameQuery) use ($follow) {
+                        $eligibleGameQuery
+                            ->where(function (Builder $teamMatchQuery) use ($follow) {
+                                $teamMatchQuery
+                                    ->where('home_team_id', $follow->team_id)
+                                    ->orWhere('away_team_id', $follow->team_id);
+                            });
+
+                        if ($follow->sport !== null) {
+                            $eligibleGameQuery->whereHas('season', function (Builder $seasonQuery) use ($follow) {
+                                $seasonQuery->where('sport', $follow->sport->value);
+                            });
+                        }
+                    });
+                }
+            })
+            ->where(function (Builder $upcomingQuery) use ($now, $today) {
+                $upcomingQuery
+                    ->where(function (Builder $scheduledQuery) use ($now) {
+                        $scheduledQuery
+                            ->where('start_time_tbd', false)
+                            ->where('start_date_time', '>=', $now);
+                    })
+                    ->orWhere(function (Builder $tbdQuery) use ($today) {
+                        $tbdQuery
+                            ->where('start_time_tbd', true)
+                            ->whereDate('start_date_time', '>=', $today);
+                    });
+            })
+            ->orderBy('start_date_time');
+
+        return $query->get();
     }
 }

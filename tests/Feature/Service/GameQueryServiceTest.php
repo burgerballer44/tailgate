@@ -1,7 +1,10 @@
 <?php
 
 use App\Models\Game;
+use App\Models\Group;
+use App\Models\Follow;
 use App\Models\Season;
+use App\Models\Sport;
 use App\Models\Team;
 use App\Services\GameQueryService;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -135,5 +138,99 @@ describe('get available teams for season', function () {
         $teams = $this->service->getAvailableTeamsForSeason($season);
 
         expect($teams)->toBeArray();
+    });
+});
+
+describe('get upcoming games for group', function () {
+    test('returns only upcoming games for followed teams', function () {
+        $group = Group::factory()->create();
+
+        $season = Season::factory()->active()->create([
+            'sport' => Sport::FOOTBALL->value,
+        ]);
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $otherHome = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $otherAway = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $includedGame = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDays(2)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $otherHome->id,
+            'away_team_id' => $otherAway->id,
+            'start_date_time' => now()->addDays(2)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->subDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $games = $this->service->getUpcomingGamesForGroup($group);
+
+        expect($games)->toHaveCount(1);
+        expect($games->first()->id)->toBe($includedGame->id);
+    });
+
+    test('respects follow sport scope when selecting games', function () {
+        $group = Group::factory()->create();
+
+        $team = Team::factory()->withSports([Sport::FOOTBALL, Sport::BASKETBALL])->create();
+        $footballOpponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $basketballOpponent = Team::factory()->withSports([Sport::BASKETBALL])->create();
+
+        $footballSeason = Season::factory()->active()->create([
+            'sport' => Sport::FOOTBALL->value,
+        ]);
+
+        $basketballSeason = Season::factory()->active()->create([
+            'sport' => Sport::BASKETBALL->value,
+        ]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $team->id,
+            'sport' => Sport::FOOTBALL,
+        ]);
+
+        $footballGame = Game::factory()->create([
+            'season_id' => $footballSeason->id,
+            'home_team_id' => $team->id,
+            'away_team_id' => $footballOpponent->id,
+            'start_date_time' => now()->addDays(3)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $basketballSeason->id,
+            'home_team_id' => $team->id,
+            'away_team_id' => $basketballOpponent->id,
+            'start_date_time' => now()->addDays(3)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $games = $this->service->getUpcomingGamesForGroup($group);
+
+        expect($games)->toHaveCount(1);
+        expect($games->first()->id)->toBe($footballGame->id);
+        expect($games->first()->season->sport)->toBe(Sport::FOOTBALL->value);
     });
 });

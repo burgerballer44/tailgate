@@ -4,6 +4,12 @@
     if ($follows->isNotEmpty()) {
         $followDescription = $follows->count().' team'.($follows->count() === 1 ? '' : 's').' followed';
     }
+
+    $tabs = [
+        'details' => 'Details',
+        'players' => 'My players',
+        'upcoming-games' => 'Upcoming games',
+    ];
 @endphp
 
 <x-layouts.app
@@ -18,135 +24,70 @@
         ] : null,
     ])->filter()->values()->toArray()"
 >
-    <div class="space-y-6">
-
-        {{-- At-a-glance stat strip --}}
-        <x-groups.section-card title="Group snapshot" description="Quick status for this group.">
-            <div class="-mx-6 -my-5 grid grid-cols-2 divide-x divide-y divide-gray-100 sm:grid-cols-4 sm:divide-y-0">
-                <div class="px-6 py-5">
-                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Following</p>
-                    <p class="mt-1 text-sm font-semibold text-gray-900">
-                        @if ($follows->isEmpty())
-                            <p class="text-sm text-gray-500">No teams followed yet.</p>
-                        @else
-                            <ul class="space-y-2">
-                                @foreach ($follows as $follow)
-                                    <li class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
-                                        <p class="font-semibold text-gray-900">{{ $follow->team->display_name }}</p>
-                                        <p class="text-gray-500">{{ $follow->sport_display }}</p>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
-                    </p>
-                </div>
-                <div class="px-6 py-5">
-                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Owner</p>
-                    <p class="mt-1 text-sm font-semibold text-gray-900">{{ $group->owner->name }}</p>
-                </div>
-                <div class="px-6 py-5">
-                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Members</p>
-                    <p class="mt-1 text-sm font-semibold text-gray-900">
-                        {{ $group->members_count }}
-                        <span class="font-normal text-gray-400">/ {{ $group->member_limit }}</span>
-                    </p>
-                </div>
-                <div class="px-6 py-5">
-                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Invite code</p>
-                    <p class="mt-1 font-mono text-sm font-semibold tracking-widest text-gray-900">{{ $group->invite_code }}</p>
-                </div>
-            </div>
-
-            @php
-                $enabledPolicies = $group->enabled_prediction_policies ?? [];
-                $policyLabels = collect($availableGroupPolicies)->keyBy(fn ($p) => $p->key());
-            @endphp
-            @if (! empty($enabledPolicies))
-                <div class="mt-4 border-t border-gray-100 px-6 py-4">
-                    <p class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Active prediction rules</p>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach ($enabledPolicies as $policyKey)
-                            <span class="inline-flex items-center rounded-full bg-navy/10 px-2.5 py-0.5 text-xs font-medium text-navy">
-                                {{ $policyLabels->get($policyKey)?->label() ?? $policyKey }}
-                            </span>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-        </x-groups.section-card>
-
-        {{-- My Players --}}
-        <x-groups.section-card overflowClass="overflow-visible" title="My players" description="Manage your players.">
-            @if ($playerCount > 0)
-                <div class="space-y-4">
-                    <x-tables.full-width
-                        :headers="['Player Name', 'Created', 'Actions']"
-                        :rows="$memberPlayers"
-                        :columns="[
-                            'player_name',
-                            fn ($row) => $row->created_at?->format('M d, Y'),
-                        ]"
-                        :rowActions="[
-                            [
-                                'label' => 'Edit',
-                                'route' => 'groups.members.players.edit',
-                                'routeParams' => ['group' => $group, 'member' => $currentMember, 'player' => 'ulid'],
-                            ],
-                            [
-                                'label' => 'Delete',
-                                'type' => 'form',
-                                'route' => 'groups.members.players.destroy',
-                                'routeParams' => ['group' => $group, 'member' => $currentMember, 'player' => 'ulid'],
-                                'confirm' => 'Are you sure you want to delete this player?',
-                            ],
-                        ]"
-                        emptyTitle="No players match this filter"
-                        emptyDescription="Try a different search term."
-                    />
-
-                    @if ($playerCount < $regularMemberPlayerLimit)
-                        <div class="flex justify-end">
-                            <x-buttons.nav-button
-                                route="groups.members.players.create"
-                                :params="['group' => $group, 'member' => $currentMember]"
-                            >
-                                Create player
-                            </x-buttons.nav-button>
-                        </div>
-                    @endif
-                </div>
-            @else
-                <x-empty-state
-                    title="No players yet"
-                    description="Create a player to start submitting score predictions."
-                    buttonText="Create player"
-                    buttonRoute="groups.members.players.create"
-                    :buttonParams="['group' => $group, 'member' => $currentMember]"
+    <div class="mt-2">
+        <div class="grid grid-cols-1 sm:hidden">
+            <x-form.select
+                id="group-tab-selector"
+                name="group_tab_selector"
+                label="Select a tab"
+                labelClass="sr-only"
+                :value="route('groups.show', ['group' => $group->ulid, 'tab' => $activeTab])"
+                :options="collect($tabs)->mapWithKeys(fn ($label, $key) => [route('groups.show', ['group' => $group->ulid, 'tab' => $key]) => $label])->toArray()"
+                containerClass="col-start-1 row-start-1"
+                class="w-full appearance-none py-2 text-base focus:outline-indigo-600"
+                aria-label="Select a tab"
+                onchange="window.location.href = this.value"
+            />
+            <svg
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                aria-hidden="true"
+                class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
+            >
+                <path
+                    d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                    clip-rule="evenodd"
+                    fill-rule="evenodd"
                 />
-            @endif
-        </x-groups.section-card>
+            </svg>
+        </div>
 
-        {{-- Upcoming Games --}}
-        {{-- TODO: wire up GameQueryService to pull upcoming games for the followed team --}}
-        <x-groups.section-card title="Upcoming games" description="Games open for score predictions.">
-            <x-empty-state
-                title="No upcoming games"
-                description="Upcoming games for your followed team will appear here."
-                :buttonText="null"
-                :buttonRoute="null"
-            />
-        </x-groups.section-card>
+        <div class="hidden sm:block">
+            <div class="border-b border-gray-200">
+                <nav aria-label="Tabs" class="-mb-px flex space-x-8">
+                    @foreach ($tabs as $key => $label)
+                        @php
+                            $isActive = $activeTab === $key;
+                        @endphp
 
-        {{-- Predictions --}}
-        {{-- TODO: wire up PlayerQueryService / PredictionQueryService for historical results --}}
-        <x-groups.section-card title="Predictions & results" description="How your predictions compared to final scores.">
-            <x-empty-state
-                title="No results yet"
-                description="Completed game results and your predictions will show here."
-                :buttonText="null"
-                :buttonRoute="null"
-            />
-        </x-groups.section-card>
+                        <a
+                            href="{{ route('groups.show', ['group' => $group->ulid, 'tab' => $key]) }}"
+                            @class([
+                                'inline-flex items-center border-b-2 px-1 py-4 text-sm font-medium',
+                                'border-navy text-navy' => $isActive,
+                                'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' => ! $isActive,
+                            ])
+                            @if($isActive) aria-current="page" @endif
+                        >
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </nav>
+            </div>
+        </div>
+    </div>
 
+    <div class="mt-6 space-y-6">
+        @if ($activeTab === 'details')
+            @include('groups.tabs.details')
+        @endif
+
+        @if ($activeTab === 'players')
+            @include('groups.tabs.players')
+        @endif
+
+        @if ($activeTab === 'upcoming-games')
+            @include('groups.tabs.upcoming-games')
+        @endif
     </div>
 </x-layouts.app>

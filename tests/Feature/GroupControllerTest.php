@@ -6,6 +6,9 @@ use App\Models\GroupRole;
 use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\Player;
+use App\Models\Prediction;
+use App\Models\Season;
+use App\Models\Game;
 use App\Models\Sport;
 use App\Models\Team;
 use App\Models\User;
@@ -182,7 +185,7 @@ describe('show', function () {
         ]);
         $group = $member->group;
 
-        $response = $this->get(route('groups.show', $group));
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'players']));
 
         $response->assertOk();
         $response->assertSee(route('groups.members.players.create', ['group' => $group, 'member' => $member]), false);
@@ -197,7 +200,7 @@ describe('show', function () {
 
         Player::factory()->for($member)->create();
 
-        $response = $this->get(route('groups.show', $group));
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'players']));
 
         $response->assertOk();
         $response->assertDontSee(route('groups.members.players.create', ['group' => $group, 'member' => $member]), false);
@@ -212,7 +215,7 @@ describe('show', function () {
 
         Player::factory()->for($member)->create();
 
-        $response = $this->get(route('groups.show', $group));
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'players']));
 
         $response->assertOk();
         $response->assertDontSee(route('groups.members.players.create', ['group' => $group, 'member' => $member]), false);
@@ -228,7 +231,7 @@ describe('show', function () {
         Player::factory()->for($member)->create(['player_name' => 'Alpha Runner']);
         Player::factory()->for($member)->create(['player_name' => 'Beta Shooter']);
 
-        $response = $this->get(route('groups.show', $group));
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'players']));
 
         $response->assertOk();
         $response->assertViewHas('memberPlayers', function ($memberPlayers) {
@@ -256,11 +259,659 @@ describe('show', function () {
             'sport' => null,
         ]);
 
-        $response = $this->get(route('groups.show', $group));
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'details']));
 
         $response->assertOk();
         $response->assertSee('&#127944;', false);
         $response->assertSee('&#127936;', false);
+    });
+
+    test('defaults to details tab when tab query is invalid', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->get(route('groups.show', ['group' => $member->group, 'tab' => 'not-a-tab']));
+
+        $response->assertOk();
+        $response->assertViewHas('activeTab', 'details');
+    });
+
+    test('upcoming games tab only shows followed-team games in follow sport scope', function () {
+        // Arrange: approved member with a group that follows one team scoped to football.
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        Player::factory()->for($member)->create();
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL, Sport::BASKETBALL])->create([
+            'organization' => 'Followed',
+            'designation' => 'Team',
+            'abbreviation' => 'FLW',
+        ]);
+
+        $footballOpponent = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Football',
+            'designation' => 'Opponent',
+            'abbreviation' => 'FOP',
+        ]);
+
+        $basketballOpponent = Team::factory()->withSports([Sport::BASKETBALL])->create([
+            'organization' => 'Basketball',
+            'designation' => 'Opponent',
+            'abbreviation' => 'BOP',
+        ]);
+
+        $footballSeason = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+        $basketballSeason = Season::factory()->active()->create(['sport' => Sport::BASKETBALL->value]);
+
+        $unfollowedFootballTeam = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Unfollowed',
+            'designation' => 'Football',
+            'abbreviation' => 'UFB',
+        ]);
+
+        $unfollowedFootballOpponent = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Other',
+            'designation' => 'Opponent',
+            'abbreviation' => 'OOP',
+        ]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => Sport::FOOTBALL,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $footballSeason->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $footballOpponent->id,
+            'start_date_time' => now()->addDays(2)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $basketballSeason->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $basketballOpponent->id,
+            'start_date_time' => now()->addDays(2)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // This game is upcoming, but should not render because the followed team is not in it.
+        Game::factory()->create([
+            'season_id' => $footballSeason->id,
+            'home_team_id' => $unfollowedFootballTeam->id,
+            'away_team_id' => $unfollowedFootballOpponent->id,
+            'start_date_time' => now()->addDays(2)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // Act: open the upcoming-games tab.
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']));
+
+        // Assert: only the followed-team football matchup is rendered.
+        $response->assertOk();
+        $response->assertSee('Followed Team (FLW)');
+        $response->assertSee('Football Opponent (FOP)');
+        $response->assertDontSee('Basketball Opponent (BOP)');
+        $response->assertDontSee('Unfollowed Football (UFB)');
+        $response->assertDontSee('Other Opponent (OOP)');
+        $response->assertSee('cursor-pointer');
+    });
+
+    test('upcoming games tab excludes games that are already in the past', function () {
+        // Arrange: group follows a team, but the only followed-team game is in the past.
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Past',
+            'designation' => 'Check',
+            'abbreviation' => 'PST',
+        ]);
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Opponent',
+            'designation' => 'Check',
+            'abbreviation' => 'OPP',
+        ]);
+
+        $unfollowedFutureHome = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Future',
+            'designation' => 'Hidden',
+            'abbreviation' => 'FUT',
+        ]);
+
+        $unfollowedFutureAway = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Still',
+            'designation' => 'Hidden',
+            'abbreviation' => 'STH',
+        ]);
+
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->subDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // This game is upcoming but should not render because no followed team is involved.
+        Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $unfollowedFutureHome->id,
+            'away_team_id' => $unfollowedFutureAway->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // Act: open the upcoming-games tab.
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']));
+
+        // Assert: no eligible games are shown.
+        $response->assertOk();
+        $response->assertSee('No upcoming games');
+        $response->assertDontSee('Past Check (PST)');
+        $response->assertDontSee('Future Hidden (FUT)');
+        $response->assertDontSee('Still Hidden (STH)');
+    });
+
+    test('upcoming games tab shows open reason text for active games before lock', function () {
+        // Arrange: one eligible open game and one non-eligible upcoming game.
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        Player::factory()->for($member)->create();
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Open',
+            'designation' => 'Status',
+            'abbreviation' => 'OPN',
+        ]);
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Reason',
+            'designation' => 'Check',
+            'abbreviation' => 'RSN',
+        ]);
+
+        $unfollowedHome = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Hidden',
+            'designation' => 'Open',
+            'abbreviation' => 'HOP',
+        ]);
+
+        $unfollowedAway = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Hidden',
+            'designation' => 'Away',
+            'abbreviation' => 'HAY',
+        ]);
+
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addHours(4)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $unfollowedHome->id,
+            'away_team_id' => $unfollowedAway->id,
+            'start_date_time' => now()->addHours(3)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // Act: open the upcoming-games tab.
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']));
+
+        // Assert: open-state reason text is shown only for eligible games.
+        $response->assertOk();
+        $response->assertSee('Open for prediction');
+        $response->assertDontSee('Unavailable');
+        $response->assertDontSee('Hidden Open (HOP)');
+        $response->assertDontSee('Hidden Away (HAY)');
+    });
+
+    test('upcoming games tab shows season inactive reason for inactive-season games', function () {
+        // Arrange: eligible game in an inactive season and an unrelated inactive game.
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        Player::factory()->for($member)->create();
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Inactive',
+            'designation' => 'Followed',
+            'abbreviation' => 'IAF',
+        ]);
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Inactive',
+            'designation' => 'Opponent',
+            'abbreviation' => 'IAO',
+        ]);
+
+        $unfollowedInactiveHome = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Hidden',
+            'designation' => 'Inactive',
+            'abbreviation' => 'HIN',
+        ]);
+
+        $unfollowedInactiveAway = Team::factory()->withSports([Sport::FOOTBALL])->create([
+            'organization' => 'Hidden',
+            'designation' => 'Opponent',
+            'abbreviation' => 'HIO',
+        ]);
+
+        $inactiveSeason = Season::factory()->create([
+            'sport' => Sport::FOOTBALL->value,
+            'active' => false,
+        ]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $inactiveSeason->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $inactiveSeason->id,
+            'home_team_id' => $unfollowedInactiveHome->id,
+            'away_team_id' => $unfollowedInactiveAway->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // Act: open the upcoming-games tab.
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']));
+
+        // Assert: eligible game shows closed reason; unrelated game remains hidden.
+        $response->assertOk();
+        $response->assertSee('Season inactive');
+        $response->assertSee('Inactive Followed (IAF)');
+        $response->assertDontSee('Hidden Inactive (HIN)');
+        $response->assertDontSee('Hidden Opponent (HIO)');
+    });
+
+});
+
+describe('storePrediction', function () {
+    test('approved member can submit prediction for their own player', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $player = Player::factory()->for($member)->create();
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $response = $this->post(route('groups.predictions.store', ['group' => $group, 'player' => $player]), [
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 31,
+            'away_team_prediction' => 24,
+        ]);
+
+        $response->assertRedirect(route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']));
+        $this->assertDatabaseHas('predictions', [
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 31,
+            'away_team_prediction' => 24,
+        ]);
+    });
+
+    test('approved member cannot submit prediction for another members player', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $otherUser = User::factory()->create();
+        $otherMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $otherUser->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $otherPlayer = Player::factory()->for($otherMember)->create();
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $response = $this->post(route('groups.predictions.store', ['group' => $group, 'player' => $otherPlayer]), [
+            'player_id' => $otherPlayer->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 17,
+            'away_team_prediction' => 14,
+        ]);
+
+        $response->assertForbidden();
+        $this->assertDatabaseMissing('predictions', [
+            'player_id' => $otherPlayer->id,
+            'game_id' => $game->id,
+        ]);
+    });
+
+    test('ajax submit returns json validation errors for invalid prediction payload', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $player = Player::factory()->for($member)->create();
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $response = $this->postJson(route('groups.predictions.store', ['group' => $group, 'player' => $player]), [
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => -1,
+            'away_team_prediction' => 7,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['home_team_prediction']);
+    });
+
+    test('ajax submit returns json policy violation errors when game is locked', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $player = Player::factory()->for($member)->create();
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->subHour()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $response = $this->postJson(route('groups.predictions.store', ['group' => $group, 'player' => $player]), [
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 21,
+            'away_team_prediction' => 10,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['prediction']);
+    });
+});
+
+describe('updatePrediction', function () {
+    test('approved member can update an existing prediction for their own player', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        $player = Player::factory()->for($member)->create();
+
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $prediction = Prediction::factory()->create([
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 10,
+            'away_team_prediction' => 7,
+        ]);
+
+        $response = $this->patch(route('groups.predictions.update', ['group' => $group, 'player' => $player, 'prediction' => $prediction]), [
+            'prediction_id' => $prediction->id,
+            'home_team_prediction' => 27,
+            'away_team_prediction' => 20,
+        ]);
+
+        $response->assertRedirect(route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']));
+
+        $prediction->refresh();
+        expect($prediction->home_team_prediction)->toBe(27);
+        expect($prediction->away_team_prediction)->toBe(20);
+    });
+
+    test('ajax update returns json success payload', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        $player = Player::factory()->for($member)->create();
+
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $prediction = Prediction::factory()->create([
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 14,
+            'away_team_prediction' => 10,
+        ]);
+
+        $response = $this->patchJson(route('groups.predictions.update', ['group' => $group, 'player' => $player, 'prediction' => $prediction]), [
+            'prediction_id' => $prediction->id,
+            'home_team_prediction' => 35,
+            'away_team_prediction' => 28,
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('prediction.home_team_prediction', 35);
+        $response->assertJsonPath('prediction.away_team_prediction', 28);
+    });
+
+    test('ajax update returns json policy violation errors when game is locked', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        $player = Player::factory()->for($member)->create();
+
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->subHour()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $prediction = Prediction::factory()->create([
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 20,
+            'away_team_prediction' => 17,
+        ]);
+
+        $response = $this->patchJson(route('groups.predictions.update', ['group' => $group, 'player' => $player, 'prediction' => $prediction]), [
+            'prediction_id' => $prediction->id,
+            'home_team_prediction' => 24,
+            'away_team_prediction' => 21,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['prediction']);
+    });
+
+    test('update returns not found when prediction does not belong to routed player', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $player = Player::factory()->for($member)->create();
+        $otherPlayer = Player::factory()->for($member)->create();
+
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $prediction = Prediction::factory()->create([
+            'player_id' => $otherPlayer->id,
+            'game_id' => $game->id,
+        ]);
+
+        $response = $this->patch(route('groups.predictions.update', ['group' => $group, 'player' => $player, 'prediction' => $prediction]), [
+            'prediction_id' => $prediction->id,
+            'home_team_prediction' => 14,
+            'away_team_prediction' => 13,
+        ]);
+
+        $response->assertNotFound();
     });
 });
 
