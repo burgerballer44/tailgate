@@ -34,3 +34,31 @@ Tailgate directly models the same real-world prediction flow in software:
 - Standings and results are visible to everyone in the group instead of being circulated manually.
 
 This mapping keeps the spirit of the original game intact while making it practical for regular use by many groups.
+
+## Application structure
+
+Tailgate has two distinct experiences that are intentionally separate, while sharing the same domain and service layer.
+
+### User-facing experience (product experience)
+
+This is the core product and the primary design authority for the platform.
+
+- Authentication and account access flows.
+- Group membership and group-level prediction rules.
+- Player management for each member.
+- Following teams, viewing upcoming games, and submitting predictions.
+- Results visibility and day-to-day competition experience.
+
+### Developer admin experience (operational backend)
+
+This is an internal operational surface for developers and maintainers.
+
+- Manually creating/updating domain records (teams, seasons, games, groups, etc.).
+- Running data imports from external sports sources.
+- Inspecting data and validating system behavior during development.
+
+### Shared backend contract
+
+Both experiences call into shared command/query services and domain rules. Controllers, routes, and views are different per experience, but business logic is centralized so behavior remains consistent.
+
+When one experience reveals a gap in service behavior, the fix should happen in shared backend logic rather than duplicating experience-specific workarounds.
