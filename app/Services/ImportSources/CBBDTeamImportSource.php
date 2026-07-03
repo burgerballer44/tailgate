@@ -60,7 +60,7 @@ class CBBDTeamImportSource implements TeamImportSourceInterface
                     $teamRow = $index + 1;
                     $teamId = $this->valueForAny($rawTeam, ['id', 'teamId', 'team_id'], $teamRow);
 
-                    $organization = $this->valueForAny($rawTeam, ['school', 'team', 'name'], Team::UNKNOWN_ORGANIZATION);
+                    $organization = $this->valueForAny($rawTeam, ['school', 'team', 'shortDisplayName', 'name'], Team::UNKNOWN_ORGANIZATION);
                     $conference = $this->valueForAny($rawTeam, ['conference'], Team::UNKNOWN_CONFERENCE);
 
                     if (
@@ -81,6 +81,12 @@ class CBBDTeamImportSource implements TeamImportSourceInterface
                         $socialMedia[] = ['label' => 'X', 'url' => $twitter];
                     }
 
+                    $rawColor = $this->nullableString($this->valueForAny($rawTeam, ['color', 'primaryColor', 'secondaryColor', 'primary_color', 'secondary_color'], null));
+
+                    if ($rawColor !== null && preg_match('/^[0-9a-fA-F]{6}$/', $rawColor) === 1) {
+                        $rawColor = '#'.$rawColor;
+                    }
+
                     yield new ImportedTeamData(
                         organization: trim($organization),
                         sport: Sport::BASKETBALL->value,
@@ -88,7 +94,7 @@ class CBBDTeamImportSource implements TeamImportSourceInterface
                         conference: trim($conference),
                         designation: $this->nullableString($this->valueForAny($rawTeam, ['mascot', 'nickname'], null)),
                         abbreviation: $this->nullableString($this->valueForAny($rawTeam, ['abbreviation', 'abbrev'], null)),
-                        color: $this->nullableHexColor($this->valueForAny($rawTeam, ['color', 'primaryColor', 'primary_color'], null)),
+                        color: $this->nullableHexColor($rawColor),
                         logos: $this->nullableUrlArray($this->valueForAny($rawTeam, ['logos', 'logo'], null)),
                         socialMedia: $socialMedia === [] ? null : $socialMedia,
                     );

@@ -40,4 +40,13 @@ interface GameQueryInterface
      * @return Collection<int, \App\Models\Game> Upcoming games sorted by start date-time.
      */
     public function getUpcomingGamesForGroup(Group $group): Collection;
+
+    /**
+     * Get upcoming games for a group constrained to a dashboard window end time.
+     *
+     * @param Group $group The group whose follows define eligible games.
+     * @param \DateTimeInterface $windowEnd Inclusive upper bound for game start date-time.
+     * @return Collection<int, \App\Models\Game> Upcoming games within the provided window.
+     */
+    public function getUpcomingGamesForGroupWithinWindow(Group $group, \DateTimeInterface $windowEnd): Collection;
 }

@@ -73,4 +73,22 @@ class MemberQueryService implements MemberQueryInterface
             ->where('status', MemberStatus::APPROVED->value)
             ->firstOrFail();
     }
+
+    /**
+     * Load approved memberships for a user with quick-prediction relations eager loaded.
+     *
+     * @param User $user The user whose approved memberships should be loaded.
+     * @return Collection<int, Member>
+     */
+    public function getApprovedMembershipsForUserWithQuickPredictionRelations(User $user): Collection
+    {
+        return Member::query()
+            ->where('user_id', $user->id)
+            ->where('status', MemberStatus::APPROVED->value)
+            ->with([
+                'group.follows.team',
+                'players',
+            ])
+            ->get();
+    }
 }

@@ -39,8 +39,8 @@
                 'value' => $game->start_date_time,
             ],
             [
-                'label' => 'Start Time TBD',
-                'value' => $startTimeTbdIndicator,
+                'label' => 'Start Time Finalized',
+                'value' => $game->start_time_tbd_to_finalized_html_entity,
             ],
             [
                 'label' => 'Created At',

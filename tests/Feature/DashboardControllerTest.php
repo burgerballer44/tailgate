@@ -1,15 +1,30 @@
 <?php
 
+use App\DTO\QuickPredictionPayload;
+use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\MemberStatus;
+use App\Models\Season;
 use App\Models\User;
+use App\Services\QuickPredictionService;
+use App\Services\Contracts\QuickPredictionServiceInterface;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 
 beforeEach(function () {
     $this->user = signInDeveloperUser();
 });
 
 describe('index', function () {
+    test('redirects unauthenticated users to login', function () {
+        auth()->logout();
+
+        $response = $this->get(route('dashboard'));
+
+        $response->assertRedirect(route('login'));
+    });
+
     test('works for authenticated user', function () {
         // visit the dashboard
         $response = $this->get(route('dashboard'));
@@ -22,7 +37,9 @@ describe('index', function () {
 
         // assert data is passed to view
         $response->assertViewHas('groups');
+        $response->assertViewHas('quickPredictionWindowLabel', QuickPredictionService::predictionWindowLabel());
         $response->assertViewHas('user', $this->user);
+        $response->assertSee('Open quick predictions');
     });
 
     test('shows user groups', function () {
@@ -148,5 +165,75 @@ describe('index', function () {
 
         // assert link to the group is present
         $response->assertSee('<a href="'.route('groups.show', $group).'">', false);
+    });
+
+});
+
+describe('quickPredictions', function () {
+    test('redirects unauthenticated users to login', function () {
+        auth()->logout();
+
+        $response = $this->get(route('dashboard.quick-predictions'));
+
+        $response->assertRedirect(route('login'));
+    });
+
+    test('returns an empty payload when the user has no approved memberships', function () {
+        $response = $this->getJson(route('dashboard.quick-predictions'));
+
+        $response->assertOk();
+        $response->assertJsonPath('games', []);
+        $response->assertJsonPath('summary.total_games', 0);
+        $response->assertJsonPath('summary.open_prediction_count', 0);
+    });
+
+    test('quick-predictions endpoint delegates payload building to bound quick prediction service implementation', function () {
+        $payload = [
+            'summary' => [
+                'open_prediction_count' => 7,
+                'total_games' => 2,
+                'total_groups' => 3,
+            ],
+            'games' => [
+                [
+                    'context_key' => 'stub-group|123',
+                    'group' => ['ulid' => 'stub-group', 'name' => 'Stub Group', 'member_ulid' => 'stub-member'],
+                    'team' => ['name' => 'Stub Team', 'sport' => 'football'],
+                    'game' => ['id' => 123, 'ulid' => 'stub-game'],
+                    'players' => [],
+                    'store_route_template' => '/groups/stub/predictions/__PLAYER__',
+                    'update_route_template' => '/groups/stub/predictions/__PLAYER__/__PREDICTION__',
+                    'group_upcoming_games_route' => '/groups/stub?tab=upcoming-games',
+                ],
+            ],
+        ];
+
+        app()->bind(QuickPredictionServiceInterface::class, fn () => new class($payload) implements QuickPredictionServiceInterface
+        {
+            /**
+             * @param array<string, mixed> $payload
+             */
+            public function __construct(private array $payload) {}
+
+            public static function predictionWindowLabel(): string
+            {
+                return 'next 2 weeks';
+            }
+
+            public function getQuickPredictionsPayloadForUser(User $user): QuickPredictionPayload
+            {
+                return new QuickPredictionPayload(
+                    openPredictionCount: $this->payload['summary']['open_prediction_count'],
+                    totalGames: $this->payload['summary']['total_games'],
+                    totalGroups: $this->payload['summary']['total_groups'],
+                    games: $this->payload['games'],
+                );
+            }
+        });
+
+        $response = $this->getJson(route('dashboard.quick-predictions'));
+
+        $response->assertOk();
+        $response->assertExactJson($payload);
     });
 });

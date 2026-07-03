@@ -233,4 +233,46 @@ describe('get upcoming games for group', function () {
         expect($games->first()->id)->toBe($footballGame->id);
         expect($games->first()->season->sport)->toBe(Sport::FOOTBALL->value);
     });
+
+    test('filters upcoming group games to an inclusive dashboard window end', function () {
+        // Arrange: create follow-scoped upcoming games around a 2-week window.
+        $group = Group::factory()->create();
+
+        $season = Season::factory()->active()->create([
+            'sport' => Sport::FOOTBALL->value,
+        ]);
+
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $gameInsideWindow = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDays(10)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $gameOutsideWindow = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDays(18)->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // Act: load games within the 2-week dashboard window.
+        $games = $this->service->getUpcomingGamesForGroupWithinWindow($group, now()->addWeeks(2));
+
+        // Assert: only the in-window game remains.
+        expect($games)->toHaveCount(1);
+        expect($games->first()->id)->toBe($gameInsideWindow->id);
+        expect($games->pluck('id'))->not->toContain($gameOutsideWindow->id);
+    });
 });

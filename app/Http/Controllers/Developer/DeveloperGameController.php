@@ -106,7 +106,6 @@ class DeveloperGameController extends Controller implements HasMiddleware
         return view('developer.games.show', [
             'season' => $season,
             'game' => $game,
-            'startTimeTbdIndicator' => ($game->start_time_tbd ? HtmlEntity::QUESTION_MARK : HtmlEntity::CHECK_MARK)->character(),
         ]);
     }
 

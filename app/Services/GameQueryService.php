@@ -112,4 +112,26 @@ class GameQueryService implements GameQueryInterface
 
         return $query->get();
     }
+
+    /**
+     * Get upcoming games for a group constrained to an inclusive end date-time window.
+     *
+     * @param Group $group The group whose follows determine eligible games.
+     * @param \DateTimeInterface $windowEnd Inclusive upper bound for game start date-time.
+     * @return Collection<int, Game> Upcoming games within the provided window.
+     */
+    public function getUpcomingGamesForGroupWithinWindow(Group $group, \DateTimeInterface $windowEnd): Collection
+    {
+        return $this->getUpcomingGamesForGroup($group)
+            ->filter(function (Game $game) use ($windowEnd): bool {
+                $gameDateTime = date_create_immutable((string) $game->start_date_time);
+
+                if (! $gameDateTime instanceof \DateTimeImmutable) {
+                    return false;
+                }
+
+                return $gameDateTime <= $windowEnd;
+            })
+            ->values();
+    }
 }

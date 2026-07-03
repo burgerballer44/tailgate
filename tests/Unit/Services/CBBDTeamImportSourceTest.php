@@ -145,7 +145,7 @@ describe('fetch', function () {
             ->and($teams[1]->socialMedia)->toBeNull();
     });
 
-    test('supports organization fallback keys team and name', function () {
+    test('supports organization fallback keys team, shortDisplayName, and name', function () {
         [$source, $client] = setupCBBDSource();
         $client->allows('fetchTeams')->andReturn(cbbdTeamRowStream([
             [
@@ -155,6 +155,11 @@ describe('fetch', function () {
             ],
             [
                 'id' => 2,
+                'shortDisplayName' => 'G Washington',
+                'conference' => 'A-10',
+            ],
+            [
+                'id' => 3,
                 'name' => 'Arizona',
                 'conference' => 'Big 12',
             ],
@@ -162,9 +167,25 @@ describe('fetch', function () {
 
         ['teams' => $teams] = collectCBBDTeamStream($source->fetch(cbbdTeamImportData()));
 
-        expect($teams)->toHaveCount(2)
+        expect($teams)->toHaveCount(3)
             ->and($teams[0]->organization)->toBe('Gonzaga')
-            ->and($teams[1]->organization)->toBe('Arizona');
+            ->and($teams[1]->organization)->toBe('G Washington')
+            ->and($teams[2]->organization)->toBe('Arizona');
+    });
+
+    test('uses secondaryColor when color and primaryColor are missing', function () {
+        [$source, $client] = setupCBBDSource();
+        $client->allows('fetchTeams')->andReturn(cbbdTeamRowStream([
+            cbbdSampleTeam([
+                'color' => null,
+                'primaryColor' => null,
+                'secondaryColor' => 'e8d2a1',
+            ]),
+        ]));
+
+        ['teams' => $teams] = collectCBBDTeamStream($source->fetch(cbbdTeamImportData()));
+
+        expect($teams[0]->color)->toBe('#e8d2a1');
     });
 
     test('supports logos provided as a single string url', function () {

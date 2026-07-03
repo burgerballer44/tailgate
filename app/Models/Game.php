@@ -118,7 +118,7 @@ class Game extends Model
      *
      * @return HtmlString The icon representing whether the game start time is still TBD.
      */
-    public function getStartTimeTbdHtmlEntityAttribute(): HtmlString
+    public function getStartTimeTbdToFinalizedHtmlEntityAttribute(): HtmlString
     {
         return new HtmlString(
             ($this->start_time_tbd ? HtmlEntity::QUESTION_MARK : HtmlEntity::CHECK_MARK)->entity()

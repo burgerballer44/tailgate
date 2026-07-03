@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('verified')->group(function () {
         // dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/quick-predictions', [DashboardController::class, 'quickPredictions'])->name('dashboard.quick-predictions');
 
         // profile
         Route::prefix('profile')->group(function () {

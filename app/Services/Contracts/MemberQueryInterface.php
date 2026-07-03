@@ -39,4 +39,12 @@ interface MemberQueryInterface
      * @return Member The approved member record for the given user.
      */
     public function findApprovedMemberForGroupAndUser(Group $group, User $user): Member;
+
+    /**
+     * Load approved memberships for a user with relations needed by quick predictions.
+     *
+     * @param User $user The user whose approved memberships should be loaded.
+     * @return Collection<int, Member>
+     */
+    public function getApprovedMembershipsForUserWithQuickPredictionRelations(User $user): Collection;
 }

@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 
 class Team extends Model
 {
+    use HasFactory;
+
     /**
      * Placeholder organization name used when source data is incomplete.
      *
@@ -25,8 +27,6 @@ class Team extends Model
      * @var string
      */
     public const UNKNOWN_CONFERENCE = 'Unknown';
-
-    use HasFactory;
 
     /**
      * The attributes that should be hidden for arrays.

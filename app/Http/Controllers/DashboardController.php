@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Contracts\QuickPredictionServiceInterface;
 use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -19,9 +21,12 @@ class DashboardController extends Controller
      * Build the dashboard controller with the query service used to fetch user-scoped data.
      *
      * @param UserQueryInterface $userQueryService Service responsible for querying user dashboard data.
-        * @return void Initializes controller dependencies.
+      * @param QuickPredictionServiceInterface $quickPredictionService Service responsible for quick-prediction payloads.
      */
-    public function __construct(private UserQueryInterface $userQueryService) {}
+    public function __construct(
+        private UserQueryInterface $userQueryService,
+        private QuickPredictionServiceInterface $quickPredictionService,
+    ) {}
 
     /**
      * Render the authenticated user's dashboard and the groups they can access.
@@ -37,7 +42,20 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'groups' => $groups,
+            'quickPredictionWindowLabel' => $this->quickPredictionService::predictionWindowLabel(),
             'user' => $user,
         ]);
+    }
+
+    /**
+     * Load quick-prediction modal data on demand for the authenticated user.
+     */
+    public function quickPredictions(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json(
+            $this->quickPredictionService->getQuickPredictionsPayloadForUser($user)->toArray()
+        );
     }
 }

@@ -100,4 +100,32 @@ describe('query members', function () {
 
         $this->service->findApprovedMemberForGroupAndUser($group, $user);
     })->throws(ModelNotFoundException::class);
+
+    test('getApprovedMembershipsForUserWithQuickPredictionRelations returns only approved memberships with required relations', function () {
+        $user = User::factory()->create();
+
+        $approvedMember = Member::factory()->create([
+            'user_id' => $user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        Member::factory()->create([
+            'user_id' => $user->id,
+            'status' => MemberStatus::PENDING->value,
+        ]);
+
+        $otherUser = User::factory()->create();
+        Member::factory()->create([
+            'user_id' => $otherUser->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $result = $this->service->getApprovedMembershipsForUserWithQuickPredictionRelations($user);
+
+        expect($result)->toHaveCount(1);
+        expect($result->first()->id)->toBe($approvedMember->id);
+        expect($result->first()->relationLoaded('players'))->toBeTrue();
+        expect($result->first()->relationLoaded('group'))->toBeTrue();
+        expect($result->first()->group?->relationLoaded('follows'))->toBeTrue();
+    });
 });

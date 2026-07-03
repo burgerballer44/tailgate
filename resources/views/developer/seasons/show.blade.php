@@ -195,7 +195,7 @@
                     fn ($row) => $row->start_date_time
                         ? rescue(fn () => \Illuminate\Support\Carbon::parse($row->start_date_time)->format('F j, Y, g:i a'), $row->start_date_time)
                         : null,
-                    'start_time_tbd_html_entity',
+                    'start_time_tbd_to_finalized_html_entity',
                 ]"
                 :rowActions="[
                     [

@@ -48,15 +48,10 @@ Everything else — leaderboards, prediction history, admin dashboards, notifica
 - Group management — create groups, invite members, approve/reject member requests, assign admin roles, manage team follows with optional sport scope.
 - Authentication — user registration, email verification, secure login, password reset, and Google OAuth integration.
 - Prediction policy framework — four core policies (lock time, season active gate, unique group predictions, minimum lead time) with full service-layer implementation and test coverage. Policies are evaluated and enforced at submission time.
+- User-facing upcoming games and prediction submission (Phase 2A/2B) — approved members can view followed-team upcoming games, submit/update predictions per player, and receive validation/policy feedback.
+- Dashboard quick predictions (Phase 3) — dashboard now shows upcoming games in the next 2 weeks grouped by team and sport across approved memberships, with per-player submission status and inline quick submit/update actions.
 - Data import pipeline — automated imports from College Football Data (CFBD) and College Basketball Data (CBBD) APIs for teams, seasons, and games. Developer admin has UI for triggering imports.
 - Developer admin interface — complete CRUD for all entities (users, teams, seasons, games, groups, members, players, predictions) with separate controllers, routes, and views.
-
-**Not yet completed (user-facing only):**
-
-- Game listing view — users have no route, controller, or view to see upcoming games for their group's followed teams. Backend query service exists; awaiting UI.
-- Prediction submission UI — users cannot submit or edit predictions via the web interface. Backend service layer (`PlayerCommandService::submitPrediction()` and `updatePrediction()`) is complete and tested; awaiting form, route, and controller wiring.
-
-These two UI components are the entire remaining scope of the MVP.
 
 ## Domain model
 
@@ -221,11 +216,14 @@ User-facing player management has been implemented with role-aware behavior:
 
 ### Phase 3: Dashboard and group surface updates
 
-Connect the completed flows into the existing navigation:
+Status: Complete.
 
-- Update the group show page to surface a member's players and prediction status.
-- Add a dashboard prompt when there are games with open predictions.
-- Improve empty states throughout so first-time users understand what to do next.
+Completed in this phase:
+
+- Dashboard quick-prediction section for the next 2 weeks, grouped by followed team and sport.
+- Per-game per-player prediction status badges (submitted/not submitted) across each approved membership.
+- Inline quick submit/update actions from dashboard, including group/player context and policy/validation error display.
+- Prompt text that highlights open prediction slots and clearer empty states when setup steps are missing.
 
 ### Phase 4: Cleanup and test coverage
 
@@ -244,11 +242,8 @@ Available to authenticated, email-verified users:
 - Member management (request to join, view approval status; admins can approve/reject/remove members and assign roles)
 - Team follow management (create, remove follows; optional sport scope)
 - Player management (create, edit, delete; self-service capped at player limit; admins can manage all members' players)
-
-**Not yet available to users:**
-
-- Viewing upcoming games for followed teams
-- Submitting or editing predictions
+- Upcoming games listing for followed teams in group and dashboard surfaces
+- Prediction submission and editing for member-owned players with policy-aware feedback
 
 ### Developer admin interface
 
@@ -260,7 +255,7 @@ Available only to users with the `Developer` role. Provides complete CRUD access
 - Games and game results
 - Groups, members, and member roles
 - Players
-- **Prediction submission and editing** (currently the only place users can submit predictions)
+- Prediction submission and editing
 - Prediction policy settings and evaluation
 
 The developer admin is a full-featured backend for testing and manual data management. It is not a staging environment for user features.

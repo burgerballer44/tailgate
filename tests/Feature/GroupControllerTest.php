@@ -736,6 +736,96 @@ describe('storePrediction', function () {
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['prediction']);
     });
+
+    test('dashboard-origin submit redirects back to dashboard', function () {
+        // Arrange: approved member, own player, eligible followed-team game.
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $player = Player::factory()->for($member)->create();
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // Act: submit from dashboard flow context.
+        $response = $this->post(route('groups.predictions.store', ['group' => $group, 'player' => $player]), [
+            'redirect_to' => 'dashboard',
+            'dashboard_prediction_context' => $group->ulid.'|'.$game->id,
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 30,
+            'away_team_prediction' => 27,
+        ]);
+
+        // Assert: successful save returns to dashboard.
+        $response->assertRedirect(route('dashboard'));
+        $this->assertDatabaseHas('predictions', [
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 30,
+            'away_team_prediction' => 27,
+        ]);
+    });
+
+    test('dashboard-origin policy failure redirects back to dashboard with validation errors', function () {
+        // Arrange: approved member with locked game to trigger policy violation.
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $player = Player::factory()->for($member)->create();
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->subHour()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        // Act: submit from dashboard flow context.
+        $response = $this->post(route('groups.predictions.store', ['group' => $group, 'player' => $player]), [
+            'redirect_to' => 'dashboard',
+            'dashboard_prediction_context' => $group->ulid.'|'.$game->id,
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 21,
+            'away_team_prediction' => 17,
+        ]);
+
+        // Assert: redirect stays on dashboard and exposes prediction validation error.
+        $response->assertRedirect(route('dashboard'));
+        $response->assertSessionHasErrors('prediction');
+        $response->assertSessionHasInput('dashboard_prediction_context', $group->ulid.'|'.$game->id);
+    });
 });
 
 describe('updatePrediction', function () {
@@ -912,6 +1002,57 @@ describe('updatePrediction', function () {
         ]);
 
         $response->assertNotFound();
+    });
+
+    test('dashboard-origin update redirects back to dashboard', function () {
+        // Arrange: approved member, existing prediction, and open game.
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        $player = Player::factory()->for($member)->create();
+
+        $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+        $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+            'sport' => null,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'start_date_time' => now()->addDay()->toDateTimeString(),
+            'start_time_tbd' => false,
+        ]);
+
+        $prediction = Prediction::factory()->create([
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 17,
+            'away_team_prediction' => 10,
+        ]);
+
+        // Act: update from dashboard flow context.
+        $response = $this->patch(route('groups.predictions.update', ['group' => $group, 'player' => $player, 'prediction' => $prediction]), [
+            'redirect_to' => 'dashboard',
+            'dashboard_prediction_context' => $group->ulid.'|'.$game->id,
+            'prediction_id' => $prediction->id,
+            'home_team_prediction' => 24,
+            'away_team_prediction' => 13,
+        ]);
+
+        // Assert: successful update returns to dashboard and persists new values.
+        $response->assertRedirect(route('dashboard'));
+
+        $prediction->refresh();
+        expect($prediction->home_team_prediction)->toBe(24);
+        expect($prediction->away_team_prediction)->toBe(13);
     });
 });
 

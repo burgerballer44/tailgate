@@ -281,12 +281,12 @@ class GroupController extends Controller
             }
 
             return redirect()
-                ->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games'])
+                ->route($this->predictionRedirectRouteName($request), $this->predictionRedirectRouteParameters($request, $group))
                 ->withErrors(['prediction' => $exception->getMessage()])
                 ->withInput();
         }
 
-        return redirect()->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']);
+        return redirect()->route($this->predictionRedirectRouteName($request), $this->predictionRedirectRouteParameters($request, $group));
     }
 
     /**
@@ -338,12 +338,47 @@ class GroupController extends Controller
             }
 
             return redirect()
-                ->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games'])
+                ->route($this->predictionRedirectRouteName($request), $this->predictionRedirectRouteParameters($request, $group))
                 ->withErrors(['prediction' => $exception->getMessage()])
                 ->withInput();
         }
 
-        return redirect()->route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']);
+        return redirect()->route($this->predictionRedirectRouteName($request), $this->predictionRedirectRouteParameters($request, $group));
+    }
+
+    /**
+     * Resolve the route name used after dashboard-aware prediction writes.
+     */
+    private function predictionRedirectRouteName(Request $request): string
+    {
+        return $this->redirectToDashboard($request)
+            ? 'dashboard'
+            : 'groups.show';
+    }
+
+    /**
+     * Resolve route parameters used after dashboard-aware prediction writes.
+     *
+     * @return array<string, mixed>
+     */
+    private function predictionRedirectRouteParameters(Request $request, Group $group): array
+    {
+        if ($this->redirectToDashboard($request)) {
+            return [];
+        }
+
+        return [
+            'group' => $group,
+            'tab' => 'upcoming-games',
+        ];
+    }
+
+    /**
+     * Determine whether prediction write originated from the dashboard quick-submit flow.
+     */
+    private function redirectToDashboard(Request $request): bool
+    {
+        return $request->input('redirect_to') === 'dashboard';
     }
 
     /**

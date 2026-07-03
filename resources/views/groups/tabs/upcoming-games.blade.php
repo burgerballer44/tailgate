@@ -14,6 +14,9 @@
     $gamesForModal = $upcomingGames
         ->mapWithKeys(function ($game) {
             $gameDateTime = date_create_immutable((string) $game->start_date_time);
+            $sport = \App\Models\Sport::tryFrom((string) $game->season?->sport);
+            $sportLabel = $sport?->value ?? ((string) $game->season?->sport ?: 'Sport unavailable');
+            $sportIcon = $sport?->htmlEntity()->character();
 
             $startLabel = $gameDateTime instanceof \DateTimeImmutable
                 ? ($game->start_time_tbd
@@ -32,6 +35,8 @@
                     'homeLogo' => $homeLogo,
                     'awayLogo' => $awayLogo,
                     'startLabel' => $startLabel,
+                    'sportLabel' => $sportLabel,
+                    'sportIcon' => $sportIcon,
                 ],
             ];
         })
@@ -211,6 +216,9 @@
             @foreach ($upcomingGames as $game)
                 @php
                     $gameDateTime = date_create_immutable((string) $game->start_date_time);
+                    $sport = \App\Models\Sport::tryFrom((string) $game->season?->sport);
+                    $sportLabel = $sport?->value ?? ((string) $game->season?->sport ?: 'Sport unavailable');
+                    $sportIcon = $sport?->htmlEntity()->character();
                     $isBeforeLock = true;
 
                     if ($gameDateTime instanceof \DateTimeImmutable) {
@@ -258,6 +266,13 @@
                                 {{ $game->awayTeam->display_name }} at {{ $game->homeTeam->display_name }}
                             </p>
 
+                            <p class="mt-1 text-xs font-medium text-gray-600">
+                                @if ($sportIcon)
+                                    <span aria-hidden="true">{{ $sportIcon }}</span>
+                                @endif
+                                <span>{{ $sportLabel }}</span>
+                            </p>
+
                             <div class="mt-2 flex flex-wrap items-center gap-3">
                                 @if ($awayLogo)
                                     <img src="{{ $awayLogo }}" alt="{{ $game->awayTeam->display_name }} logo" class="h-7 w-7 rounded-full bg-white object-contain ring-1 ring-gray-200" loading="lazy" />
@@ -294,6 +309,10 @@
                             <span x-text="activeGame ? activeGame.awayTeam : ''"></span>
                             <span> at </span>
                             <span x-text="activeGame ? activeGame.homeTeam : ''"></span>
+                        </p>
+                        <p class="mt-1 text-xs font-medium text-gray-600">
+                            <span x-show="activeGame && activeGame.sportIcon" aria-hidden="true" x-text="activeGame ? activeGame.sportIcon : ''"></span>
+                            <span x-text="activeGame ? activeGame.sportLabel : ''"></span>
                         </p>
                         <p class="mt-1 text-xs text-gray-500" x-text="activeGame ? activeGame.startLabel : ''"></p>
 

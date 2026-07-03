@@ -121,6 +121,8 @@ applyTo: '**'
 - Document logic with PHPDoc and inline comments.
 - Comments should explain "why" in addition to "what" the code does.
 - The goal of the comments should be to explain what is happening to a developer as if they were new.
+- Any new interface, class, or method should have a PHPDoc block with a brief description of its purpose and usage.
+- There should be inline comments for any complex or big groups of logic, especially if it is not immediately obvious what the code is doing.
 
 ## ✅ Performance & Optimization
 
