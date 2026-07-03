@@ -284,11 +284,13 @@ class GameImportManager implements GameImportManagerInterface
 
         // query teams for this season's sport and any conferences represented in the chunk to build a lookup cache for resolving team names to IDs during the import process
         $query = Team::query()
-            ->whereHas('sports', fn ($builder) => $builder->where('sport', $season->sport));
+            ->whereHas('sports', function ($builder) use ($season, $conferenceKeys) {
+                $builder->where('sport', $season->sport);
 
-        if ($conferenceKeys !== []) {
-            $query->whereIn(DB::raw('LOWER(conference)'), $conferenceKeys);
-        }
+                if ($conferenceKeys !== []) {
+                    $builder->whereIn(DB::raw('LOWER(conference)'), $conferenceKeys);
+                }
+            });
 
         $lookup = [];
 

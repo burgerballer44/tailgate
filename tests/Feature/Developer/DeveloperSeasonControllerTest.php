@@ -493,13 +493,11 @@ describe('importing season games', function () {
             'season_type' => SeasonType::REGULAR->value,
         ]);
 
-        $homeTeam = Team::factory()->withSports([$season->sport])->create([
+        $homeTeam = Team::factory()->withSports([$season->sport => 'SEC'])->create([
             'organization' => 'Alabama',
-            'conference' => 'SEC',
         ]);
-        $awayTeam = Team::factory()->withSports([$season->sport])->create([
+        $awayTeam = Team::factory()->withSports([$season->sport => 'SEC'])->create([
             'organization' => 'Georgia',
-            'conference' => 'SEC',
         ]);
 
         Http::fake([
@@ -545,13 +543,11 @@ describe('importing season games', function () {
             'season_type' => SeasonType::REGULAR->value,
         ]);
 
-        $homeTeam = Team::factory()->withSports([$season->sport])->create([
+        $homeTeam = Team::factory()->withSports([$season->sport => 'SEC'])->create([
             'organization' => 'Alabama',
-            'conference' => 'SEC',
         ]);
-        $awayTeam = Team::factory()->withSports([$season->sport])->create([
+        $awayTeam = Team::factory()->withSports([$season->sport => 'SEC'])->create([
             'organization' => 'Georgia',
-            'conference' => 'SEC',
         ]);
 
         $existingGame = Game::factory()->create([
@@ -603,14 +599,12 @@ describe('importing season games', function () {
             'season_type' => SeasonType::REGULAR->value,
         ]);
 
-        Team::factory()->withSports([$season->sport])->create([
+        Team::factory()->withSports([$season->sport => 'SEC'])->create([
             'organization' => 'Alabama',
-            'conference' => 'SEC',
         ]);
 
-        Team::factory()->withSports([$season->sport])->create([
+        Team::factory()->withSports([$season->sport => 'SEC'])->create([
             'organization' => 'Georgia',
-            'conference' => 'SEC',
         ]);
 
         Http::fake([

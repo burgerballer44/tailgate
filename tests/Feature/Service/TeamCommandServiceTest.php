@@ -38,7 +38,7 @@ describe('create a team', function () {
         expect($team)->toBeInstanceOf(Team::class);
         expect($team->organization)->toBe($data['organization']);
         expect($team->designation)->toBe($data['designation']);
-        expect($team->conference)->toBe($data['conference']);
+        expect($team->sports->pluck('conference')->toArray())->toBe([$data['conference']]);
         expect($team->abbreviation)->toBe($data['abbreviation']);
         expect($team->color)->toBe($data['color']);
         expect($team->logos)->toBe($data['logos']);
@@ -55,7 +55,6 @@ describe('update a team', function () {
         $team = Team::factory()->withSports([Sport::FOOTBALL])->create([
             'organization' => 'Old Organization',
             'designation' => 'Old Designation',
-            'conference' => 'Big Ten',
             'abbreviation' => 'OD',
             'color' => '#000000',
             'logos' => ['https://example.test/old-logo.png'],
@@ -95,7 +94,7 @@ describe('update a team', function () {
         // verify updated data
         expect($team->organization)->toBe($data->organization);
         expect($team->designation)->toBe($data->designation);
-        expect($team->conference)->toBe($data->conference);
+        expect($team->sports->pluck('conference')->toArray())->toBe([$data->conference]);
         expect($team->abbreviation)->toBe($data->abbreviation);
         expect($team->color)->toBe($data->color);
         expect($team->logos)->toBe($data->logos);

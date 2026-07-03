@@ -40,9 +40,9 @@ class StoreTeamRequest extends FormRequest
     /**
      * Validate the team creation request data.
      *
-     * Ensures all required team fields are provided with valid values, including name, conference,
-     * abbreviation, logos, social media, team type, and supported sports. Optional fields like
-     * colors are also validated.
+     * Ensures all required team fields are provided with valid values, including identity fields,
+     * a default conference for selected sports, abbreviation, logos, social media, team type,
+     * and supported sports. Optional fields like colors are also validated.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team field validation rules.
      */

@@ -21,7 +21,7 @@
     <x-slot name="sections">
         <x-forms.form-section
             title="Team identity"
-            description="Enter the core identifying information for this team, including its name, conference, and abbreviation."
+            description="Enter the core identifying information for this team, including its name and abbreviation."
         >
             <div>
                 <x-inputs.input-label for="organization" class="font-semibold" :value="__('Organization')" />
@@ -53,7 +53,7 @@
             </div>
 
             <div class="mt-4">
-                <x-inputs.input-label for="conference" class="font-semibold" :value="__('Conference')" />
+                <x-inputs.input-label for="conference" class="font-semibold" :value="__('Default conference')" />
                 <x-inputs.text-input
                     id="conference"
                     name="conference"
@@ -64,6 +64,7 @@
                     autocomplete="conference"
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('conference')" />
+                <p class="mt-1 text-xs text-slate-500">Applies to all selected sports unless a sport-specific conference is assigned during imports.</p>
             </div>
 
             <div class="mt-4">

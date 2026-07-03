@@ -40,8 +40,9 @@ class UpdateTeamRequest extends FormRequest
     /**
      * Validate the team update request data.
      *
-     * Ensures the updated team fields conform to team requirements, including name, conference,
-     * logos, social media links, team type, and supported sports.
+     * Ensures the updated team fields conform to team requirements, including identity fields,
+     * a default conference for selected sports, logos, social media links, team type, and
+     * supported sports.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team field validation rules.
      */

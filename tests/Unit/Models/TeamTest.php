@@ -40,6 +40,51 @@ describe('sports_html_entities', function () {
     });
 });
 
+describe('conference accessors', function () {
+    test('returns unique conferences across all team sports', function () {
+        $team = new Team;
+        $team->setRelation('sports', collect([
+            new TeamSport([
+                'sport' => Sport::FOOTBALL,
+                'conference' => 'American Athletic',
+            ]),
+            new TeamSport([
+                'sport' => Sport::BASKETBALL,
+                'conference' => 'Patriot',
+            ]),
+            new TeamSport([
+                'sport' => Sport::FOOTBALL,
+                'conference' => 'American Athletic',
+            ]),
+        ]));
+
+        expect($team->conference)->toBe('American Athletic, Patriot');
+    });
+
+    test('returns unknown when team has no sport conferences', function () {
+        $team = new Team;
+        $team->setRelation('sports', collect());
+
+        expect($team->conference)->toBe(Team::UNKNOWN_CONFERENCE);
+    });
+
+    test('returns sport specific conference summary for each sport', function () {
+        $team = new Team;
+        $team->setRelation('sports', collect([
+            new TeamSport([
+                'sport' => Sport::FOOTBALL,
+                'conference' => 'American Athletic',
+            ]),
+            new TeamSport([
+                'sport' => Sport::BASKETBALL,
+                'conference' => 'Patriot',
+            ]),
+        ]));
+
+        expect($team->sport_conference_summary)->toBe('Football: American Athletic, Basketball: Patriot');
+    });
+});
+
 describe('color_badge', function () {
     test('returns null when team has no color', function () {
         $team = new Team;

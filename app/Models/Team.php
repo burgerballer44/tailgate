@@ -45,7 +45,6 @@ class Team extends Model
     protected $fillable = [
         'organization',
         'designation',
-        'conference',
         'abbreviation',
         'color',
         'logos',
@@ -108,6 +107,62 @@ class Team extends Model
             ->implode(' ');
 
         return new HtmlString($entities);
+    }
+
+    /**
+     * Build a stable, human-readable conference summary from sport associations.
+     *
+     * @return string The conference summary, or "Unknown" when no sport conferences exist.
+     */
+    public function getConferenceAttribute(): string
+    {
+        $conferenceValues = $this->relationLoaded('sports')
+            ? $this->sports->pluck('conference')->all()
+            : $this->sports()->pluck('conference')->all();
+
+        $conferences = collect($conferenceValues)
+            ->map(fn (mixed $conference): string => trim((string) $conference))
+            ->filter(fn (string $conference): bool => $conference !== '')
+            ->unique()
+            ->values();
+
+        if ($conferences->isEmpty()) {
+            return self::UNKNOWN_CONFERENCE;
+        }
+
+        return $conferences->join(', ');
+    }
+
+    /**
+     * Build a sport-aware conference summary for diagnostic and admin views.
+     *
+     * @return string A summary like "Football: SEC, Basketball: ACC".
+     */
+    public function getSportConferenceSummaryAttribute(): string
+    {
+        $sports = $this->relationLoaded('sports')
+            ? $this->sports
+            : $this->sports()->get();
+
+        $summary = $sports
+            ->map(function (TeamSport $teamSport): string {
+                $sport = $teamSport->sport instanceof Sport ? $teamSport->sport->value : (string) $teamSport->sport;
+                $conference = trim((string) $teamSport->conference);
+
+                if ($conference === '') {
+                    $conference = self::UNKNOWN_CONFERENCE;
+                }
+
+                return ucfirst($sport).': '.$conference;
+            })
+            ->unique()
+            ->values();
+
+        if ($summary->isEmpty()) {
+            return self::UNKNOWN_CONFERENCE;
+        }
+
+        return $summary->implode(', ');
     }
 
     /**
@@ -198,7 +253,9 @@ class Team extends Model
             $builder->where(function ($query) use ($q) {
                 $query->whereRaw('LOWER(organization) LIKE LOWER(?)', ["%{$q}%"])
                     ->orWhereRaw('LOWER(designation) LIKE LOWER(?)', ["%{$q}%"])
-                    ->orWhereRaw('LOWER(conference) LIKE LOWER(?)', ["%{$q}%"])
+                    ->orWhereHas('sports', function ($sportsQuery) use ($q) {
+                        $sportsQuery->whereRaw('LOWER(conference) LIKE LOWER(?)', ["%{$q}%"]);
+                    })
                     ->orWhereRaw('LOWER(abbreviation) LIKE LOWER(?)', ["%{$q}%"]);
             });
         }

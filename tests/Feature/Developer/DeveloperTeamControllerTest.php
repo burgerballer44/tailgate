@@ -181,8 +181,12 @@ describe('creating a team', function () {
         $this->assertDatabaseHas('teams', [
             'organization' => $teamData['organization'],
             'designation' => $teamData['designation'],
-            'conference' => $teamData['conference'],
             'type' => $teamData['type'],
+        ]);
+
+        $this->assertDatabaseHas('team_sports', [
+            'sport' => Sport::BASKETBALL->value,
+            'conference' => $teamData['conference'],
         ]);
 
         // verify team sports were created
@@ -264,7 +268,6 @@ describe('updating team', function () {
         $team = Team::factory()->withSports([Sport::BASKETBALL])->create([
             'organization' => 'theOrganization',
             'designation' => 'theDesignation',
-            'conference' => 'Big Ten',
             'type' => TeamType::COLLEGE,
         ]);
 
@@ -398,8 +401,12 @@ describe('importing teams', function () {
         $this->assertDatabaseHas('teams', [
             'organization' => 'Abilene Christian',
             'designation' => 'Wildcats',
-            'conference' => 'UAC',
             'abbreviation' => 'ACU',
+        ]);
+
+        $this->assertDatabaseHas('team_sports', [
+            'sport' => Sport::FOOTBALL->value,
+            'conference' => 'UAC',
         ]);
 
         expect(session('alert')['type'])->toBe('success');
@@ -418,7 +425,6 @@ describe('importing teams', function () {
         $team = Team::factory()->withSports([Sport::FOOTBALL->value])->create([
             'organization' => 'Abilene Christian',
             'designation' => 'Old Name',
-            'conference' => 'UAC',
             'abbreviation' => 'OLD',
         ]);
 
@@ -488,8 +494,12 @@ describe('importing teams', function () {
 
         $this->assertDatabaseHas('teams', [
             'organization' => 'Abilene Christian',
-            'conference' => 'UAC',
             'abbreviation' => 'ACU',
+        ]);
+
+        $this->assertDatabaseHas('team_sports', [
+            'sport' => Sport::FOOTBALL->value,
+            'conference' => 'UAC',
         ]);
 
         expect(session('alert')['type'])->toBe('warning');

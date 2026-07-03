@@ -9,22 +9,23 @@ use App\Services\Contracts\TeamCommandInterface;
 
 /**
  * Executes team lifecycle actions and maintains team-to-sport associations.
- * Centralizes persistence behavior for team identity, classification, and metadata.
+ * Centralizes persistence behavior for team identity, classification, metadata,
+ * and sport-specific conference assignments.
  */
 class TeamCommandService implements TeamCommandInterface
 {
     /**
      * Persists a new team with normalized identity, metadata, and sport associations.
      *
-    * @param ValidatedTeamData $data Validated team data including identity, metadata, and sports.
-    * @return Team The created team instance with any sport relations attached.
+     * @param ValidatedTeamData $data Validated team data including identity, metadata, sports,
+     * and per-sport conference mappings.
+     * @return Team The created team instance with any sport relations attached.
      */
     public function create(ValidatedTeamData $data): Team
     {
         $teamData = [
             'organization' => $data->organization,
             'designation' => $data->designation,
-            'conference' => $data->conference,
             'abbreviation' => $data->abbreviation,
             'color' => $data->color,
             'logos' => $data->logos,
@@ -37,7 +38,10 @@ class TeamCommandService implements TeamCommandInterface
         // batch-insert all sports in a single query rather than one insert per sport
         if (isset($data->sports) && ! empty($data->sports)) {
             $team->sports()->createMany(
-                array_map(fn ($sport) => ['sport' => $sport->value], $data->sports)
+                array_map(fn ($sport) => [
+                    'sport' => $sport->value,
+                    'conference' => $data->sportConferences[$sport->value] ?? $data->conference,
+                ], $data->sports)
             );
         }
 
@@ -47,9 +51,10 @@ class TeamCommandService implements TeamCommandInterface
     /**
      * Applies identity, metadata, and sport-association changes to an existing team.
      *
-        * @param Team $team The team to update.
-        * @param ValidatedTeamData $data Validated data to apply to the team.
-        * @return Team The updated team instance.
+     * @param Team $team The team to update.
+     * @param ValidatedTeamData $data Validated data to apply to the team, including any
+     * sport-specific conference changes.
+     * @return Team The updated team instance.
      */
     public function update(Team $team, ValidatedTeamData $data): Team
     {
@@ -57,7 +62,6 @@ class TeamCommandService implements TeamCommandInterface
         $updateData = [
             'organization' => $data->organization,
             'designation' => $data->designation,
-            'conference' => $data->conference,
             'abbreviation' => $data->abbreviation,
             'color' => $data->color,
             'logos' => $data->logos,
@@ -71,7 +75,17 @@ class TeamCommandService implements TeamCommandInterface
         // sync sports by diffing incoming against existing to avoid unnecessary deletes and re-inserts
         if (isset($data->sports) && ! empty($data->sports)) {
             $incomingValues = array_map(fn ($sport) => $sport->value, $data->sports);
-            $existingValues = $team->sports()->pluck('sport')->map(fn ($s) => $s instanceof Sport ? $s->value : (string) $s)->all();
+            $incomingConferenceBySport = [];
+
+            foreach ($incomingValues as $sportValue) {
+                $incomingConferenceBySport[$sportValue] = $data->sportConferences[$sportValue] ?? $data->conference;
+            }
+
+            $existingSports = $team->sports()->get();
+            $existingValues = $existingSports
+                ->pluck('sport')
+                ->map(fn ($sport) => $sport instanceof Sport ? $sport->value : (string) $sport)
+                ->all();
 
             $toAdd = array_values(array_diff($incomingValues, $existingValues));
             $toRemove = array_values(array_diff($existingValues, $incomingValues));
@@ -82,8 +96,28 @@ class TeamCommandService implements TeamCommandInterface
 
             if ($toAdd !== []) {
                 $team->sports()->createMany(
-                    array_map(fn ($value) => ['sport' => $value], $toAdd)
+                    array_map(fn ($value) => [
+                        'sport' => $value,
+                        'conference' => $incomingConferenceBySport[$value] ?? $data->conference,
+                    ], $toAdd)
                 );
+            }
+
+            foreach ($existingSports as $existingSport) {
+                $sportValue = $existingSport->sport instanceof Sport
+                    ? $existingSport->sport->value
+                    : (string) $existingSport->sport;
+
+                if (! in_array($sportValue, $incomingValues, true)) {
+                    continue;
+                }
+
+                $incomingConference = $incomingConferenceBySport[$sportValue] ?? $data->conference;
+
+                if ($existingSport->conference !== $incomingConference) {
+                    $existingSport->conference = $incomingConference;
+                    $existingSport->save();
+                }
             }
         }
 

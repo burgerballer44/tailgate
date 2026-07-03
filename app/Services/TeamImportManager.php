@@ -121,10 +121,9 @@ class TeamImportManager implements TeamImportManagerInterface
 
         foreach ($chunk as $offset => $team) {
             $teamNumber = $processedCount + $offset + 1;
-            $conferenceKey = Str::lower(trim($team->conference));
-            $organizationKey = Str::lower(trim($team->organization));
+            $identityKey = $this->teamIdentityKey($team->organization);
 
-            $existingTeam = $teamLookupCache[$conferenceKey][$organizationKey] ?? null;
+            $existingTeam = $teamLookupCache[$identityKey] ?? null;
             $teamData = $this->buildTeamDataForPersist($team, $existingTeam);
             $dto = ValidatedTeamData::fromArray($teamData);
 
@@ -143,7 +142,7 @@ class TeamImportManager implements TeamImportManagerInterface
             }
 
             // Keep chunk-local duplicates from causing duplicate creates.
-            $teamLookupCache[$conferenceKey][$organizationKey] = $persistedTeam;
+            $teamLookupCache[$identityKey] = $persistedTeam;
         }
 
         return [$importedCount, $updatedCount];
@@ -175,6 +174,7 @@ class TeamImportManager implements TeamImportManagerInterface
                 'logos' => $this->normalizeList($team->logos),
                 'social_media' => $this->normalizeList($team->socialMedia),
                 'sports' => $this->mergeSportValues(null, $team->sport),
+                'sport_conferences' => $this->buildIncomingSportConferenceMap($team->sport, $team->conference),
                 'type' => $this->resolveTypeValue($team->type, null),
             ];
         }
@@ -183,12 +183,13 @@ class TeamImportManager implements TeamImportManagerInterface
         return [
             'organization' => $this->pickPreferredString($team->organization, $existingTeam->organization),
             'designation' => $this->pickPreferredString($team->designation, $existingTeam->designation),
-            'conference' => $this->pickPreferredString($team->conference, $existingTeam->conference),
+            'conference' => $this->pickPreferredString($team->conference, Team::UNKNOWN_CONFERENCE),
             'abbreviation' => $this->pickPreferredNullableString($team->abbreviation, $existingTeam->abbreviation),
             'color' => $this->pickPreferredNullableString($team->color, $existingTeam->color),
             'logos' => $this->mergeLists($existingTeam->logos, $team->logos),
             'social_media' => $this->mergeLists($existingTeam->social_media, $team->socialMedia),
             'sports' => $this->mergeSportValues($existingTeam, $team->sport),
+            'sport_conferences' => $this->mergeSportConferenceValues($existingTeam, $team->sport, $team->conference),
             'type' => $this->resolveTypeValue($team->type, $existingTeam->type),
         ];
     }
@@ -323,6 +324,51 @@ class TeamImportManager implements TeamImportManagerInterface
     }
 
     /**
+     * Build a map of sport => conference for incoming data.
+     *
+     * @return array<string, string>
+     */
+    private function buildIncomingSportConferenceMap(?string $sport, ?string $conference): array
+    {
+        if (! $this->hasValue($sport)) {
+            return [];
+        }
+
+        $normalizedSport = trim($sport);
+        $normalizedConference = $this->hasValue($conference)
+            ? trim((string) $conference)
+            : Team::UNKNOWN_CONFERENCE;
+
+        return [$normalizedSport => $normalizedConference];
+    }
+
+    /**
+     * Merge existing sport-conference mappings with the incoming mapping.
+     *
+     * @return array<string, string>
+     */
+    private function mergeSportConferenceValues(Team $existingTeam, ?string $incomingSport, ?string $incomingConference): array
+    {
+        $existingMapping = $existingTeam->sports()
+            ->get(['sport', 'conference'])
+            ->mapWithKeys(function ($teamSport): array {
+                $sportValue = $teamSport->sport instanceof Sport
+                    ? $teamSport->sport->value
+                    : (string) $teamSport->sport;
+
+                $conference = trim((string) $teamSport->conference);
+                if ($conference === '') {
+                    $conference = Team::UNKNOWN_CONFERENCE;
+                }
+
+                return [$sportValue => $conference];
+            })
+            ->all();
+
+        return array_merge($existingMapping, $this->buildIncomingSportConferenceMap($incomingSport, $incomingConference));
+    }
+
+    /**
      * Resolve the team type from incoming data, falling back to an existing type when
      * the source omits or sends an invalid value.
      */
@@ -373,67 +419,57 @@ class TeamImportManager implements TeamImportManagerInterface
     }
 
     /**
-     * Preloads teams matching the sport/conference combinations in the given
-     * chunk into the lookup cache, minimizing database queries during the chunk import.
+     * Preloads teams matching identity combinations represented in the chunk into
+     * the lookup cache, minimizing database queries during the chunk import.
      *
      * @param  array<int, ImportedTeamData>  $teams
-     * @param  array<string, array<string, Team>>  $teamLookupCache
+     * @param  array<string, Team>  $teamLookupCache
      */
     private function warmTeamLookupCache(array $teams, array &$teamLookupCache): void
     {
-        $missingByConference = [];
+        $missingByIdentity = [];
+        $requestedOrganizations = [];
 
         foreach ($teams as $team) {
-            // lowercase and trim conference and organization to improve cache hit rates
-            $conference = Str::lower(trim($team->conference));
-            $organization = Str::lower(trim($team->organization));
+            $identityKey = $this->teamIdentityKey($team->organization);
 
-            // initialize cache buckets if they don't exist yet
-            if (! isset($teamLookupCache[$conference])) {
-                $teamLookupCache[$conference] = [];
-            }
-
-            // track any conference/organization combinations that are missing from the cache so we can batch query them
-            if (! isset($teamLookupCache[$conference][$organization])) {
-                $missingByConference[$conference]['conference_value'] = $team->conference;
-                $missingByConference[$conference][$organization] = true;
+            if (! isset($teamLookupCache[$identityKey])) {
+                $missingByIdentity[$identityKey] = true;
+                $requestedOrganizations[] = trim($team->organization);
             }
         }
 
-        foreach ($missingByConference as $conference => $requested) {
-            $conferenceValue = $requested['conference_value'] ?? null;
+        if ($missingByIdentity === []) {
+            return;
+        }
 
-            // if we don't have a valid conference value, we won't be able to match any teams for this bucket, so skip it
-            if (! is_string($conferenceValue) || trim($conferenceValue) === '') {
-                continue;
-            }
+        $organizationValues = array_values(array_unique(array_filter(
+            $requestedOrganizations,
+            fn (string $organization): bool => $organization !== '',
+        )));
 
-            // get the list of requested organizations for this conference bucket (excluding the 'conference_value' key)
-            $organizationValues = array_values(array_filter(
-                array_keys($requested),
-                static fn (string $value): bool => $value !== 'conference_value',
-            ));
+        if ($organizationValues === []) {
+            return;
+        }
 
-            // if we don't have any valid organization values, we won't be able to match any teams for this bucket, so skip it
-            if ($organizationValues === []) {
-                continue;
-            }
+        $matches = Team::query()
+            ->whereIn(DB::raw('LOWER(organization)'), array_map(fn (string $organization): string => Str::lower($organization), $organizationValues))
+            ->get();
 
-            // query for teams matching any of the requested organization values for this conference
-            $matches = Team::query()
-                ->whereRaw('LOWER(conference) = ?', [$conference])
-                ->whereIn(DB::raw('LOWER(organization)'), $organizationValues)
-                ->get();
+        foreach ($matches as $matchedTeam) {
+            $identityKey = $this->teamIdentityKey($matchedTeam->organization);
 
-            // index the matching teams in the cache by their lowercase conference and organization values for quick lookup during import
-            foreach ($matches as $matchedTeam) {
-                $conferenceKey = Str::lower(trim($matchedTeam->conference));
-                $organization = Str::lower(trim($matchedTeam->organization));
-
-                if (! isset($teamLookupCache[$conferenceKey][$organization])) {
-                    $teamLookupCache[$conferenceKey][$organization] = $matchedTeam;
-                }
+            if (! isset($teamLookupCache[$identityKey])) {
+                $teamLookupCache[$identityKey] = $matchedTeam;
             }
         }
+    }
+
+    /**
+     * Build a normalized identity key from organization.
+     */
+    private function teamIdentityKey(?string $organization): string
+    {
+        return Str::lower(trim((string) $organization));
     }
 }

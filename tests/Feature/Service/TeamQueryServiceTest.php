@@ -25,13 +25,31 @@ describe('query teams', function () {
     });
 
     test('search query can match by conference', function () {
-        Team::factory()->create(['conference' => 'SEC']);
-        Team::factory()->create(['conference' => 'Big Ten']);
+        Team::factory()->withSports(['Football' => 'SEC'])->create();
+        Team::factory()->withSports(['Football' => 'Big Ten'])->create();
 
         $teams = $this->service->query(['q' => 'SEC'])->get();
 
         expect($teams)->toHaveCount(1)
             ->and($teams->first()->conference)->toBe('SEC');
+    });
+
+    test('search query can match a secondary sport conference on the same team', function () {
+        Team::factory()->withSports([
+            'Football' => 'American Athletic',
+            'Basketball' => 'Patriot',
+        ])->create([
+            'organization' => 'Navy',
+            'designation' => 'Midshipmen',
+        ]);
+
+        $teams = $this->service->query(['q' => 'Patriot'])->get();
+
+        $conferenceSummary = collect(explode(', ', $teams->first()->conference))->sort()->values()->all();
+
+        expect($teams)->toHaveCount(1)
+            ->and($teams->first()->organization)->toBe('Navy')
+            ->and($conferenceSummary)->toBe(['American Athletic', 'Patriot']);
     });
 });
 
@@ -40,14 +58,12 @@ describe('get available teams for follow', function () {
         Team::factory()->create([
             'organization' => 'North Carolina',
             'designation' => 'Tar Heels',
-            'conference' => 'ACC',
             'abbreviation' => 'UNC',
         ]);
 
         Team::factory()->create([
             'organization' => 'Alabama',
             'designation' => 'Crimson Tide',
-            'conference' => 'SEC',
             'abbreviation' => 'BAMA',
         ]);
 
@@ -63,7 +79,6 @@ describe('get available teams for follow', function () {
         Team::factory()->create([
             'organization' => 'Duke',
             'designation' => 'Blue Devils',
-            'conference' => 'ACC',
             'abbreviation' => 'DUKE',
         ]);
 

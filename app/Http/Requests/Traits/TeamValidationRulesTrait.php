@@ -11,8 +11,9 @@ trait TeamValidationRulesTrait
     /**
      * Define base validation rules for team data.
      *
-     * Validates all team fields including organization, designation, conference, logos, social media links,
-     * team type, and supported sports. Color must be a valid hex code if provided.
+     * Validates all team fields including organization, designation, a default conference value,
+     * logos, social media links, team type, and supported sports. Color must be a valid hex code
+     * if provided.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base team field validation rules.
      */

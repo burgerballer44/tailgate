@@ -22,7 +22,6 @@ class TeamFactory extends Factory
         return [
             'organization' => fake()->company(),
             'designation' => fake()->name().'designation',
-            'conference' => fake()->randomElement(['ACC', 'Big Ten', 'SEC', 'Big 12', 'Mountain West', 'Independent']),
             'abbreviation' => fake()->optional()->lexify('???'),
             'color' => fake()->optional()->hexColor(),
             'logos' => fake()->optional()->randomElement([
@@ -46,6 +45,7 @@ class TeamFactory extends Factory
             // By default, create one random sport for each team
             $team->sports()->create([
                 'sport' => fake()->randomElement(Sport::cases())->value,
+                'conference' => fake()->randomElement(['ACC', 'Big Ten', 'SEC', 'Big 12', 'Mountain West', 'Independent']),
             ]);
         });
     }
@@ -58,9 +58,18 @@ class TeamFactory extends Factory
         return $this->afterCreating(function (Team $team) use ($sports) {
             // Remove default sport and add specified ones
             $team->sports()->delete();
-            foreach ($sports as $sport) {
+
+            foreach ($sports as $key => $value) {
+                $sport = is_string($key) ? $key : $value;
+                $conference = is_string($key)
+                    ? $value
+                    : Team::UNKNOWN_CONFERENCE;
+
                 $team->sports()->create([
                     'sport' => $sport instanceof Sport ? $sport->value : $sport,
+                    'conference' => is_string($conference) && trim($conference) !== ''
+                        ? trim($conference)
+                        : Team::UNKNOWN_CONFERENCE,
                 ]);
             }
         });

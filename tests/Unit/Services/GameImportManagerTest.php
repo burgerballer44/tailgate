@@ -321,6 +321,45 @@ describe('import – team resolution', function () {
         expect($result->importedCount)->toBe(0)
             ->and($result->errors)->toHaveCount(1);
     });
+
+    test('does not resolve a team when the imported conference only matches a different sport for that team', function () {
+        $season = Season::factory()->create(['sport' => Sport::FOOTBALL->value]);
+
+        Team::factory()->withSports([
+            Sport::FOOTBALL->value => 'American Athletic',
+            Sport::BASKETBALL->value => 'Patriot',
+        ])->create([
+            'organization' => 'Navy',
+            'designation' => 'Midshipmen',
+        ]);
+
+        Team::factory()->withSports([
+            Sport::FOOTBALL->value => 'SEC',
+        ])->create(['organization' => 'Georgia']);
+
+        $source = fakeSource();
+        $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(items: [
+            new ImportedGameData(
+                homeTeam: 'Navy',
+                homeTeamConference: 'Patriot',
+                awayTeam: 'Georgia',
+                awayTeamConference: 'SEC',
+                homeTeamScore: 0,
+                awayTeamScore: 0,
+                startDateTime: CarbonImmutable::parse('2024-09-07 19:00:00')->toDateTimeString(),
+                startTimeTBD: false,
+            ),
+        ]));
+
+        $this->seasonCommandService->shouldNotReceive('addGame');
+
+        $result = (new GameImportManager($this->seasonCommandService, $this->gameCommandService, [$source]))
+            ->import($season, fakeImportData());
+
+        expect($result->importedCount)->toBe(0)
+            ->and($result->errors)->toHaveCount(1)
+            ->and($result->errors[0])->toContain("home team 'Navy' was not found");
+    });
 });
 
 // ─────────────────────────────────────────────────────────

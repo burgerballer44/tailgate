@@ -7,7 +7,7 @@ use App\Models\Team;
 
 /**
  * Manages the complete lifecycle of team information and sport associations.
- * Handles team creation and updates (organization, type, conference, sports), and deletion,
+ * Handles team creation and updates (organization, type, sport-specific conferences, sports), and deletion,
  * supporting team directory and sports affiliation management.
  */
 interface TeamCommandInterface

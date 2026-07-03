@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Sport;
+use App\Models\Team;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,12 +17,15 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('team_id');
             $table->enum('sport', Sport::values());
+            $table->string('conference')->default(Team::UNKNOWN_CONFERENCE);
             $table->timestamps();
 
             $table->unique(['team_id', 'sport']);
             $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
 
             $table->index('sport');
+            $table->index('conference');
+            $table->index(['sport', 'conference']);
         });
     }
 

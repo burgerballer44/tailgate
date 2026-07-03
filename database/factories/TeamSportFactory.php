@@ -22,6 +22,7 @@ class TeamSportFactory extends Factory
         return [
             'team_id' => Team::factory(),
             'sport' => fake()->randomElement(Sport::cases())->value,
+            'conference' => fake()->randomElement(['ACC', 'Big Ten', 'SEC', 'Big 12', 'Mountain West', 'Independent']),
         ];
     }
 }

@@ -1,6 +1,6 @@
 <x-layouts.app
     mainHeading="Teams"
-    mainDescription="A list of all the teams including their organization, designation, conference and sport."
+    mainDescription="A list of all teams including organization, designation, sport conferences, and sports."
     :mainActions="[
         ['text' => 'Import Teams', 'route' => 'developer.teams.import-teams'],
         ['text' => 'Add Team', 'route' => 'developer.teams.create'],
@@ -14,7 +14,7 @@
     />
     {{-- query --}}
     <x-form.query-filters>
-        <x-form.query-search label="Search by organization, designation, conference" :error="$errors->get('q')" />
+        <x-form.query-search label="Search by organization, designation, abbreviation, conference" :error="$errors->get('q')" />
 
         <x-form.select
             name="sport"
@@ -34,11 +34,11 @@
     {{-- table --}}
     <x-tables.full-width
         heading="Teams"
-        description="A list of all the teams including their organization, designation, conference and sport."
+        description="A list of all teams including organization, designation, sport conferences, and sports."
         :tableActions="[
             ['route' => 'developer.teams.create', 'text' => 'Add Team']
         ]"
-        :headers="['Organization', 'Designation', 'Conference', 'Type', 'Sports', 'Color', 'Logo', 'Created', 'Actions']"
+        :headers="['Organization', 'Designation', 'Conferences', 'Type', 'Sports', 'Color', 'Logo', 'Created', 'Actions']"
         :rows="$teams"
         :columns="[
             'organization',

@@ -55,7 +55,6 @@ describe('import', function () {
     test('updates matching teams via preloaded lookup and creates new teams', function () {
         $existingTeam = Team::factory()->withSports([Sport::FOOTBALL])->create([
             'organization' => 'UCLA',
-            'conference' => 'Big Ten',
             'type' => TeamType::COLLEGE->value,
         ]);
 
@@ -90,7 +89,6 @@ describe('import', function () {
             ->andReturnUsing(function () {
                 return Team::factory()->withoutSports()->create([
                     'organization' => 'USC',
-                    'conference' => 'Big Ten',
                     'type' => TeamType::COLLEGE->value,
                 ]);
             });
@@ -124,7 +122,6 @@ describe('import', function () {
 
         $createdTeam = Team::factory()->withoutSports()->make([
             'organization' => 'Texas',
-            'conference' => 'SEC',
             'type' => TeamType::COLLEGE->value,
         ]);
 
@@ -155,7 +152,6 @@ describe('import', function () {
         $existingTeam = Team::factory()->withSports([Sport::FOOTBALL])->create([
             'organization' => 'UCLA',
             'designation' => 'Bruins',
-            'conference' => 'Big Ten',
             'abbreviation' => 'UCLA',
             'color' => '#123456',
             'logos' => ['https://example.test/logo-football.png'],
@@ -200,6 +196,60 @@ describe('import', function () {
                     && $dto->socialMedia === [
                         ['label' => 'X', 'url' => 'https://x.com/ucla'],
                         ['label' => 'Instagram', 'url' => 'https://instagram.com/ucla'],
+                    ];
+            })
+            ->andReturnUsing(fn (Team $team) => $team);
+
+        $teamCommand->shouldReceive('create')->never();
+
+        $manager = new TeamImportManager($teamCommand, [$source]);
+
+        $result = $manager->import(managerImportData());
+
+        expect($result->importedCount)->toBe(0)
+            ->and($result->updatedCount)->toBe(1)
+            ->and($result->errors)->toBe([]);
+    });
+
+    test('merges one team identity across multiple sports with different conferences', function () {
+        $existingTeam = Team::factory()->withSports([
+            Sport::FOOTBALL->value => 'American Athletic',
+        ])->create([
+            'organization' => 'Navy',
+            'designation' => 'Midshipmen',
+            'abbreviation' => 'NAVY',
+            'type' => TeamType::COLLEGE->value,
+        ]);
+
+        $source = Mockery::mock(TeamImportSourceInterface::class);
+        $source->allows('key')->andReturn('cfbd');
+        $source->allows('label')->andReturn('CFBD API');
+        $source->allows('fetch')->andReturn(ImportFetchStream::fromArray(
+            items: [
+                importedTeam([
+                    'organization' => 'Navy',
+                    'designation' => 'Midshipmen',
+                    'sport' => Sport::BASKETBALL->value,
+                    'conference' => 'Patriot',
+                    'abbreviation' => 'NAVY',
+                ]),
+            ],
+            errors: [],
+        ));
+
+        $teamCommand = Mockery::mock(TeamCommandInterface::class);
+        $teamCommand
+            ->shouldReceive('update')
+            ->once()
+            ->withArgs(function (Team $team, ValidatedTeamData $dto) use ($existingTeam): bool {
+                $sportValues = array_map(fn (Sport $sport): string => $sport->value, $dto->sports);
+                sort($sportValues);
+
+                return $team->is($existingTeam)
+                    && $sportValues === [Sport::BASKETBALL->value, Sport::FOOTBALL->value]
+                    && $dto->sportConferences === [
+                        Sport::FOOTBALL->value => 'American Athletic',
+                        Sport::BASKETBALL->value => 'Patriot',
                     ];
             })
             ->andReturnUsing(fn (Team $team) => $team);

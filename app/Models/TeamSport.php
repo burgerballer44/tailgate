@@ -18,6 +18,7 @@ class TeamSport extends Model
     protected $fillable = [
         'team_id',
         'sport',
+        'conference',
     ];
 
     /**

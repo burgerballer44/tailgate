@@ -34,7 +34,6 @@ class TeamQueryService implements TeamQueryInterface
         return Team::query()
             ->orderBy('organization')
             ->orderBy('designation')
-            ->orderBy('conference')
             ->orderBy('abbreviation')
             ->get();
     }

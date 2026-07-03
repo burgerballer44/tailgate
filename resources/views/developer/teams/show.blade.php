@@ -1,6 +1,6 @@
 <x-layouts.app
     mainHeading="Team: {{ $team->designation }}"
-    mainDescription="Details for team including designation and sport."
+    mainDescription="Details for team identity, sport associations, and conferences."
     :mainActions="[
         ['text' => 'Back to Teams', 'route' => 'developer.teams.index'],
         ['text' => 'Edit Team', 'route' => 'developer.teams.edit', 'params' => ['team' => $team]],
@@ -52,13 +52,13 @@
         />
 
         <x-model-viewer
-            message="Branding and conference"
+            message="Branding and conferences"
             details="Display and branding fields used in UI integrations."
             tone="success"
             :fields="[
                 [
-                    'label' => 'Conference',
-                    'value' => $team->conference,
+                    'label' => 'Sport conferences',
+                    'value' => $team->sport_conference_summary,
                 ],
                 [
                     'label' => 'Abbreviation',
