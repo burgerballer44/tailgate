@@ -9,11 +9,11 @@ namespace App\DTO;
 readonly class ImportResult
 {
     /**
-     * @param string $source The unique key for the import source (e.g. 'cfbd', 'csv').
-     * @param string $sourceLabel The human-readable label for the import source (e.g. 'CFBD').
-     * @param int $importedCount The number of new records successfully created during the import.
-     * @param int $updatedCount The number of existing records updated during the import.
-     * @param array<int, string> $errors Any errors that occurred during the import process.
+     * @param  string  $source  The unique key for the import source (e.g. 'cfbd', 'csv').
+     * @param  string  $sourceLabel  The human-readable label for the import source (e.g. 'CFBD').
+     * @param  int  $importedCount  The number of new records successfully created during the import.
+     * @param  int  $updatedCount  The number of existing records updated during the import.
+     * @param  array<int, string>  $errors  Any errors that occurred during the import process.
      */
     public function __construct(
         public string $source,

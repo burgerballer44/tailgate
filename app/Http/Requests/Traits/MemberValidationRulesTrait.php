@@ -17,7 +17,7 @@ trait MemberValidationRulesTrait
      *
      * Validates that the member role is valid and, if provided, the status is a valid enum value.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base member field validation rules.
+     * @return array<string, ValidationRule|array|string> The base member field validation rules.
      */
     protected function baseMemberRules(): array
     {
@@ -33,7 +33,7 @@ trait MemberValidationRulesTrait
      * Ensures the user exists, is not already a member of the group, and the group has not
      * reached its member limit. Status is required when creating a member.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member creation validation rules.
+     * @return array<string, ValidationRule|array|string> The member creation validation rules.
      */
     protected function createMemberRules(): array
     {
@@ -49,7 +49,7 @@ trait MemberValidationRulesTrait
      * Allows changing a member's role while enforcing a minimum admin requirement to prevent
      * removing all administrators from the group.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member update validation rules.
+     * @return array<string, ValidationRule|array|string> The member update validation rules.
      */
     protected function updateMemberRules(): array
     {

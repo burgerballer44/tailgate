@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\DTO\ValidatedMemberData;
-use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\MemberCommandInterface;
+use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -109,8 +109,6 @@ class Group extends Model
 
     /**
      * Register model lifecycle hooks used to seed identifiers and defaults.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -149,8 +147,8 @@ class Group extends Model
      *
      * Supported filters are `q`, `owner_id`, and `name`.
      *
-     * @param Builder $builder The query builder to constrain.
-     * @param array<string, mixed> $filters Associative filter input from the caller.
+     * @param  Builder  $builder  The query builder to constrain.
+     * @param  array<string, mixed>  $filters  Associative filter input from the caller.
      * @return Builder The constrained builder instance.
      */
     #[Scope]
@@ -250,7 +248,7 @@ class Group extends Model
      * This reuses an already-loaded members relation when available to avoid an
      * extra lookup in common authorization paths.
      *
-     * @param User $user The user to evaluate.
+     * @param  User  $user  The user to evaluate.
      * @return bool True when the user owns the group or has an admin member record.
      */
     public function isAdminOrOwner(User $user): bool
@@ -333,7 +331,7 @@ class Group extends Model
     /**
      * Determine whether a prediction policy key is enabled for the group.
      *
-     * @param string $policyKey The policy key to check.
+     * @param  string  $policyKey  The policy key to check.
      * @return bool True when the configured policy list contains the key.
      */
     public function isPredictionPolicyEnabled(string $policyKey): bool

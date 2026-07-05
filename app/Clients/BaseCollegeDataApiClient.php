@@ -35,10 +35,10 @@ abstract class BaseCollegeDataApiClient
     abstract protected function providerCode(): string;
 
     /**
-     * @param string|null $token Bearer token for the provider's API. A null or
-     *     blank value is allowed at construction time so that misconfigured
-     *     environments fail at call time with a descriptive exception rather than at boot.
-     * @param string $baseUrl Root URL of the provider's API (no trailing slash).
+     * @param  string|null  $token  Bearer token for the provider's API. A null or
+     *                              blank value is allowed at construction time so that misconfigured
+     *                              environments fail at call time with a descriptive exception rather than at boot.
+     * @param  string  $baseUrl  Root URL of the provider's API (no trailing slash).
      */
     public function __construct(
         private readonly ?string $token,
@@ -51,13 +51,13 @@ abstract class BaseCollegeDataApiClient
      * The response is consumed as a stream rather than buffered in memory, which
      * keeps peak memory usage constant regardless of how many games the API returns.
      *
-    * @param array<string, mixed> $query Query parameters forwarded verbatim to
-    *     the /games endpoint (e.g. year, season type).
-     * @return \Generator<int, array<string, mixed>>  Yields each game as an associative
-     *                                                array matching the provider's schema.
+     * @param  array<string, mixed>  $query  Query parameters forwarded verbatim to
+     *                                       the /games endpoint (e.g. year, season type).
+     * @return \Generator<int, array<string, mixed>> Yields each game as an associative
+     *                                               array matching the provider's schema.
      *
-     * @throws GameImportException  If the token is not configured, the HTTP request fails,
-     *                              or the response body cannot be parsed as a JSON array.
+     * @throws GameImportException If the token is not configured, the HTTP request fails,
+     *                             or the response body cannot be parsed as a JSON array.
      */
     public function fetchGames(array $query): \Generator
     {
@@ -74,13 +74,13 @@ abstract class BaseCollegeDataApiClient
      * The response is consumed as a stream rather than buffered in memory, which
      * keeps peak memory usage constant regardless of how many teams the API returns.
      *
-    * @param array<string, mixed> $query Query parameters forwarded verbatim to
-    *     the /teams endpoint.
-     * @return \Generator<int, array<string, mixed>>  Yields each team as an associative
-     *                                                array matching the provider's schema.
+     * @param  array<string, mixed>  $query  Query parameters forwarded verbatim to
+     *                                       the /teams endpoint.
+     * @return \Generator<int, array<string, mixed>> Yields each team as an associative
+     *                                               array matching the provider's schema.
      *
-     * @throws TeamImportException  If the token is not configured, the HTTP request fails,
-     *                              or the response body cannot be parsed as a JSON array.
+     * @throws TeamImportException If the token is not configured, the HTTP request fails,
+     *                             or the response body cannot be parsed as a JSON array.
      */
     public function fetchTeams(array $query): \Generator
     {
@@ -115,15 +115,15 @@ abstract class BaseCollegeDataApiClient
      * in the `finally` block to prevent resource leaks, even if the caller abandons the
      * generator mid-iteration.
      *
-    * @param string $endpoint API path relative to the base URL (e.g. "/games").
-    * @param array<string, mixed> $query Query parameters for the request.
-    * @param class-string<GameImportException|TeamImportException> $exceptionClass Exception type to throw on failure;
-    *     allows the same transport logic to serve both game and team imports.
-     * @return \Generator<int, array<string, mixed>>  Each yielded value is one top-level
-     *                                                element from the response JSON array.
+     * @param  string  $endpoint  API path relative to the base URL (e.g. "/games").
+     * @param  array<string, mixed>  $query  Query parameters for the request.
+     * @param  class-string<GameImportException|TeamImportException>  $exceptionClass  Exception type to throw on failure;
+     *                                                                                 allows the same transport logic to serve both game and team imports.
+     * @return \Generator<int, array<string, mixed>> Each yielded value is one top-level
+     *                                               element from the response JSON array.
      *
-     * @throws GameImportException|TeamImportException  On missing token, HTTP error,
-     *                                                  non-resource stream, or JSON parse failure.
+     * @throws GameImportException|TeamImportException On missing token, HTTP error,
+     *                                                 non-resource stream, or JSON parse failure.
      */
     private function streamCollection(string $endpoint, array $query, string $exceptionClass): \Generator
     {
@@ -178,13 +178,13 @@ abstract class BaseCollegeDataApiClient
      * Guzzle, which is required for JsonMachine to parse the body incrementally.
      * Without it the entire payload would be loaded into memory before yielding begins.
      *
-    * @param string $endpoint API path relative to the base URL.
-    * @param array<string, mixed> $query Query parameters for the request.
-    * @param class-string<GameImportException|TeamImportException> $exceptionClass Exception type to wrap HTTP errors in.
-     * @return Response  The successful (2xx) streaming response.
+     * @param  string  $endpoint  API path relative to the base URL.
+     * @param  array<string, mixed>  $query  Query parameters for the request.
+     * @param  class-string<GameImportException|TeamImportException>  $exceptionClass  Exception type to wrap HTTP errors in.
+     * @return Response The successful (2xx) streaming response.
      *
-     * @throws GameImportException|TeamImportException  If the HTTP request returns a
-     *                                                  non-2xx status or a connection error occurs.
+     * @throws GameImportException|TeamImportException If the HTTP request returns a
+     *                                                 non-2xx status or a connection error occurs.
      */
     private function sendStreamRequest(string $endpoint, array $query, string $exceptionClass): Response
     {
@@ -219,9 +219,9 @@ abstract class BaseCollegeDataApiClient
      * send a request with a null/empty Authorization header and receiving a cryptic
      * 401 response from the provider.
      *
-    * @param class-string<GameImportException|TeamImportException> $exceptionClass Exception type to throw.
+     * @param  class-string<GameImportException|TeamImportException>  $exceptionClass  Exception type to throw.
      *
-     * @throws GameImportException|TeamImportException  When the token is null or blank.
+     * @throws GameImportException|TeamImportException When the token is null or blank.
      */
     private function ensureTokenConfigured(string $exceptionClass): void
     {
@@ -240,10 +240,10 @@ abstract class BaseCollegeDataApiClient
      * do not need to know which concrete class to instantiate — the caller passes the
      * class string and this method handles the `new` call.
      *
-    * @param class-string<GameImportException|TeamImportException> $exceptionClass The exception class to instantiate.
-    * @param string $message Human-readable error message.
-    * @param Throwable|null $previous Underlying cause, if any, for exception chaining.
-     * @return GameImportException|TeamImportException  A new exception instance of the requested type.
+     * @param  class-string<GameImportException|TeamImportException>  $exceptionClass  The exception class to instantiate.
+     * @param  string  $message  Human-readable error message.
+     * @param  Throwable|null  $previous  Underlying cause, if any, for exception chaining.
+     * @return GameImportException|TeamImportException A new exception instance of the requested type.
      */
     private function newImportException(string $exceptionClass, string $message, ?Throwable $previous = null): GameImportException|TeamImportException
     {

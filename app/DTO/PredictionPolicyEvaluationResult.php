@@ -2,8 +2,6 @@
 
 namespace App\DTO;
 
-use App\DTO\PredictionPolicyViolation;
-
 /**
  * Represents the final outcome of policy evaluation for a prediction submission.
  *
@@ -15,7 +13,7 @@ use App\DTO\PredictionPolicyViolation;
 readonly class PredictionPolicyEvaluationResult
 {
     /**
-     * @param array<int, PredictionPolicyViolation> $violations Zero or more policy violations recorded during evaluation.
+     * @param  array<int, PredictionPolicyViolation>  $violations  Zero or more policy violations recorded during evaluation.
      */
     public function __construct(
         public array $violations = [],
@@ -38,14 +36,14 @@ readonly class PredictionPolicyEvaluationResult
      */
     public function hasViolations(): bool
     {
-        return !$this->isValid();
+        return ! $this->isValid();
     }
 
     /**
      * Returns a human-readable message summarizing the evaluation outcome.
      *
      * @return string A plain-language summary suitable for display; individual violations
-     *     are joined with " | " so the full context fits in a single UI message.
+     *                are joined with " | " so the full context fits in a single UI message.
      */
     public function summary(): string
     {

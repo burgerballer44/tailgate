@@ -19,8 +19,8 @@ class DeveloperUserController extends Controller
     /**
      * Build the developer user controller with command and query services.
      *
-     * @param UserCommandInterface $userCommandService Service responsible for user write operations.
-     * @param UserQueryInterface $userQueryService Service responsible for user listing and read projections.
+     * @param  UserCommandInterface  $userCommandService  Service responsible for user write operations.
+     * @param  UserQueryInterface  $userQueryService  Service responsible for user listing and read projections.
      * @return void Initializes controller dependencies.
      */
     public function __construct(
@@ -31,7 +31,7 @@ class DeveloperUserController extends Controller
     /**
      * Display a paginated list of users with available role and status filters.
      *
-     * @param Request $request Incoming request containing optional filter query values.
+     * @param  Request  $request  Incoming request containing optional filter query values.
      * @return View Renders the developer user index with filtered users and enum-backed filter options.
      */
     public function index(Request $request): View
@@ -59,7 +59,7 @@ class DeveloperUserController extends Controller
     /**
      * Persist a newly created user from validated payload data.
      *
-     * @param StoreUserRequest $request Validated request containing user profile, role, and status values.
+     * @param  StoreUserRequest  $request  Validated request containing user profile, role, and status values.
      * @return RedirectResponse Redirects to the developer user index after creating the user.
      */
     public function store(StoreUserRequest $request): RedirectResponse
@@ -74,7 +74,7 @@ class DeveloperUserController extends Controller
     /**
      * Show a single user record in the developer detail view.
      *
-     * @param User $user Route-bound user being inspected.
+     * @param  User  $user  Route-bound user being inspected.
      * @return View Renders the developer user detail page.
      */
     public function show(User $user): View
@@ -85,7 +85,7 @@ class DeveloperUserController extends Controller
     /**
      * Show the form for editing an existing user.
      *
-     * @param User $user Route-bound user to edit.
+     * @param  User  $user  Route-bound user to edit.
      * @return View Renders the developer user edit form with role and status options.
      */
     public function edit(User $user): View
@@ -100,8 +100,8 @@ class DeveloperUserController extends Controller
     /**
      * Update an existing user profile from validated payload data.
      *
-     * @param UpdateUserRequest $request Validated request containing updated user attributes.
-     * @param User $user Route-bound user that will be updated.
+     * @param  UpdateUserRequest  $request  Validated request containing updated user attributes.
+     * @param  User  $user  Route-bound user that will be updated.
      * @return RedirectResponse Redirects to the developer user index after a successful update.
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
@@ -116,7 +116,7 @@ class DeveloperUserController extends Controller
     /**
      * Remove a user from the system.
      *
-     * @param User $user Route-bound user to delete.
+     * @param  User  $user  Route-bound user to delete.
      * @return RedirectResponse Redirects to the developer user index after deletion.
      */
     public function destroy(User $user): RedirectResponse

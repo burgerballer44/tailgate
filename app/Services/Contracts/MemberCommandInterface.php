@@ -7,17 +7,18 @@ use App\Models\Group;
 use App\Models\Member;
 
 /**
- * Manages the lifecycle of group memberships and member state changes.
- * Handles adding members to groups, updating member roles and approval status, and removing members,
- * supporting group membership administration and approval workflows.
+ * Defines write operations for group memberships.
+ *
+ * Implementations create, update, and remove members while enforcing
+ * membership-related domain rules.
  */
 interface MemberCommandInterface
 {
     /**
      * Create a new member within the given group.
      *
-     * @param Group $group The group to add the member to.
-     * @param ValidatedMemberData $data The normalized membership payload.
+     * @param  Group  $group  The group to add the member to.
+     * @param  ValidatedMemberData  $data  The normalized membership payload.
      * @return Member The created member instance.
      */
     public function createForGroup(Group $group, ValidatedMemberData $data): Member;
@@ -25,8 +26,8 @@ interface MemberCommandInterface
     /**
      * Update an existing member.
      *
-     * @param Member $member The member to update.
-     * @param ValidatedMemberData $data The normalized membership payload.
+     * @param  Member  $member  The member to update.
+     * @param  ValidatedMemberData  $data  The normalized membership payload.
      * @return Member The updated member instance.
      */
     public function update(Member $member, ValidatedMemberData $data): Member;
@@ -34,8 +35,7 @@ interface MemberCommandInterface
     /**
      * Delete a member.
      *
-     * @param Member $member The member to delete.
-     * @return void
+     * @param  Member  $member  The member to delete.
      */
     public function delete(Member $member): void;
 }

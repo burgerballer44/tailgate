@@ -1,8 +1,8 @@
 <?php
 
+use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
-use App\Models\Follow;
 use App\Models\Season;
 use App\Models\Sport;
 use App\Models\Team;

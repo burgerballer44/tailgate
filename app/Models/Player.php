@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
-use App\Models\Prediction;
 
 class Player extends Model
 {
@@ -46,8 +45,6 @@ class Player extends Model
 
     /**
      * Register model lifecycle hooks used to seed identifiers.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -61,8 +58,8 @@ class Player extends Model
      *
      * Supported filters are `member_id` and `q`.
      *
-     * @param Builder $builder The query builder to constrain.
-     * @param array<string, mixed> $filters Associative filter input from the caller.
+     * @param  Builder  $builder  The query builder to constrain.
+     * @param  array<string, mixed>  $filters  Associative filter input from the caller.
      * @return Builder The constrained builder instance.
      */
     #[Scope]

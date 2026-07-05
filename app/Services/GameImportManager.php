@@ -29,9 +29,9 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Create a game import coordinator with the configured command services and source registry.
      *
-     * @param SeasonCommandInterface $seasonCommandService The service responsible for creating games within a season.
-     * @param GameCommandInterface $gameCommandService The service responsible for updating existing games.
-     * @param iterable<int, GameImportSourceInterface> $sources Available game import sources keyed by iteration order.
+     * @param  SeasonCommandInterface  $seasonCommandService  The service responsible for creating games within a season.
+     * @param  GameCommandInterface  $gameCommandService  The service responsible for updating existing games.
+     * @param  iterable<int, GameImportSourceInterface>  $sources  Available game import sources keyed by iteration order.
      */
     public function __construct(
         private readonly SeasonCommandInterface $seasonCommandService,
@@ -40,9 +40,9 @@ class GameImportManager implements GameImportManagerInterface
     ) {}
 
     /**
-     * Exposes game import sources and metadata for source selection UIs.
+     * Return game import source metadata.
      *
-     * @return array<int, array<string, string>> Available source metadata for import selection UIs.
+     * @return array<int, array<string, string>> Available source metadata for import configuration.
      */
     public function availableSources(): array
     {
@@ -60,8 +60,8 @@ class GameImportManager implements GameImportManagerInterface
     /**
      * Import games for a season, resolving teams and updating or creating rows as needed.
      *
-     * @param Season $season The season receiving the imported schedule.
-     * @param GameImportData $data Import source selection and runtime options.
+     * @param  Season  $season  The season receiving the imported schedule.
+     * @param  GameImportData  $data  Import source selection and runtime options.
      * @return ImportResult A summary of imported, updated, and skipped games.
      *
      * @throws GameImportException When the requested source key is unavailable or the source rejects the request.

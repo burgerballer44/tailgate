@@ -7,9 +7,10 @@ use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 
 /**
- * Provides a team data feed from an external source (e.g., API, CSV).
- * Implementations fetch and stream imported team data in a consistent format, abstracting away
- * source-specific details and allowing multiple team sources to be swapped at runtime.
+ * Provides normalized team import records from an external source.
+ *
+ * Implementations hide source-specific payload shapes and expose a consistent
+ * stream of ImportedTeamData DTOs.
  */
 interface TeamImportSourceInterface
 {
@@ -21,7 +22,7 @@ interface TeamImportSourceInterface
     public function key(): string;
 
     /**
-     * Provides the display label used in source selection interfaces.
+     * Returns a human-readable source name.
      *
      * @return string The source label.
      */
@@ -35,7 +36,7 @@ interface TeamImportSourceInterface
     public function type(): string;
 
     /**
-     * Explains source behavior for operator-facing import selection screens.
+     * Returns a short description of source behavior and constraints.
      *
      * @return string The source description.
      */
@@ -44,7 +45,7 @@ interface TeamImportSourceInterface
     /**
      * Streams normalized team records for the requested import options.
      *
-     * @param TeamImportData $data Import source selection and runtime options.
+     * @param  TeamImportData  $data  Import source selection and runtime options.
      * @return ImportFetchStream<ImportedTeamData> A stream of normalized team DTOs and fetch-time errors.
      */
     public function fetch(TeamImportData $data): ImportFetchStream;

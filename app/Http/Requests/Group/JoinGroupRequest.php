@@ -26,7 +26,7 @@ class JoinGroupRequest extends FormRequest
      * The invite code is required as a string. Validation at the service layer will verify
      * that the code is valid and not expired.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The invite_code validation rules.
+     * @return array<string, ValidationRule|array|string> The invite_code validation rules.
      */
     public function rules(): array
     {

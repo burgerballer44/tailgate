@@ -25,7 +25,7 @@ enum HtmlEntity: string
     /**
      * Map a boolean value to the matching status icon.
      *
-     * @param bool $value The boolean state to represent.
+     * @param  bool  $value  The boolean state to represent.
      * @return self The check mark for true or the red X for false.
      */
     public static function forBoolean(bool $value): self

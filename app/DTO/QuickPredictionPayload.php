@@ -10,10 +10,10 @@ use Illuminate\Contracts\Support\Arrayable;
 readonly class QuickPredictionPayload implements Arrayable
 {
     /**
-     * @param int $openPredictionCount Total number of unfilled prediction slots across all memberships.
-     * @param int $totalGames Number of game entries included in this payload.
-     * @param int $totalGroups Number of approved memberships included in this payload.
-     * @param array<int, array<string, mixed>> $games Sorted array of game entry objects, each with group/game/players context.
+     * @param  int  $openPredictionCount  Total number of unfilled prediction slots across all memberships.
+     * @param  int  $totalGames  Number of game entries included in this payload.
+     * @param  int  $totalGroups  Number of approved memberships included in this payload.
+     * @param  array<int, array<string, mixed>>  $games  Sorted array of game entry objects, each with group/game/players context.
      */
     public function __construct(
         public int $openPredictionCount,

@@ -24,8 +24,8 @@ class PlayerController extends Controller
     /**
      * Build the player controller with command and query services.
      *
-     * @param PlayerCommandInterface $playerCommandService Service responsible for player writes.
-     * @param PlayerQueryInterface $playerQueryService Service responsible for player reads.
+     * @param  PlayerCommandInterface  $playerCommandService  Service responsible for player writes.
+     * @param  PlayerQueryInterface  $playerQueryService  Service responsible for player reads.
      */
     public function __construct(
         private PlayerCommandInterface $playerCommandService,
@@ -34,11 +34,11 @@ class PlayerController extends Controller
 
     /**
      * Display a listing of players for a member.
-        *
-        * @param Request $request Current request used to resolve route context and actor.
-        * @param Group $group Group that owns the selected member.
-        * @param Member $member Member whose players are being listed.
-        * @return View Players index page for the selected member.
+     *
+     * @param  Request  $request  Current request used to resolve route context and actor.
+     * @param  Group  $group  Group that owns the selected member.
+     * @param  Member  $member  Member whose players are being listed.
+     * @return View Players index page for the selected member.
      */
     public function index(Request $request, Group $group, Member $member): View
     {
@@ -49,7 +49,7 @@ class PlayerController extends Controller
         return view('groups.players.index', [
             'group' => $group,
             'member' => $member,
-            'players' => $member->players()->latest()->paginate(),
+            'players' => $this->playerQueryService->getPlayersForMember($member)->latest()->paginate(),
             'routeBaseName' => $this->getRouteBaseName($request),
             'returnRouteName' => $returnRouteName,
             'returnRouteParams' => $returnRouteParams,
@@ -59,11 +59,11 @@ class PlayerController extends Controller
 
     /**
      * Show the form to create a new player.
-        *
-        * @param Request $request Current request used for authorization and route context.
-        * @param Group $group Group that owns the selected member.
-        * @param Member $member Member that will own the newly created player.
-        * @return View Player creation form.
+     *
+     * @param  Request  $request  Current request used for authorization and route context.
+     * @param  Group  $group  Group that owns the selected member.
+     * @param  Member  $member  Member that will own the newly created player.
+     * @return View Player creation form.
      */
     public function create(Request $request, Group $group, Member $member): View
     {
@@ -83,11 +83,11 @@ class PlayerController extends Controller
 
     /**
      * Store a newly created player.
-        *
-        * @param StorePlayerRequest $request Validated player creation payload.
-        * @param Group $group Group that owns the selected member.
-        * @param Member $member Member that will own the new player.
-        * @return RedirectResponse Redirect to the route appropriate for the current flow context.
+     *
+     * @param  StorePlayerRequest  $request  Validated player creation payload.
+     * @param  Group  $group  Group that owns the selected member.
+     * @param  Member  $member  Member that will own the new player.
+     * @return RedirectResponse Redirect to the route appropriate for the current flow context.
      */
     public function store(StorePlayerRequest $request, Group $group, Member $member): RedirectResponse
     {
@@ -111,12 +111,12 @@ class PlayerController extends Controller
 
     /**
      * Show the form to edit an existing player.
-        *
-        * @param Request $request Current request used for authorization and route context.
-        * @param Group $group Group that owns the selected member.
-        * @param Member $member Member that owns the selected player.
-        * @param Player $player Player to edit.
-        * @return View Player edit form.
+     *
+     * @param  Request  $request  Current request used for authorization and route context.
+     * @param  Group  $group  Group that owns the selected member.
+     * @param  Member  $member  Member that owns the selected player.
+     * @param  Player  $player  Player to edit.
+     * @return View Player edit form.
      */
     public function edit(Request $request, Group $group, Member $member, Player $player): View
     {
@@ -137,12 +137,12 @@ class PlayerController extends Controller
 
     /**
      * Update an existing player.
-        *
-        * @param UpdatePlayerRequest $request Validated player update payload.
-        * @param Group $group Group that owns the selected member.
-        * @param Member $member Member that owns the selected player.
-        * @param Player $player Player being updated.
-        * @return RedirectResponse Redirect to the route appropriate for the current flow context.
+     *
+     * @param  UpdatePlayerRequest  $request  Validated player update payload.
+     * @param  Group  $group  Group that owns the selected member.
+     * @param  Member  $member  Member that owns the selected player.
+     * @param  Player  $player  Player being updated.
+     * @return RedirectResponse Redirect to the route appropriate for the current flow context.
      */
     public function update(UpdatePlayerRequest $request, Group $group, Member $member, Player $player): RedirectResponse
     {
@@ -160,12 +160,12 @@ class PlayerController extends Controller
 
     /**
      * Remove a player.
-        *
-        * @param Request $request Current request used for authorization and route context.
-        * @param Group $group Group that owns the selected member.
-        * @param Member $member Member that owns the selected player.
-        * @param Player $player Player being deleted.
-        * @return RedirectResponse Redirect to the route appropriate for the current flow context.
+     *
+     * @param  Request  $request  Current request used for authorization and route context.
+     * @param  Group  $group  Group that owns the selected member.
+     * @param  Member  $member  Member that owns the selected player.
+     * @param  Player  $player  Player being deleted.
+     * @return RedirectResponse Redirect to the route appropriate for the current flow context.
      */
     public function destroy(Request $request, Group $group, Member $member, Player $player): RedirectResponse
     {

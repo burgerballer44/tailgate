@@ -7,9 +7,9 @@ use App\Models\PredictionPolicyScope;
 use App\Services\Contracts\PredictionPolicyRuleInterface;
 
 /**
- * Requires predictions to be submitted at least 30 minutes before kickoff.
- * This is a group-level policy intended for more competitive groups that want
- * a stricter lead time than the default app lock-time rule.
+ * Enforces a stricter pre-kickoff lead time for submissions.
+ *
+ * This group-level rule is optional and can be enabled per group.
  */
 class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
 {
@@ -26,7 +26,7 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
     }
 
     /**
-     * Returns the short label used in UI and violation summaries.
+     * Returns the short label used in violation summaries.
      *
      * @return string Human-readable name displayed in violation messages and policy management screens.
      */
@@ -38,7 +38,7 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
     /**
      * Explains the business rule enforced by this policy.
      *
-     * @return string Full human-readable description of the constraint, suitable for user-facing display.
+     * @return string Human-readable rule description.
      */
     public function description(): string
     {
@@ -56,13 +56,13 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
     }
 
     /**
-     * Returns true when the submission occurs at least 30 minutes before kickoff.
+     * Return true when submission occurs at least 30 minutes before kickoff.
      *
      * If the game's start time cannot be parsed as a valid datetime, the check is
-     * skipped and the submission is allowed through — an unparseable time is treated
-     * as no time rather than blocking all predictions for that game.
+     * skipped and the submission is allowed through. This avoids blocking
+     * predictions when imported schedule data is malformed.
      *
-     * @param PredictionPolicyContext $context The submission context including the player, group, game, and prediction data.
+     * @param  PredictionPolicyContext  $context  The submission context including the player, group, game, and prediction data.
      * @return bool True if the submission is within the required lead time; false triggers a violation.
      */
     public function passes(PredictionPolicyContext $context): bool
@@ -73,7 +73,7 @@ class MinimumLeadTimeBeforeLockPolicy implements PredictionPolicyRuleInterface
             return true;
         }
 
-        $cutoff = (new \DateTimeImmutable('now'))->modify('+' . self::MINIMUM_LEAD_TIME_MINUTES . ' minutes');
+        $cutoff = (new \DateTimeImmutable('now'))->modify('+'.self::MINIMUM_LEAD_TIME_MINUTES.' minutes');
 
         return $gameDateTime >= $cutoff;
     }

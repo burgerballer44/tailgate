@@ -469,7 +469,7 @@ describe('getQuickPredictionsPayloadForUser', function () {
         // Verify the status is closed when a past-TBD game is present in the retrieved set.
         // The game won't surface in the upcoming window, so assert directly via the model.
         $gameDateTime = date_create_immutable((string) $game->start_date_time);
-        $isBeforeLock = $gameDateTime instanceof \DateTimeImmutable
+        $isBeforeLock = $gameDateTime instanceof DateTimeImmutable
             && $gameDateTime->format('Y-m-d') >= now()->toDateString();
 
         expect($isBeforeLock)->toBeFalse();

@@ -89,7 +89,7 @@ describe('evaluate', function () {
             'away_team_prediction' => 14,
         ]));
 
-        expect($evaluate)->toThrow(\RuntimeException::class, 'Prediction policies require a valid game.');
+        expect($evaluate)->toThrow(RuntimeException::class, 'Prediction policies require a valid game.');
     });
 
     test('throws when player does not resolve to a group', function () {
@@ -115,7 +115,7 @@ describe('evaluate', function () {
             'away_team_prediction' => 14,
         ]));
 
-        expect($evaluate)->toThrow(\RuntimeException::class, 'Prediction policies require the player to belong to a group.');
+        expect($evaluate)->toThrow(RuntimeException::class, 'Prediction policies require the player to belong to a group.');
     });
 
     test('returns valid result when app and enabled group policies pass', function () {

@@ -6,8 +6,8 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -68,8 +68,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Register model lifecycle hooks used to seed identifiers.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -111,7 +109,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check whether the user owns the given group.
      *
-     * @param Group $group The group being checked.
+     * @param  Group  $group  The group being checked.
      * @return bool True when the user is the group owner.
      */
     public function isOwnerOf(Group $group): bool
@@ -125,7 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * The method expects the group's members relation to be loaded, so callers
      * can avoid repeated lookups when they already have the collection in memory.
      *
-     * @param Group $group The group to inspect.
+     * @param  Group  $group  The group to inspect.
      * @return string|null The membership status value, or null when no membership exists.
      */
     public function getMembershipStatus(Group $group): ?string
@@ -138,7 +136,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check whether the user can access the given group.
      *
-     * @param Group $group The group being checked.
+     * @param  Group  $group  The group being checked.
      * @return bool True when the user owns the group or has an approved membership.
      */
     public function canAccessGroup(Group $group): bool
@@ -171,8 +169,8 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * Supported filters are `q`, `status`, and `role`.
      *
-     * @param Builder $builder The query builder to constrain.
-     * @param array<string, mixed> $query Associative filter input from the caller.
+     * @param  Builder  $builder  The query builder to constrain.
+     * @param  array<string, mixed>  $query  Associative filter input from the caller.
      * @return Builder The constrained builder instance.
      */
     #[Scope]

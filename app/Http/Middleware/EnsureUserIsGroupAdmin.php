@@ -7,6 +7,7 @@ use App\Models\MemberStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Restricts routes to approved group administrators.
@@ -19,10 +20,11 @@ class EnsureUserIsGroupAdmin
      * This middleware depends on route-model binding for both the group and the
      * authenticated user, and returns 403 to avoid revealing membership details.
      *
-     * @param Request $request The current request, used to resolve the routed group and authenticated user.
-     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @param  Request  $request  The current request, used to resolve the routed group and authenticated user.
+     * @param  Closure(Request): Response  $next  The next middleware or controller to execute.
      * @return Response The downstream response when the user is an approved group admin.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the user is missing or is not an approved group admin.
+     *
+     * @throws HttpException When the user is missing or is not an approved group admin.
      */
     public function handle(Request $request, Closure $next): Response
     {

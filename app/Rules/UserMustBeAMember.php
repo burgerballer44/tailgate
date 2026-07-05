@@ -22,8 +22,7 @@ class UserMustBeAMember implements DataAwareRule, ValidationRule
     /**
      * Captures request payload values needed to resolve the user being validated.
      *
-     * @param array<string, mixed> $data All validated request data.
-     * @return static
+     * @param  array<string, mixed>  $data  All validated request data.
      */
     public function setData(array $data): static
     {
@@ -38,10 +37,9 @@ class UserMustBeAMember implements DataAwareRule, ValidationRule
      * Falls back to 'owner_id' when 'user_id' is absent, which supports both
      * member-centric and owner-centric request shapes without duplicating the rule.
      *
-     * @param string $attribute The dot-notation field name being validated.
-     * @param mixed $value The value under validation.
-     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
-     * @return void
+     * @param  string  $attribute  The dot-notation field name being validated.
+     * @param  mixed  $value  The value under validation.
+     * @param  Closure(string): void  $fail  Closure invoked with an error message if validation fails.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

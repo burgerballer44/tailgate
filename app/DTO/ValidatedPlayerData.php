@@ -9,9 +9,9 @@ namespace App\DTO;
 readonly class ValidatedPlayerData
 {
     /**
-     * @param string $player_name The display name of the player.
-     * @param int|null $member_id The ID of the group member associated with this player,
-     *     or null if the player is not yet linked to a member account.
+     * @param  string  $player_name  The display name of the player.
+     * @param  int|null  $member_id  The ID of the group member associated with this player,
+     *                               or null if the player is not yet linked to a member account.
      */
     public function __construct(
         public string $player_name,
@@ -21,8 +21,7 @@ readonly class ValidatedPlayerData
     /**
      * Constructs an instance from a raw associative array, typically from a validated form request.
      *
-     * @param array<string, mixed> $data Raw input data containing 'player_name' and optionally 'member_id'.
-     * @return self
+     * @param  array<string, mixed>  $data  Raw input data containing 'player_name' and optionally 'member_id'.
      */
     public static function fromArray(array $data): self
     {

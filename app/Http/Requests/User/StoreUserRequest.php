@@ -30,7 +30,7 @@ class StoreUserRequest extends FormRequest
      * Ensures the user has a unique email, valid status and role enums, and all required fields.
      * Email uniqueness prevents duplicate accounts in the system.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user field validation rules.
+     * @return array<string, ValidationRule|array|string> The user field validation rules.
      */
     public function rules(): array
     {

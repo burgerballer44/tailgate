@@ -14,16 +14,16 @@ use App\Models\TeamType;
 readonly class ValidatedTeamData
 {
     /**
-     * @param string $organization The full name of the team's organization (e.g. "University of Alabama").
-     * @param string $designation The team's designation or nickname (e.g. "Alabama Crimson Tide").
-     * @param string $conference A default conference value used when sport-specific conferences are not provided.
-     * @param string|null $abbreviation The team's abbreviation or short code (e.g. "ALA"), or null if not provided.
-     * @param string|null $color The team's primary color in hex format (e.g. "#9E1B32"), or null if not provided.
-     * @param array|null $logos Logo URLs keyed by type or size, or null if not provided.
-     * @param array|null $socialMedia Social media links keyed by platform, or null if not provided.
-     * @param TeamType $type The team type enum (e.g. College, Professional).
-     * @param array $sports An array of Sport enum instances the team participates in.
-     * @param array<string, string> $sportConferences A map of sport value => conference.
+     * @param  string  $organization  The full name of the team's organization (e.g. "University of Alabama").
+     * @param  string  $designation  The team's designation or nickname (e.g. "Alabama Crimson Tide").
+     * @param  string  $conference  A default conference value used when sport-specific conferences are not provided.
+     * @param  string|null  $abbreviation  The team's abbreviation or short code (e.g. "ALA"), or null if not provided.
+     * @param  string|null  $color  The team's primary color in hex format (e.g. "#9E1B32"), or null if not provided.
+     * @param  array|null  $logos  Logo URLs keyed by type or size, or null if not provided.
+     * @param  array|null  $socialMedia  Social media links keyed by platform, or null if not provided.
+     * @param  TeamType  $type  The team type enum (e.g. College, Professional).
+     * @param  array  $sports  An array of Sport enum instances the team participates in.
+     * @param  array<string, string>  $sportConferences  A map of sport value => conference.
      */
     public function __construct(
         public string $organization,
@@ -45,8 +45,7 @@ readonly class ValidatedTeamData
      * the factory to be used in both HTTP and programmatic contexts. A top-level conference value
      * is treated as the default for each selected sport unless explicit sport_conferences are supplied.
      *
-     * @param array<string, mixed> $data Raw input data containing team identity, classification, and optional metadata.
-     * @return self
+     * @param  array<string, mixed>  $data  Raw input data containing team identity, classification, and optional metadata.
      */
     public static function fromArray(array $data): self
     {

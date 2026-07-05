@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTO\QuickPredictionPayload;
 use App\Models\Game;
+use App\Models\Group;
 use App\Models\Member;
 use App\Models\Sport;
 use App\Models\User;
@@ -15,16 +16,16 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 
 /**
- * Builds the quick-prediction payload for the dashboard.
+ * Assembles quick-prediction payload data for a user.
  */
 class QuickPredictionService implements QuickPredictionServiceInterface
 {
     private const PREDICTION_WINDOW_WEEKS = 2;
 
     /**
-     * @param GameQueryInterface $gameQueryService Fetches upcoming group games within a time window.
-     * @param MemberQueryInterface $memberQueryService Loads user memberships for quick predictions.
-     * @param PredictionQueryInterface $predictionQueryService Loads predictions for player/game sets.
+     * @param  GameQueryInterface  $gameQueryService  Fetches upcoming group games within a time window.
+     * @param  MemberQueryInterface  $memberQueryService  Loads user memberships for quick predictions.
+     * @param  PredictionQueryInterface  $predictionQueryService  Loads predictions for player/game sets.
      */
     public function __construct(
         private GameQueryInterface $gameQueryService,
@@ -33,7 +34,7 @@ class QuickPredictionService implements QuickPredictionServiceInterface
     ) {}
 
     /**
-     * Return the dashboard copy for the configured prediction window.
+     * Return a human-readable label for the configured prediction window.
      */
     public static function predictionWindowLabel(): string
     {
@@ -45,14 +46,11 @@ class QuickPredictionService implements QuickPredictionServiceInterface
      */
     public function getQuickPredictionsPayloadForUser(User $user): QuickPredictionPayload
     {
-        // Only approved members can submit predictions.
-        // Pending members are visible on the dashboard but cannot interact with games,
-        // so we exclude them entirely here.
+        // Only approved memberships are eligible to submit predictions.
         $approvedMemberships = $this->memberQueryService
             ->getApprovedMembershipsForUserWithQuickPredictionRelations($user);
 
-        // The modal only shows games within a configurable rolling window.
-        // This keeps the list focused and avoids surfacing games the user cannot realistically predict.
+        // Restrict results to a rolling prediction window.
         $windowEnd = now()->addWeeks(self::PREDICTION_WINDOW_WEEKS);
         $dashboardOpenPredictionCount = 0;
         $gameEntries = collect();
@@ -73,12 +71,10 @@ class QuickPredictionService implements QuickPredictionServiceInterface
             $upcomingGames = $this->gameQueryService
                 ->getUpcomingGamesForGroupWithinWindow($group, $windowEnd);
 
-            // Further group the games by followed team + sport so each modal card has
-            // the correct team name and sport label.
+            // Group games by followed team and sport to keep context explicit.
             $teamSportGroups = $this->buildTeamSportGameGroups($group, $upcomingGames);
 
-            // If this membership has no relevant games AND no players, there is nothing
-            // to show in the modal for it — skip to avoid empty entries.
+            // Skip memberships that contribute no players and no eligible games.
             if ($teamSportGroups->isEmpty() && $memberPlayers->isEmpty()) {
                 continue;
             }
@@ -88,12 +84,10 @@ class QuickPredictionService implements QuickPredictionServiceInterface
             // so we can check in O(1) whether a slot is already filled.
             $predictionLookup = $this->buildPredictionLookup($memberPlayers, $upcomingGames);
 
-            // Accumulate the count of missing predictions across all memberships.
-            // This drives the badge number shown on the "Open quick predictions" button.
+            // Accumulate the count of missing predictions across memberships.
             $dashboardOpenPredictionCount += $this->countOpenPredictionSlots($memberPlayers, $upcomingGames, $predictionLookup);
 
-            // Build one modal entry per game — each entry carries everything the
-            // front-end needs to render a game card with player rows and action links.
+            // Build one payload entry per game.
             foreach ($teamSportGroups as $teamSportGroup) {
                 foreach ($teamSportGroup['games'] as $game) {
                     $gameEntries->push($this->buildModalGameEntry($membership, $teamSportGroup, $game, $memberPlayers, $predictionLookup));
@@ -130,7 +124,7 @@ class QuickPredictionService implements QuickPredictionServiceInterface
     }
 
     /**
-     * Build one UI-ready game entry for a membership/team-sport bucket.
+     * Build one game entry for a membership and team/sport bucket.
      */
     private function buildModalGameEntry(Member $membership, array $teamSportGroup, Game $game, EloquentCollection $memberPlayers, array $predictionLookup): array
     {
@@ -180,31 +174,28 @@ class QuickPredictionService implements QuickPredictionServiceInterface
             ];
         })->values();
 
-        // Determine whether the prediction window is open for this game.
-        // The status drives the card's visual state (open form vs. locked indicator).
+        // Determine whether prediction submission is currently allowed for this game.
         [$statusLabel, $statusReason, $isOpen] = $this->predictionStatusForGame($game);
 
         return [
-            // A unique key for this card within the modal's Vue/Alpine component. Using
-            // group ULID + game ID avoids collisions across memberships.
+            // Group ULID + game ID avoids collisions across memberships.
             'context_key' => $group->ulid.'|'.$game->id,
 
-            // Group context — the front-end uses the member_ulid when building API calls
-            // that are scoped to the membership rather than the group.
+            // Membership context is included because commands are member-scoped.
             'group' => [
                 'ulid' => $group->ulid,
                 'name' => $group->name,
                 'member_ulid' => $membership->ulid,
             ],
 
-            // Team and sport label for the card header.
+            // Team and sport context.
             'team' => [
                 'name' => $teamSportGroup['teamName'],
                 'sport' => $sportLabel,
                 'sport_icon' => $sportIcon,
             ],
 
-            // Game details the card needs to render the matchup and control the form.
+            // Game details required by prediction consumers.
             'game' => [
                 'id' => $game->id,
                 'ulid' => $game->ulid,
@@ -226,9 +217,7 @@ class QuickPredictionService implements QuickPredictionServiceInterface
             // One row per player in the membership.
             'players' => $playerRows,
 
-            // Route templates with placeholder tokens. The front-end replaces __PLAYER__
-            // and __PREDICTION__ with real ULIDs when the user submits or updates a
-            // prediction, keeping the back-end route structure out of the JS layer.
+            // Route templates keep placeholder tokens that clients replace at submit time.
             'store_route_template' => route('groups.predictions.store', ['group' => $group, 'player' => '__PLAYER__']),
             'update_route_template' => route('groups.predictions.update', ['group' => $group, 'player' => '__PLAYER__', 'prediction' => '__PREDICTION__']),
             'group_upcoming_games_route' => route('groups.show', ['group' => $group, 'tab' => 'upcoming-games']),
@@ -260,9 +249,8 @@ class QuickPredictionService implements QuickPredictionServiceInterface
         $isSeasonActive = (bool) $game->season?->active;
         $isOpen = $isSeasonActive && $isBeforeLock;
 
-        // Provide a reason so the UI can display a tooltip or sub-label explaining
-        // the locked state to the user. Season inactive takes priority in messaging
-        // because the lock time is irrelevant if the season is already over.
+        // Include a reason so consumers can explain why submission is closed.
+        // Season inactive takes priority because lock time is irrelevant in that case.
         if (! $isSeasonActive) {
             $statusReason = 'Season inactive';
         } elseif (! $isBeforeLock) {
@@ -275,9 +263,9 @@ class QuickPredictionService implements QuickPredictionServiceInterface
     }
 
     /**
-     * Group upcoming games by followed team and sport for modal sections.
+     * Group upcoming games by followed team and sport.
      */
-    private function buildTeamSportGameGroups(\App\Models\Group $group, Collection $games): Collection
+    private function buildTeamSportGameGroups(Group $group, Collection $games): Collection
     {
         // Intermediate associative array keyed by "team_id:sport" so we can accumulate
         // games per bucket before converting to a Collection at the end.
@@ -303,8 +291,7 @@ class QuickPredictionService implements QuickPredictionServiceInterface
                 $sportLabel = (string) ($game->season?->sport ?? $follow->sport?->value ?? 'Unknown sport');
                 $teamName = (string) ($follow->team?->display_name ?? $follow->team?->organization ?? 'Unknown team');
 
-                // The bucket key combines team and sport so that the same team followed
-                // under different sports produces separate sections in the modal.
+                // Team+sport creates separate buckets when one team is followed across sports.
                 $groupKey = $follow->team_id.':'.$sportLabel;
 
                 if (! isset($grouped[$groupKey])) {
@@ -327,15 +314,13 @@ class QuickPredictionService implements QuickPredictionServiceInterface
                     'key' => $entry['key'],
                     'teamName' => $entry['teamName'],
                     'sport' => $entry['sport'],
-                    // Sort games within each bucket chronologically so they appear in
-                    // the correct order when the modal iterates through them.
+                    // Sort each bucket chronologically for stable downstream consumption.
                     'games' => collect($entry['games'])
                         ->sortBy('start_date_time')
                         ->values(),
                 ];
             })
-            // Sort the sections themselves alphabetically by team name + sport so the
-            // modal has a stable, predictable order regardless of insertion order.
+                    // Sort buckets alphabetically for predictable output ordering.
             ->sortBy(fn (array $entry): string => strtolower($entry['teamName'].' '.$entry['sport']))
             ->values();
     }

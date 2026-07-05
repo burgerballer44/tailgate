@@ -21,10 +21,9 @@ class GameBelongsToFollowedTeam implements ValidationRule
      * away team is in the group's followed-team list, with optional sport-scoped filtering.
      * Uses already-loaded follows when available to avoid redundant queries.
      *
-     * @param string $attribute The dot-notation field name being validated.
-     * @param mixed $value The game ID being validated.
-     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
-     * @return void
+     * @param  string  $attribute  The dot-notation field name being validated.
+     * @param  mixed  $value  The game ID being validated.
+     * @param  Closure(string): void  $fail  Closure invoked with an error message if validation fails.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

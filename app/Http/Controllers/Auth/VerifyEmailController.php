@@ -10,10 +10,10 @@ use Illuminate\Http\RedirectResponse;
 class VerifyEmailController extends Controller
 {
     /**
-    * Mark the authenticated user's email address as verified and activate the account.
-    *
-    * @param EmailVerificationRequest $request Signed verification request for the current authenticated user.
-    * @return RedirectResponse Redirects to the dashboard with verification flag whether already verified or newly verified.
+     * Mark the authenticated user's email address as verified and activate the account.
+     *
+     * @param  EmailVerificationRequest  $request  Signed verification request for the current authenticated user.
+     * @return RedirectResponse Redirects to the dashboard with verification flag whether already verified or newly verified.
      */
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {

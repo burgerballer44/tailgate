@@ -33,7 +33,7 @@ class CFBDTeamImportSource implements TeamImportSourceInterface
     }
 
     /**
-     * Get the human-readable label shown in source selection UIs.
+     * Get the human-readable source label.
      *
      * @return string The display label for this source.
      */
@@ -53,7 +53,7 @@ class CFBDTeamImportSource implements TeamImportSourceInterface
     }
 
     /**
-     * Describe the data feed for operator-facing import screens.
+     * Describe this source's feed and expected data.
      *
      * @return string A short description of the CFBD football team feed.
      */
@@ -65,7 +65,7 @@ class CFBDTeamImportSource implements TeamImportSourceInterface
     /**
      * Stream normalized CFBD team records for the requested import options.
      *
-     * @param TeamImportData $data Import options including year and conference filters.
+     * @param  TeamImportData  $data  Import options including year and conference filters.
      * @return ImportFetchStream<ImportedTeamData> A stream of normalized team DTOs plus any fetch-time errors.
      */
     public function fetch(TeamImportData $data): ImportFetchStream

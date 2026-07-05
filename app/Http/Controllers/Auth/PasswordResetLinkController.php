@@ -26,6 +26,7 @@ class PasswordResetLinkController extends Controller
      *
      * @param  Request  $request  The current request containing the email address to notify.
      * @return RedirectResponse A redirect back to the form with a status message.
+     *
      * @throws ValidationException When the email field is invalid or the reset link cannot be sent.
      */
     public function store(Request $request): RedirectResponse

@@ -56,8 +56,6 @@ class Season extends Model
 
     /**
      * Register model lifecycle hooks used to seed identifiers.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -107,8 +105,8 @@ class Season extends Model
      *
      * Supported filters are `q`, `sport`, and `season_type`.
      *
-     * @param Builder $builder The query builder to constrain.
-     * @param array<string, mixed> $query Associative filter input from the caller.
+     * @param  Builder  $builder  The query builder to constrain.
+     * @param  array<string, mixed>  $query  Associative filter input from the caller.
      * @return Builder The constrained builder instance.
      */
     #[Scope]

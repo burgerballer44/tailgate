@@ -14,7 +14,7 @@ use RuntimeException;
 class PredictionPolicyViolationException extends RuntimeException
 {
     /**
-     * @param PredictionPolicyEvaluationResult $result The full evaluation result carrying all recorded violations.
+     * @param  PredictionPolicyEvaluationResult  $result  The full evaluation result carrying all recorded violations.
      */
     public function __construct(private readonly PredictionPolicyEvaluationResult $result)
     {

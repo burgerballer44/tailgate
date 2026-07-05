@@ -18,8 +18,9 @@ abstract class FormRequest extends \Illuminate\Foundation\Http\FormRequest
      * in addition to the standard validation exception, allowing the UI to display both redirect
      * logic and a human-readable error message to the user.
      *
-     * @param Validator $validator The validator instance containing all failed validation rules.
+     * @param  Validator  $validator  The validator instance containing all failed validation rules.
      * @return void
+     *
      * @throws ValidationException Always thrown with error bag and redirect location set for browser requests.
      */
     protected function failedValidation(Validator $validator)

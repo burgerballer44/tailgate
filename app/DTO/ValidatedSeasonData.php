@@ -12,10 +12,10 @@ use App\Models\Sport;
 readonly class ValidatedSeasonData
 {
     /**
-     * @param string $name The name of the season (e.g. "2024", "Fall 2024").
-     * @param Sport $sport The sport enum associated with the season.
-     * @param SeasonType $season_type The type of season (e.g. Regular, Playoff, Preseason).
-     * @param bool|null $active Whether the season is currently active, or null to use the system default.
+     * @param  string  $name  The name of the season (e.g. "2024", "Fall 2024").
+     * @param  Sport  $sport  The sport enum associated with the season.
+     * @param  SeasonType  $season_type  The type of season (e.g. Regular, Playoff, Preseason).
+     * @param  bool|null  $active  Whether the season is currently active, or null to use the system default.
      */
     public function __construct(
         public string $name,
@@ -30,8 +30,7 @@ readonly class ValidatedSeasonData
      * Accepts both raw string values and already-cast enum instances for sport and season_type,
      * which allows the factory to be used in both HTTP and programmatic contexts.
      *
-     * @param array<string, mixed> $data Raw input data containing name, sport, season_type, and optionally active.
-     * @return self
+     * @param  array<string, mixed>  $data  Raw input data containing name, sport, season_type, and optionally active.
      */
     public static function fromArray(array $data): self
     {

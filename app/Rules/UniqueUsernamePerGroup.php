@@ -14,10 +14,9 @@ class UniqueUsernamePerGroup implements ValidationRule
     /**
      * Validates that the requested player name is not already used in this group.
      *
-     * @param string $attribute The dot-notation field name being validated.
-     * @param mixed $value The player name being validated.
-     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
-     * @return void
+     * @param  string  $attribute  The dot-notation field name being validated.
+     * @param  mixed  $value  The player name being validated.
+     * @param  Closure(string): void  $fail  Closure invoked with an error message if validation fails.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

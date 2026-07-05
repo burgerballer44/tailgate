@@ -6,22 +6,20 @@ use App\DTO\QuickPredictionPayload;
 use App\Models\User;
 
 /**
- * Builds the data payload for the dashboard quick-predictions modal.
+ * Defines operations that assemble quick-prediction payload data.
  *
- * Implementations are responsible for scoping the payload to the user's approved
- * memberships and filtering games to the active prediction window.
+ * Implementations scope data to approved memberships and include only games
+ * that fall within the configured prediction window.
  */
 interface QuickPredictionServiceInterface
 {
     /**
-     * Return the human-readable prediction window label for dashboard UI copy.
+     * Return a human-readable label for the active prediction window.
      */
     public static function predictionWindowLabel(): string;
 
     /**
-     * Return the full quick-prediction payload for the given user's dashboard modal.
-     *
-     * @return QuickPredictionPayload
+     * Return the full quick-prediction payload for a user.
      */
     public function getQuickPredictionsPayloadForUser(User $user): QuickPredictionPayload;
 }

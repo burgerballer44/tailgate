@@ -1,16 +1,12 @@
 <?php
 
 use App\DTO\QuickPredictionPayload;
-use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\MemberStatus;
-use App\Models\Season;
 use App\Models\User;
-use App\Services\QuickPredictionService;
 use App\Services\Contracts\QuickPredictionServiceInterface;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Gate;
+use App\Services\QuickPredictionService;
 
 beforeEach(function () {
     $this->user = signInDeveloperUser();
@@ -211,7 +207,7 @@ describe('quickPredictions', function () {
         app()->bind(QuickPredictionServiceInterface::class, fn () => new class($payload) implements QuickPredictionServiceInterface
         {
             /**
-             * @param array<string, mixed> $payload
+             * @param  array<string, mixed>  $payload
              */
             public function __construct(private array $payload) {}
 

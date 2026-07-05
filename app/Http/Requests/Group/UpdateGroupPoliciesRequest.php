@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupPoliciesData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateGroupPoliciesRequest extends FormRequest
 {
@@ -23,7 +24,7 @@ class UpdateGroupPoliciesRequest extends FormRequest
     /**
      * Validate optional group-level prediction policy selections.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {

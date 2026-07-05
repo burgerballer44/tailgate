@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -29,7 +30,7 @@ class UpdateGroupRequest extends FormRequest
      * Allows admins to update group name, member and player limits, and enabled prediction policies.
      * The owner can only be changed by developers using a separate endpoint.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group field validation rules.
+     * @return array<string, ValidationRule|array|string> The group field validation rules.
      */
     public function rules(): array
     {
@@ -56,6 +57,4 @@ class UpdateGroupRequest extends FormRequest
 
         return ValidatedGroupData::fromArray($validated);
     }
-
 }
-

@@ -1,22 +1,22 @@
 <?php
 
-use App\DTO\ValidatedPlayerData;
-use App\DTO\ValidatedPredictionData;
 use App\DTO\PredictionPolicyEvaluationResult;
 use App\DTO\PredictionPolicyViolation;
+use App\DTO\ValidatedPlayerData;
+use App\DTO\ValidatedPredictionData;
 use App\Exceptions\PredictionPolicyViolationException;
 use App\Models\Game;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Prediction;
-use App\Models\Season;
 use App\Models\PredictionPolicyScope;
+use App\Models\Season;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\PlayerCommandService;
 use Illuminate\Support\Str;
 
 beforeEach(function () {
-    $this->service = new PlayerCommandService();
+    $this->service = new PlayerCommandService;
 });
 
 describe('create player for member', function () {
@@ -120,7 +120,7 @@ describe('submit prediction', function () {
             scope: PredictionPolicyScope::APP,
         );
         $result = new PredictionPolicyEvaluationResult([$violation]);
-        $evaluator = \Mockery::mock(PredictionPolicyEvaluatorInterface::class);
+        $evaluator = Mockery::mock(PredictionPolicyEvaluatorInterface::class);
         $evaluator->shouldReceive('evaluate')->once()->andReturn($result);
 
         $service = new PlayerCommandService($evaluator);
@@ -189,7 +189,7 @@ describe('update prediction', function () {
             scope: PredictionPolicyScope::APP,
         );
         $result = new PredictionPolicyEvaluationResult([$violation]);
-        $evaluator = \Mockery::mock(PredictionPolicyEvaluatorInterface::class);
+        $evaluator = Mockery::mock(PredictionPolicyEvaluatorInterface::class);
         $evaluator->shouldReceive('evaluate')->once()->andReturn($result);
 
         $service = new PlayerCommandService($evaluator);

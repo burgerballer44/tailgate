@@ -11,7 +11,7 @@ class DeveloperRuleController extends Controller
     /**
      * Build the rules controller with the evaluator used to resolve app and group policies.
      *
-     * @param PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator Service that exposes configured prediction rules.
+     * @param  PredictionPolicyEvaluatorInterface  $predictionPolicyEvaluator  Service that exposes configured prediction rules.
      * @return void Initializes controller dependencies.
      */
     public function __construct(private readonly PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator) {}

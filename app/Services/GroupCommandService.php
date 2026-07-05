@@ -14,6 +14,8 @@ use App\Models\Player;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\MemberCommandInterface;
 use App\Services\Contracts\PlayerCommandInterface;
+use DomainException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Executes group lifecycle and nested membership operations from a single coordination point.
@@ -24,8 +26,8 @@ class GroupCommandService implements GroupCommandInterface
     /**
      * Create a group coordinator that delegates member and player operations.
      *
-     * @param MemberCommandInterface $memberCommandService The service used for nested member operations.
-     * @param PlayerCommandInterface $playerCommandService The service used for nested player operations.
+     * @param  MemberCommandInterface  $memberCommandService  The service used for nested member operations.
+     * @param  PlayerCommandInterface  $playerCommandService  The service used for nested player operations.
      */
     public function __construct(
         private MemberCommandInterface $memberCommandService,
@@ -36,10 +38,11 @@ class GroupCommandService implements GroupCommandInterface
      * Persists a new group with normalized ownership and optional limit settings.
      *
      * @param  ValidatedGroupData  $data  Validated group data including name, owner_id, limits.
-     * @return Group  The created group instance.
+     * @return Group The created group instance.
      */
     public function create(ValidatedGroupData $data): Group
     {
+        // Build a strict persistence payload from validated DTO input.
         $groupData = [
             'name' => $data->name,
             'owner_id' => $data->owner_id,
@@ -53,6 +56,7 @@ class GroupCommandService implements GroupCommandInterface
             $groupData['player_limit'] = $data->player_limit;
         }
 
+        // Persist group identity and optional limits in one write.
         return Group::create($groupData);
     }
 
@@ -61,10 +65,11 @@ class GroupCommandService implements GroupCommandInterface
      *
      * @param  Group  $group  The group to update.
      * @param  ValidatedGroupData  $data  Validated data containing group information to update.
-     * @return Group  The updated group instance.
+     * @return Group The updated group instance.
      */
     public function update(Group $group, ValidatedGroupData $data): Group
     {
+        // Construct a partial update payload so unchanged values remain untouched.
         $updateData = [];
 
         if ($data->name !== null) {
@@ -87,6 +92,7 @@ class GroupCommandService implements GroupCommandInterface
             $updateData['enabled_prediction_policies'] = $data->enabled_prediction_policies;
         }
 
+        // Persist all selected fields as a single update unit.
         $group->fill($updateData);
         $group->save();
 
@@ -96,12 +102,13 @@ class GroupCommandService implements GroupCommandInterface
     /**
      * Applies only group-level optional prediction policy updates.
      *
-     * @param Group $group The group to update.
-     * @param ValidatedGroupPoliciesData $data Validated policy data to persist.
+     * @param  Group  $group  The group to update.
+     * @param  ValidatedGroupPoliciesData  $data  Validated policy data to persist.
      * @return Group The updated group instance.
      */
     public function updatePolicies(Group $group, ValidatedGroupPoliciesData $data): Group
     {
+        // Restrict this method to policy fields only.
         $group->fill([
             'enabled_prediction_policies' => $data->enabled_prediction_policies,
         ]);
@@ -125,10 +132,11 @@ class GroupCommandService implements GroupCommandInterface
      *
      * @param  Group  $group  The group to add the member to.
      * @param  ValidatedMemberData  $data  Validated member data.
-     * @return Member  The created member instance.
+     * @return Member The created member instance.
      */
     public function addMember(Group $group, ValidatedMemberData $data): Member
     {
+        // Delegate member creation so role/status defaults stay centralized.
         return $this->memberCommandService->createForGroup($group, $data);
     }
 
@@ -140,6 +148,12 @@ class GroupCommandService implements GroupCommandInterface
      */
     public function removeMember(Group $group, Member $member): void
     {
+        // Guard aggregate boundaries to avoid deleting members from a different group.
+        if ($member->group_id !== $group->id) {
+            throw new DomainException('Member does not belong to the provided group.');
+        }
+
+        // Delegate deletion so admin-safety constraints stay in one service.
         $this->memberCommandService->delete($member);
     }
 
@@ -149,10 +163,16 @@ class GroupCommandService implements GroupCommandInterface
      * @param  Group  $group  The group context.
      * @param  Member  $member  The member to add the player to.
      * @param  ValidatedPlayerData  $data  Validated player data.
-     * @return Player  The created player instance.
+     * @return Player The created player instance.
      */
     public function addPlayer(Group $group, Member $member, ValidatedPlayerData $data): Player
     {
+        // Guard aggregate boundaries to ensure players are created under the target group.
+        if ($member->group_id !== $group->id) {
+            throw new DomainException('Member does not belong to the provided group.');
+        }
+
+        // Delegate player creation to keep roster rules centralized.
         return $this->playerCommandService->createForMember($member, $data);
     }
 
@@ -166,6 +186,12 @@ class GroupCommandService implements GroupCommandInterface
      */
     public function removePlayer(Group $group, Member $member, Player $player): void
     {
+        // Guard aggregate boundaries before deletion.
+        if ($member->group_id !== $group->id || $player->member_id !== $member->id) {
+            throw new DomainException('Player does not belong to the provided group member.');
+        }
+
+        // Delegate to player command service for consistent delete behavior.
         $this->playerCommandService->delete($player);
     }
 
@@ -177,28 +203,39 @@ class GroupCommandService implements GroupCommandInterface
      * @param  ValidatedFollowData  $data  Validated follow data including team_id.
      * @return Follow The created follow instance.
      *
-     * @throws \Exception If the group is already following this team.
+     * @throws DomainException If the group is already following this team or follow limits are exceeded.
      */
     public function followTeam(Group $group, ValidatedFollowData $data): Follow
     {
-        $duplicateFollowExists = $group->follows()
-            ->where('team_id', $data->team_id)
-            ->where('sport', $data->sport?->value)
-            ->exists();
+        // Execute checks and creation atomically to avoid race conditions under concurrent requests.
+        return DB::transaction(function () use ($group, $data): Follow {
+            $lockedGroup = Group::query()
+                ->whereKey($group->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if ($duplicateFollowExists) {
-            throw new \Exception('This group is already following this team.');
-        }
+            // Prevent duplicate follows for the same team/sport pair.
+            $duplicateFollowExists = $lockedGroup->follows()
+                ->where('team_id', $data->team_id)
+                ->where('sport', $data->sport?->value)
+                ->exists();
 
-        $followCount = $group->follows()->count();
-        if ($followCount >= $group->follow_limit) {
-            throw new \Exception('This group has reached its follow limit.');
-        }
+            if ($duplicateFollowExists) {
+                throw new DomainException('This group is already following this team.');
+            }
 
-        return $group->follows()->create([
-            'team_id' => $data->team_id,
-            'sport' => $data->sport?->value,
-        ]);
+            // Enforce follow_limit before creating another follow record.
+            $followCount = $lockedGroup->follows()->count();
+            if ($followCount >= $lockedGroup->follow_limit) {
+                throw new DomainException('This group has reached its follow limit.');
+            }
+
+            // Persist the follow relationship scoped to the selected sport when present.
+            return $lockedGroup->follows()->create([
+                'team_id' => $data->team_id,
+                'sport' => $data->sport?->value,
+            ]);
+        });
     }
 
     /**
@@ -209,6 +246,7 @@ class GroupCommandService implements GroupCommandInterface
      */
     public function removeFollow(Group $group, Follow $follow): void
     {
+        // Scope deletion to the group relation to prevent cross-group removal.
         $group->follows()->whereKey($follow->id)->delete();
     }
 }

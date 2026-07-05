@@ -2,6 +2,7 @@
 
 use App\DTO\PredictionPolicyEvaluationResult;
 use App\DTO\PredictionPolicyViolation;
+use App\DTO\ValidatedPredictionData;
 use App\Exceptions\PredictionPolicyViolationException;
 use App\Models\Follow;
 use App\Models\Game;
@@ -285,7 +286,7 @@ describe('submitPrediction', function () {
                 ->withArgs(function ($boundPlayer, $dto) use ($player): bool {
                     return $boundPlayer instanceof Player
                         && $boundPlayer->id === $player->id
-                        && $dto instanceof \App\DTO\ValidatedPredictionData;
+                        && $dto instanceof ValidatedPredictionData;
                 })
                 ->andThrow(new PredictionPolicyViolationException($result));
         });
@@ -338,7 +339,7 @@ describe('updatePrediction', function () {
                 ->withArgs(function ($boundPrediction, $dto) use ($prediction): bool {
                     return $boundPrediction instanceof Prediction
                         && $boundPrediction->id === $prediction->id
-                        && $dto instanceof \App\DTO\ValidatedPredictionData;
+                        && $dto instanceof ValidatedPredictionData;
                 })
                 ->andThrow(new PredictionPolicyViolationException($result));
         });

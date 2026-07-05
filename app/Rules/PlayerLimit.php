@@ -19,10 +19,9 @@ class PlayerLimit implements ValidationRule
      * limit, while regular members are capped at the fixed per-member default. This dual
      * limit allows admins to provision more players than self-service members can.
      *
-     * @param string $attribute The dot-notation field name being validated.
-     * @param mixed $value The value under validation.
-     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
-     * @return void
+     * @param  string  $attribute  The dot-notation field name being validated.
+     * @param  mixed  $value  The value under validation.
+     * @param  Closure(string): void  $fail  Closure invoked with an error message if validation fails.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

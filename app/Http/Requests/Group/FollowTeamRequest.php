@@ -29,7 +29,7 @@ class FollowTeamRequest extends FormRequest
      *
      * Ensures the team exists and, if provided, that the sport is valid for that team.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team_id and sport validation rules.
+     * @return array<string, ValidationRule|array|string> The team_id and sport validation rules.
      */
     public function rules(): array
     {

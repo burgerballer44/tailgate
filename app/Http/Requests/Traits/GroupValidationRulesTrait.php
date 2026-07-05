@@ -4,6 +4,7 @@ namespace App\Http\Requests\Traits;
 
 use App\Rules\UserMustBeAMember;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 trait GroupValidationRulesTrait
 {
@@ -13,7 +14,7 @@ trait GroupValidationRulesTrait
      * Allows optional updates to group name and member/player limits while ensuring they conform
      * to reasonable constraints.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base group field validation rules.
+     * @return array<string, ValidationRule|array|string> The base group field validation rules.
      */
     public function baseRules(): array
     {
@@ -30,7 +31,7 @@ trait GroupValidationRulesTrait
      * Allows developers to change group ownership, which is restricted from the user-facing update endpoint.
      * The new owner must exist as a user in the system.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The admin group field validation rules.
+     * @return array<string, ValidationRule|array|string> The admin group field validation rules.
      */
     public function developerUpdateRules(): array
     {
@@ -44,7 +45,7 @@ trait GroupValidationRulesTrait
      *
      * Requires a group name and valid owner. The owner must exist as a user and be a member of the system.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group creation validation rules.
+     * @return array<string, ValidationRule|array|string> The group creation validation rules.
      */
     public function storeRules(): array
     {

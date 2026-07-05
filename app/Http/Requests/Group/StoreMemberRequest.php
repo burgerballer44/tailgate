@@ -30,7 +30,7 @@ class StoreMemberRequest extends FormRequest
      * Ensures the user exists, is not already a member of the group, and the group can accept
      * additional members. Also validates the role and status assignments.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member field validation rules.
+     * @return array<string, ValidationRule|array|string> The member field validation rules.
      */
     public function rules(): array
     {

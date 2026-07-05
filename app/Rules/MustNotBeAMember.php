@@ -23,8 +23,7 @@ class MustNotBeAMember implements DataAwareRule, ValidationRule
     /**
      * Captures request payload values needed for cross-field membership checks.
      *
-     * @param array<string, mixed> $data All validated request data.
-     * @return static
+     * @param  array<string, mixed>  $data  All validated request data.
      */
     public function setData(array $data): static
     {
@@ -36,10 +35,9 @@ class MustNotBeAMember implements DataAwareRule, ValidationRule
     /**
      * Validates that the target user is not already a member of the current group.
      *
-     * @param string $attribute The dot-notation field name being validated.
-     * @param mixed $value The value under validation.
-     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
-     * @return void
+     * @param  string  $attribute  The dot-notation field name being validated.
+     * @param  mixed  $value  The value under validation.
+     * @param  Closure(string): void  $fail  Closure invoked with an error message if validation fails.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

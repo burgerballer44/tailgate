@@ -16,7 +16,7 @@ trait UserValidationRulesTrait
      *
      * Validates that the user has a name, unique email, and valid status and role enum values.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base user field validation rules.
+     * @return array<string, ValidationRule|array|string> The base user field validation rules.
      */
     protected function baseRules(): array
     {
@@ -33,7 +33,7 @@ trait UserValidationRulesTrait
      *
      * Requires a unique email address that does not already exist in the system.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user creation validation rules.
+     * @return array<string, ValidationRule|array|string> The user creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -47,8 +47,8 @@ trait UserValidationRulesTrait
      *
      * Allows email to be updated while remaining unique, except for the user's current email address.
      *
-     * @param User $user The user being updated; used to exclude their current email from uniqueness check.
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user update validation rules.
+     * @param  User  $user  The user being updated; used to exclude their current email from uniqueness check.
+     * @return array<string, ValidationRule|array|string> The user update validation rules.
      */
     protected function updateRules(User $user): array
     {

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Traits;
 
 use App\Models\Sport;
 use App\Models\TeamType;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Enum;
 
 trait TeamValidationRulesTrait
@@ -15,7 +16,7 @@ trait TeamValidationRulesTrait
      * logos, social media links, team type, and supported sports. Color must be a valid hex code
      * if provided.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base team field validation rules.
+     * @return array<string, ValidationRule|array|string> The base team field validation rules.
      */
     protected function baseRules(): array
     {
@@ -40,7 +41,7 @@ trait TeamValidationRulesTrait
     /**
      * Define validation rules for creating a team.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team creation validation rules.
+     * @return array<string, ValidationRule|array|string> The team creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -50,7 +51,7 @@ trait TeamValidationRulesTrait
     /**
      * Define validation rules for updating a team.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team update validation rules.
+     * @return array<string, ValidationRule|array|string> The team update validation rules.
      */
     protected function updateRules(): array
     {
@@ -62,8 +63,6 @@ trait TeamValidationRulesTrait
      *
      * Form submissions may serialize complex fields as JSON strings. This method converts them
      * back to arrays so validation rules can properly validate array structure.
-     *
-     * @return void
      */
     protected function prepareTeamJsonFields(): void
     {
@@ -77,8 +76,7 @@ trait TeamValidationRulesTrait
      * This helper is used to convert JSON-encoded form fields into PHP arrays. It silently
      * ignores invalid JSON or non-string values, leaving them unchanged for validation to handle.
      *
-     * @param string $field The field name to decode.
-     * @return void
+     * @param  string  $field  The field name to decode.
      */
     private function decodeJsonArrayField(string $field): void
     {

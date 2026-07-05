@@ -12,13 +12,13 @@ use InvalidArgumentException;
 readonly class ValidatedGameData
 {
     /**
-     * @param int $season_id The ID of the season the game belongs to.
-     * @param int $home_team_id The ID of the home team.
-     * @param int $away_team_id The ID of the away team.
-     * @param int $home_team_score The final score of the home team.
-     * @param int $away_team_score The final score of the away team.
-     * @param string|null $start_date_time The start date and time in 'Y-m-d H:i:s' format, or null if unknown.
-     * @param bool $start_time_tbd Whether the start time is to be determined (TBD).
+     * @param  int  $season_id  The ID of the season the game belongs to.
+     * @param  int  $home_team_id  The ID of the home team.
+     * @param  int  $away_team_id  The ID of the away team.
+     * @param  int  $home_team_score  The final score of the home team.
+     * @param  int  $away_team_score  The final score of the away team.
+     * @param  string|null  $start_date_time  The start date and time in 'Y-m-d H:i:s' format, or null if unknown.
+     * @param  bool  $start_time_tbd  Whether the start time is to be determined (TBD).
      */
     public function __construct(
         public int $season_id,
@@ -37,10 +37,9 @@ readonly class ValidatedGameData
      * start_time_tbd automatically when only a date (no time component) is provided,
      * in addition to respecting an explicit start_time_tbd flag from the input.
      *
-     * @param array<string, mixed> $data Raw input data containing season, team, score, and start-time fields.
-     * @return self
+     * @param  array<string, mixed>  $data  Raw input data containing season, team, score, and start-time fields.
      *
-     * @throws \InvalidArgumentException If start_date_time is a non-empty string that cannot be parsed as a date.
+     * @throws InvalidArgumentException If start_date_time is a non-empty string that cannot be parsed as a date.
      */
     public static function fromArray(array $data): self
     {

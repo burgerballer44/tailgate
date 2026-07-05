@@ -14,10 +14,9 @@ class NoPredictionSubmitted implements ValidationRule
     /**
      * Validates that no existing prediction has already been submitted for this player and game.
      *
-     * @param string $attribute The dot-notation field name being validated.
-     * @param mixed $value The game ID being validated.
-     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
-     * @return void
+     * @param  string  $attribute  The dot-notation field name being validated.
+     * @param  mixed  $value  The game ID being validated.
+     * @param  Closure(string): void  $fail  Closure invoked with an error message if validation fails.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

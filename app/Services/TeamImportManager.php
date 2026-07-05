@@ -27,8 +27,8 @@ class TeamImportManager implements TeamImportManagerInterface
     /**
      * Create a team import coordinator with the configured command service and source registry.
      *
-     * @param TeamCommandInterface $teamCommandService The service responsible for team create and update operations.
-     * @param iterable<int, TeamImportSourceInterface> $sources Available team import sources keyed by iteration order.
+     * @param  TeamCommandInterface  $teamCommandService  The service responsible for team create and update operations.
+     * @param  iterable<int, TeamImportSourceInterface>  $sources  Available team import sources keyed by iteration order.
      */
     public function __construct(
         private readonly TeamCommandInterface $teamCommandService,
@@ -36,9 +36,9 @@ class TeamImportManager implements TeamImportManagerInterface
     ) {}
 
     /**
-     * Exposes team import sources and metadata for source selection UIs.
+     * Return team import source metadata.
      *
-     * @return array<int, array<string, string>> Available source metadata for import selection UIs.
+     * @return array<int, array<string, string>> Available source metadata for import configuration.
      */
     public function availableSources(): array
     {
@@ -56,7 +56,7 @@ class TeamImportManager implements TeamImportManagerInterface
     /**
      * Import teams from the configured source, batching work to keep memory usage bounded.
      *
-     * @param TeamImportData $data Import source selection and runtime options.
+     * @param  TeamImportData  $data  Import source selection and runtime options.
      * @return ImportResult A summary of imported, updated, and skipped teams.
      *
      * @throws TeamImportException When the requested source key is unavailable.
@@ -111,7 +111,7 @@ class TeamImportManager implements TeamImportManagerInterface
      * Persists a single chunk of ImportedTeamData DTOs, updating existing teams and creating new ones.
      * Uses a batched DB lookup to preload all matching teams for the chunk, avoiding N+1 queries.
      *
-     * @return array{0: int, 1: int}  A tuple of [importedCount, updatedCount] for the chunk.
+     * @return array{0: int, 1: int} A tuple of [importedCount, updatedCount] for the chunk.
      */
     private function importChunk(array $chunk, int $processedCount, array &$errors, array &$teamLookupCache): array
     {
@@ -389,7 +389,7 @@ class TeamImportManager implements TeamImportManagerInterface
      * Resolves a source key to the configured team import source implementation.
      *
      * @param  string  $key  The unique key identifying the desired team import source.
-     * @return TeamImportSourceInterface  The team import source instance matching the given key.
+     * @return TeamImportSourceInterface The team import source instance matching the given key.
      */
     private function resolveSource(string $key): TeamImportSourceInterface
     {

@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Developer;
 
-use App\Http\Controllers\Controller;
 use App\Exceptions\PredictionPolicyViolationException;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Group\StorePlayerRequest;
 use App\Http\Requests\Group\SubmitPredictionRequest;
 use App\Http\Requests\Group\UpdatePlayerRequest;
 use App\Http\Requests\Group\UpdatePredictionRequest;
-use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Prediction;
+use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\PlayerCommandInterface;
+use App\Services\Contracts\PlayerQueryInterface;
+use App\Services\Contracts\PredictionQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,19 +25,22 @@ class DeveloperPlayerController extends Controller
     /**
      * Build the developer player controller with player command operations.
      *
-     * @param PlayerCommandInterface $playerCommandService Service responsible for player and prediction write operations.
+     * @param  PlayerCommandInterface  $playerCommandService  Service responsible for player and prediction write operations.
      * @return void Initializes controller dependencies.
      */
     public function __construct(
-        private PlayerCommandInterface $playerCommandService
+        private PlayerCommandInterface $playerCommandService,
+        private PlayerQueryInterface $playerQueryService,
+        private GameQueryInterface $gameQueryService,
+        private PredictionQueryInterface $predictionQueryService,
     ) {}
 
     /**
      * Display a paginated list of players for a group member.
      *
-     * @param Request $request Incoming request context for pagination and future filters.
-     * @param Group $group Route-bound group context.
-     * @param Member $member Route-bound member whose players are being listed.
+     * @param  Request  $request  Incoming request context for pagination and future filters.
+     * @param  Group  $group  Route-bound group context.
+     * @param  Member  $member  Route-bound member whose players are being listed.
      * @return View Renders the developer player index for the selected member.
      */
     public function index(Request $request, Group $group, Member $member): View
@@ -43,15 +48,15 @@ class DeveloperPlayerController extends Controller
         return view('developer.players.index', [
             'group' => $group,
             'member' => $member,
-            'players' => $member->players()->paginate(),
+            'players' => $this->playerQueryService->getPlayersForMember($member)->paginate(),
         ]);
     }
 
     /**
      * Show the form for adding a player to a member.
      *
-     * @param Group $group Route-bound group context.
-     * @param Member $member Route-bound member who will own the new player.
+     * @param  Group  $group  Route-bound group context.
+     * @param  Member  $member  Route-bound member who will own the new player.
      * @return View Renders the developer player create form.
      */
     public function create(Group $group, Member $member): View
@@ -65,9 +70,9 @@ class DeveloperPlayerController extends Controller
     /**
      * Create a player for the selected member.
      *
-     * @param StorePlayerRequest $request Validated request containing new player details.
-     * @param Group $group Route-bound group context for post-create navigation.
-     * @param Member $member Route-bound member receiving the new player.
+     * @param  StorePlayerRequest  $request  Validated request containing new player details.
+     * @param  Group  $group  Route-bound group context for post-create navigation.
+     * @param  Member  $member  Route-bound member receiving the new player.
      * @return RedirectResponse Redirects to the member's player index after creation.
      */
     public function store(StorePlayerRequest $request, Group $group, Member $member): RedirectResponse
@@ -82,9 +87,9 @@ class DeveloperPlayerController extends Controller
     /**
      * Show one player and its predictions.
      *
-     * @param Group $group Route-bound group context.
-     * @param Member $member Route-bound member that owns the player.
-     * @param Player $player Route-bound player being viewed.
+     * @param  Group  $group  Route-bound group context.
+     * @param  Member  $member  Route-bound member that owns the player.
+     * @param  Player  $player  Route-bound player being viewed.
      * @return View Renders the player detail view with paginated predictions.
      */
     public function show(Group $group, Member $member, Player $player): View
@@ -93,16 +98,16 @@ class DeveloperPlayerController extends Controller
             'group' => $group,
             'member' => $member,
             'player' => $player->load('member.user'),
-            'predictions' => $player->predictions()->with(['game.homeTeam', 'game.awayTeam'])->paginate(),
+            'predictions' => $this->predictionQueryService->getPredictionsForPlayer($player)->paginate(),
         ]);
     }
 
     /**
      * Show the form for editing a player.
      *
-     * @param Group $group Route-bound group context.
-     * @param Member $member Route-bound member that owns the player.
-     * @param Player $player Route-bound player being edited.
+     * @param  Group  $group  Route-bound group context.
+     * @param  Member  $member  Route-bound member that owns the player.
+     * @param  Player  $player  Route-bound player being edited.
      * @return View Renders the player edit form.
      */
     public function edit(Group $group, Member $member, Player $player): View
@@ -117,10 +122,10 @@ class DeveloperPlayerController extends Controller
     /**
      * Update an existing player.
      *
-     * @param UpdatePlayerRequest $request Validated request containing updated player values.
-     * @param Group $group Route-bound group context for post-update navigation.
-     * @param Member $member Route-bound member that owns the player.
-     * @param Player $player Route-bound player being updated.
+     * @param  UpdatePlayerRequest  $request  Validated request containing updated player values.
+     * @param  Group  $group  Route-bound group context for post-update navigation.
+     * @param  Member  $member  Route-bound member that owns the player.
+     * @param  Player  $player  Route-bound player being updated.
      * @return RedirectResponse Redirects to the member player index after update.
      */
     public function update(UpdatePlayerRequest $request, Group $group, Member $member, Player $player): RedirectResponse
@@ -135,9 +140,9 @@ class DeveloperPlayerController extends Controller
     /**
      * Remove a player from a member.
      *
-     * @param Group $group Route-bound group context for post-delete navigation.
-     * @param Member $member Route-bound member that owns the player.
-     * @param Player $player Route-bound player to delete.
+     * @param  Group  $group  Route-bound group context for post-delete navigation.
+     * @param  Member  $member  Route-bound member that owns the player.
+     * @param  Player  $player  Route-bound player to delete.
      * @return RedirectResponse Redirects to the member player index after deletion.
      */
     public function destroy(Group $group, Member $member, Player $player): RedirectResponse
@@ -152,17 +157,15 @@ class DeveloperPlayerController extends Controller
     /**
      * Show the prediction submission form for a player.
      *
-     * @param Group $group Route-bound group used to scope eligible prediction games.
-     * @param Member $member Route-bound member that owns the player.
-     * @param Player $player Route-bound player submitting predictions.
+     * @param  Group  $group  Route-bound group used to scope eligible prediction games.
+     * @param  Member  $member  Route-bound member that owns the player.
+     * @param  Player  $player  Route-bound player submitting predictions.
      * @return View Renders the prediction submission form.
      */
     public function createPrediction(Group $group, Member $member, Player $player): View
     {
         // Predictions are limited to followed-season games so members cannot predict unrelated schedules.
-        $games = Game::whereHas('season.follows', function ($query) use ($group) {
-            $query->where('group_id', $group->id);
-        })->with(['homeTeam', 'awayTeam'])->get();
+        $games = $this->gameQueryService->getGamesForGroupFollowSelection($group)->get();
 
         return view('developer.players.submit-prediction', [
             'group' => $group,
@@ -175,10 +178,10 @@ class DeveloperPlayerController extends Controller
     /**
      * Submit a new prediction for a player.
      *
-     * @param SubmitPredictionRequest $request Validated request containing prediction data.
-     * @param Group $group Route-bound group context for redirect routing.
-     * @param Member $member Route-bound member that owns the player.
-     * @param Player $player Route-bound player receiving the new prediction.
+     * @param  SubmitPredictionRequest  $request  Validated request containing prediction data.
+     * @param  Group  $group  Route-bound group context for redirect routing.
+     * @param  Member  $member  Route-bound member that owns the player.
+     * @param  Player  $player  Route-bound player receiving the new prediction.
      * @return RedirectResponse Redirects back to the player detail or back with input when policy validation fails.
      */
     public function submitPrediction(SubmitPredictionRequest $request, Group $group, Member $member, Player $player): RedirectResponse
@@ -199,11 +202,11 @@ class DeveloperPlayerController extends Controller
     /**
      * Update an existing player prediction.
      *
-     * @param UpdatePredictionRequest $request Validated request with updated prediction values.
-     * @param Group $group Route-bound group context for redirect routing.
-     * @param Member $member Route-bound member that owns the player.
-     * @param Player $player Route-bound player that owns the prediction.
-     * @param Prediction $prediction Route-bound prediction being updated.
+     * @param  UpdatePredictionRequest  $request  Validated request with updated prediction values.
+     * @param  Group  $group  Route-bound group context for redirect routing.
+     * @param  Member  $member  Route-bound member that owns the player.
+     * @param  Player  $player  Route-bound player that owns the prediction.
+     * @param  Prediction  $prediction  Route-bound prediction being updated.
      * @return RedirectResponse Redirects back to the player detail or back with input when policy validation fails.
      */
     public function updatePrediction(UpdatePredictionRequest $request, Group $group, Member $member, Player $player, Prediction $prediction): RedirectResponse
@@ -224,10 +227,10 @@ class DeveloperPlayerController extends Controller
     /**
      * Show the form for editing an existing prediction.
      *
-     * @param Group $group Route-bound group context.
-     * @param Member $member Route-bound member context.
-     * @param Player $player Route-bound player context.
-     * @param Prediction $prediction Route-bound prediction being edited.
+     * @param  Group  $group  Route-bound group context.
+     * @param  Member  $member  Route-bound member context.
+     * @param  Player  $player  Route-bound player context.
+     * @param  Prediction  $prediction  Route-bound prediction being edited.
      * @return View Renders the prediction edit screen.
      */
     public function editPrediction(Group $group, Member $member, Player $player, Prediction $prediction): View
@@ -243,10 +246,10 @@ class DeveloperPlayerController extends Controller
     /**
      * Delete an existing prediction.
      *
-     * @param Group $group Route-bound group context for redirect routing.
-     * @param Member $member Route-bound member context.
-     * @param Player $player Route-bound player context.
-     * @param Prediction $prediction Route-bound prediction to delete.
+     * @param  Group  $group  Route-bound group context for redirect routing.
+     * @param  Member  $member  Route-bound member context.
+     * @param  Player  $player  Route-bound player context.
+     * @param  Prediction  $prediction  Route-bound prediction to delete.
      * @return RedirectResponse Redirects back to the player detail after deletion.
      */
     public function destroyPrediction(Group $group, Member $member, Player $player, Prediction $prediction): RedirectResponse

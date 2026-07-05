@@ -17,14 +17,14 @@ class SocialAuthenticationService
     /**
      * Resolve a local user account from the given provider user details.
      *
-    * This resolves an existing linked account first, then falls back to matching
-    * by email and creating a new user when no local account exists.
+     * This resolves an existing linked account first, then falls back to matching
+     * by email and creating a new user when no local account exists.
      *
-    * @param string $provider The external authentication provider key, such as `google`.
-    * @param ProviderUser $providerUser The identity payload returned by the provider.
-    * @return User The resolved local user account, either existing or newly created.
+     * @param  string  $provider  The external authentication provider key, such as `google`.
+     * @param  ProviderUser  $providerUser  The identity payload returned by the provider.
+     * @return User The resolved local user account, either existing or newly created.
      *
-    * @throws SocialAuthenticationException When the provider does not return a usable user ID or email.
+     * @throws SocialAuthenticationException When the provider does not return a usable user ID or email.
      */
     public function resolveUserFromProvider(string $provider, ProviderUser $providerUser): User
     {
@@ -88,11 +88,10 @@ class SocialAuthenticationService
     /**
      * Update the metadata of a linked social account based on the latest provider user details.
      *
-        * Keeps local account metadata aligned with the latest provider payload.
+     * Keeps local account metadata aligned with the latest provider payload.
      *
-        * @param SocialAccount $account The linked social account to refresh.
-        * @param ProviderUser $providerUser The latest user details from the authentication provider.
-        * @return void
+     * @param  SocialAccount  $account  The linked social account to refresh.
+     * @param  ProviderUser  $providerUser  The latest user details from the authentication provider.
      */
     protected function updateSocialAccountMetadata(SocialAccount $account, ProviderUser $providerUser): void
     {
@@ -112,12 +111,12 @@ class SocialAuthenticationService
     /**
      * Resolve a display name for the user based on the provider user details and email.
      *
-        * Uses the provider's name when available, otherwise derives a title-cased name
-        * from the local part of the email address.
+     * Uses the provider's name when available, otherwise derives a title-cased name
+     * from the local part of the email address.
      *
-        * @param ProviderUser $providerUser The user details returned by the authentication provider.
-        * @param string $email The provider email used as a fallback name source.
-        * @return string The resolved display name for the user.
+     * @param  ProviderUser  $providerUser  The user details returned by the authentication provider.
+     * @param  string  $email  The provider email used as a fallback name source.
+     * @return string The resolved display name for the user.
      */
     protected function resolveName(ProviderUser $providerUser, string $email): string
     {

@@ -30,7 +30,7 @@ class UpdateMemberRequest extends FormRequest
      * Allows updating a member's role and status. Role changes enforce a minimum admin requirement
      * to prevent removing all admins from the group.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The member field validation rules.
+     * @return array<string, ValidationRule|array|string> The member field validation rules.
      */
     public function rules(): array
     {

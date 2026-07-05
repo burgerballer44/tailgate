@@ -17,12 +17,13 @@ class TeamCommandService implements TeamCommandInterface
     /**
      * Persists a new team with normalized identity, metadata, and sport associations.
      *
-     * @param ValidatedTeamData $data Validated team data including identity, metadata, sports,
-     * and per-sport conference mappings.
+     * @param  ValidatedTeamData  $data  Validated team data including identity, metadata, sports,
+     *                                   and per-sport conference mappings.
      * @return Team The created team instance with any sport relations attached.
      */
     public function create(ValidatedTeamData $data): Team
     {
+        // Build the core team payload before persisting relationships.
         $teamData = [
             'organization' => $data->organization,
             'designation' => $data->designation,
@@ -33,6 +34,7 @@ class TeamCommandService implements TeamCommandInterface
             'type' => $data->type->value,
         ];
 
+        // Persist the base team first so relationship records have a foreign key.
         $team = Team::create($teamData);
 
         // batch-insert all sports in a single query rather than one insert per sport
@@ -51,9 +53,9 @@ class TeamCommandService implements TeamCommandInterface
     /**
      * Applies identity, metadata, and sport-association changes to an existing team.
      *
-     * @param Team $team The team to update.
-     * @param ValidatedTeamData $data Validated data to apply to the team, including any
-     * sport-specific conference changes.
+     * @param  Team  $team  The team to update.
+     * @param  ValidatedTeamData  $data  Validated data to apply to the team, including any
+     *                                   sport-specific conference changes.
      * @return Team The updated team instance.
      */
     public function update(Team $team, ValidatedTeamData $data): Team
@@ -69,6 +71,7 @@ class TeamCommandService implements TeamCommandInterface
             'type' => $data->type->value,
         ];
 
+        // Persist top-level fields before syncing sport associations.
         $team->fill($updateData);
         $team->save();
 
@@ -81,6 +84,7 @@ class TeamCommandService implements TeamCommandInterface
                 $incomingConferenceBySport[$sportValue] = $data->sportConferences[$sportValue] ?? $data->conference;
             }
 
+            // Load existing relations once to compute add/remove/update deltas.
             $existingSports = $team->sports()->get();
             $existingValues = $existingSports
                 ->pluck('sport')
@@ -90,10 +94,12 @@ class TeamCommandService implements TeamCommandInterface
             $toAdd = array_values(array_diff($incomingValues, $existingValues));
             $toRemove = array_values(array_diff($existingValues, $incomingValues));
 
+            // Remove relations that are no longer part of the requested state.
             if ($toRemove !== []) {
                 $team->sports()->whereIn('sport', $toRemove)->delete();
             }
 
+            // Insert newly requested sport rows in a single query.
             if ($toAdd !== []) {
                 $team->sports()->createMany(
                     array_map(fn ($value) => [
@@ -103,6 +109,7 @@ class TeamCommandService implements TeamCommandInterface
                 );
             }
 
+            // Update conference metadata for retained sport rows.
             foreach ($existingSports as $existingSport) {
                 $sportValue = $existingSport->sport instanceof Sport
                     ? $existingSport->sport->value
@@ -127,11 +134,11 @@ class TeamCommandService implements TeamCommandInterface
     /**
      * Removes a team record from persistence.
      *
-     * @param Team $team The team to delete.
-     * @return void
+     * @param  Team  $team  The team to delete.
      */
     public function delete(Team $team): void
     {
+        // Delete by key to avoid mutating in-memory model state.
         Team::destroy($team->getKey());
     }
 }

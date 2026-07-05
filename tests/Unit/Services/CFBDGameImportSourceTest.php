@@ -6,8 +6,8 @@ use App\DTO\ImportedGameData;
 use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
-use App\Models\Sport;
 use App\Models\SeasonType;
+use App\Models\Sport;
 use App\Services\ImportSources\CFBDGameImportSource;
 use Tests\TestCase;
 

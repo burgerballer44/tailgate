@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Restricts follow-scoped routes to follows that belong to the current group.
@@ -17,10 +18,11 @@ class FollowBelongsToGroup
      * Returning 404 for both missing bindings and mismatched ownership keeps the
      * route from exposing whether the follow exists outside the group.
      *
-     * @param Request $request The current request, used to resolve the routed group and follow.
-     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @param  Request  $request  The current request, used to resolve the routed group and follow.
+     * @param  Closure(Request): Response  $next  The next middleware or controller to execute.
      * @return Response The downstream response when the follow belongs to the group.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the group or follow is missing or the follow does not belong to the group.
+     *
+     * @throws HttpException When the group or follow is missing or the follow does not belong to the group.
      */
     public function handle(Request $request, Closure $next): Response
     {

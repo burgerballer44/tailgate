@@ -52,8 +52,6 @@ class Follow extends Model
 
     /**
      * Register model lifecycle hooks used to seed identifiers.
-     *
-     * @return void
      */
     protected static function booted(): void
     {

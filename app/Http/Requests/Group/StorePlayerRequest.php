@@ -30,7 +30,7 @@ class StorePlayerRequest extends FormRequest
      * Ensures the player name is unique within the group and the group has not exceeded its
      * player limit. Validates the player_name field.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player field validation rules.
+     * @return array<string, ValidationRule|array|string> The player field validation rules.
      */
     public function rules(): array
     {

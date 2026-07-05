@@ -8,8 +8,9 @@ use App\Models\PredictionPolicyScope;
 use App\Services\Contracts\PredictionPolicyRuleInterface;
 
 /**
- * Prevents multiple players in the same group from submitting predictions for the same game.
- * This is a group-level policy that only runs when enabled by the group.
+ * Enforces one prediction per game within a group.
+ *
+ * This group-level rule is optional and runs only when enabled.
  */
 class UniqueGroupPredictionPolicy implements PredictionPolicyRuleInterface
 {
@@ -24,7 +25,7 @@ class UniqueGroupPredictionPolicy implements PredictionPolicyRuleInterface
     }
 
     /**
-     * Returns the short label used in UI and violation summaries.
+     * Returns the short label used in violation summaries.
      *
      * @return string Human-readable name displayed in violation messages and policy management screens.
      */
@@ -36,7 +37,7 @@ class UniqueGroupPredictionPolicy implements PredictionPolicyRuleInterface
     /**
      * Explains the business rule enforced by this policy.
      *
-     * @return string Full human-readable description of the constraint, suitable for user-facing display.
+     * @return string Human-readable rule description.
      */
     public function description(): string
     {
@@ -54,12 +55,12 @@ class UniqueGroupPredictionPolicy implements PredictionPolicyRuleInterface
     }
 
     /**
-     * Returns true when no other player in the same group has already predicted the game.
+     * Return true when no other group player has already predicted this game.
      *
      * When evaluating an update, the current prediction is excluded from the duplicate
      * check so a player can re-submit their own prediction without triggering a violation.
      *
-     * @param PredictionPolicyContext $context The submission context including the player, group, game, and prediction data.
+     * @param  PredictionPolicyContext  $context  The submission context including the player, group, game, and prediction data.
      * @return bool True if no conflicting prediction exists in the group; false triggers a violation.
      */
     public function passes(PredictionPolicyContext $context): bool

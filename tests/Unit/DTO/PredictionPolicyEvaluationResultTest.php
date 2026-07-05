@@ -6,7 +6,7 @@ use App\Models\PredictionPolicyScope;
 
 describe('isValid', function () {
     test('returns true when no violations exist', function () {
-        $result = new PredictionPolicyEvaluationResult();
+        $result = new PredictionPolicyEvaluationResult;
 
         expect($result->isValid())->toBeTrue();
     });
@@ -27,7 +27,7 @@ describe('isValid', function () {
 
 describe('hasViolations', function () {
     test('returns false when no violations exist', function () {
-        $result = new PredictionPolicyEvaluationResult();
+        $result = new PredictionPolicyEvaluationResult;
 
         expect($result->hasViolations())->toBeFalse();
     });
@@ -48,7 +48,7 @@ describe('hasViolations', function () {
 
 describe('summary', function () {
     test('returns success summary when there are no violations', function () {
-        $result = new PredictionPolicyEvaluationResult();
+        $result = new PredictionPolicyEvaluationResult;
 
         expect($result->summary())->toBe('Prediction submission is valid.');
     });

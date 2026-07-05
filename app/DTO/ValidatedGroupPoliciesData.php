@@ -11,7 +11,7 @@ namespace App\DTO;
 readonly class ValidatedGroupPoliciesData
 {
     /**
-     * @param array<int, string> $enabled_prediction_policies Group-level policy keys to enable.
+     * @param  array<int, string>  $enabled_prediction_policies  Group-level policy keys to enable.
      */
     public function __construct(
         public array $enabled_prediction_policies,
@@ -20,7 +20,7 @@ readonly class ValidatedGroupPoliciesData
     /**
      * Construct from raw validated request input.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function fromArray(array $data): self
     {

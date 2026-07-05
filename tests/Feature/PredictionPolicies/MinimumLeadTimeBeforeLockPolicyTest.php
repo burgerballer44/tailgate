@@ -28,7 +28,6 @@ function makeLeadTimeContext(Game $game): PredictionPolicyContext
     );
 }
 
-
 test('returns expected metadata', function () {
     $policy = new MinimumLeadTimeBeforeLockPolicy;
 

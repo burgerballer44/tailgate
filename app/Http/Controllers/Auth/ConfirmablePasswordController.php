@@ -26,7 +26,8 @@ class ConfirmablePasswordController extends Controller
      *
      * @param  Request  $request  The current request containing the entered password.
      * @return RedirectResponse A redirect to the intended protected page once confirmation succeeds.
-     * @throws \Illuminate\Validation\ValidationException When the supplied password does not match.
+     *
+     * @throws ValidationException When the supplied password does not match.
      */
     public function store(Request $request): RedirectResponse
     {

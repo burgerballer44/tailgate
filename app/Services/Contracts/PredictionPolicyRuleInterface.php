@@ -6,7 +6,10 @@ use App\DTO\PredictionPolicyContext;
 use App\Models\PredictionPolicyScope;
 
 /**
- * Implementations provide metadata for UI/reporting and policy evaluation logic.
+ * Defines a single prediction policy rule.
+ *
+ * Each rule provides stable metadata for configuration and violation reporting,
+ * and encapsulates one pass/fail enforcement check.
  */
 interface PredictionPolicyRuleInterface
 {
@@ -18,7 +21,7 @@ interface PredictionPolicyRuleInterface
     public function key(): string;
 
     /**
-     * Returns a short human-readable title shown in UI and feedback.
+     * Returns a short human-readable name for this rule.
      *
      * @return string The display label for the policy.
      */
@@ -42,7 +45,7 @@ interface PredictionPolicyRuleInterface
      * Evaluates the rule against the provided prediction submission context.
      * Returns true when the submission satisfies this rule, false otherwise.
      *
-     * @param PredictionPolicyContext $context The submission context used by the policy.
+     * @param  PredictionPolicyContext  $context  The submission context used by the policy.
      * @return bool True when the submission passes the policy.
      */
     public function passes(PredictionPolicyContext $context): bool;

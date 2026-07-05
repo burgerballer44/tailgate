@@ -7,6 +7,7 @@ use App\Models\HtmlEntity;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 describe('isAdminOrOwner', function () {
     test('returns true for group owner', function () {
@@ -161,7 +162,7 @@ describe('model defaults and accessors', function () {
 
         $display = $group->enabled_prediction_policies_display;
 
-        expect($display)->toBeInstanceOf(\Illuminate\Support\HtmlString::class);
+        expect($display)->toBeInstanceOf(HtmlString::class);
         expect($display->toHtml())->toContain('Unique group prediction');
         expect($display->toHtml())->toContain('Minimum lead time before lock');
     });

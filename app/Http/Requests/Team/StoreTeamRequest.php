@@ -5,6 +5,7 @@ namespace App\Http\Requests\Team;
 use App\DTO\ValidatedTeamData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\TeamValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class StoreTeamRequest extends FormRequest
 {
@@ -16,8 +17,6 @@ class StoreTeamRequest extends FormRequest
      * Converts JSON string representations of logos and social media arrays into PHP arrays
      * to allow validation against array rules. This is necessary because form submissions may
      * serialize these complex fields as JSON strings.
-     *
-     * @return void
      */
     protected function prepareForValidation(): void
     {
@@ -44,7 +43,7 @@ class StoreTeamRequest extends FormRequest
      * a default conference for selected sports, abbreviation, logos, social media, team type,
      * and supported sports. Optional fields like colors are also validated.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The team field validation rules.
+     * @return array<string, ValidationRule|array|string> The team field validation rules.
      */
     public function rules(): array
     {

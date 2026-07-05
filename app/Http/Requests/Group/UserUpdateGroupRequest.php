@@ -5,6 +5,7 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UserUpdateGroupRequest extends FormRequest
 {
@@ -29,7 +30,7 @@ class UserUpdateGroupRequest extends FormRequest
      * Allows group owners to update basic group information.
      * Sensitive fields like owner changes are not included.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group field validation rules.
+     * @return array<string, ValidationRule|array|string> The group field validation rules.
      */
     public function rules(): array
     {
@@ -43,7 +44,7 @@ class UserUpdateGroupRequest extends FormRequest
      *
      * Injects the group owner ID since the owner cannot be changed through this endpoint.
      *
-     * @param int $ownerId The ID of the group owner (typically the authenticated user).
+     * @param  int  $ownerId  The ID of the group owner (typically the authenticated user).
      * @return ValidatedGroupData The validated group data transfer object.
      */
     public function toDTO(int $ownerId): ValidatedGroupData

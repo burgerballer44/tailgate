@@ -40,9 +40,7 @@ class LoginRequest extends FormRequest
     /**
      * Attempt to authenticate the submitted credentials and update the rate limiter.
      *
-     * @return void
      * @throws ValidationException When the credentials are invalid or the request is rate limited.
-     *
      */
     public function authenticate(): void
     {
@@ -62,9 +60,7 @@ class LoginRequest extends FormRequest
     /**
      * Guard the login flow against excessive failed attempts.
      *
-     * @return void
      * @throws ValidationException When the request has already exceeded the allowed attempt count.
-     *
      */
     public function ensureIsNotRateLimited(): void
     {

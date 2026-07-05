@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
      * enums are valid. Retrieves the user from the route parameter to validate against
      * the correct user record.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The user field validation rules.
+     * @return array<string, ValidationRule|array|string> The user field validation rules.
      */
     public function rules(): array
     {

@@ -13,7 +13,7 @@ trait PlayerValidationRulesTrait
      *
      * Validates that the player has a non-empty name as a string.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The base player field validation rules.
+     * @return array<string, ValidationRule|array|string> The base player field validation rules.
      */
     protected function baseRules(): array
     {
@@ -28,7 +28,7 @@ trait PlayerValidationRulesTrait
      * Ensures the player name is unique within the group and the group has not exceeded its
      * player limit.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player creation validation rules.
+     * @return array<string, ValidationRule|array|string> The player creation validation rules.
      */
     protected function storeRules(): array
     {
@@ -42,7 +42,7 @@ trait PlayerValidationRulesTrait
      *
      * Allows changing the player name and optionally reassigning the player to a different member.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player update validation rules.
+     * @return array<string, ValidationRule|array|string> The player update validation rules.
      */
     protected function updateRules(): array
     {

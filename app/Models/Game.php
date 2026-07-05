@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use App\Models\Prediction;
 
 class Game extends Model
 {
@@ -63,8 +62,6 @@ class Game extends Model
 
     /**
      * Register model lifecycle hooks used to seed identifiers.
-     *
-     * @return void
      */
     protected static function booted(): void
     {

@@ -7,8 +7,9 @@ use App\Models\PredictionPolicyScope;
 use App\Services\Contracts\PredictionPolicyRuleInterface;
 
 /**
- * Prevents predictions from being submitted after the game lock time.
- * This is an app-level policy that applies to every submission.
+ * Enforces the default game lock-time rule.
+ *
+ * This app-level policy applies to every prediction submission and update.
  */
 class PredictionLockTimePolicy implements PredictionPolicyRuleInterface
 {
@@ -23,7 +24,7 @@ class PredictionLockTimePolicy implements PredictionPolicyRuleInterface
     }
 
     /**
-     * Returns the short label used in UI and violation summaries.
+     * Returns the short label used in violation summaries.
      *
      * @return string Human-readable name displayed in violation messages and policy management screens.
      */
@@ -35,7 +36,7 @@ class PredictionLockTimePolicy implements PredictionPolicyRuleInterface
     /**
      * Explains the business rule enforced by this policy.
      *
-     * @return string Full human-readable description of the constraint, suitable for user-facing display.
+     * @return string Human-readable rule description.
      */
     public function description(): string
     {
@@ -53,16 +54,16 @@ class PredictionLockTimePolicy implements PredictionPolicyRuleInterface
     }
 
     /**
-     * Returns true when the game has not yet reached its lock time.
+     * Return true when the game's lock time has not passed.
      *
      * TBD games compare by date only so day-based locking still works — comparing
      * full datetimes for a TBD game would incorrectly block same-day submissions
      * made before midnight.
      *
-     * If the game's start time cannot be parsed as a valid datetime, the check is
-     * skipped and the submission is allowed through.
+     * If start time parsing fails, the rule allows the submission to avoid
+     * blocking all predictions because of malformed source data.
      *
-     * @param PredictionPolicyContext $context The submission context including the player, group, game, and prediction data.
+     * @param  PredictionPolicyContext  $context  The submission context including the player, group, game, and prediction data.
      * @return bool True if the game's lock time has not yet passed; false triggers a violation.
      */
     public function passes(PredictionPolicyContext $context): bool

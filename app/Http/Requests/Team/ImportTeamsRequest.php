@@ -14,7 +14,7 @@ class ImportTeamsRequest extends FormRequest
     /**
      * Construct a team import request with dependency injection.
      *
-     * @param TeamImportManagerInterface $manager The service that provides available import sources.
+     * @param  TeamImportManagerInterface  $manager  The service that provides available import sources.
      */
     public function __construct(private TeamImportManagerInterface $manager) {}
 
@@ -37,7 +37,7 @@ class ImportTeamsRequest extends FormRequest
      * Ensures the import source is valid (checked against available sources from TeamImportManager),
      * year is within acceptable range, and optional conference filter is a string.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The import field validation rules.
+     * @return array<string, ValidationRule|array|string> The import field validation rules.
      */
     public function rules(): array
     {
@@ -85,8 +85,9 @@ class ImportTeamsRequest extends FormRequest
      * JSON requests receive the standard Laravel validation response. Browser requests receive
      * a flash alert in addition to the validation exception to provide user-facing feedback.
      *
-     * @param Validator $validator The validator instance containing failed rules.
+     * @param  Validator  $validator  The validator instance containing failed rules.
      * @return void
+     *
      * @throws ValidationException Always thrown with appropriate error bag and redirect location.
      */
     protected function failedValidation(Validator $validator)

@@ -7,16 +7,14 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
- * Retrieves season information and related game data, and discovers available seasons.
- * Provides season lookups with eager-loaded games and teams, and lists active seasons for following workflows,
- * supporting season browsing and game management features.
+ * Defines read operations for seasons and season-related lookups.
  */
 interface SeasonQueryInterface
 {
     /**
      * Build a season query from supported filters.
      *
-     * @param array<string, mixed> $query Associative query parameters used to filter seasons.
+     * @param  array<string, mixed>  $query  Associative query parameters used to filter seasons.
      * @return Builder The filtered season query.
      */
     public function query(array $query): Builder;
@@ -24,15 +22,15 @@ interface SeasonQueryInterface
     /**
      * Load a season with its games and related teams.
      *
-     * @param Season $season The season to load.
+     * @param  Season  $season  The season to load.
      * @return Season The same season instance with nested relationships loaded.
      */
     public function loadWithGames(Season $season): Season;
 
     /**
-     * Get active seasons available for follow workflows.
+     * Get active seasons that can be used when configuring follows.
      *
-     * @return Collection<int, \App\Models\Season> Active seasons ordered for selection UIs.
+     * @return Collection<int, Season> Active seasons ordered for stable selection.
      */
     public function getAvailableSeasonsForFollow(): Collection;
 }

@@ -13,7 +13,7 @@ class PasswordController extends Controller
     /**
      * Build the password controller with the user command service.
      *
-     * @param UserCommandInterface $userCommandService Service used to mutate user credentials.
+     * @param  UserCommandInterface  $userCommandService  Service used to mutate user credentials.
      * @return void Initializes controller dependencies.
      */
     public function __construct(

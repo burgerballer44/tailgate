@@ -19,17 +19,19 @@ use App\Models\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\Sport;
-use App\Services\Contracts\PlayerCommandInterface;
-use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GameQueryInterface;
+use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\MemberCommandInterface;
 use App\Services\Contracts\MemberQueryInterface;
+use App\Services\Contracts\PlayerCommandInterface;
 use App\Services\Contracts\PlayerQueryInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
+use App\Services\Contracts\PredictionQueryInterface;
 use App\Services\Contracts\TeamQueryInterface;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -56,6 +58,7 @@ class GroupController extends Controller
         private MemberQueryInterface $memberQueryService,
         private PlayerCommandInterface $playerCommandService,
         private PlayerQueryInterface $playerQueryService,
+        private PredictionQueryInterface $predictionQueryService,
         private PredictionPolicyEvaluatorInterface $policyEvaluator,
         private TeamQueryInterface $teamQueryService,
     ) {}
@@ -196,7 +199,7 @@ class GroupController extends Controller
             $group->load('owner')->loadCount('members');
         }
 
-        $memberPlayers = collect();
+        $memberPlayers = new EloquentCollection;
         if (in_array($activeTab, ['players', 'upcoming-games'], true)) {
             $memberPlayers = $this->playerQueryService->getAllForMember($currentMember);
         }
@@ -207,10 +210,7 @@ class GroupController extends Controller
             $upcomingGames = $this->gameQueryService->getUpcomingGamesForGroup($group);
 
             if ($memberPlayers->isNotEmpty() && $upcomingGames->isNotEmpty()) {
-                $predictions = Prediction::query()
-                    ->whereIn('player_id', $memberPlayers->pluck('id'))
-                    ->whereIn('game_id', $upcomingGames->pluck('id'))
-                    ->get();
+                $predictions = $this->predictionQueryService->getPredictionsForPlayersAndGames($memberPlayers, $upcomingGames);
 
                 foreach ($predictions as $prediction) {
                     $predictionLookup[$prediction->game_id.':'.$prediction->player_id] = [
@@ -387,9 +387,9 @@ class GroupController extends Controller
      * This method displays the group management form where admins can
      * manage group settings, approve/reject join requests, and manage members.
      *
-        * @param Request $request The incoming request used to resolve member-selection context.
-        * @param Group $group The group to edit.
-        * @return View Returns the group edit view.
+     * @param  Request  $request  The incoming request used to resolve member-selection context.
+     * @param  Group  $group  The group to edit.
+     * @return View Returns the group edit view.
      */
     public function edit(Request $request, Group $group): View
     {

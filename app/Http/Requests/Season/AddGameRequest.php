@@ -41,8 +41,6 @@ class AddGameRequest extends FormRequest
      *
      * This ensures that the checkbox field is properly converted to a boolean value before
      * validation runs, allowing the validation rules to expect a boolean type.
-     *
-     * @return void
      */
     protected function prepareForValidation(): void
     {

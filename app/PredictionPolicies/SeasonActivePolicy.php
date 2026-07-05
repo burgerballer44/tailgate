@@ -7,8 +7,9 @@ use App\Models\PredictionPolicyScope;
 use App\Services\Contracts\PredictionPolicyRuleInterface;
 
 /**
- * Requires the game to belong to an active season before a prediction is accepted.
- * This is an app-level policy applied to every submission.
+ * Requires the target game to belong to an active season.
+ *
+ * This app-level policy is enforced for every prediction submission and update.
  */
 class SeasonActivePolicy implements PredictionPolicyRuleInterface
 {
@@ -23,7 +24,7 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
     }
 
     /**
-     * Returns the short label used in UI and violation summaries.
+     * Returns the short label used in violation summaries.
      *
      * @return string Human-readable name displayed in violation messages and policy management screens.
      */
@@ -35,7 +36,7 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
     /**
      * Explains the business rule enforced by this policy.
      *
-     * @return string Full human-readable description of the constraint, suitable for user-facing display.
+     * @return string Human-readable rule description.
      */
     public function description(): string
     {
@@ -59,7 +60,7 @@ class SeasonActivePolicy implements PredictionPolicyRuleInterface
      * a season relationship loaded; in that case the policy fails closed (returns false)
      * to prevent predictions on orphaned games.
      *
-     * @param PredictionPolicyContext $context The submission context including the player, group, game, and prediction data.
+     * @param  PredictionPolicyContext  $context  The submission context including the player, group, game, and prediction data.
      * @return bool True if the game's season is present and active; false triggers a violation.
      */
     public function passes(PredictionPolicyContext $context): bool

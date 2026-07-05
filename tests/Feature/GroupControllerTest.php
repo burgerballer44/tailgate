@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Follow;
+use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
@@ -8,7 +9,6 @@ use App\Models\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\Season;
-use App\Models\Game;
 use App\Models\Sport;
 use App\Models\Team;
 use App\Models\User;

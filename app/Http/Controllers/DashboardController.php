@@ -20,8 +20,8 @@ class DashboardController extends Controller
     /**
      * Build the dashboard controller with the query service used to fetch user-scoped data.
      *
-     * @param UserQueryInterface $userQueryService Service responsible for querying user dashboard data.
-      * @param QuickPredictionServiceInterface $quickPredictionService Service responsible for quick-prediction payloads.
+     * @param  UserQueryInterface  $userQueryService  Service responsible for querying user dashboard data.
+     * @param  QuickPredictionServiceInterface  $quickPredictionService  Service responsible for quick-prediction payloads.
      */
     public function __construct(
         private UserQueryInterface $userQueryService,

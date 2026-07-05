@@ -8,9 +8,10 @@ use App\DTO\ImportFetchStream;
 use App\Models\Season;
 
 /**
- * Provides a game data feed from an external source (e.g., API, CSV).
- * Implementations fetch and stream imported game data in a consistent format, abstracting away
- * source-specific details and allowing multiple game sources to be swapped at runtime.
+ * Provides normalized game import records from an external source.
+ *
+ * Implementations hide source-specific payload shapes and expose a consistent
+ * stream of ImportedGameData DTOs.
  */
 interface GameImportSourceInterface
 {
@@ -22,7 +23,7 @@ interface GameImportSourceInterface
     public function key(): string;
 
     /**
-     * Provides the display label used in source selection interfaces.
+     * Returns a human-readable source name.
      *
      * @return string The source label.
      */
@@ -36,7 +37,7 @@ interface GameImportSourceInterface
     public function type(): string;
 
     /**
-     * Explains source behavior for operator-facing import selection screens.
+     * Returns a short description of source behavior and constraints.
      *
      * @return string The source description.
      */
@@ -45,8 +46,8 @@ interface GameImportSourceInterface
     /**
      * Streams normalized game records for the requested season and import options.
      *
-     * @param Season $season The season to fetch games for.
-     * @param GameImportData $data Import source selection and runtime options.
+     * @param  Season  $season  The season to fetch games for.
+     * @param  GameImportData  $data  Import source selection and runtime options.
      * @return ImportFetchStream<ImportedGameData> A stream of normalized game DTOs and fetch-time errors.
      */
     public function fetch(Season $season, GameImportData $data): ImportFetchStream;

@@ -8,8 +8,8 @@ use App\DTO\ImportedGameData;
 use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
-use App\Models\Sport;
 use App\Models\SeasonType;
+use App\Models\Sport;
 use App\Models\Team;
 use App\Services\Contracts\GameImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
@@ -37,7 +37,7 @@ class CFBDGameImportSource implements GameImportSourceInterface
     }
 
     /**
-     * Get the human-readable label shown in source selection UIs.
+     * Get the human-readable source label.
      *
      * @return string The display label for this source.
      */
@@ -57,7 +57,7 @@ class CFBDGameImportSource implements GameImportSourceInterface
     }
 
     /**
-     * Describe the data feed for operator-facing import screens.
+     * Describe this source's feed and expected data.
      *
      * @return string A short description of the CFBD football schedule feed.
      */
@@ -69,8 +69,8 @@ class CFBDGameImportSource implements GameImportSourceInterface
     /**
      * Stream normalized CFBD game records for the requested season and import options.
      *
-     * @param Season $season The season whose sport constrains which games can be imported.
-     * @param GameImportData $data Import options including year, season type, and week filters.
+     * @param  Season  $season  The season whose sport constrains which games can be imported.
+     * @param  GameImportData  $data  Import options including year, season type, and week filters.
      * @return ImportFetchStream<ImportedGameData> A stream of normalized game DTOs plus any fetch-time errors.
      *
      * @throws GameImportException When the season is not a football season.
@@ -147,9 +147,9 @@ class CFBDGameImportSource implements GameImportSourceInterface
 
     /**
      * Translates application season types into the values expected by the CFBD API.
-        *
-        * @param mixed $seasonType The incoming season type value from import options.
-        * @return string|null The CFBD season type string, or null when no translation applies.
+     *
+     * @param  mixed  $seasonType  The incoming season type value from import options.
+     * @return string|null The CFBD season type string, or null when no translation applies.
      */
     private function translateSeasonTypeForClient(mixed $seasonType): ?string
     {

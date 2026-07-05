@@ -20,10 +20,9 @@ class GroupAdminMinimum implements ValidationRule
      * remaining admin without first promoting another member, which would leave the
      * group without governance.
      *
-     * @param string $attribute The dot-notation field name being validated.
-     * @param mixed $value The new role value being assigned.
-     * @param Closure(string): void $fail Closure invoked with an error message if validation fails.
-     * @return void
+     * @param  string  $attribute  The dot-notation field name being validated.
+     * @param  mixed  $value  The new role value being assigned.
+     * @param  Closure(string): void  $fail  Closure invoked with an error message if validation fails.
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

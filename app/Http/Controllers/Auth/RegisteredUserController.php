@@ -21,7 +21,7 @@ class RegisteredUserController extends Controller
     /**
      * Build the registration controller with user command operations.
      *
-     * @param UserCommandInterface $userCommandService Service responsible for user creation and writes.
+     * @param  UserCommandInterface  $userCommandService  Service responsible for user creation and writes.
      */
     public function __construct(
         private UserCommandInterface $userCommandService
@@ -29,8 +29,8 @@ class RegisteredUserController extends Controller
 
     /**
      * Display the registration view.
-        *
-        * @return View Registration page for new users.
+     *
+     * @return View Registration page for new users.
      */
     public function create(): View
     {
@@ -40,9 +40,10 @@ class RegisteredUserController extends Controller
     /**
      * Handle an incoming registration request.
      *
-        * @param Request $request Current request containing registration credentials.
-        * @return RedirectResponse Redirect to dashboard after account creation and login.
-        * @throws ValidationException When the registration payload does not satisfy validation rules.
+     * @param  Request  $request  Current request containing registration credentials.
+     * @return RedirectResponse Redirect to dashboard after account creation and login.
+     *
+     * @throws ValidationException When the registration payload does not satisfy validation rules.
      */
     public function store(Request $request): RedirectResponse
     {

@@ -18,7 +18,7 @@ class NewPasswordController extends Controller
     /**
      * Build the password reset controller with user command operations.
      *
-     * @param UserCommandInterface $userCommandService Service responsible for persisting password updates.
+     * @param  UserCommandInterface  $userCommandService  Service responsible for persisting password updates.
      */
     public function __construct(
         private UserCommandInterface $userCommandService
@@ -40,6 +40,7 @@ class NewPasswordController extends Controller
      *
      * @param  Request  $request  The current request containing the reset token and credentials.
      * @return RedirectResponse A redirect to the login screen after a successful reset.
+     *
      * @throws ValidationException When the reset payload fails validation or the broker rejects it.
      */
     public function store(Request $request): RedirectResponse

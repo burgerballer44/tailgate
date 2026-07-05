@@ -23,9 +23,9 @@ class DeveloperTeamController extends Controller
     /**
      * Build the developer team controller with write, read, and import services.
      *
-     * @param TeamCommandInterface $teamCommandService Service responsible for team create, update, and delete actions.
-     * @param TeamQueryInterface $teamQueryService Service used to query teams for index and filters.
-     * @param TeamImportManagerInterface $teamImportManager Service orchestrating external team imports.
+     * @param  TeamCommandInterface  $teamCommandService  Service responsible for team create, update, and delete actions.
+     * @param  TeamQueryInterface  $teamQueryService  Service used to query teams for index and filters.
+     * @param  TeamImportManagerInterface  $teamImportManager  Service orchestrating external team imports.
      * @return void Initializes controller dependencies.
      */
     public function __construct(
@@ -37,7 +37,7 @@ class DeveloperTeamController extends Controller
     /**
      * Display a paginated list of teams with sport and type filter options.
      *
-     * @param Request $request Incoming request that can include team search filters.
+     * @param  Request  $request  Incoming request that can include team search filters.
      * @return View Renders the developer team index.
      */
     public function index(Request $request): View
@@ -65,7 +65,7 @@ class DeveloperTeamController extends Controller
     /**
      * Persist a new team from validated payload data.
      *
-     * @param StoreTeamRequest $request Validated request containing team attributes.
+     * @param  StoreTeamRequest  $request  Validated request containing team attributes.
      * @return RedirectResponse Redirects to the team index after a successful create.
      */
     public function store(StoreTeamRequest $request): RedirectResponse
@@ -80,7 +80,7 @@ class DeveloperTeamController extends Controller
     /**
      * Display a single team record.
      *
-     * @param Team $team Route-bound team being viewed.
+     * @param  Team  $team  Route-bound team being viewed.
      * @return View Renders the developer team detail page.
      */
     public function show(Team $team): View
@@ -91,7 +91,7 @@ class DeveloperTeamController extends Controller
     /**
      * Show the form for editing a team.
      *
-     * @param Team $team Route-bound team being edited.
+     * @param  Team  $team  Route-bound team being edited.
      * @return View Renders the developer team edit form.
      */
     public function edit(Team $team): View
@@ -106,8 +106,8 @@ class DeveloperTeamController extends Controller
     /**
      * Update an existing team.
      *
-     * @param UpdateTeamRequest $request Validated request containing updated team attributes.
-     * @param Team $team Route-bound team that will be updated.
+     * @param  UpdateTeamRequest  $request  Validated request containing updated team attributes.
+     * @param  Team  $team  Route-bound team that will be updated.
      * @return RedirectResponse Redirects to the team index after a successful update.
      */
     public function update(UpdateTeamRequest $request, Team $team): RedirectResponse
@@ -122,7 +122,7 @@ class DeveloperTeamController extends Controller
     /**
      * Delete a team.
      *
-     * @param Team $team Route-bound team to delete.
+     * @param  Team  $team  Route-bound team to delete.
      * @return RedirectResponse Redirects to the team index after deletion.
      */
     public function destroy(Team $team): RedirectResponse
@@ -147,10 +147,10 @@ class DeveloperTeamController extends Controller
     }
 
     /**
-        * Import teams from the selected external source.
+     * Import teams from the selected external source.
      *
-        * @param ImportTeamsRequest $request Validated request that defines source and import options.
-        * @return RedirectResponse Redirects to either the import form (when failed) or team index (when import completes).
+     * @param  ImportTeamsRequest  $request  Validated request that defines source and import options.
+     * @return RedirectResponse Redirects to either the import form (when failed) or team index (when import completes).
      */
     public function storeImportedTeams(ImportTeamsRequest $request): RedirectResponse
     {

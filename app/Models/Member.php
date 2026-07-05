@@ -46,8 +46,6 @@ class Member extends Model
 
     /**
      * Register model lifecycle hooks used to seed identifiers.
-     *
-     * @return void
      */
     protected static function booted(): void
     {
@@ -61,8 +59,8 @@ class Member extends Model
      *
      * Supported filters are `user_id`, `group_id`, and `status`.
      *
-     * @param Builder $builder The query builder to constrain.
-     * @param array<string, mixed> $filters Associative filter input from the caller.
+     * @param  Builder  $builder  The query builder to constrain.
+     * @param  array<string, mixed>  $filters  Associative filter input from the caller.
      * @return Builder The constrained builder instance.
      */
     #[Scope]
@@ -159,7 +157,7 @@ class Member extends Model
      * Removal is only allowed for approved non-owner members when the acting
      * user can administer the group.
      *
-     * @param User $user The user attempting the removal.
+     * @param  User  $user  The user attempting the removal.
      * @return bool True when the removal is permitted.
      */
     public function canBeRemovedBy(User $user): bool

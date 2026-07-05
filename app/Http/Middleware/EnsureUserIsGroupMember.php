@@ -6,6 +6,7 @@ use App\Models\MemberStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Restricts routes to approved members of the routed group.
@@ -18,10 +19,11 @@ class EnsureUserIsGroupMember
      * The 403 response intentionally avoids disclosing whether the group or the
      * membership record exists to callers without access.
      *
-     * @param Request $request The current request, used to resolve the routed group and authenticated user.
-     * @param Closure(Request): Response $next The next middleware or controller to execute.
+     * @param  Request  $request  The current request, used to resolve the routed group and authenticated user.
+     * @param  Closure(Request): Response  $next  The next middleware or controller to execute.
      * @return Response The downstream response when the user is an approved member.
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException When the user is missing or is not an approved member.
+     *
+     * @throws HttpException When the user is missing or is not an approved member.
      */
     public function handle(Request $request, Closure $next): Response
     {

@@ -30,7 +30,7 @@ class UpdatePlayerRequest extends FormRequest
      * Allows updating the player name and optionally reassigning the player to a different member.
      * Updated player names must still be unique within the group.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The player field validation rules.
+     * @return array<string, ValidationRule|array|string> The player field validation rules.
      */
     public function rules(): array
     {

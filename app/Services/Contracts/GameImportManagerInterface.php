@@ -7,24 +7,25 @@ use App\DTO\ImportResult;
 use App\Models\Season;
 
 /**
- * Orchestrates the end-to-end process of importing games from various external sources into a season.
- * Manages source discovery, delegates to the appropriate source for data fetching, handles validation
- * and conflict resolution, and provides comprehensive import result reporting with error tracking.
+ * Coordinates importing games from a selected source into a season.
+ *
+ * Implementations resolve the source, run import persistence, and return a
+ * result summary with counts and errors.
  */
 interface GameImportManagerInterface
 {
     /**
-     * Lists import sources and metadata used by game import selection workflows.
+     * Returns available game import sources and their metadata.
      *
-     * @return array<int, array<string, string>> Source metadata for import selection UIs.
+     * @return array<int, array<string, string>> Source metadata for import configuration.
      */
     public function availableSources(): array;
 
     /**
      * Import games into a season.
      *
-     * @param Season $season The season receiving the imported schedule.
-     * @param GameImportData $data The import source selection and runtime options.
+     * @param  Season  $season  The season receiving the imported schedule.
+     * @param  GameImportData  $data  The import source selection and runtime options.
      * @return ImportResult A summary of imported, updated, and skipped games.
      */
     public function import(Season $season, GameImportData $data): ImportResult;

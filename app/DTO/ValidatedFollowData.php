@@ -11,8 +11,8 @@ use App\Models\Sport;
 readonly class ValidatedFollowData
 {
     /**
-     * @param int $team_id The ID of the team being followed.
-     * @param Sport|null $sport The sport to scope the follow to, or null to follow the team across all sports.
+     * @param  int  $team_id  The ID of the team being followed.
+     * @param  Sport|null  $sport  The sport to scope the follow to, or null to follow the team across all sports.
      */
     public function __construct(
         public int $team_id,
@@ -22,8 +22,7 @@ readonly class ValidatedFollowData
     /**
      * Constructs an instance from a raw associative array, typically from a validated form request.
      *
-     * @param array<string, mixed> $data Raw input data containing 'team_id' and optionally 'sport'.
-     * @return self
+     * @param  array<string, mixed>  $data  Raw input data containing 'team_id' and optionally 'sport'.
      */
     public static function fromArray(array $data): self
     {

@@ -44,8 +44,6 @@ class StoreGroupRequest extends FormRequest
      * If no owner_id is provided in the request, automatically set it to the currently authenticated
      * user's ID. This ensures that groups are always created with the correct ownership without
      * requiring the client to pass the owner_id explicitly.
-     *
-     * @return void
      */
     protected function prepareForValidation(): void
     {
@@ -61,7 +59,7 @@ class StoreGroupRequest extends FormRequest
      *
      * Enforces that the group has a name and a valid owner (user).
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string> The group field validation rules.
+     * @return array<string, ValidationRule|array|string> The group field validation rules.
      */
     public function rules(): array
     {

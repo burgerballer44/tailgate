@@ -10,7 +10,6 @@ use App\Models\Player;
 use App\Models\Prediction;
 use App\Services\Contracts\PlayerCommandInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
-use App\Services\PredictionPolicyEvaluatorService;
 
 /**
  * Executes player lifecycle actions within member-owned rosters.
@@ -21,10 +20,10 @@ class PlayerCommandService implements PlayerCommandInterface
     /**
      * Create a player coordinator with optional policy evaluation support.
      *
-     * @param PredictionPolicyEvaluatorInterface|null $predictionPolicyEvaluator The evaluator used to validate prediction submissions; defaults to the concrete service when omitted.
+     * @param  PredictionPolicyEvaluatorInterface|null  $predictionPolicyEvaluator  The evaluator used to validate prediction submissions; defaults to the concrete service when omitted.
      */
     public function __construct(
-        private ?PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator = new PredictionPolicyEvaluatorService()
+        private PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator,
     ) {}
 
     /**
@@ -32,10 +31,11 @@ class PlayerCommandService implements PlayerCommandInterface
      *
      * @param  Member  $member  The member to add the player to.
      * @param  ValidatedPlayerData  $data  Validated player data including player_name.
-     * @return Player  The created player instance.
+     * @return Player The created player instance.
      */
     public function createForMember(Member $member, ValidatedPlayerData $data): Player
     {
+        // Build only the persistence payload that belongs to player creation.
         $playerData = [
             'player_name' => $data->player_name,
         ];
@@ -48,10 +48,11 @@ class PlayerCommandService implements PlayerCommandInterface
      *
      * @param  Player  $player  The player to update.
      * @param  ValidatedPlayerData  $data  Validated data containing player information to update.
-     * @return Player  The updated player instance.
+     * @return Player The updated player instance.
      */
     public function update(Player $player, ValidatedPlayerData $data): Player
     {
+        // Apply partial updates so callers can mutate only selected fields.
         $updateData = [];
 
         if ($data->player_name !== null) {
@@ -62,6 +63,7 @@ class PlayerCommandService implements PlayerCommandInterface
             $updateData['member_id'] = $data->member_id;
         }
 
+        // Persist the computed delta in a single save operation.
         $player->fill($updateData);
         $player->save();
 
@@ -83,17 +85,20 @@ class PlayerCommandService implements PlayerCommandInterface
      *
      * @param  Player  $player  The player to submit the prediction for.
      * @param  ValidatedPredictionData  $data  Validated prediction data.
-     * @return Prediction  The created prediction instance.
-     * @throws PredictionPolicyViolationException  If the prediction violates any business rules.
+     * @return Prediction The created prediction instance.
+     *
+     * @throws PredictionPolicyViolationException If the prediction violates any business rules.
      */
     public function submitPrediction(Player $player, ValidatedPredictionData $data): Prediction
     {
+        // Enforce all prediction policies before writing a new prediction.
         $result = $this->predictionPolicyEvaluator->evaluate($player, $data);
 
         if ($result->hasViolations()) {
             throw new PredictionPolicyViolationException($result);
         }
 
+        // Persist only fields that belong to the prediction aggregate.
         $predictionData = [
             'game_id' => $data->game_id,
             'home_team_prediction' => $data->home_team_prediction,
@@ -108,22 +113,26 @@ class PlayerCommandService implements PlayerCommandInterface
      *
      * @param  Prediction  $prediction  The prediction to update.
      * @param  ValidatedPredictionData  $data  Validated data containing prediction information to update.
-     * @return Prediction  The updated prediction instance.
-     * @throws PredictionPolicyViolationException  If the updated prediction violates any business rules.
+     * @return Prediction The updated prediction instance.
+     *
+     * @throws PredictionPolicyViolationException If the updated prediction violates any business rules.
      */
     public function updatePrediction(Prediction $prediction, ValidatedPredictionData $data): Prediction
     {
+        // Re-run policy checks with current prediction context to support update-specific rules.
         $result = $this->predictionPolicyEvaluator->evaluate($prediction->player, $data, $prediction);
 
         if ($result->hasViolations()) {
             throw new PredictionPolicyViolationException($result);
         }
 
+        // Update score values while keeping the original player/game association intact.
         $updateData = [
             'home_team_prediction' => $data->home_team_prediction,
             'away_team_prediction' => $data->away_team_prediction,
         ];
 
+        // Persist in one pass to keep update behavior predictable.
         $prediction->fill($updateData);
         $prediction->save();
 
