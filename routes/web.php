@@ -112,6 +112,8 @@ Route::middleware('auth')->group(function () {
             Route::middleware('user.group.admin')->group(function () {
                 Route::get('{group}/edit', [GroupController::class, 'edit'])->name('edit');
                 Route::patch('{group}', [GroupController::class, 'update'])->name('update');
+                Route::patch('{group}/season-follows', [GroupController::class, 'updateSeasonFollows'])->name('update-season-follows');
+                Route::patch('{group}/prediction-scoring-policy', [GroupController::class, 'updatePredictionScoringPolicy'])->name('update-prediction-scoring-policy');
                 Route::patch('{group}/prediction-policies', [GroupController::class, 'updatePolicies'])->name('update-policies');
                 Route::post('{group}/approve/{member}', [GroupController::class, 'approveMember'])
                     ->middleware('group.member.belongs')

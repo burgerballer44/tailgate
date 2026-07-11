@@ -4,6 +4,8 @@ namespace App\Services\Contracts;
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
+use App\DTO\ValidatedGroupSeasonFollowsData;
+use App\DTO\ValidatedGroupPredictionScoringPolicyData;
 use App\DTO\ValidatedGroupPoliciesData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
@@ -38,13 +40,31 @@ interface GroupCommandInterface
     public function update(Group $group, ValidatedGroupData $data): Group;
 
     /**
-     * Update only group-level optional prediction policies.
+     * Update optional prediction policies for a followed season in a group.
      *
      * @param  Group  $group  The group to update.
-     * @param  ValidatedGroupPoliciesData  $data  The normalized policy payload.
+     * @param  ValidatedGroupPoliciesData  $data  The normalized season policy payload.
      * @return Group The updated group instance.
      */
     public function updatePolicies(Group $group, ValidatedGroupPoliciesData $data): Group;
+
+    /**
+     * Update the selected prediction scoring policy for a followed season.
+     *
+     * @param  Group  $group  The group to update.
+     * @param  ValidatedGroupPredictionScoringPolicyData  $data  The normalized season scoring payload.
+     * @return Group The updated group instance.
+     */
+    public function updatePredictionScoringPolicy(Group $group, ValidatedGroupPredictionScoringPolicyData $data): Group;
+
+    /**
+     * Sync the explicit seasons followed by a group.
+     *
+     * @param  Group  $group  The group to update.
+     * @param  ValidatedGroupSeasonFollowsData  $data  The normalized season-follow payload.
+     * @return Group The updated group instance.
+     */
+    public function syncSeasonFollows(Group $group, ValidatedGroupSeasonFollowsData $data): Group;
 
     /**
      * Delete a group.

@@ -2,8 +2,7 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Models\Sport;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Services\Contracts\SeasonQueryInterface;
 use Illuminate\Validation\Rule;
 
 trait FollowValidationRulesTrait
@@ -13,26 +12,35 @@ trait FollowValidationRulesTrait
      *
      * Ensures the team exists and the specified sport is valid for that team if provided.
      *
-     * @return array<string, ValidationRule|array|string> The team and sport validation rules.
+    * @return array<string, mixed> The team and season validation rules.
      */
     protected function baseRules(): array
     {
         return [
             'team_id' => ['required', 'exists:teams,id'],
-            'sport' => [
-                'nullable',
-                Rule::enum(Sport::class),
-                Rule::exists('team_sports', 'sport')->where(function ($query) {
-                    $query->where('team_id', $this->input('team_id'));
-                }),
-            ],
+            'season_ids' => ['required', 'array', 'min:1'],
+            'season_ids.*' => ['integer', Rule::in($this->activeSeasonIdsForFollow())],
         ];
+    }
+
+    /**
+     * Returns active season IDs valid for follow selection.
+     *
+     * @return array<int, int>
+     */
+    protected function activeSeasonIdsForFollow(): array
+    {
+        return app(SeasonQueryInterface::class)
+            ->getAvailableSeasonsForFollow()
+            ->pluck('id')
+            ->map(fn ($seasonId): int => (int) $seasonId)
+            ->all();
     }
 
     /**
      * Define validation rules for creating a follow relationship.
      *
-     * @return array<string, ValidationRule|array|string> The team follow validation rules.
+    * @return array<string, mixed> The team follow validation rules.
      */
     protected function storeRules(): array
     {
@@ -42,7 +50,7 @@ trait FollowValidationRulesTrait
     /**
      * Define validation rules for updating a follow relationship.
      *
-     * @return array<string, ValidationRule|array|string> The team follow validation rules.
+    * @return array<string, mixed> The team follow validation rules.
      */
     protected function updateRules(): array
     {

@@ -7,6 +7,8 @@ use App\Exceptions\PredictionPolicyViolationException;
 use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\JoinGroupRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
+use App\Http\Requests\Group\UpdateGroupSeasonFollowsRequest;
+use App\Http\Requests\Group\UpdateGroupPredictionScoringPolicyRequest;
 use App\Http\Requests\Group\SubmitPredictionRequest;
 use App\Http\Requests\Group\UpdateGroupPoliciesRequest;
 use App\Http\Requests\Group\UpdatePredictionRequest;
@@ -18,7 +20,6 @@ use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
-use App\Models\Sport;
 use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
@@ -27,7 +28,9 @@ use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\PlayerCommandInterface;
 use App\Services\Contracts\PlayerQueryInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
+use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
 use App\Services\Contracts\PredictionQueryInterface;
+use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -60,6 +63,8 @@ class GroupController extends Controller
         private PlayerQueryInterface $playerQueryService,
         private PredictionQueryInterface $predictionQueryService,
         private PredictionPolicyEvaluatorInterface $policyEvaluator,
+        private PredictionScoringPolicyCatalogInterface $predictionScoringPolicyCatalog,
+        private SeasonQueryInterface $seasonQueryService,
         private TeamQueryInterface $teamQueryService,
     ) {}
 
@@ -188,6 +193,7 @@ class GroupController extends Controller
 
         // Follow data is used for summary text and details tab rendering.
         $group->load(['follows.team']);
+        $group->load(['seasonFollows.season']);
 
         // Resolve the current signed-in approved member record once for all tabs.
         $currentMember = $this->memberQueryService->findApprovedMemberForGroupAndUser(
@@ -396,8 +402,8 @@ class GroupController extends Controller
         // get the authenticated user
         $user = $request->user();
 
-        // load group follows used by the manage page summary cards
-        $group->load(['follows.team']);
+        // load follows and season follows used by the manage page sections
+        $group->load(['follows.team', 'seasonFollows.season']);
 
         // Get the approved members from the query service so the controller
         // stays focused on request flow and view composition.
@@ -427,7 +433,11 @@ class GroupController extends Controller
             'approvedMembers' => $approvedMembers,
             'selectedMember' => $selectedMember,
             'managedPlayers' => $managedPlayers,
-            'availableGroupPolicies' => $this->policyEvaluator->groupRules(),
+            'availableSeasonsForFollow' => $this->seasonQueryService->getAvailableSeasonsForFollow(),
+            'selectedSeasonIds' => $group->followedSeasonIds,
+            'availableGroupPolicies' => collect($this->policyEvaluator->groupRules()),
+            'availablePredictionScoringPolicies' => $this->predictionScoringPolicyCatalog->options(),
+            'defaultPredictionScoringPolicyKey' => $this->predictionScoringPolicyCatalog->defaultKey(),
         ]);
     }
 
@@ -447,11 +457,11 @@ class GroupController extends Controller
 
         $this->setFlashAlert('success', 'Group updated successfully!');
 
-        return redirect()->route('groups.show', $group);
+        return $this->redirectToEditTab($request, $group, 'settings');
     }
 
     /**
-     * Update group-level optional prediction policies.
+     * Update optional prediction policies for one followed season.
      *
      * App-level policies remain always-on and are not configurable here.
      */
@@ -459,9 +469,60 @@ class GroupController extends Controller
     {
         $this->groupCommandService->updatePolicies($group, $request->toDTO());
 
-        $this->setFlashAlert('success', 'Prediction policies updated successfully!');
+        $this->setFlashAlert('success', 'Season prediction policies updated successfully!');
 
-        return redirect()->route('groups.show', $group);
+        return $this->redirectToEditTab($request, $group, 'seasons');
+    }
+
+    /**
+     * Update the selected prediction scoring policy for one followed season.
+     */
+    public function updatePredictionScoringPolicy(UpdateGroupPredictionScoringPolicyRequest $request, Group $group): RedirectResponse
+    {
+        $this->groupCommandService->updatePredictionScoringPolicy($group, $request->toDTO());
+
+        $this->setFlashAlert('success', 'Season prediction scoring policy updated successfully!');
+
+        return $this->redirectToEditTab($request, $group, 'seasons');
+    }
+
+    /**
+     * Update the explicit seasons followed by the group.
+     */
+    public function updateSeasonFollows(UpdateGroupSeasonFollowsRequest $request, Group $group): RedirectResponse
+    {
+        $this->groupCommandService->syncSeasonFollows($group, $request->toDTO());
+
+        $this->setFlashAlert('success', 'Season follows updated successfully!');
+
+        return $this->redirectToEditTab($request, $group, 'seasons');
+    }
+
+    /**
+     * Resolve a safe edit tab key from the request.
+     */
+    private function requestedEditTab(Request $request, string $fallback): string
+    {
+        $tab = $request->input('tab');
+
+        if (! is_string($tab)) {
+            return $fallback;
+        }
+
+        return in_array($tab, ['settings', 'seasons', 'players', 'members'], true)
+            ? $tab
+            : $fallback;
+    }
+
+    /**
+     * Redirect back to the group edit screen on the requested tab.
+     */
+    private function redirectToEditTab(Request $request, Group $group, string $fallbackTab): RedirectResponse
+    {
+        return redirect()->route('groups.edit', [
+            'group' => $group,
+            'tab' => $this->requestedEditTab($request, $fallbackTab),
+        ]);
     }
 
     /**
@@ -553,11 +614,14 @@ class GroupController extends Controller
     public function createFollowTeam(Group $group): View
     {
         $teams = $this->teamQueryService->getAvailableTeamsForFollow();
-        $sportOptions = collect(Sport::cases())
-            ->mapWithKeys(fn (Sport $sport): array => [$sport->value => $sport->value])
-            ->toArray();
+        $availableSeasonsForFollow = $this->seasonQueryService->getAvailableSeasonsForFollow();
 
-        return view('groups.follow-team', compact('group', 'teams', 'sportOptions'));
+        return view('groups.follow-team', [
+            'group' => $group,
+            'teams' => $teams,
+            'availableSeasonsForFollow' => $availableSeasonsForFollow,
+            'selectedSeasonIds' => $group->followedSeasonIds,
+        ]);
     }
 
     /**

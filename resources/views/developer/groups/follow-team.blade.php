@@ -17,7 +17,8 @@
         <x-form.developer.follow-team
             :group="$group"
             :teams="$teams"
-            :sport-options="$sportOptions"
+            :available-seasons-for-follow="$availableSeasonsForFollow"
+            :selected-season-ids="$selectedSeasonIds"
             :action="route('developer.groups.follow-team', $group)"
             :method="'POST'"
         />

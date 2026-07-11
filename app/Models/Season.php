@@ -75,6 +75,16 @@ class Season extends Model
     }
 
     /**
+     * Get the explicit group-season follows configured for this season.
+     *
+     * @return HasMany The season-follow relationship.
+     */
+    public function groupSeasonFollows(): HasMany
+    {
+        return $this->hasMany(GroupSeasonFollow::class);
+    }
+
+    /**
      * Render the season sport as an icon when the stored value maps cleanly.
      *
      * @return HtmlString|string An icon when the sport is known, otherwise the raw stored value.

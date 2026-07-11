@@ -62,7 +62,7 @@ class GameQueryService implements GameQueryInterface
     }
 
     /**
-     * Get upcoming games available to a group based on followed teams and optional sport scope.
+     * Get upcoming games available to a group based on followed teams and followed seasons.
      *
      * @param  Group  $group  The group whose follows determine eligible games.
      * @return Collection<int, Game> Upcoming games sorted by start date-time.
@@ -70,12 +70,17 @@ class GameQueryService implements GameQueryInterface
     public function getUpcomingGamesForGroup(Group $group): Collection
     {
         // Ensure follows are loaded once to avoid repeated lazy-loading queries.
-        $group->loadMissing('follows');
+        $group->loadMissing(['follows', 'seasonFollows']);
 
         if ($group->follows->isEmpty()) {
-            // No follows means no eligible games by design.
+            // No team follows means no eligible games by design.
             return collect();
         }
+
+        $useExplicitSeasonFilter = $group->seasonFollows->isNotEmpty();
+        $followedSeasonIds = $useExplicitSeasonFilter
+            ? $group->seasonFollows->pluck('season_id')->all()
+            : [];
 
         // Capture time boundaries once for consistent window checks.
         $now = now();
@@ -93,15 +98,11 @@ class GameQueryService implements GameQueryInterface
                                     ->where('home_team_id', $follow->team_id)
                                     ->orWhere('away_team_id', $follow->team_id);
                             });
-
-                        if ($follow->sport !== null) {
-                            // Sport-scoped follows only match games in seasons of that sport.
-                            $eligibleGameQuery->whereHas('season', function (Builder $seasonQuery) use ($follow) {
-                                $seasonQuery->where('sport', $follow->sport->value);
-                            });
-                        }
                     });
                 }
+            })
+            ->when($useExplicitSeasonFilter, function (Builder $seasonQuery) use ($followedSeasonIds) {
+                $seasonQuery->whereIn('season_id', $followedSeasonIds);
             })
             ->where(function (Builder $upcomingQuery) use ($now, $today) {
                 // Upcoming includes exact-time future games and TBD games not before today.
@@ -130,12 +131,19 @@ class GameQueryService implements GameQueryInterface
      */
     public function getGamesForGroupFollowSelection(Group $group): Builder
     {
-        // Restrict candidates to games whose seasons are followed by the group.
-        return Game::query()
-            ->whereHas('season.follows', function (Builder $query) use ($group) {
-                $query->where('group_id', $group->id);
-            })
-            ->with(['homeTeam', 'awayTeam']);
+        // Restrict candidates to games whose seasons are explicitly followed by the group.
+        $query = Game::query()->with(['homeTeam', 'awayTeam']);
+
+        $query->when(
+            $group->seasonFollows()->exists(),
+            function (Builder $seasonQuery) use ($group) {
+                $seasonQuery->whereHas('season.groupSeasonFollows', function (Builder $query) use ($group) {
+                    $query->where('group_id', $group->id);
+                });
+            }
+        );
+
+        return $query;
     }
 
     /**

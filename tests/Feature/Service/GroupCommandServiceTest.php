@@ -2,14 +2,17 @@
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
+use App\DTO\ValidatedGroupSeasonFollowsData;
+use App\DTO\ValidatedGroupPredictionScoringPolicyData;
 use App\DTO\ValidatedGroupPoliciesData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
 use App\Models\Follow;
 use App\Models\Group;
+use App\Models\GroupSeasonFollow;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Sport;
+use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Contracts\MemberCommandInterface;
@@ -81,39 +84,119 @@ describe('update group', function () {
 });
 
 describe('update group policies', function () {
-    test('updates only enabled prediction policies', function () {
+    test('updates only enabled prediction policies for the selected followed season', function () {
         $group = Group::factory()->create([
             'name' => 'Original Name',
             'owner_id' => User::factory()->create()->id,
             'member_limit' => 21,
             'player_limit' => 4,
+        ]);
+
+        $season = Season::factory()->active()->create();
+        $seasonFollow = GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
             'enabled_prediction_policies' => [],
         ]);
 
         $updatedGroup = $this->service->updatePolicies($group, ValidatedGroupPoliciesData::fromArray([
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['group-unique-prediction'],
         ]));
 
-        $group->refresh();
+        $seasonFollow->refresh();
 
-        expect($updatedGroup->enabled_prediction_policies)->toBe(['group-unique-prediction']);
-        expect($group->enabled_prediction_policies)->toBe(['group-unique-prediction']);
+        expect($updatedGroup->seasonFollows)->toHaveCount(1);
+        expect($seasonFollow->enabled_prediction_policies)->toBe(['group-unique-prediction']);
         expect($group->name)->toBe('Original Name');
         expect($group->member_limit)->toBe(21);
         expect($group->player_limit)->toBe(4);
     });
 
     test('clears enabled prediction policies when payload is empty', function () {
-        $group = Group::factory()->create([
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        $seasonFollow = GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['group-unique-prediction'],
         ]);
 
         $this->service->updatePolicies($group, ValidatedGroupPoliciesData::fromArray([
+            'season_id' => $season->id,
             'enabled_prediction_policies' => [],
         ]));
 
-        $group->refresh();
-        expect($group->enabled_prediction_policies)->toBe([]);
+        $seasonFollow->refresh();
+        expect($seasonFollow->enabled_prediction_policies)->toBe([]);
+    });
+});
+
+describe('update prediction scoring policy', function () {
+    test('updates only prediction scoring policy key for the selected followed season', function () {
+        $group = Group::factory()->create([
+            'name' => 'Original Name',
+            'member_limit' => 21,
+            'player_limit' => 4,
+        ]);
+
+        $season = Season::factory()->active()->create();
+        $seasonFollow = GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'prediction-difference-from-score',
+        ]);
+
+        $this->service->updatePredictionScoringPolicy($group, ValidatedGroupPredictionScoringPolicyData::fromArray([
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'placement-points',
+        ]));
+
+        $seasonFollow->refresh();
+
+        expect($seasonFollow->prediction_scoring_policy)->toBe('placement-points');
+        expect($group->name)->toBe('Original Name');
+        expect($group->member_limit)->toBe(21);
+        expect($group->player_limit)->toBe(4);
+    });
+});
+
+describe('sync season follows', function () {
+    test('creates season follows for selected seasons and removes unselected seasons', function () {
+        $group = Group::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
+        $thirdSeason = Season::factory()->active()->create();
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $thirdSeason->id,
+        ]);
+
+        $this->service->syncSeasonFollows($group, ValidatedGroupSeasonFollowsData::fromArray([
+            'season_ids' => [$firstSeason->id, $secondSeason->id],
+        ]));
+
+        expect($group->fresh()->seasonFollows()->pluck('season_id')->all())->toBe([$firstSeason->id, $secondSeason->id]);
+    });
+
+    test('keeps the selected seasons in place when syncing again', function () {
+        $group = Group::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
+
+        $this->service->syncSeasonFollows($group, ValidatedGroupSeasonFollowsData::fromArray([
+            'season_ids' => [$firstSeason->id, $secondSeason->id],
+        ]));
+
+        $this->service->syncSeasonFollows($group, ValidatedGroupSeasonFollowsData::fromArray([
+            'season_ids' => [$firstSeason->id, $secondSeason->id],
+        ]));
+
+        $seasonFollowIds = $group->fresh()->seasonFollows->pluck('season_id')->all();
+
+        expect($seasonFollowIds)->toBe([$firstSeason->id, $secondSeason->id]);
+        expect($seasonFollowIds)->toHaveCount(2);
     });
 });
 
@@ -206,10 +289,12 @@ describe('follow team', function () {
         // create group and team
         $group = Group::factory()->create();
         $team = Team::factory()->create();
+        $season = Season::factory()->active()->create();
 
         // follow data
         $data = [
             'team_id' => $team->id,
+            'season_ids' => [$season->id],
         ];
 
         // follow team
@@ -219,41 +304,60 @@ describe('follow team', function () {
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'sport' => null,
         ]);
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
         expect($follow)->toBeInstanceOf(Follow::class);
     });
 
-    test('creates sport-scoped follow relationship', function () {
+    test('adds all selected seasons when following a team', function () {
         $group = Group::factory()->create();
-        $team = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $team = Team::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
 
         $follow = $this->service->followTeam($group, ValidatedFollowData::fromArray([
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL->value,
+            'season_ids' => [$firstSeason->id, $secondSeason->id],
         ]));
 
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL->value,
         ]);
-        expect($follow->sport)->toBe(Sport::FOOTBALL);
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $firstSeason->id,
+        ]);
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $secondSeason->id,
+        ]);
+
+        expect($follow)->toBeInstanceOf(Follow::class);
     });
 
     test('creates multiple follows when under follow limit', function () {
         $group = Group::factory()->create(['follow_limit' => 2]);
-        $firstTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
-        $secondTeam = Team::factory()->withSports([Sport::BASKETBALL])->create();
+        $firstTeam = Team::factory()->create();
+        $secondTeam = Team::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
 
         $firstFollow = $this->service->followTeam($group, ValidatedFollowData::fromArray([
             'team_id' => $firstTeam->id,
-            'sport' => Sport::FOOTBALL->value,
+            'season_ids' => [$firstSeason->id],
         ]));
 
         $secondFollow = $this->service->followTeam($group, ValidatedFollowData::fromArray([
             'team_id' => $secondTeam->id,
-            'sport' => Sport::BASKETBALL->value,
+            'season_ids' => [$secondSeason->id],
         ]));
 
         expect($group->follows()->count())->toBe(2);
@@ -264,28 +368,32 @@ describe('follow team', function () {
         $group = Group::factory()->create(['follow_limit' => 1]);
         $firstTeam = Team::factory()->create();
         $secondTeam = Team::factory()->create();
+        $season = Season::factory()->active()->create();
 
         $this->service->followTeam($group, ValidatedFollowData::fromArray([
             'team_id' => $firstTeam->id,
+            'season_ids' => [$season->id],
         ]));
 
         expect(fn () => $this->service->followTeam($group, ValidatedFollowData::fromArray([
             'team_id' => $secondTeam->id,
+            'season_ids' => [$season->id],
         ])))->toThrow('This group has reached its follow limit.');
     });
 
-    test('throws error when team and sport scope are already followed', function () {
+    test('throws error when team is already followed', function () {
         $group = Group::factory()->create(['follow_limit' => 2]);
-        $team = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $team = Team::factory()->create();
+        $season = Season::factory()->active()->create();
 
         $this->service->followTeam($group, ValidatedFollowData::fromArray([
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL->value,
+            'season_ids' => [$season->id],
         ]));
 
         expect(fn () => $this->service->followTeam($group, ValidatedFollowData::fromArray([
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL->value,
+            'season_ids' => [$season->id],
         ])))->toThrow('This group is already following this team.');
     });
 });

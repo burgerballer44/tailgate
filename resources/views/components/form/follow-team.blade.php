@@ -1,4 +1,4 @@
-@props(['group' => null, 'teams' => collect(), 'sportOptions' => [], 'action' => '', 'method' => 'POST'])
+@props(['group' => null, 'teams' => collect(), 'availableSeasonsForFollow' => collect(), 'selectedSeasonIds' => collect(), 'action' => '', 'method' => 'POST'])
 
 <form action="{{ $action }}" method="POST" class="rounded-lg bg-white p-6 shadow-md">
     @csrf
@@ -18,14 +18,36 @@
     </div>
 
     <div class="mt-4">
-        <x-form.select
-            name="sport"
-            label="Sport scope"
-            :required="false"
-            :value="old('sport')"
-            :options="['' => 'All sports'] + $sportOptions"
-        />
-        <x-inputs.input-error class="mt-2" :messages="$errors->get('sport')" />
+        <p class="text-sm font-medium text-gray-700">Seasons</p>
+        <p class="mt-1 text-xs text-gray-500">Choose one or more active seasons for this team follow.</p>
+
+        @php
+            $selectedSeasonIdValues = collect(old('season_ids', $selectedSeasonIds->all() ?? []))
+                ->map(fn ($seasonId) => (int) $seasonId)
+                ->all();
+        @endphp
+
+        @if ($availableSeasonsForFollow->isNotEmpty())
+            <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                @foreach ($availableSeasonsForFollow as $season)
+                    <label class="flex items-start gap-2 rounded border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                        <input
+                            type="checkbox"
+                            name="season_ids[]"
+                            value="{{ $season->id }}"
+                            class="mt-0.5 h-4 w-4 rounded border-gray-300 text-navy focus:ring-navy"
+                            {{ in_array($season->id, $selectedSeasonIdValues, true) ? 'checked' : '' }}
+                        >
+                        <span>{{ $season->name }}</span>
+                    </label>
+                @endforeach
+            </div>
+        @else
+            <p class="mt-2 text-sm text-gray-500">No active seasons are currently available.</p>
+        @endif
+
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('season_ids')" />
+        <x-inputs.input-error class="mt-2" :messages="$errors->get('season_ids.*')" />
     </div>
 
     {{-- buttons --}}

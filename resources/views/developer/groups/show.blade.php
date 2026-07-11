@@ -160,23 +160,35 @@
             <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="mb-4">
                     <h2 class="text-lg font-semibold text-gray-900">Prediction Policies</h2>
-                    <p class="mt-1 text-sm text-gray-600">Group-level prediction policies currently enabled for this group.</p>
+                    <p class="mt-1 text-sm text-gray-600">Optional prediction policies currently enabled per followed season.</p>
                 </div>
 
-                @if ($enabledGroupRules === [])
-                    <p class="text-sm text-gray-500">No group-level rules are enabled for this group.</p>
+                @if ($enabledGroupRulesBySeason === [])
+                    <p class="text-sm text-gray-500">No followed seasons are configured for this group.</p>
                 @else
                     <div class="space-y-4">
-                        @foreach ($enabledGroupRules as $rule)
+                        @foreach ($enabledGroupRulesBySeason as $seasonRuleSet)
                             <div class="rounded-md border border-gray-200 p-4">
-                                <div class="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-900">{{ $rule->label() }}</p>
-                                        <p class="text-xs text-gray-500">{{ $rule->key() }}</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $seasonRuleSet['season_name'] }}</p>
+
+                                @if ($seasonRuleSet['rules'] === [])
+                                    <p class="mt-2 text-sm text-gray-500">No optional group-level rules enabled for this season.</p>
+                                @else
+                                    <div class="mt-3 space-y-3">
+                                        @foreach ($seasonRuleSet['rules'] as $rule)
+                                            <div class="rounded-md border border-gray-200 p-4">
+                                                <div class="flex items-start justify-between gap-4">
+                                                    <div>
+                                                        <p class="text-sm font-semibold text-gray-900">{{ $rule->label() }}</p>
+                                                        <p class="text-xs text-gray-500">{{ $rule->key() }}</p>
+                                                    </div>
+                                                    <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-900">{{ $rule->scope()->value }}</span>
+                                                </div>
+                                                <p class="mt-3 text-sm text-gray-700">{{ $rule->description() }}</p>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                    <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-900">{{ $rule->scope()->value }}</span>
-                                </div>
-                                <p class="mt-3 text-sm text-gray-700">{{ $rule->description() }}</p>
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -203,7 +215,6 @@
                             <div class="flex items-center justify-between rounded-md border border-gray-200 px-3 py-2">
                                 <div>
                                     <p class="text-sm font-semibold text-gray-900">{{ $follow->team->display_name }}</p>
-                                    <p class="mt-0.5 text-xs text-gray-500">Sport scope: {{ $follow->sport?->value ?? 'All sports' }}</p>
                                 </div>
                                 <form
                                     method="POST"

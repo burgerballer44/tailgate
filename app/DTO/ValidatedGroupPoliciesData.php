@@ -11,9 +11,11 @@ namespace App\DTO;
 readonly class ValidatedGroupPoliciesData
 {
     /**
-     * @param  array<int, string>  $enabled_prediction_policies  Group-level policy keys to enable.
+     * @param  int  $season_id  Followed season ID receiving this policy configuration.
+     * @param  array<int, string>  $enabled_prediction_policies  Season-level policy keys to enable.
      */
     public function __construct(
+        public int $season_id,
         public array $enabled_prediction_policies,
     ) {}
 
@@ -25,6 +27,7 @@ readonly class ValidatedGroupPoliciesData
     public static function fromArray(array $data): self
     {
         return new self(
+            season_id: (int) $data['season_id'],
             enabled_prediction_policies: array_values(array_filter((array) ($data['enabled_prediction_policies'] ?? []))),
         );
     }

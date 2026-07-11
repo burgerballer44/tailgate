@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
+use App\DTO\ValidatedGroupSeasonFollowsData;
+use App\DTO\ValidatedGroupPredictionScoringPolicyData;
 use App\DTO\ValidatedGroupPoliciesData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
@@ -88,10 +90,6 @@ class GroupCommandService implements GroupCommandInterface
             $updateData['owner_id'] = $data->owner_id;
         }
 
-        if ($data->enabled_prediction_policies !== null) {
-            $updateData['enabled_prediction_policies'] = $data->enabled_prediction_policies;
-        }
-
         // Persist all selected fields as a single update unit.
         $group->fill($updateData);
         $group->save();
@@ -108,13 +106,69 @@ class GroupCommandService implements GroupCommandInterface
      */
     public function updatePolicies(Group $group, ValidatedGroupPoliciesData $data): Group
     {
-        // Restrict this method to policy fields only.
-        $group->fill([
+        $groupSeasonFollow = $group->seasonFollows()
+            ->where('season_id', $data->season_id)
+            ->firstOrFail();
+
+        $groupSeasonFollow->fill([
             'enabled_prediction_policies' => $data->enabled_prediction_policies,
         ]);
-        $group->save();
+        $groupSeasonFollow->save();
 
-        return $group;
+        return $group->load('seasonFollows.season');
+    }
+
+    /**
+     * Applies the selected scoring policy key for one followed season.
+     *
+     * @param  Group  $group  The group to update.
+     * @param  ValidatedGroupPredictionScoringPolicyData  $data  Validated season scoring payload.
+     * @return Group The updated group instance.
+     */
+    public function updatePredictionScoringPolicy(Group $group, ValidatedGroupPredictionScoringPolicyData $data): Group
+    {
+        $groupSeasonFollow = $group->seasonFollows()
+            ->where('season_id', $data->season_id)
+            ->firstOrFail();
+
+        $groupSeasonFollow->fill([
+            'prediction_scoring_policy' => $data->prediction_scoring_policy,
+        ]);
+        $groupSeasonFollow->save();
+
+        return $group->load('seasonFollows.season');
+    }
+
+    /**
+     * Synchronize the seasons explicitly followed by a group.
+     *
+     * @param  Group  $group  The group to update.
+     * @param  ValidatedGroupSeasonFollowsData  $data  The normalized season-follow payload.
+     * @return Group The updated group instance.
+     */
+    public function syncSeasonFollows(Group $group, ValidatedGroupSeasonFollowsData $data): Group
+    {
+        $selectedSeasonIds = array_values(array_unique(array_map('intval', $data->season_ids)));
+
+        $existingSeasonFollows = $group->seasonFollows()->get()->keyBy('season_id');
+
+        foreach ($selectedSeasonIds as $seasonId) {
+            $groupSeasonFollow = $existingSeasonFollows->get($seasonId);
+
+            if ($groupSeasonFollow) {
+                continue;
+            }
+
+            $group->seasonFollows()->create([
+                'season_id' => $seasonId,
+            ]);
+        }
+
+        $group->seasonFollows()
+            ->whereNotIn('season_id', $selectedSeasonIds)
+            ->delete();
+
+        return $group->load('seasonFollows.season');
     }
 
     /**
@@ -214,10 +268,9 @@ class GroupCommandService implements GroupCommandInterface
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Prevent duplicate follows for the same team/sport pair.
+            // Prevent duplicate follows for the same team.
             $duplicateFollowExists = $lockedGroup->follows()
                 ->where('team_id', $data->team_id)
-                ->where('sport', $data->sport?->value)
                 ->exists();
 
             if ($duplicateFollowExists) {
@@ -230,11 +283,19 @@ class GroupCommandService implements GroupCommandInterface
                 throw new DomainException('This group has reached its follow limit.');
             }
 
-            // Persist the follow relationship scoped to the selected sport when present.
-            return $lockedGroup->follows()->create([
+            // Persist the team follow relationship.
+            $follow = $lockedGroup->follows()->create([
                 'team_id' => $data->team_id,
-                'sport' => $data->sport?->value,
             ]);
+
+            // Ensure selected active seasons are followed so this team can participate there.
+            foreach ($data->season_ids as $seasonId) {
+                $lockedGroup->seasonFollows()->firstOrCreate([
+                    'season_id' => $seasonId,
+                ]);
+            }
+
+            return $follow;
         });
     }
 

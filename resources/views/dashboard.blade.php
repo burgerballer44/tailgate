@@ -3,7 +3,9 @@
     mainDescription="Welcome back, {{ $user->name }}! Manage your groups and predictions here."
 >
     <div class="space-y-6">
-        @include('dashboard.partials.quick-predictions-section')
+        @if ($groups->isNotEmpty())
+            @include('dashboard.partials.quick-predictions-section')
+        @endif
 
         {{-- Groups --}}
         @if ($groups->isNotEmpty())

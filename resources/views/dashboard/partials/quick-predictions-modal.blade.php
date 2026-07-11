@@ -3,7 +3,7 @@
         <div class="flex items-start justify-between border-b border-gray-100 pb-4">
             <div>
                 <h3 class="text-lg font-semibold text-gray-900">Quick predictions</h3>
-                <p class="mt-1 text-sm text-gray-600">Submit scores with AJAX and move between games with consistent loading.</p>
+                <p class="mt-1 text-sm text-gray-600">Submit your predictions and move between games with ease.</p>
             </div>
             <button
                 type="button"

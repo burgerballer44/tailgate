@@ -3,6 +3,7 @@
 use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
+use App\Models\GroupSeasonFollow;
 use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\Player;
@@ -49,6 +50,11 @@ function makeApprovedMembershipWithGame(User $user, Sport $sport = Sport::FOOTBA
     ]);
 
     $season = Season::factory()->active()->create(['sport' => $sport->value]);
+
+    GroupSeasonFollow::factory()->create([
+        'group_id' => $group->id,
+        'season_id' => $season->id,
+    ]);
 
     $game = Game::factory()->create([
         'season_id' => $season->id,
@@ -152,10 +158,10 @@ describe('getQuickPredictionsPayloadForUser', function () {
     });
 
     // -------------------------------------------------------------------------
-    // Sport-scoped follow filtering
+    // Team + season follow filtering
     // -------------------------------------------------------------------------
 
-    test('sport-scoped follow excludes games from the wrong sport', function () {
+    test('followed seasons exclude games from non-followed seasons', function () {
         $member = Member::factory()->create([
             'user_id' => $this->user->id,
             'status' => MemberStatus::APPROVED->value,
@@ -166,15 +172,15 @@ describe('getQuickPredictionsPayloadForUser', function () {
         $footballOpponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
         $basketballOpponent = Team::factory()->withSports([Sport::BASKETBALL])->create();
 
-        // Follow scoped to football only.
         Follow::factory()->create([
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL,
         ]);
 
         $footballSeason = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
         $basketballSeason = Season::factory()->active()->create(['sport' => Sport::BASKETBALL->value]);
+
+        GroupSeasonFollow::factory()->create(['group_id' => $group->id, 'season_id' => $footballSeason->id]);
 
         $footballGame = Game::factory()->create([
             'season_id' => $footballSeason->id,
@@ -184,7 +190,7 @@ describe('getQuickPredictionsPayloadForUser', function () {
             'start_time_tbd' => false,
         ]);
 
-        // Basketball game involving the same team — should be excluded by the sport scope.
+        // Basketball game involving the same team — should be excluded by season follows.
         Game::factory()->create([
             'season_id' => $basketballSeason->id,
             'home_team_id' => $team->id,
@@ -200,7 +206,7 @@ describe('getQuickPredictionsPayloadForUser', function () {
         expect($gameIds)->toContain($footballGame->id);
     });
 
-    test('unscoped follow includes games from all sports', function () {
+    test('includes games across all selected seasons for a followed team', function () {
         $member = Member::factory()->create([
             'user_id' => $this->user->id,
             'status' => MemberStatus::APPROVED->value,
@@ -211,15 +217,16 @@ describe('getQuickPredictionsPayloadForUser', function () {
         $footballOpponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
         $basketballOpponent = Team::factory()->withSports([Sport::BASKETBALL])->create();
 
-        // Follow with no sport restriction.
         Follow::factory()->create([
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'sport' => null,
         ]);
 
         $footballSeason = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
         $basketballSeason = Season::factory()->active()->create(['sport' => Sport::BASKETBALL->value]);
+
+        GroupSeasonFollow::factory()->create(['group_id' => $group->id, 'season_id' => $footballSeason->id]);
+        GroupSeasonFollow::factory()->create(['group_id' => $group->id, 'season_id' => $basketballSeason->id]);
 
         $footballGame = Game::factory()->create([
             'season_id' => $footballSeason->id,
@@ -337,6 +344,11 @@ describe('getQuickPredictionsPayloadForUser', function () {
             'active' => false,
         ]);
 
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
         Game::factory()->create([
             'season_id' => $season->id,
             'home_team_id' => $followedTeam->id,
@@ -388,6 +400,11 @@ describe('getQuickPredictionsPayloadForUser', function () {
             'active' => false,
         ]);
 
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
         Game::factory()->create([
             'season_id' => $season->id,
             'home_team_id' => $followedTeam->id,
@@ -422,6 +439,11 @@ describe('getQuickPredictionsPayloadForUser', function () {
 
         $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
 
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
         Game::factory()->create([
             'season_id' => $season->id,
             'home_team_id' => $followedTeam->id,
@@ -455,6 +477,11 @@ describe('getQuickPredictionsPayloadForUser', function () {
         ]);
 
         $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
 
         // Insert a past-date TBD game directly so it bypasses the upcoming-games query filter,
         // allowing the status logic to be exercised in isolation from the game retrieval filter.
@@ -509,6 +536,11 @@ describe('getQuickPredictionsPayloadForUser', function () {
         ]);
 
         $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
         $gameTime = now()->addDays(5)->setTime(15, 30, 0);
 
         Game::factory()->create([
@@ -544,6 +576,11 @@ describe('getQuickPredictionsPayloadForUser', function () {
         ]);
 
         $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
 
         Game::factory()->create([
             'season_id' => $season->id,
@@ -629,6 +666,9 @@ describe('getQuickPredictionsPayloadForUser', function () {
         Follow::factory()->create(['group_id' => $group2->id, 'team_id' => $team2->id, 'sport' => null]);
 
         $season = Season::factory()->active()->create(['sport' => Sport::FOOTBALL->value]);
+
+        GroupSeasonFollow::factory()->create(['group_id' => $group1->id, 'season_id' => $season->id]);
+        GroupSeasonFollow::factory()->create(['group_id' => $group2->id, 'season_id' => $season->id]);
 
         Game::factory()->create([
             'season_id' => $season->id,

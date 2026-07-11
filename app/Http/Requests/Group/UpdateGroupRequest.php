@@ -5,7 +5,6 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedGroupData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
-use Illuminate\Contracts\Validation\ValidationRule;
 
 class UpdateGroupRequest extends FormRequest
 {
@@ -27,34 +26,23 @@ class UpdateGroupRequest extends FormRequest
     /**
      * Validate the group update request data.
      *
-     * Allows admins to update group name, member and player limits, and enabled prediction policies.
+     * Allows admins to update group name and limit settings.
      * The owner can only be changed by developers using a separate endpoint.
      *
-     * @return array<string, ValidationRule|array|string> The group field validation rules.
+     * @return array<string, mixed> The group field validation rules.
      */
     public function rules(): array
     {
-        return array_merge($this->developerUpdateRules(), [
-            'enabled_prediction_policies' => ['sometimes', 'array'],
-            'enabled_prediction_policies.*' => ['string', 'distinct', 'in:'.implode(',', $this->groupPolicyKeys())],
-        ]);
+        return $this->developerUpdateRules();
     }
 
     /**
      * Transform validated group data into a data transfer object for the service layer.
      *
-     * Ensures enabled_prediction_policies is always an array, even if not provided in the request.
-     *
      * @return ValidatedGroupData The validated group data transfer object.
      */
     public function toDTO(): ValidatedGroupData
     {
-        $validated = $this->validated();
-
-        if (! array_key_exists('enabled_prediction_policies', $validated)) {
-            $validated['enabled_prediction_policies'] = [];
-        }
-
-        return ValidatedGroupData::fromArray($validated);
+        return ValidatedGroupData::fromArray($this->validated());
     }
 }

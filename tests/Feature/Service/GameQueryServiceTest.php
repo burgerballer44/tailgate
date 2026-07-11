@@ -3,6 +3,7 @@
 use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
+use App\Models\GroupSeasonFollow;
 use App\Models\Season;
 use App\Models\Sport;
 use App\Models\Team;
@@ -149,6 +150,11 @@ describe('get upcoming games for group', function () {
             'sport' => Sport::FOOTBALL->value,
         ]);
 
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
         $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
         $opponent = Team::factory()->withSports([Sport::FOOTBALL])->create();
         $otherHome = Team::factory()->withSports([Sport::FOOTBALL])->create();
@@ -190,7 +196,7 @@ describe('get upcoming games for group', function () {
         expect($games->first()->id)->toBe($includedGame->id);
     });
 
-    test('respects follow sport scope when selecting games', function () {
+    test('uses followed seasons to limit followed-team games', function () {
         $group = Group::factory()->create();
 
         $team = Team::factory()->withSports([Sport::FOOTBALL, Sport::BASKETBALL])->create();
@@ -205,10 +211,11 @@ describe('get upcoming games for group', function () {
             'sport' => Sport::BASKETBALL->value,
         ]);
 
+        GroupSeasonFollow::factory()->create(['group_id' => $group->id, 'season_id' => $footballSeason->id]);
+
         Follow::factory()->create([
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL,
         ]);
 
         $footballGame = Game::factory()->create([
@@ -231,7 +238,7 @@ describe('get upcoming games for group', function () {
 
         expect($games)->toHaveCount(1);
         expect($games->first()->id)->toBe($footballGame->id);
-        expect($games->first()->season->sport)->toBe(Sport::FOOTBALL->value);
+        expect($games->first()->season_id)->toBe($footballSeason->id);
     });
 
     test('filters upcoming group games to an inclusive dashboard window end', function () {
@@ -240,6 +247,11 @@ describe('get upcoming games for group', function () {
 
         $season = Season::factory()->active()->create([
             'sport' => Sport::FOOTBALL->value,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
         ]);
 
         $followedTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();

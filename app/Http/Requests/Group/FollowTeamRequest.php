@@ -5,7 +5,6 @@ namespace App\Http\Requests\Group;
 use App\DTO\ValidatedFollowData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\FollowValidationRulesTrait;
-use Illuminate\Contracts\Validation\ValidationRule;
 
 class FollowTeamRequest extends FormRequest
 {
@@ -27,9 +26,9 @@ class FollowTeamRequest extends FormRequest
     /**
      * Validate the team follow request data.
      *
-     * Ensures the team exists and, if provided, that the sport is valid for that team.
+     * Ensures the team exists and at least one active season is selected.
      *
-     * @return array<string, ValidationRule|array|string> The team_id and sport validation rules.
+    * @return array<string, mixed> The team and selected-season validation rules.
      */
     public function rules(): array
     {

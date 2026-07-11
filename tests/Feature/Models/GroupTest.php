@@ -3,11 +3,12 @@
 use App\Models\Follow;
 use App\Models\Group;
 use App\Models\GroupRole;
+use App\Models\GroupSeasonFollow;
 use App\Models\HtmlEntity;
 use App\Models\Member;
+use App\Models\Season;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\HtmlString;
 
 describe('isAdminOrOwner', function () {
     test('returns true for group owner', function () {
@@ -100,6 +101,47 @@ describe('model defaults and accessors', function () {
         expect($group->fresh()->follow_limit)->toBe(Group::INITIAL_FOLLOW_LIMIT);
     });
 
+    test('defaults prediction_scoring_policy when not provided', function () {
+        $group = Group::factory()->create([
+            'prediction_scoring_policy' => null,
+        ]);
+
+        expect($group->fresh()->prediction_scoring_policy)->toBe(Group::DEFAULT_PREDICTION_SCORING_POLICY);
+    });
+
+    test('isFollowingSeason returns true only when the group explicitly follows the season', function () {
+        $group = Group::factory()->create();
+        $followedSeason = Season::factory()->active()->create();
+        $unfollowedSeason = Season::factory()->active()->create();
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $followedSeason->id,
+        ]);
+
+        expect($group->isFollowingSeason($followedSeason))->toBeTrue();
+        expect($group->isFollowingSeason($followedSeason->id))->toBeTrue();
+        expect($group->isFollowingSeason($unfollowedSeason))->toBeFalse();
+    });
+
+    test('followedSeasonIds returns all explicitly followed season ids', function () {
+        $group = Group::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $firstSeason->id,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $secondSeason->id,
+        ]);
+
+        expect($group->followedSeasonIds->all())->toBe([$firstSeason->id, $secondSeason->id]);
+    });
+
     test('follow_collection returns follows with teams', function () {
         $group = Group::factory()->create(['follow_limit' => 3]);
         $firstFollow = Follow::factory()->create(['group_id' => $group->id]);
@@ -142,36 +184,4 @@ describe('model defaults and accessors', function () {
         expect($group->follow_html_entity->toHtml())->toBe(HtmlEntity::CHECK_MARK->entity());
     });
 
-    test('stores enabled prediction policies as an array', function () {
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => ['group-unique-prediction'],
-        ]);
-
-        expect($group->enabled_prediction_policies)->toBe(['group-unique-prediction']);
-        expect($group->isPredictionPolicyEnabled('group-unique-prediction'))->toBeTrue();
-        expect($group->isPredictionPolicyEnabled('season-active'))->toBeFalse();
-    });
-
-    test('enabled_prediction_policies_display returns labels for enabled policy keys', function () {
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => [
-                'group-unique-prediction',
-                'minimum-lead-time-before-lock',
-            ],
-        ]);
-
-        $display = $group->enabled_prediction_policies_display;
-
-        expect($display)->toBeInstanceOf(HtmlString::class);
-        expect($display->toHtml())->toContain('Unique group prediction');
-        expect($display->toHtml())->toContain('Minimum lead time before lock');
-    });
-
-    test('enabled_prediction_policies_display returns none enabled when no policies are selected', function () {
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => [],
-        ]);
-
-        expect($group->enabled_prediction_policies_display)->toBe('None enabled');
-    });
 });

@@ -24,7 +24,6 @@ class GroupFactory extends Factory
             'member_limit' => Group::INITIAL_MEMBER_LIMIT,
             'player_limit' => Group::INITIAL_PLAYER_LIMIT,
             'follow_limit' => Group::INITIAL_FOLLOW_LIMIT,
-            'enabled_prediction_policies' => [],
         ];
     }
 }

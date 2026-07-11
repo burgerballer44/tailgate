@@ -10,7 +10,6 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
  * Prevents prediction submissions for games outside a group's followed teams.
- * Applies optional sport-scoped follow constraints when validating eligible games.
  */
 class GameBelongsToFollowedTeam implements ValidationRule
 {
@@ -18,7 +17,7 @@ class GameBelongsToFollowedTeam implements ValidationRule
      * Validates that the selected game is eligible for this group's follow configuration.
      *
      * Resolves the group from the current route and checks whether the game's home or
-     * away team is in the group's followed-team list, with optional sport-scoped filtering.
+    * away team is in the group's followed-team list.
      * Uses already-loaded follows when available to avoid redundant queries.
      *
      * @param  string  $attribute  The dot-notation field name being validated.
@@ -33,6 +32,12 @@ class GameBelongsToFollowedTeam implements ValidationRule
 
         if (! $group instanceof Group || ! $game) {
             $fail('Cannot submit a prediction for a game in a team you are not following.');
+
+            return;
+        }
+
+        if ($group->seasonFollows()->exists() && ! $group->isFollowingSeason($game->season_id)) {
+            $fail('Cannot submit a prediction for a season your group is not explicitly following.');
 
             return;
         }
@@ -57,20 +62,10 @@ class GameBelongsToFollowedTeam implements ValidationRule
     }
 
     /**
-     * Evaluates whether the game matches a followed team, including optional sport scoping.
+     * Evaluates whether the game includes a followed team.
      */
     private function gameTeamIsFollowed(Game $game, Follow $follow): bool
     {
-        $containsFollowedTeam = $game->home_team_id === $follow->team_id || $game->away_team_id === $follow->team_id;
-
-        if (! $containsFollowedTeam) {
-            return false;
-        }
-
-        if (! $follow->sport) {
-            return true;
-        }
-
-        return $game->season?->sport === $follow->sport->value;
+        return $game->home_team_id === $follow->team_id || $game->away_team_id === $follow->team_id;
     }
 }

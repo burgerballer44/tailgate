@@ -4,15 +4,12 @@ namespace App\Services\Contracts;
 
 use App\DTO\PredictionPolicyEvaluationResult;
 use App\DTO\ValidatedPredictionData;
-use App\Models\Group;
+use App\Models\GroupSeasonFollow;
 use App\Models\Player;
 use App\Models\Prediction;
 
 /**
  * Defines prediction policy evaluation operations.
- *
- * Implementations evaluate submissions, expose registered rules, and resolve
- * which group-level rules are currently enabled.
  */
 interface PredictionPolicyEvaluatorInterface
 {
@@ -34,17 +31,17 @@ interface PredictionPolicyEvaluatorInterface
     public function appRules(): array;
 
     /**
-     * Returns the available group-level policy rules that can be enabled per group.
+     * Returns the available group-level policy rules that can be enabled per followed season.
      *
      * @return array<int, PredictionPolicyRuleInterface> The configurable group-level policy rules.
      */
     public function groupRules(): array;
 
     /**
-     * Returns the subset of group-level policies currently enabled for the given group.
+     * Returns the subset of group-level policies currently enabled for a followed season.
      *
-     * @param  Group  $group  The group whose enabled policies should be resolved.
+     * @param  GroupSeasonFollow|null  $seasonFollow  The followed season configuration record.
      * @return array<int, PredictionPolicyRuleInterface> The enabled group-level policy rules.
      */
-    public function enabledGroupRules(Group $group): array;
+    public function enabledGroupRules(?GroupSeasonFollow $seasonFollow): array;
 }

@@ -8,11 +8,11 @@ use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Group;
-use App\Models\Sport;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use App\Services\Contracts\PredictionQueryInterface;
+use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\View\View;
@@ -34,6 +34,7 @@ class DeveloperGroupController extends Controller
         private GroupQueryInterface $groupQueryService,
         private UserQueryInterface $userQueryService,
         private TeamQueryInterface $teamQueryService,
+        private SeasonQueryInterface $seasonQueryService,
         private PredictionQueryInterface $predictionQueryService,
         private PredictionPolicyEvaluatorInterface $predictionPolicyEvaluator,
     ) {}
@@ -98,13 +99,18 @@ class DeveloperGroupController extends Controller
             ? $request->query('tab')
             : 'details';
 
-        $enabledGroupRules = [];
+        $enabledGroupRulesBySeason = [];
 
         if ($activeTab === 'details') {
-            $group->load(['owner', 'follows.team'])
+            $group->load(['owner', 'follows.team', 'seasonFollows.season'])
                 ->loadCount(['members', 'players']);
 
-            $enabledGroupRules = $this->predictionPolicyEvaluator->enabledGroupRules($group);
+            foreach ($group->seasonFollows as $seasonFollow) {
+                $enabledGroupRulesBySeason[] = [
+                    'season_name' => $seasonFollow->season?->name ?? 'Season #'.$seasonFollow->season_id,
+                    'rules' => $this->predictionPolicyEvaluator->enabledGroupRules($seasonFollow),
+                ];
+            }
         }
 
         if ($activeTab === 'members') {
@@ -126,7 +132,7 @@ class DeveloperGroupController extends Controller
             'group' => $group,
             'predictions' => $predictions,
             'activeTab' => $activeTab,
-            'enabledGroupRules' => $enabledGroupRules,
+            'enabledGroupRulesBySeason' => $enabledGroupRulesBySeason,
         ]);
     }
 
@@ -185,11 +191,14 @@ class DeveloperGroupController extends Controller
     public function createFollowTeam(Group $group): View
     {
         $teams = $this->teamQueryService->getAvailableTeamsForFollow();
-        $sportOptions = collect(Sport::cases())
-            ->mapWithKeys(fn (Sport $sport): array => [$sport->value => $sport->value])
-            ->toArray();
+        $availableSeasonsForFollow = $this->seasonQueryService->getAvailableSeasonsForFollow();
 
-        return view('developer.groups.follow-team', compact('group', 'teams', 'sportOptions'));
+        return view('developer.groups.follow-team', [
+            'group' => $group,
+            'teams' => $teams,
+            'availableSeasonsForFollow' => $availableSeasonsForFollow,
+            'selectedSeasonIds' => $group->followedSeasonIds,
+        ]);
     }
 
     /**

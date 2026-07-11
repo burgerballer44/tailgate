@@ -71,11 +71,11 @@ class QuickPredictionService implements QuickPredictionServiceInterface
             $upcomingGames = $this->gameQueryService
                 ->getUpcomingGamesForGroupWithinWindow($group, $windowEnd);
 
-            // Group games by followed team and sport to keep context explicit.
-            $teamSportGroups = $this->buildTeamSportGameGroups($group, $upcomingGames);
+            // Group games by followed team to keep context explicit.
+            $teamGroups = $this->buildTeamGameGroups($group, $upcomingGames);
 
             // Skip memberships that contribute no players and no eligible games.
-            if ($teamSportGroups->isEmpty() && $memberPlayers->isEmpty()) {
+            if ($teamGroups->isEmpty() && $memberPlayers->isEmpty()) {
                 continue;
             }
 
@@ -88,9 +88,9 @@ class QuickPredictionService implements QuickPredictionServiceInterface
             $dashboardOpenPredictionCount += $this->countOpenPredictionSlots($memberPlayers, $upcomingGames, $predictionLookup);
 
             // Build one payload entry per game.
-            foreach ($teamSportGroups as $teamSportGroup) {
-                foreach ($teamSportGroup['games'] as $game) {
-                    $gameEntries->push($this->buildModalGameEntry($membership, $teamSportGroup, $game, $memberPlayers, $predictionLookup));
+            foreach ($teamGroups as $teamGroup) {
+                foreach ($teamGroup['games'] as $game) {
+                    $gameEntries->push($this->buildModalGameEntry($membership, $teamGroup, $game, $memberPlayers, $predictionLookup));
                 }
             }
         }
@@ -124,14 +124,14 @@ class QuickPredictionService implements QuickPredictionServiceInterface
     }
 
     /**
-     * Build one game entry for a membership and team/sport bucket.
+     * Build one game entry for a membership and followed-team bucket.
      */
-    private function buildModalGameEntry(Member $membership, array $teamSportGroup, Game $game, EloquentCollection $memberPlayers, array $predictionLookup): array
+    private function buildModalGameEntry(Member $membership, array $teamGroup, Game $game, EloquentCollection $memberPlayers, array $predictionLookup): array
     {
         $group = $membership->group;
         $gameDateTime = date_create_immutable((string) $game->start_date_time);
         $seasonSport = Sport::tryFrom((string) $game->season?->sport);
-        $sportLabel = $seasonSport?->value ?? (string) ($teamSportGroup['sport'] ?? 'Unknown sport');
+        $sportLabel = $seasonSport?->value ?? 'Unknown sport';
         $sportIcon = $seasonSport?->htmlEntity()->character();
 
         // Build a human-readable label for the game start time.
@@ -190,7 +190,7 @@ class QuickPredictionService implements QuickPredictionServiceInterface
 
             // Team and sport context.
             'team' => [
-                'name' => $teamSportGroup['teamName'],
+                'name' => $teamGroup['teamName'],
                 'sport' => $sportLabel,
                 'sport_icon' => $sportIcon,
             ],
@@ -263,11 +263,11 @@ class QuickPredictionService implements QuickPredictionServiceInterface
     }
 
     /**
-     * Group upcoming games by followed team and sport.
+     * Group upcoming games by followed team.
      */
-    private function buildTeamSportGameGroups(Group $group, Collection $games): Collection
+    private function buildTeamGameGroups(Group $group, Collection $games): Collection
     {
-        // Intermediate associative array keyed by "team_id:sport" so we can accumulate
+        // Intermediate associative array keyed by team ID so we can accumulate
         // games per bucket before converting to a Collection at the end.
         $grouped = [];
 
@@ -280,25 +280,14 @@ class QuickPredictionService implements QuickPredictionServiceInterface
                     continue;
                 }
 
-                // If the follow is sport-scoped, skip games whose season sport does not
-                // match. This is the core of the sport-filtering contract.
-                if ($follow->sport !== null && $game->season?->sport !== $follow->sport->value) {
-                    continue;
-                }
-
-                // Resolve display strings. The season sport is the canonical label;
-                // the follow sport is a fallback for edge cases where the season is missing.
-                $sportLabel = (string) ($game->season?->sport ?? $follow->sport?->value ?? 'Unknown sport');
                 $teamName = (string) ($follow->team?->display_name ?? $follow->team?->organization ?? 'Unknown team');
 
-                // Team+sport creates separate buckets when one team is followed across sports.
-                $groupKey = $follow->team_id.':'.$sportLabel;
+                $groupKey = (string) $follow->team_id;
 
                 if (! isset($grouped[$groupKey])) {
                     $grouped[$groupKey] = [
                         'key' => $groupKey,
                         'teamName' => $teamName,
-                        'sport' => $sportLabel,
                         'games' => [],
                     ];
                 }
@@ -313,15 +302,14 @@ class QuickPredictionService implements QuickPredictionServiceInterface
                 return [
                     'key' => $entry['key'],
                     'teamName' => $entry['teamName'],
-                    'sport' => $entry['sport'],
                     // Sort each bucket chronologically for stable downstream consumption.
                     'games' => collect($entry['games'])
                         ->sortBy('start_date_time')
                         ->values(),
                 ];
             })
-                    // Sort buckets alphabetically for predictable output ordering.
-            ->sortBy(fn (array $entry): string => strtolower($entry['teamName'].' '.$entry['sport']))
+            // Sort buckets alphabetically for predictable output ordering.
+            ->sortBy(fn (array $entry): string => strtolower($entry['teamName']))
             ->values();
     }
 

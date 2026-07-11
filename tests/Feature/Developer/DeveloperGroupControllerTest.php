@@ -2,9 +2,10 @@
 
 use App\Models\Follow;
 use App\Models\Group;
+use App\Models\GroupSeasonFollow;
 use App\Models\Member;
 use App\Models\Player;
-use App\Models\Sport;
+use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -219,7 +220,11 @@ describe('viewing a group', function () {
     });
 
     test('details tab shows enabled group rules', function () {
-        $group = Group::factory()->create([
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create(['name' => 'Policy Season']);
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
             'enabled_prediction_policies' => [
                 'group-unique-prediction',
                 'minimum-lead-time-before-lock',
@@ -230,6 +235,7 @@ describe('viewing a group', function () {
 
         $response->assertOk();
         $response->assertSee('Rules');
+        $response->assertSee('Policy Season');
         $response->assertSee('Unique group prediction');
         $response->assertSee('When enabled for a group, only one prediction for a game may exist within that group.');
         $response->assertSee('Minimum lead time before lock');
@@ -288,10 +294,6 @@ describe('updating group', function () {
         $updateData = [
             'name' => 'Updated Name',
             'owner_id' => $group->owner->id,
-            'enabled_prediction_policies' => [
-                'group-unique-prediction',
-                'minimum-lead-time-before-lock',
-            ],
         ];
 
         // patch the group data
@@ -303,7 +305,6 @@ describe('updating group', function () {
         // verify group was updated
         $group->refresh();
         expect($group->name)->toBe($updateData['name']);
-        expect($group->enabled_prediction_policies)->toBe($updateData['enabled_prediction_policies']);
     });
 
     test('flashes success message on update', function () {
@@ -377,27 +378,38 @@ describe('follow team', function () {
     test('follows multiple teams up to follow limit', function () {
         $group = Group::factory()->create(['follow_limit' => 2]);
         $firstTeam = Team::factory()->create();
-        $secondTeam = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $secondTeam = Team::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
 
         $this->post(route('developer.groups.follow-team', $group), [
             'team_id' => $firstTeam->id,
+            'season_ids' => [$firstSeason->id],
         ])->assertRedirect(route('developer.groups.show', $group));
 
         $this->post(route('developer.groups.follow-team', $group), [
             'team_id' => $secondTeam->id,
-            'sport' => Sport::FOOTBALL->value,
+            'season_ids' => [$secondSeason->id],
         ])->assertRedirect(route('developer.groups.show', $group));
 
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $firstTeam->id,
-            'sport' => null,
         ]);
 
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $secondTeam->id,
-            'sport' => Sport::FOOTBALL->value,
+        ]);
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $firstSeason->id,
+        ]);
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $secondSeason->id,
         ]);
     });
 
@@ -405,14 +417,17 @@ describe('follow team', function () {
         $group = Group::factory()->create(['follow_limit' => 1]);
         $firstTeam = Team::factory()->create();
         $secondTeam = Team::factory()->create();
+        $season = Season::factory()->active()->create();
 
         $this->post(route('developer.groups.follow-team', $group), [
             'team_id' => $firstTeam->id,
+            'season_ids' => [$season->id],
         ])->assertRedirect(route('developer.groups.show', $group));
 
         $response = $this->from(route('developer.groups.follow-team.create', $group))
             ->post(route('developer.groups.follow-team', $group), [
                 'team_id' => $secondTeam->id,
+                'season_ids' => [$season->id],
             ]);
 
         $response->assertRedirect(route('developer.groups.follow-team.create', $group));

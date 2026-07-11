@@ -3,6 +3,7 @@
 use App\DTO\ValidatedPredictionData;
 use App\Models\Game;
 use App\Models\Group;
+use App\Models\GroupSeasonFollow;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Prediction;
@@ -172,14 +173,17 @@ describe('evaluate', function () {
         $service = app(PredictionPolicyEvaluatorService::class);
 
         // This proves duplicates do not fail unless the unique-group policy is enabled.
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => [],
-        ]);
+        $group = Group::factory()->create();
         $firstMember = Member::factory()->create(['group_id' => $group->id]);
         $secondMember = Member::factory()->create(['group_id' => $group->id]);
         $firstPlayer = Player::factory()->create(['member_id' => $firstMember->id]);
         $secondPlayer = Player::factory()->create(['member_id' => $secondMember->id]);
         $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'enabled_prediction_policies' => [],
+        ]);
         $game = Game::factory()->create([
             'season_id' => $season->id,
             'start_date_time' => now()->addDay()->format('Y-m-d H:i:s'),
@@ -205,14 +209,17 @@ describe('evaluate', function () {
         $service = app(PredictionPolicyEvaluatorService::class);
 
         // This verifies the first group-level policy path when enabled.
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => ['group-unique-prediction'],
-        ]);
+        $group = Group::factory()->create();
         $firstMember = Member::factory()->create(['group_id' => $group->id]);
         $secondMember = Member::factory()->create(['group_id' => $group->id]);
         $firstPlayer = Player::factory()->create(['member_id' => $firstMember->id]);
         $secondPlayer = Player::factory()->create(['member_id' => $secondMember->id]);
         $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]);
         $game = Game::factory()->create([
             'season_id' => $season->id,
             'start_date_time' => now()->addDay()->format('Y-m-d H:i:s'),
@@ -239,12 +246,15 @@ describe('evaluate', function () {
         $service = app(PredictionPolicyEvaluatorService::class);
 
         // This validates self-exclusion behavior for update flows under uniqueness checks.
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => ['group-unique-prediction'],
-        ]);
+        $group = Group::factory()->create();
         $member = Member::factory()->create(['group_id' => $group->id]);
         $player = Player::factory()->create(['member_id' => $member->id]);
         $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'enabled_prediction_policies' => ['group-unique-prediction'],
+        ]);
         $game = Game::factory()->create([
             'season_id' => $season->id,
             'start_date_time' => now()->addDay()->format('Y-m-d H:i:s'),
@@ -269,12 +279,15 @@ describe('evaluate', function () {
         $service = app(PredictionPolicyEvaluatorService::class);
 
         // This verifies the second group-level policy branch and expected violation metadata.
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => ['minimum-lead-time-before-lock'],
-        ]);
+        $group = Group::factory()->create();
         $member = Member::factory()->create(['group_id' => $group->id]);
         $player = Player::factory()->create(['member_id' => $member->id]);
         $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'enabled_prediction_policies' => ['minimum-lead-time-before-lock'],
+        ]);
         $game = Game::factory()->create([
             'season_id' => $season->id,
             'start_date_time' => now()->addMinutes(20)->format('Y-m-d H:i:s'),
@@ -298,17 +311,20 @@ describe('evaluate', function () {
         $service = app(PredictionPolicyEvaluatorService::class);
 
         // This locks down aggregate behavior for multiple group failures in one submission.
-        $group = Group::factory()->create([
-            'enabled_prediction_policies' => [
-                'group-unique-prediction',
-                'minimum-lead-time-before-lock',
-            ],
-        ]);
+        $group = Group::factory()->create();
         $firstMember = Member::factory()->create(['group_id' => $group->id]);
         $secondMember = Member::factory()->create(['group_id' => $group->id]);
         $firstPlayer = Player::factory()->create(['member_id' => $firstMember->id]);
         $secondPlayer = Player::factory()->create(['member_id' => $secondMember->id]);
         $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'enabled_prediction_policies' => [
+                'group-unique-prediction',
+                'minimum-lead-time-before-lock',
+            ],
+        ]);
         $game = Game::factory()->create([
             'season_id' => $season->id,
             'start_date_time' => now()->addMinutes(20)->format('Y-m-d H:i:s'),
@@ -368,29 +384,29 @@ describe('groupRules', function () {
 });
 
 describe('enabledGroupRules', function () {
-    test('returns only rules enabled on the given group', function () {
+    test('returns only rules enabled on the given followed season', function () {
         $service = app(PredictionPolicyEvaluatorService::class);
 
-        // This verifies key-based filtering against group configuration.
-        $group = Group::factory()->create([
+        // This verifies key-based filtering against season configuration.
+        $groupSeasonFollow = GroupSeasonFollow::factory()->create([
             'enabled_prediction_policies' => ['minimum-lead-time-before-lock'],
         ]);
 
-        $rules = $service->enabledGroupRules($group);
+        $rules = $service->enabledGroupRules($groupSeasonFollow);
 
         expect($rules)->toHaveCount(1);
         expect($rules[0])->toBeInstanceOf(MinimumLeadTimeBeforeLockPolicy::class);
     });
 
-    test('returns an empty list when no group policies are enabled', function () {
+    test('returns an empty list when no season policies are enabled', function () {
         $service = app(PredictionPolicyEvaluatorService::class);
 
-        // This confirms group-level checks can be fully disabled per group.
-        $group = Group::factory()->create([
+        // This confirms group-level checks can be fully disabled per followed season.
+        $groupSeasonFollow = GroupSeasonFollow::factory()->create([
             'enabled_prediction_policies' => [],
         ]);
 
-        $rules = $service->enabledGroupRules($group);
+        $rules = $service->enabledGroupRules($groupSeasonFollow);
 
         expect($rules)->toBe([]);
     });

@@ -2,17 +2,17 @@
 
 namespace App\Http\Requests\Group;
 
-use App\DTO\ValidatedGroupPoliciesData;
+use App\DTO\ValidatedGroupPredictionScoringPolicyData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\GroupValidationRulesTrait;
 use Illuminate\Validation\Rule;
 
-class UpdateGroupPoliciesRequest extends FormRequest
+class UpdateGroupPredictionScoringPolicyRequest extends FormRequest
 {
     use GroupValidationRulesTrait;
 
     /**
-     * Authorize authenticated users to update group policies.
+     * Authorize authenticated users to update group scoring policy.
      *
      * Group admin authorization is enforced by route middleware.
      */
@@ -22,9 +22,9 @@ class UpdateGroupPoliciesRequest extends FormRequest
     }
 
     /**
-     * Validate season-scoped prediction policy selections.
+    * Validate required season-scoped prediction scoring policy selection.
      *
-     * @return array<string, mixed>
+     * @return array<string, array<int, string>|string>
      */
     public function rules(): array
     {
@@ -38,22 +38,18 @@ class UpdateGroupPoliciesRequest extends FormRequest
                     $query->where('group_id', $group->id ?? null);
                 }),
             ],
-            'enabled_prediction_policies' => ['sometimes', 'array'],
-            'enabled_prediction_policies.*' => ['string', 'distinct', 'in:'.implode(',', $this->groupPolicyKeys())],
+            'prediction_scoring_policy' => ['required', 'string', 'in:'.implode(',', $this->predictionScoringPolicyKeys())],
         ];
     }
 
     /**
-     * Convert validated input to a dedicated policy DTO.
-     *
-     * The dedicated policies endpoint treats missing checkbox input as an
-     * intentional "clear all" action.
+     * Convert validated request input to a scoring policy DTO.
      */
-    public function toDTO(): ValidatedGroupPoliciesData
+    public function toDTO(): ValidatedGroupPredictionScoringPolicyData
     {
-        return ValidatedGroupPoliciesData::fromArray([
+        return ValidatedGroupPredictionScoringPolicyData::fromArray([
             'season_id' => $this->input('season_id'),
-            'enabled_prediction_policies' => $this->input('enabled_prediction_policies', []),
+            'prediction_scoring_policy' => $this->input('prediction_scoring_policy'),
         ]);
     }
 }

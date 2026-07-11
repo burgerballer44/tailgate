@@ -2,15 +2,15 @@
 
 namespace Database\Factories;
 
-use App\Models\Follow;
 use App\Models\Group;
-use App\Models\Team;
+use App\Models\GroupSeasonFollow;
+use App\Models\Season;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Follow>
+ * @extends Factory<GroupSeasonFollow>
  */
-class FollowFactory extends Factory
+class GroupSeasonFollowFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -21,7 +21,9 @@ class FollowFactory extends Factory
     {
         return [
             'group_id' => Group::factory(),
-            'team_id' => Team::factory(),
+            'season_id' => Season::factory(),
+            'prediction_scoring_policy' => Group::DEFAULT_PREDICTION_SCORING_POLICY,
+            'enabled_prediction_policies' => [],
         ];
     }
 }

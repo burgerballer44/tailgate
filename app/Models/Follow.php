@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class Follow extends Model
@@ -28,16 +27,6 @@ class Follow extends Model
      */
     protected $fillable = [
         'team_id',
-        'sport',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'sport' => Sport::class,
     ];
 
     /**
@@ -80,25 +69,4 @@ class Follow extends Model
         return $this->belongsTo(Group::class);
     }
 
-    /**
-     * Render the followed sport as one or more HTML entities.
-     *
-     * When a specific sport is stored, a single icon is returned. When the sport
-     * is absent, the accessor falls back to all available sports to represent an
-     * all-sports follow.
-     *
-     * @return HtmlString The sport icon markup used in compact displays.
-     */
-    public function getSportDisplayAttribute(): HtmlString
-    {
-        if (! $this->sport instanceof Sport) {
-            $allSportsEntities = collect(Sport::cases())
-                ->map(fn (Sport $sport) => $sport->htmlEntity()->entity())
-                ->implode(' ');
-
-            return new HtmlString($allSportsEntities);
-        }
-
-        return new HtmlString($this->sport->htmlEntity()->entity());
-    }
 }

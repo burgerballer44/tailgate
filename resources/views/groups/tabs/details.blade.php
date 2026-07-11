@@ -1,20 +1,21 @@
 <x-groups.section-card title="Group snapshot" description="Quick status for this group.">
+    @php
+        $followedTeams = $group->follow_collection;
+        $followedSeasons = $group->seasonFollows
+            ->filter(fn ($seasonFollow) => $seasonFollow->season !== null)
+            ->sortBy(fn ($seasonFollow) => $seasonFollow->season->name)
+            ->values();
+    @endphp
+
     <div class="-mx-6 -my-5 grid grid-cols-2 divide-x divide-y divide-gray-100 sm:grid-cols-4 sm:divide-y-0">
         <div class="px-6 py-5">
-            <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Following</p>
+            <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Followed teams</p>
+            <p class="mt-1 text-sm font-semibold text-gray-900">{{ $followedTeams->count() }}</p>
+        </div>
 
-            @if ($follows->isEmpty())
-                <p class="mt-1 text-sm text-gray-500">No teams followed yet.</p>
-            @else
-                <ul class="mt-2 space-y-2">
-                    @foreach ($follows as $follow)
-                        <li class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
-                            <p class="font-semibold text-gray-900">{{ $follow->team->display_name }}</p>
-                            <p class="text-gray-500">{{ $follow->sport_display }}</p>
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
+        <div class="px-6 py-5">
+            <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Followed seasons</p>
+            <p class="mt-1 text-sm font-semibold text-gray-900">{{ $followedSeasons->count() }}</p>
         </div>
 
         <div class="px-6 py-5">
@@ -36,21 +37,41 @@
         </div>
     </div>
 
-    @php
-        $enabledPolicies = $group->enabled_prediction_policies ?? [];
-        $policyLabels = collect($availableGroupPolicies)->keyBy(fn ($p) => $p->key());
-    @endphp
+</x-groups.section-card>
 
-    @if (! empty($enabledPolicies))
-        <div class="mt-4 border-t border-gray-100 px-6 py-4">
-            <p class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Active prediction rules</p>
-            <div class="flex flex-wrap gap-2">
-                @foreach ($enabledPolicies as $policyKey)
-                    <span class="inline-flex items-center rounded-full bg-navy/10 px-2.5 py-0.5 text-xs font-medium text-navy">
-                        {{ $policyLabels->get($policyKey)?->label() ?? $policyKey }}
-                    </span>
-                @endforeach
-            </div>
+<x-groups.section-card title="Followed teams and seasons" description="Teams and seasons this group is configured to use for predictions.">
+    <div class="grid gap-6 md:grid-cols-2">
+        <div>
+            <h3 class="text-sm font-semibold text-gray-900">Followed teams</h3>
+
+            @if ($followedTeams->isEmpty())
+                <p class="mt-2 text-sm text-gray-500">No teams followed yet.</p>
+            @else
+                <ul class="mt-3 space-y-2">
+                    @foreach ($followedTeams as $follow)
+                        <li class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                            {{ $follow->team->display_name }}
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
-    @endif
+
+        <div>
+            <h3 class="text-sm font-semibold text-gray-900">Followed seasons</h3>
+
+            @if ($followedSeasons->isEmpty())
+                <p class="mt-2 text-sm text-gray-500">No seasons followed yet.</p>
+            @else
+                <ul class="mt-3 space-y-2">
+                    @foreach ($followedSeasons as $seasonFollow)
+                        <li class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                            {{ $seasonFollow->season->name }}
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+    </div>
+
 </x-groups.section-card>

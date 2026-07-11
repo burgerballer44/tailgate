@@ -35,8 +35,8 @@ interface GameQueryInterface
     /**
      * Get upcoming games that are eligible for a group's follows.
      *
-     * A game is eligible when either team matches a followed team and, when the
-     * follow has sport scope, the game season sport matches that scope.
+        * A game is eligible when either team matches a followed team and the group
+        * follows the season when explicit season follows are configured.
      *
      * @param  Group  $group  The group whose follow configuration defines eligible games.
      * @return Collection<int, Game> Upcoming games sorted by start date-time.

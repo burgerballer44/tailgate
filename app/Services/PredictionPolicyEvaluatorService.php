@@ -8,6 +8,7 @@ use App\DTO\PredictionPolicyViolation;
 use App\DTO\ValidatedPredictionData;
 use App\Models\Game;
 use App\Models\Group;
+use App\Models\GroupSeasonFollow;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\PredictionPolicies\MinimumLeadTimeBeforeLockPolicy;
@@ -21,7 +22,7 @@ use App\Services\Contracts\PredictionPolicyRuleInterface;
  * Evaluates prediction submissions against registered policy rules.
  *
  * App-level rules are always enforced. Group-level rules are enforced only
- * when explicitly enabled on the group.
+ * when explicitly enabled for the game's followed season.
  */
 class PredictionPolicyEvaluatorService implements PredictionPolicyEvaluatorInterface
 {
@@ -77,8 +78,12 @@ class PredictionPolicyEvaluatorService implements PredictionPolicyEvaluatorInter
             );
         }
 
-        // Group-level rules run only when enabled by key on the group.
-        foreach ($this->enabledGroupRules($group) as $rule) {
+        $seasonFollow = $group->seasonFollows()
+            ->where('season_id', $game->season_id)
+            ->first();
+
+        // Group-level rules run only when enabled on the followed season.
+        foreach ($this->enabledGroupRules($seasonFollow) as $rule) {
             if ($rule->passes($context)) {
                 continue;
             }
@@ -121,16 +126,18 @@ class PredictionPolicyEvaluatorService implements PredictionPolicyEvaluatorInter
     }
 
     /**
-     * Return only group-level rules enabled for the given group.
+     * Return only group-level rules enabled for the given followed season.
      *
-     * @param  Group  $group  The group whose enabled policy keys should be resolved.
+     * @param  GroupSeasonFollow|null  $seasonFollow  The followed season whose enabled policy keys should be resolved.
      * @return array<int, PredictionPolicyRuleInterface>
      */
-    public function enabledGroupRules(Group $group): array
+    public function enabledGroupRules(?GroupSeasonFollow $seasonFollow): array
     {
+        $enabledKeys = $seasonFollow?->enabled_prediction_policies ?? [];
+
         return array_values(array_filter(
             $this->groupRules(),
-            fn (PredictionPolicyRuleInterface $rule): bool => $group->isPredictionPolicyEnabled($rule->key())
+            fn (PredictionPolicyRuleInterface $rule): bool => in_array($rule->key(), $enabledKeys, true)
         ));
     }
 

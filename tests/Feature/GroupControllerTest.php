@@ -4,6 +4,7 @@ use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupRole;
+use App\Models\GroupSeasonFollow;
 use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Models\Player;
@@ -240,30 +241,67 @@ describe('show', function () {
         });
     });
 
-    test('shows sport icon when follow is scoped and all sports icons when unscoped', function () {
+    test('shows followed team names in details tab', function () {
         $member = Member::factory()->create([
             'user_id' => $this->user->id,
             'status' => MemberStatus::APPROVED->value,
         ]);
         $group = $member->group;
 
-        Follow::factory()->create([
-            'group_id' => $group->id,
-            'team_id' => Team::factory()->create()->id,
-            'sport' => Sport::FOOTBALL,
+        $firstTeam = Team::factory()->create([
+            'organization' => 'Alpha',
+            'designation' => 'Team',
+            'abbreviation' => 'ALP',
+        ]);
+
+        $secondTeam = Team::factory()->create([
+            'organization' => 'Beta',
+            'designation' => 'Team',
+            'abbreviation' => 'BET',
         ]);
 
         Follow::factory()->create([
             'group_id' => $group->id,
-            'team_id' => Team::factory()->create()->id,
-            'sport' => null,
+            'team_id' => $firstTeam->id,
+        ]);
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $secondTeam->id,
         ]);
 
         $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'details']));
 
         $response->assertOk();
-        $response->assertSee('&#127944;', false);
-        $response->assertSee('&#127936;', false);
+        $response->assertSee($firstTeam->display_name);
+        $response->assertSee($secondTeam->display_name);
+    });
+
+    test('shows followed season names in details tab', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $footballSeason = Season::factory()->active()->create(['name' => '2026 College Football']);
+        $basketballSeason = Season::factory()->active()->create(['name' => '2026 College Basketball']);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $footballSeason->id,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $basketballSeason->id,
+        ]);
+
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'details']));
+
+        $response->assertOk();
+        $response->assertSee($footballSeason->name);
+        $response->assertSee($basketballSeason->name);
     });
 
     test('defaults to details tab when tab query is invalid', function () {
@@ -278,8 +316,8 @@ describe('show', function () {
         $response->assertViewHas('activeTab', 'details');
     });
 
-    test('upcoming games tab only shows followed-team games in follow sport scope', function () {
-        // Arrange: approved member with a group that follows one team scoped to football.
+    test('upcoming games tab only shows followed-team games in followed seasons', function () {
+        // Arrange: approved member with a group that follows one team.
         $member = Member::factory()->create([
             'user_id' => $this->user->id,
             'status' => MemberStatus::APPROVED->value,
@@ -323,7 +361,11 @@ describe('show', function () {
         Follow::factory()->create([
             'group_id' => $group->id,
             'team_id' => $followedTeam->id,
-            'sport' => Sport::FOOTBALL,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $footballSeason->id,
         ]);
 
         Game::factory()->create([
@@ -1060,11 +1102,52 @@ describe('edit', function () {
     test('shows edit form for owner', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
 
-        $response = $this->get(route('groups.edit', $group));
+        $response = $this->get(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
 
         $response->assertOk();
         $response->assertViewIs('groups.edit');
         $response->assertViewHas('group', $group);
+    });
+
+    test('shows explicit season follow options in the edit form', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        $inactiveSeason = Season::factory()->create([
+            'active' => false,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->get(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+
+        $response->assertOk();
+        $response->assertSee('Season follows');
+        $response->assertViewHas('availableSeasonsForFollow', function ($availableSeasonsForFollow) use ($season, $inactiveSeason) {
+            return $availableSeasonsForFollow->pluck('id')->all() === [$season->id]
+                && $availableSeasonsForFollow->contains('id', $season->id)
+                && ! $availableSeasonsForFollow->contains('id', $inactiveSeason->id);
+        });
+    });
+
+    test('shows prediction scoring policy radio options with labels and default marker', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'prediction-difference-from-score',
+        ]);
+
+        $response = $this->get(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+
+        $response->assertOk();
+        $response->assertSee('Prediction scoring policy');
+        $response->assertSee('Prediction difference from score (lowest total wins)');
+        $response->assertSee('Placement points (1st, 2nd, 3rd...)');
+        $response->assertSee('(Default)');
     });
 
     test('shows edit form for admin', function () {
@@ -1192,9 +1275,10 @@ describe('update', function () {
 
         $response = $this->patch(route('groups.update', $group), [
             'name' => 'New Name',
+            'tab' => 'settings',
         ]);
 
-        $response->assertRedirect(route('groups.show', $group));
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'settings']));
         $group->refresh();
         expect($group->name)->toBe('New Name');
         expect($group->owner_id)->toBe($this->user->id); // owner should not change
@@ -1211,9 +1295,10 @@ describe('update', function () {
 
         $response = $this->patch(route('groups.update', $group), [
             'name' => 'New Name',
+            'tab' => 'settings',
         ]);
 
-        $response->assertRedirect(route('groups.show', $group));
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'settings']));
         $group->refresh();
         expect($group->name)->toBe('New Name');
     });
@@ -1266,16 +1351,25 @@ describe('updatePolicies', function () {
             'name' => $originalName,
             'member_limit' => $originalMemberLimit,
             'player_limit' => $originalPlayerLimit,
+        ]);
+
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
             'enabled_prediction_policies' => [],
         ]);
 
         $response = $this->patch(route('groups.update-policies', $group), [
+            'tab' => 'seasons',
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['group-unique-prediction'],
         ]);
 
-        $response->assertRedirect(route('groups.show', $group));
-        $group->refresh();
-        expect($group->enabled_prediction_policies)->toBe(['group-unique-prediction']);
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+        $seasonFollow = $group->fresh()->seasonFollows()->where('season_id', $season->id)->first();
+        expect($seasonFollow)->not->toBeNull();
+        expect($seasonFollow->enabled_prediction_policies)->toBe(['group-unique-prediction']);
         expect($group->name)->toBe($originalName);
         expect($group->member_limit)->toBe($originalMemberLimit);
         expect($group->player_limit)->toBe($originalPlayerLimit);
@@ -1283,20 +1377,31 @@ describe('updatePolicies', function () {
     });
 
     test('clears group prediction policies when no checkbox is selected', function () {
-        $group = Group::factory()->create([
-            'owner_id' => $this->user->id,
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['group-unique-prediction'],
         ]);
 
-        $response = $this->patch(route('groups.update-policies', $group), []);
+        $response = $this->patch(route('groups.update-policies', $group), [
+            'tab' => 'seasons',
+            'season_id' => $season->id,
+        ]);
 
-        $response->assertRedirect(route('groups.show', $group));
-        $group->refresh();
-        expect($group->enabled_prediction_policies)->toBe([]);
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+        $seasonFollow = $group->fresh()->seasonFollows()->where('season_id', $season->id)->first();
+        expect($seasonFollow)->not->toBeNull();
+        expect($seasonFollow->enabled_prediction_policies)->toBe([]);
     });
 
     test('updates group prediction policies for admin', function () {
-        $group = Group::factory()->create([
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
             'enabled_prediction_policies' => [],
         ]);
 
@@ -1308,18 +1413,27 @@ describe('updatePolicies', function () {
         ]);
 
         $response = $this->patch(route('groups.update-policies', $group), [
+            'tab' => 'seasons',
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['minimum-lead-time-before-lock'],
         ]);
 
-        $response->assertRedirect(route('groups.show', $group));
-        $group->refresh();
-        expect($group->enabled_prediction_policies)->toBe(['minimum-lead-time-before-lock']);
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+        $seasonFollow = $group->fresh()->seasonFollows()->where('season_id', $season->id)->first();
+        expect($seasonFollow)->not->toBeNull();
+        expect($seasonFollow->enabled_prediction_policies)->toBe(['minimum-lead-time-before-lock']);
     });
 
     test('rejects invalid policy keys', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
 
         $response = $this->patch(route('groups.update-policies', $group), [
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['not-a-valid-policy'],
         ]);
 
@@ -1329,6 +1443,11 @@ describe('updatePolicies', function () {
 
     test('denies update policies to regular members', function () {
         $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
 
         Member::factory()->create([
             'user_id' => $this->user->id,
@@ -1338,6 +1457,7 @@ describe('updatePolicies', function () {
         ]);
 
         $response = $this->patch(route('groups.update-policies', $group), [
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['group-unique-prediction'],
         ]);
 
@@ -1346,12 +1466,211 @@ describe('updatePolicies', function () {
 
     test('flashes success message on policy update', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
 
         $this->patch(route('groups.update-policies', $group), [
+            'season_id' => $season->id,
             'enabled_prediction_policies' => ['group-unique-prediction'],
         ])->assertRedirect();
 
-        expect(session('alert')['message'])->toBe('Prediction policies updated successfully!');
+        expect(session('alert')['message'])->toBe('Season prediction policies updated successfully!');
+    });
+});
+
+describe('updatePredictionScoringPolicy', function () {
+    test('updates season prediction scoring policy for owner', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->patch(route('groups.update-prediction-scoring-policy', $group), [
+            'tab' => 'seasons',
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'placement-points',
+        ]);
+
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'placement-points',
+        ]);
+    });
+
+    test('updates season prediction scoring policy for admin', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->patch(route('groups.update-prediction-scoring-policy', $group), [
+            'tab' => 'seasons',
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'placement-points',
+        ]);
+
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'placement-points',
+        ]);
+    });
+
+    test('rejects invalid prediction scoring policy key', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->from(route('groups.edit', ['group' => $group, 'tab' => 'seasons']))
+            ->patch(route('groups.update-prediction-scoring-policy', $group), [
+                'season_id' => $season->id,
+                'prediction_scoring_policy' => 'not-a-valid-policy',
+            ]);
+
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+        $response->assertSessionHasErrors('prediction_scoring_policy');
+    });
+
+    test('denies update prediction scoring policy to regular members', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->patch(route('groups.update-prediction-scoring-policy', $group), [
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'placement-points',
+        ]);
+
+        $response->assertForbidden();
+    });
+
+    test('flashes success message on prediction scoring policy update', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $this->patch(route('groups.update-prediction-scoring-policy', $group), [
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'placement-points',
+        ])->assertRedirect();
+
+        expect(session('alert')['message'])->toBe('Season prediction scoring policy updated successfully!');
+    });
+});
+
+describe('updateSeasonFollows', function () {
+    test('updates the group season follows for owner', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
+
+        $response = $this->patch(route('groups.update-season-follows', $group), [
+            'tab' => 'seasons',
+            'season_ids' => [$firstSeason->id, $secondSeason->id],
+        ]);
+
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $firstSeason->id,
+        ]);
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $secondSeason->id,
+        ]);
+    });
+
+    test('rejects season ids that are not active', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $inactiveSeason = Season::factory()->create(['active' => false]);
+
+        $response = $this->from(route('groups.edit', ['group' => $group, 'tab' => 'seasons']))
+            ->patch(route('groups.update-season-follows', $group), [
+                'season_ids' => [$inactiveSeason->id],
+            ]);
+
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+        $response->assertSessionHasErrors('season_ids.0');
+    });
+
+    test('allows clearing all followed seasons', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->patch(route('groups.update-season-follows', $group), ['tab' => 'seasons']);
+
+        $response->assertRedirect(route('groups.edit', ['group' => $group, 'tab' => 'seasons']));
+
+        $this->assertDatabaseMissing('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+    });
+
+    test('denies update season follows to regular members', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+        $season = Season::factory()->active()->create();
+
+        $response = $this->patch(route('groups.update-season-follows', $group), [
+            'season_ids' => [$season->id],
+        ]);
+
+        $response->assertForbidden();
+    });
+
+    test('flashes success message on season follow update', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $season = Season::factory()->active()->create();
+
+        $this->patch(route('groups.update-season-follows', $group), [
+            'season_ids' => [$season->id],
+        ])->assertRedirect();
+
+        expect(session('alert')['message'])->toBe('Season follows updated successfully!');
     });
 });
 
@@ -1734,36 +2053,50 @@ describe('followTeam', function () {
     test('follows team successfully', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id, 'follow_limit' => 2]);
         $team = Team::factory()->create();
+        $season = Season::factory()->active()->create();
 
         $this->assertDatabaseMissing('follows', ['group_id' => $group->id]);
 
         $response = $this->post(route('groups.follow-team', $group), [
             'team_id' => $team->id,
+            'season_ids' => [$season->id],
         ]);
 
         $response->assertRedirect(route('groups.show', $group));
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'sport' => null,
+        ]);
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $season->id,
         ]);
         expect(session('alert')['message'])->toBe('Team followed successfully!');
     });
 
-    test('follows team with a sport scope', function () {
+    test('follows team and adds all selected seasons', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id, 'follow_limit' => 2]);
-        $team = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $team = Team::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
 
         $response = $this->post(route('groups.follow-team', $group), [
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL->value,
+            'season_ids' => [$firstSeason->id, $secondSeason->id],
         ]);
 
         $response->assertRedirect(route('groups.show', $group));
         $this->assertDatabaseHas('follows', [
             'group_id' => $group->id,
             'team_id' => $team->id,
-            'sport' => Sport::FOOTBALL->value,
+        ]);
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $firstSeason->id,
+        ]);
+        $this->assertDatabaseHas('group_season_follows', [
+            'group_id' => $group->id,
+            'season_id' => $secondSeason->id,
         ]);
     });
 
@@ -1771,11 +2104,13 @@ describe('followTeam', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id, 'follow_limit' => 2]);
         $firstTeam = Team::factory()->create();
         $secondTeam = Team::factory()->create();
+        $firstSeason = Season::factory()->active()->create();
+        $secondSeason = Season::factory()->active()->create();
 
-        $this->post(route('groups.follow-team', $group), ['team_id' => $firstTeam->id])
+        $this->post(route('groups.follow-team', $group), ['team_id' => $firstTeam->id, 'season_ids' => [$firstSeason->id]])
             ->assertRedirect(route('groups.show', $group));
 
-        $this->post(route('groups.follow-team', $group), ['team_id' => $secondTeam->id])
+        $this->post(route('groups.follow-team', $group), ['team_id' => $secondTeam->id, 'season_ids' => [$secondSeason->id]])
             ->assertRedirect(route('groups.show', $group));
 
         $this->assertDatabaseCount('follows', 2);
@@ -1785,29 +2120,33 @@ describe('followTeam', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id, 'follow_limit' => 1]);
         $firstTeam = Team::factory()->create();
         $secondTeam = Team::factory()->create();
+        $season = Season::factory()->active()->create();
 
-        $this->post(route('groups.follow-team', $group), ['team_id' => $firstTeam->id])
+        $this->post(route('groups.follow-team', $group), ['team_id' => $firstTeam->id, 'season_ids' => [$season->id]])
             ->assertRedirect(route('groups.show', $group));
 
         $response = $this->from(route('groups.follow-team.create', $group))
-            ->post(route('groups.follow-team', $group), ['team_id' => $secondTeam->id]);
+            ->post(route('groups.follow-team', $group), ['team_id' => $secondTeam->id, 'season_ids' => [$season->id]]);
 
         $response->assertRedirect(route('groups.follow-team.create', $group));
         expect(session('alert')['message'])->toBe('This group has reached its follow limit.');
     });
 
-    test('rejects follow when selected sport is not available for team', function () {
+    test('rejects follow when selected season is inactive', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
-        $team = Team::factory()->withSports([Sport::FOOTBALL])->create();
+        $team = Team::factory()->create();
+        $inactiveSeason = Season::factory()->create([
+            'active' => false,
+        ]);
 
         $response = $this->from(route('groups.follow-team.create', $group))
             ->post(route('groups.follow-team', $group), [
                 'team_id' => $team->id,
-                'sport' => Sport::BASKETBALL->value,
+                'season_ids' => [$inactiveSeason->id],
             ]);
 
         $response->assertRedirect(route('groups.follow-team.create', $group));
-        $response->assertSessionHasErrors('sport');
+        $response->assertSessionHasErrors('season_ids.0');
     });
 });
 

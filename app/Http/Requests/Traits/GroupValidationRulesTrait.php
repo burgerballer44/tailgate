@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Traits;
 
 use App\Rules\UserMustBeAMember;
+use App\Services\Contracts\SeasonQueryInterface;
+use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
-use Illuminate\Contracts\Validation\ValidationRule;
 
 trait GroupValidationRulesTrait
 {
@@ -69,5 +70,29 @@ trait GroupValidationRulesTrait
             static fn ($rule): string => $rule->key(),
             app(PredictionPolicyEvaluatorInterface::class)->groupRules(),
         ));
+    }
+
+    /**
+     * Returns the valid keys for prediction scoring policy selection.
+     *
+     * @return array<int, string>
+     */
+    public function predictionScoringPolicyKeys(): array
+    {
+        return app(PredictionScoringPolicyCatalogInterface::class)->keys();
+    }
+
+    /**
+     * Returns the IDs of active seasons available for explicit following.
+     *
+     * @return array<int, int>
+     */
+    public function activeSeasonIdsForFollow(): array
+    {
+        return app(SeasonQueryInterface::class)
+            ->getAvailableSeasonsForFollow()
+            ->pluck('id')
+            ->map(fn ($seasonId): int => (int) $seasonId)
+            ->all();
     }
 }

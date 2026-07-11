@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\DTO\ValidatedMemberData;
 use App\Services\Contracts\MemberCommandInterface;
-use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +19,11 @@ use Illuminate\Support\Str;
 class Group extends Model
 {
     use HasFactory;
+
+    /**
+     * Default prediction scoring policy key for new groups.
+     */
+    public const DEFAULT_PREDICTION_SCORING_POLICY = 'prediction-difference-from-score';
 
     // TODO: move these to an enum
 
@@ -85,16 +89,7 @@ class Group extends Model
         'member_limit',
         'player_limit',
         'follow_limit',
-        'enabled_prediction_policies',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'enabled_prediction_policies' => 'array',
+        'prediction_scoring_policy',
     ];
 
     /**
@@ -126,8 +121,8 @@ class Group extends Model
             if (! $group->follow_limit) {
                 $group->follow_limit = self::INITIAL_FOLLOW_LIMIT;
             }
-            if ($group->enabled_prediction_policies === null) {
-                $group->enabled_prediction_policies = [];
+            if (! $group->prediction_scoring_policy) {
+                $group->prediction_scoring_policy = self::DEFAULT_PREDICTION_SCORING_POLICY;
             }
         });
 
@@ -213,6 +208,16 @@ class Group extends Model
     }
 
     /**
+     * Get the explicit season follows configured for the group.
+     *
+     * @return HasMany The season-follow relationship.
+     */
+    public function seasonFollows(): HasMany
+    {
+        return $this->hasMany(GroupSeasonFollow::class);
+    }
+
+    /**
      * Get the admin membership records for the group.
      *
      * @return HasMany The admin membership relationship.
@@ -277,6 +282,35 @@ class Group extends Model
     }
 
     /**
+     * Determine whether the group explicitly follows the given season.
+     *
+     * @param  Season|int  $season  The season model or ID to check.
+     * @return bool True when a group-season follow exists.
+     */
+    public function isFollowingSeason(Season|int $season): bool
+    {
+        $seasonId = $season instanceof Season ? $season->id : $season;
+
+        if ($this->relationLoaded('seasonFollows')) {
+            return $this->seasonFollows->contains('season_id', $seasonId);
+        }
+
+        return $this->seasonFollows()->where('season_id', $seasonId)->exists();
+    }
+
+    /**
+     * Get the IDs of explicitly followed seasons.
+     *
+     * @return Collection<int, int>
+     */
+    public function getFollowedSeasonIdsAttribute(): Collection
+    {
+        return $this->relationLoaded('seasonFollows')
+            ? $this->seasonFollows->pluck('season_id')->values()
+            : $this->seasonFollows()->pluck('season_id')->values();
+    }
+
+    /**
      * Get follows as a collection, reusing a loaded relation when available.
      *
      * @return Collection<int, Follow> The loaded or freshly queried follow collection.
@@ -303,39 +337,4 @@ class Group extends Model
         return new HtmlString(HtmlEntity::forBoolean($isFollowing)->entity());
     }
 
-    /**
-     * Render enabled prediction policy labels as badge markup.
-     *
-     * @return HtmlString|string A badge wrapper for enabled policies or a plain fallback when none are enabled.
-     */
-    public function getEnabledPredictionPoliciesDisplayAttribute(): HtmlString|string
-    {
-        $enabledPolicyKeys = $this->enabled_prediction_policies ?? [];
-
-        if ($enabledPolicyKeys === []) {
-            return 'None enabled';
-        }
-
-        // Resolve labels from the evaluator so the UI stays aligned with the active rule registry.
-        $labelsByKey = collect(app(PredictionPolicyEvaluatorInterface::class)->groupRules())
-            ->mapWithKeys(fn ($rule): array => [$rule->key() => $rule->label()]);
-
-        $badges = collect($enabledPolicyKeys)
-            ->map(fn (string $policyKey): string => (string) ($labelsByKey[$policyKey] ?? $policyKey))
-            ->map(fn (string $label): string => '<span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-200">'.e($label).'</span>')
-            ->implode(' ');
-
-        return new HtmlString('<div class="flex flex-wrap gap-2">'.$badges.'</div>');
-    }
-
-    /**
-     * Determine whether a prediction policy key is enabled for the group.
-     *
-     * @param  string  $policyKey  The policy key to check.
-     * @return bool True when the configured policy list contains the key.
-     */
-    public function isPredictionPolicyEnabled(string $policyKey): bool
-    {
-        return in_array($policyKey, $this->enabled_prediction_policies ?? [], true);
-    }
 }
