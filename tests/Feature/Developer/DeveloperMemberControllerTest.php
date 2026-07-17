@@ -212,11 +212,12 @@ describe('deleting a member', function () {
         // should redirect to index
         $response->assertRedirect(route('developer.groups.members.index', $group));
 
-        // there should be 1 member in the db
-        $this->assertDatabaseCount('members', 1);
-
-        // verify member was deleted
-        $this->assertDatabaseMissing('members', ['id' => $member->id]);
+        // verify member was deactivated
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'status' => MemberStatus::REMOVED->value,
+        ]);
+        expect($member->fresh()?->left_at)->not->toBeNull();
     });
 
     test('flashes success message on delete', function () {
@@ -228,6 +229,6 @@ describe('deleting a member', function () {
         $this->delete(route('developer.groups.members.destroy', [$group, $member]))->assertRedirect();
 
         // assert flash message
-        expect(session('alert')['message'])->toBe('Member removed successfully!');
+        expect(session('alert')['message'])->toBe('Member removed successfully. Historical players and predictions were preserved.');
     });
 });

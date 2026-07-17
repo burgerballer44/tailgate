@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->enum('role', GroupRole::values())->default(GroupRole::GROUP_MEMBER->value);
             $table->enum('status', MemberStatus::values())->default(MemberStatus::APPROVED->value);
+            $table->timestamp('left_at')->nullable();
             $table->timestamps();
 
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
@@ -27,6 +28,7 @@ return new class extends Migration
 
             $table->unique(['group_id', 'user_id']);
             $table->index(['group_id', 'status']);
+            $table->index(['group_id', 'left_at']);
             $table->index(['group_id', 'role']);
             $table->index('user_id');
         });

@@ -26,7 +26,9 @@ class Follow extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'group_id',
         'team_id',
+        'sport',
     ];
 
     /**

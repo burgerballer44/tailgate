@@ -208,11 +208,21 @@ class Group extends Model
     }
 
     /**
-     * Get the explicit season follows configured for the group.
+     * Get the explicit season follows configured for the group (active only).
      *
      * @return HasMany The season-follow relationship.
      */
     public function seasonFollows(): HasMany
+    {
+        return $this->hasMany(GroupSeasonFollow::class)->whereNull('unfollowed_at');
+    }
+
+    /**
+     * Get all season follows including historical unfollowed seasons.
+     *
+     * @return HasMany The season-follow relationship including historical data.
+     */
+    public function allSeasonFollows(): HasMany
     {
         return $this->hasMany(GroupSeasonFollow::class);
     }

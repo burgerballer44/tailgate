@@ -36,4 +36,14 @@ class SeasonFactory extends Factory
             'active' => true,
         ]);
     }
+
+    /**
+     * Indicate that the season is inactive.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'active' => false,
+        ]);
+    }
 }

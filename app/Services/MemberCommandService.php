@@ -9,6 +9,7 @@ use App\Models\Member;
 use App\Models\MemberStatus;
 use App\Services\Contracts\MemberCommandInterface;
 use DomainException;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Executes membership lifecycle actions within group administration workflows.
@@ -64,15 +65,52 @@ class MemberCommandService implements MemberCommandInterface
     }
 
     /**
-     * Removes a member record while enforcing minimum-admin safety constraints.
-     *
-     * @param  Member  $member  The member to delete.
-     *
-     * @throws DomainException If deleting would violate admin minimum requirements.
+     * Reject a pending membership request.
      */
-    public function delete(Member $member): void
+    public function reject(Member $member): void
     {
-        // Load group context once for admin-minimum enforcement.
+        if ($member->status !== MemberStatus::PENDING->value) {
+            throw new DomainException('Only pending memberships can be rejected.');
+        }
+
+        $member->status = MemberStatus::REJECTED->value;
+
+        if (Schema::hasColumn($member->getTable(), 'left_at')) {
+            $member->left_at = now();
+        }
+
+        $member->save();
+    }
+
+    /**
+     * Remove a member through admin action while preserving historical data.
+     *
+     * @throws DomainException If removing would violate admin minimum requirements.
+     */
+    public function remove(Member $member): void
+    {
+        $this->assertAdminMinimumNotViolated($member);
+        $this->deactivateMember($member, MemberStatus::REMOVED);
+    }
+
+    /**
+     * Mark a member as left when they voluntarily leave the group.
+     *
+     * @throws DomainException If leaving would violate admin minimum requirements.
+     */
+    public function leave(Member $member): void
+    {
+        $this->assertAdminMinimumNotViolated($member);
+        $this->deactivateMember($member, MemberStatus::LEFT);
+    }
+
+    /**
+     * Enforce admin-minimum safety before deactivating an admin membership.
+     *
+     * @throws DomainException If the group would lose its last admin.
+     */
+    private function assertAdminMinimumNotViolated(Member $member): void
+    {
         $group = $member->group;
 
         if (
@@ -81,8 +119,23 @@ class MemberCommandService implements MemberCommandInterface
         ) {
             throw new DomainException('Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.');
         }
+    }
 
-        // Safe to remove once admin minimum constraints are satisfied.
-        Member::destroy($member->getKey());
+    /**
+     * Apply a terminal membership status and leave timestamp.
+     */
+    private function deactivateMember(Member $member, MemberStatus $terminalStatus): void
+    {
+        if ($member->status === MemberStatus::PENDING->value) {
+            throw new DomainException('Pending memberships must be explicitly approved or rejected.');
+        }
+
+        $member->status = $terminalStatus->value;
+
+        if (Schema::hasColumn($member->getTable(), 'left_at')) {
+            $member->left_at = now();
+        }
+
+        $member->save();
     }
 }

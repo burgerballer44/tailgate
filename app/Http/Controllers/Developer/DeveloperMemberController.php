@@ -149,9 +149,9 @@ class DeveloperMemberController extends Controller
      */
     public function destroy(Group $group, Member $member): RedirectResponse
     {
-        $this->memberCommandService->delete($member);
+        $this->memberCommandService->remove($member);
 
-        $this->setFlashAlert('success', 'Member removed successfully!');
+        $this->setFlashAlert('success', 'Member removed successfully. Historical players and predictions were preserved.');
 
         return redirect()->route('developer.groups.members.index', $group);
     }

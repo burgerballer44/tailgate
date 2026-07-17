@@ -237,15 +237,20 @@ describe('add member', function () {
 });
 
 describe('remove member', function () {
-    test('removes member from group', function () {
+    test('deactivates approved member in group', function () {
         // create member
-        $member = Member::factory()->create();
+        $member = Member::factory()->create([
+            'status' => \App\Models\MemberStatus::APPROVED->value,
+        ]);
 
         // remove member
         $this->service->removeMember($member->group, $member);
 
-        // verify removed
-        $this->assertDatabaseMissing('members', ['id' => $member->id]);
+        // verify deactivated
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'status' => \App\Models\MemberStatus::REMOVED->value,
+        ]);
     });
 });
 

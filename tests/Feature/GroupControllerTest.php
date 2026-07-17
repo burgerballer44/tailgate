@@ -128,6 +128,52 @@ describe('requestJoin', function () {
         expect(session('alert')['message'])->toBe('You are already a member of this group.');
     });
 
+    test('reactivates previously removed member as pending on rejoin', function () {
+        $group = Group::factory()->create();
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::LEFT->value,
+            'left_at' => now()->subDay(),
+        ]);
+
+        $response = $this->post(route('groups.request-join'), [
+            'invite_code' => $group->invite_code,
+        ]);
+
+        $response->assertRedirect(route('dashboard'));
+        $this->assertDatabaseCount('members', 2);
+        $this->assertDatabaseHas('members', [
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::PENDING->value,
+            'role' => GroupRole::GROUP_MEMBER->value,
+        ]);
+        expect(Member::query()
+            ->where('group_id', $group->id)
+            ->where('user_id', $this->user->id)
+            ->firstOrFail()
+            ->left_at)->toBeNull();
+    });
+
+    test('flashes preservation message on rejoin', function () {
+        $group = Group::factory()->create();
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::REMOVED->value,
+            'left_at' => now()->subDays(2),
+        ]);
+
+        $this->post(route('groups.request-join'), [
+            'invite_code' => $group->invite_code,
+        ])->assertRedirect(route('dashboard'));
+
+        expect(session('alert')['message'])->toBe('Rejoin request submitted. Your previous players and predictions in this group were preserved.');
+    });
+
     test('fails if member limit reached', function () {
         $group = Group::factory()->create();
 
@@ -302,6 +348,149 @@ describe('show', function () {
         $response->assertOk();
         $response->assertSee($footballSeason->name);
         $response->assertSee($basketballSeason->name);
+    });
+
+    test('shows leaderboard and raw prediction data tabs for approved member', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'details']));
+
+        $response->assertOk();
+        $response->assertSee('Leaderboard');
+        $response->assertSee('Raw Prediction Data');
+    });
+
+    test('shows season selector in leaderboard tab when group has active followed season', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $season = Season::factory()->active()->create(['name' => '2026 Season']);
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->get(route('groups.show', [
+            'group' => $group,
+            'tab' => 'leaderboard',
+            'season_id' => $season->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('id="results-season-selector"', false);
+        $response->assertSee('2026 Season');
+    });
+
+    test('prefers an active followed season as the default results season', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $historicalSeason = Season::factory()->create([
+            'name' => '2025 Season',
+            'active' => false,
+        ]);
+        $activeSeason = Season::factory()->active()->create([
+            'name' => '2026 Season',
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $historicalSeason->id,
+        ]);
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $activeSeason->id,
+        ]);
+
+        $response = $this->get(route('groups.show', [
+            'group' => $group,
+            'tab' => 'leaderboard',
+        ]));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedResultsSeasonId', $activeSeason->id);
+    });
+
+    test('falls back to the most recent followed season with games when no active season exists', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $olderSeason = Season::factory()->create([
+            'name' => '2024 Season',
+            'active' => false,
+        ]);
+        $newerSeason = Season::factory()->create([
+            'name' => '2025 Season',
+            'active' => false,
+        ]);
+        $followedTeam = Team::factory()->create();
+        $opponent = Team::factory()->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $olderSeason->id,
+        ]);
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $newerSeason->id,
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $olderSeason->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'home_team_score' => 21,
+            'away_team_score' => 17,
+            'start_date_time' => '2025-09-01 12:00:00',
+        ]);
+
+        Game::factory()->create([
+            'season_id' => $newerSeason->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'home_team_score' => 24,
+            'away_team_score' => 20,
+            'start_date_time' => '2025-10-01 12:00:00',
+        ]);
+
+        $response = $this->get(route('groups.show', [
+            'group' => $group,
+            'tab' => 'leaderboard',
+        ]));
+
+        $response->assertOk();
+        $response->assertViewHas('selectedResultsSeasonId', $newerSeason->id);
+    });
+
+    test('shows empty state in leaderboard tab when no followed season is available', function () {
+        $member = Member::factory()->create([
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $group = $member->group;
+
+        $response = $this->get(route('groups.show', ['group' => $group, 'tab' => 'leaderboard']));
+
+        $response->assertOk();
+        $response->assertSee('No followed seasons are available for results yet.');
     });
 
     test('defaults to details tab when tab query is invalid', function () {
@@ -1780,7 +1969,7 @@ describe('approveMember', function () {
 });
 
 describe('rejectMember', function () {
-    test('rejects pending member for owner', function () {
+    test('marks pending member as rejected for owner', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $pendingMember = Member::factory()->create([
             'group_id' => $group->id,
@@ -1792,10 +1981,13 @@ describe('rejectMember', function () {
         $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('members', ['id' => $pendingMember->id]);
+        $this->assertDatabaseHas('members', [
+            'id' => $pendingMember->id,
+            'status' => MemberStatus::REJECTED->value,
+        ]);
     });
 
-    test('rejects pending member for admin', function () {
+    test('marks pending member as rejected for admin', function () {
         $group = Group::factory()->create();
         Member::factory()->create([
             'user_id' => $this->user->id,
@@ -1813,7 +2005,10 @@ describe('rejectMember', function () {
         $response = $this->post(route('groups.reject-member', [$group, $pendingMember]));
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('members', ['id' => $pendingMember->id]);
+        $this->assertDatabaseHas('members', [
+            'id' => $pendingMember->id,
+            'status' => MemberStatus::REJECTED->value,
+        ]);
     });
 
     test('denies rejection to regular members', function () {
@@ -1904,7 +2099,7 @@ describe('rejectMember', function () {
 });
 
 describe('removeMember', function () {
-    test('removes approved member for owner', function () {
+    test('deactivates approved member for owner', function () {
         $group = Group::factory()->create(['owner_id' => $this->user->id]);
         $approvedMember = Member::factory()->create([
             'group_id' => $group->id,
@@ -1916,10 +2111,14 @@ describe('removeMember', function () {
         $response = $this->delete(route('groups.remove-member', [$group, $approvedMember]));
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('members', ['id' => $approvedMember->id]);
+        $this->assertDatabaseHas('members', [
+            'id' => $approvedMember->id,
+            'status' => MemberStatus::REMOVED->value,
+        ]);
+        expect($approvedMember->fresh()?->left_at)->not->toBeNull();
     });
 
-    test('removes approved member for admin', function () {
+    test('deactivates approved member for admin', function () {
         $group = Group::factory()->create();
         Member::factory()->create([
             'user_id' => $this->user->id,
@@ -1937,7 +2136,11 @@ describe('removeMember', function () {
         $response = $this->delete(route('groups.remove-member', [$group, $approvedMember]));
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('members', ['id' => $approvedMember->id]);
+        $this->assertDatabaseHas('members', [
+            'id' => $approvedMember->id,
+            'status' => MemberStatus::REMOVED->value,
+        ]);
+        expect($approvedMember->fresh()?->left_at)->not->toBeNull();
     });
 
     test('denies removal to regular members', function () {
@@ -1981,7 +2184,11 @@ describe('removeMember', function () {
         $response = $this->delete(route('groups.remove-member', [$group, $adminMember]));
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('members', ['id' => $adminMember->id]);
+        $this->assertDatabaseHas('members', [
+            'id' => $adminMember->id,
+            'status' => MemberStatus::REMOVED->value,
+        ]);
+        expect($adminMember->fresh()?->left_at)->not->toBeNull();
     });
 
     test('flashes success message on removal', function () {
@@ -1993,7 +2200,7 @@ describe('removeMember', function () {
 
         $this->delete(route('groups.remove-member', [$group, $approvedMember]))->assertRedirect();
 
-        expect(session('alert')['message'])->toBe('Member removed from group.');
+        expect(session('alert')['message'])->toBe('Member removed from group. Their historical players and predictions were preserved.');
     });
 
     test('returns 404 when trying to remove non-approved member', function () {
@@ -2020,6 +2227,55 @@ describe('removeMember', function () {
 
         $response->assertNotFound();
         $this->assertDatabaseHas('members', ['id' => $approvedMember->id]);
+    });
+});
+
+describe('leaveGroup', function () {
+    test('allows an approved member to leave and preserves membership history', function () {
+        $group = Group::factory()->create();
+        $member = Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->delete(route('groups.leave', $group));
+
+        $response->assertRedirect(route('dashboard'));
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'status' => MemberStatus::LEFT->value,
+        ]);
+        expect($member->fresh()?->left_at)->not->toBeNull();
+    });
+
+    test('flashes preservation message when member leaves', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $this->delete(route('groups.leave', $group))->assertRedirect(route('dashboard'));
+
+        expect(session('alert')['message'])->toBe('You left the group. Your players and prediction history in this group were preserved.');
+    });
+
+    test('denies owner from leaving group', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+
+        $response = $this->delete(route('groups.leave', $group));
+
+        $response->assertForbidden();
+    });
+
+    test('denies non-members from leaving group', function () {
+        $group = Group::factory()->create();
+
+        $response = $this->delete(route('groups.leave', $group));
+
+        $response->assertForbidden();
     });
 });
 
@@ -2184,5 +2440,168 @@ describe('removeFollow', function () {
         $response->assertNotFound();
         $this->assertDatabaseHas('follows', ['id' => $groupFollow->id]);
         $this->assertDatabaseHas('follows', ['id' => $otherFollow->id]);
+    });
+});
+
+describe('seasonResults', function () {
+    test('returns season results payload for approved group member', function () {
+        $group = Group::factory()->create();
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+            'created_at' => '2026-08-01 00:00:00',
+        ]);
+
+        $season = Season::factory()->active()->create();
+        $followedTeam = Team::factory()->create();
+        $opponent = Team::factory()->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'home_team_score' => 21,
+            'away_team_score' => 17,
+        ]);
+
+        $member = Member::query()
+            ->where('group_id', $group->id)
+            ->where('user_id', $this->user->id)
+            ->firstOrFail();
+        $player = Player::factory()->create(['member_id' => $member->id]);
+
+        Prediction::factory()->create([
+            'player_id' => $player->id,
+            'game_id' => $game->id,
+        ]);
+
+        $response = $this->getJson(route('groups.season-results', [
+            'group' => $group,
+            'season_id' => $season->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'data' => [
+                'group_id',
+                'season_id',
+                'points_policy',
+                'generated_at',
+                'leaderboard_rows',
+                'raw_game_rows',
+                'meta' => [
+                    'as_of_game_id',
+                    'status',
+                    'game_ids',
+                    'total_games_loaded',
+                    'total_predictions_loaded',
+                    'total_leaderboard_rows',
+                    'total_raw_game_rows',
+                ],
+            ],
+        ]);
+        $response->assertJsonPath('data.group_id', $group->id);
+        $response->assertJsonPath('data.season_id', $season->id);
+    });
+
+    test('forbids access for non-member users', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->getJson(route('groups.season-results', [
+            'group' => $group,
+            'season_id' => $season->id,
+        ]));
+
+        $response->assertForbidden();
+    });
+
+    test('forbids access for pending members', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::PENDING->value,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->getJson(route('groups.season-results', [
+            'group' => $group,
+            'season_id' => $season->id,
+        ]));
+
+        $response->assertForbidden();
+    });
+
+    test('validates that season belongs to group season follows', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->getJson(route('groups.season-results', [
+            'group' => $group,
+            'season_id' => $season->id,
+        ]));
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['season_id']);
+    });
+
+    test('validates as_of_game_id belongs to selected season', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        $otherSeason = Season::factory()->active()->create();
+
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $this->user->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $otherGame = Game::factory()->create([
+            'season_id' => $otherSeason->id,
+        ]);
+
+        $response = $this->getJson(route('groups.season-results', [
+            'group' => $group,
+            'season_id' => $season->id,
+            'as_of_game_id' => $otherGame->id,
+        ]));
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['as_of_game_id']);
     });
 });

@@ -22,6 +22,13 @@ describe('index', function () {
     });
 
     test('works for authenticated user', function () {
+        // create a group and add user as member to trigger quick predictions section
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+        ]);
+
         // visit the dashboard
         $response = $this->get(route('dashboard'));
 

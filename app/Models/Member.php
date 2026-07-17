@@ -32,7 +32,20 @@ class Member extends Model
         'user_id',
         'role',
         'status',
+        'left_at',
     ];
+
+    /**
+     * Attribute cast definitions.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'left_at' => 'datetime',
+        ];
+    }
 
     /**
      * Use the ULID instead of the numeric ID for route model binding.

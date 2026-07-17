@@ -2,6 +2,7 @@
 
 use App\Models\Group;
 use App\Models\Member;
+use App\Models\MemberStatus;
 use App\Models\User;
 use App\Services\GroupQueryService;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -74,7 +75,10 @@ describe('is user already member', function () {
 describe('is group member limit reached', function () {
     test('returns true when limit reached', function () {
         $group = Group::factory()->create(['member_limit' => 1]);
-        Member::factory()->create(['group_id' => $group->id]);
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
 
         $result = $this->service->isGroupMemberLimitReached($group);
 
@@ -83,7 +87,30 @@ describe('is group member limit reached', function () {
 
     test('returns false when limit not reached', function () {
         $group = Group::factory()->create(['member_limit' => 3]);
-        Member::factory()->create(['group_id' => $group->id]);
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $result = $this->service->isGroupMemberLimitReached($group);
+
+        expect($result)->toBeFalse();
+    });
+
+    test('returns false when only inactive members remain', function () {
+        $group = Group::factory()->create(['member_limit' => 2]);
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::REJECTED->value,
+        ]);
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::LEFT->value,
+        ]);
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::REMOVED->value,
+        ]);
 
         $result = $this->service->isGroupMemberLimitReached($group);
 

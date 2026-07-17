@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DTO\ValidatedMemberData;
 use App\Exceptions\PredictionPolicyViolationException;
 use App\Http\Requests\Group\FollowTeamRequest;
+use App\Http\Requests\Group\GetGroupSeasonResultsRequest;
 use App\Http\Requests\Group\JoinGroupRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
 use App\Http\Requests\Group\UpdateGroupSeasonFollowsRequest;
@@ -14,6 +15,7 @@ use App\Http\Requests\Group\UpdateGroupPoliciesRequest;
 use App\Http\Requests\Group\UpdatePredictionRequest;
 use App\Http\Requests\Group\UserUpdateGroupRequest;
 use App\Models\Follow;
+use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupRole;
 use App\Models\Member;
@@ -23,6 +25,7 @@ use App\Models\Prediction;
 use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\GroupCommandInterface;
 use App\Services\Contracts\GroupQueryInterface;
+use App\Services\Contracts\GroupSeasonLeaderboardServiceInterface;
 use App\Services\Contracts\MemberCommandInterface;
 use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\PlayerCommandInterface;
@@ -37,6 +40,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * GroupController handles user-facing group operations.
@@ -56,6 +60,7 @@ class GroupController extends Controller
     public function __construct(
         private GroupCommandInterface $groupCommandService,
         private GroupQueryInterface $groupQueryService,
+        private GroupSeasonLeaderboardServiceInterface $groupSeasonLeaderboardService,
         private GameQueryInterface $gameQueryService,
         private MemberCommandInterface $memberCommandService,
         private MemberQueryInterface $memberQueryService,
@@ -121,50 +126,70 @@ class GroupController extends Controller
      * Process a request to join a group via invite code.
      *
      * This method handles the user's request to join a group. It validates the
-     * invite code, checks for existing membership, and adds the user as a member
-     * if everything is valid. Currently uses direct joining, but can be extended
-     * with owner confirmation logic later.
+        * invite code, checks current membership state, and either creates a new
+        * pending membership or reactivates a previously removed membership.
      *
      * @param  JoinGroupRequest  $request  The validated request containing the invite code
      * @return RedirectResponse Redirects back with success/error messages
      */
     public function requestJoin(JoinGroupRequest $request): RedirectResponse
     {
-        // find the group by invite code
+        // Find the group by invite code.
         $group = $this->groupQueryService->findByInviteCode($request->invite_code);
 
-        // if no group found with that code, show error and redirect back
+        // If no group matches the invite code, stop early.
         if (! $group) {
             $this->setFlashAlert('error', 'Invalid invite code.');
 
             return redirect()->back();
         }
 
-        // check if the current user is already a member of this group
-        // this prevents duplicate memberships
-        if ($this->groupQueryService->isUserAlreadyMember($group, $request->user()->id)) {
-            $this->setFlashAlert('error', 'You are already a member of this group.');
+        // Reuse an existing membership when the user previously left the group.
+        $existingMember = $group->members()
+            ->where('user_id', $request->user()->id)
+            ->first();
 
-            return redirect()->back();
+        if ($existingMember instanceof Member) {
+            if (in_array($existingMember->status, [MemberStatus::APPROVED->value, MemberStatus::PENDING->value], true)) {
+                $this->setFlashAlert('error', 'You are already a member of this group.');
+
+                return redirect()->back();
+            }
         }
 
-        // check if the group has reached its member limit
+        // Check active capacity (approved + pending only).
         if ($this->groupQueryService->isGroupMemberLimitReached($group)) {
             $this->setFlashAlert('error', 'Group member limit reached.');
 
             return redirect()->back();
         }
 
-        // add the user as a pending member of the group
-        $memberData = ValidatedMemberData::fromArray([
-            'user_id' => $request->user()->id,
-            'role' => GroupRole::GROUP_MEMBER,
-            'status' => MemberStatus::PENDING,
-        ]);
+        if ($existingMember instanceof Member) {
+            // Rejoin flow: reuse historical membership record so past players/predictions stay linked.
+            $existingMember->role = GroupRole::GROUP_MEMBER->value;
+            $existingMember->status = MemberStatus::PENDING->value;
 
-        $this->groupCommandService->addMember($group, $memberData);
+            if (Schema::hasColumn($existingMember->getTable(), 'left_at')) {
+                $existingMember->left_at = null;
+            }
 
-        // show success message and redirect to dashboard
+            $existingMember->save();
+
+            $this->setFlashAlert('success', 'Rejoin request submitted. Your previous players and predictions in this group were preserved.');
+
+            return redirect()->route('dashboard');
+        } else {
+            // First-time join: create a new pending membership.
+            $memberData = ValidatedMemberData::fromArray([
+                'user_id' => $request->user()->id,
+                'role' => GroupRole::GROUP_MEMBER,
+                'status' => MemberStatus::PENDING,
+            ]);
+
+            $this->groupCommandService->addMember($group, $memberData);
+        }
+
+        // Show success message and redirect to dashboard.
         $this->setFlashAlert('success', 'Successfully joined the group!');
 
         return redirect()->route('dashboard');
@@ -186,6 +211,7 @@ class GroupController extends Controller
         $user = $request->user();
 
         $validTabs = ['details', 'players', 'upcoming-games'];
+        $validTabs = ['details', 'players', 'upcoming-games', 'leaderboard', 'raw-prediction-data'];
 
         $activeTab = in_array($request->query('tab'), $validTabs, true)
             ? $request->query('tab')
@@ -194,6 +220,17 @@ class GroupController extends Controller
         // Follow data is used for summary text and details tab rendering.
         $group->load(['follows.team']);
         $group->load(['seasonFollows.season']);
+
+        $resultsSeasonOptions = $this->buildResultsSeasonOptions($group);
+
+        $requestedSeasonId = $request->query('season_id');
+        $requestedSeasonId = is_numeric($requestedSeasonId) ? (int) $requestedSeasonId : null;
+
+        $defaultSeasonId = $this->resolveDefaultResultsSeasonId($group, $resultsSeasonOptions);
+
+        $selectedResultsSeasonId = $requestedSeasonId !== null && array_key_exists($requestedSeasonId, $resultsSeasonOptions)
+            ? $requestedSeasonId
+            : $defaultSeasonId;
 
         // Resolve the current signed-in approved member record once for all tabs.
         $currentMember = $this->memberQueryService->findApprovedMemberForGroupAndUser(
@@ -232,6 +269,8 @@ class GroupController extends Controller
         return view('groups.show', [
             'group' => $group,
             'activeTab' => $activeTab,
+            'resultsSeasonOptions' => $resultsSeasonOptions,
+            'selectedResultsSeasonId' => $selectedResultsSeasonId,
             'currentMember' => $currentMember,
             'memberPlayers' => $memberPlayers,
             'playerCount' => $memberPlayers->count(),
@@ -239,6 +278,27 @@ class GroupController extends Controller
             'predictionLookup' => $predictionLookup,
             'regularMemberPlayerLimit' => Group::REGULAR_MEMBER_PLAYER_LIMIT,
             'availableGroupPolicies' => $this->policyEvaluator->groupRules(),
+        ]);
+    }
+
+    /**
+     * Return season-scoped leaderboard and raw prediction results payload.
+     */
+    public function seasonResults(GetGroupSeasonResultsRequest $request, Group $group): JsonResponse
+    {
+        $seasonId = (int) $request->input('season_id');
+        $asOfGameId = $request->filled('as_of_game_id')
+            ? (int) $request->input('as_of_game_id')
+            : null;
+
+        $results = $this->groupSeasonLeaderboardService->buildSeasonResults(
+            groupId: $group->id,
+            seasonId: $seasonId,
+            asOfGameId: $asOfGameId,
+        );
+
+        return response()->json([
+            'data' => $results->toArray(),
         ]);
     }
 
@@ -385,6 +445,137 @@ class GroupController extends Controller
     private function redirectToDashboard(Request $request): bool
     {
         return $request->input('redirect_to') === 'dashboard';
+    }
+
+    /**
+     * Build season-selector options ordered for the results experience.
+     *
+     * @return array<int, string>
+     */
+    private function buildResultsSeasonOptions(Group $group): array
+    {
+        if ($group->seasonFollows->isEmpty()) {
+            return [];
+        }
+
+        $seasonMetrics = $this->resultsSeasonMetrics($group);
+
+        return $group->seasonFollows
+            ->sort(function ($left, $right) use ($seasonMetrics): int {
+                $leftMetrics = $seasonMetrics[$left->season_id] ?? [
+                    'is_active' => false,
+                    'latest_game_timestamp' => null,
+                    'latest_scorable_game_timestamp' => null,
+                ];
+                $rightMetrics = $seasonMetrics[$right->season_id] ?? [
+                    'is_active' => false,
+                    'latest_game_timestamp' => null,
+                    'latest_scorable_game_timestamp' => null,
+                ];
+
+                if ($leftMetrics['is_active'] !== $rightMetrics['is_active']) {
+                    return $leftMetrics['is_active'] ? -1 : 1;
+                }
+
+                if ($leftMetrics['latest_game_timestamp'] !== $rightMetrics['latest_game_timestamp']) {
+                    return ($rightMetrics['latest_game_timestamp'] ?? PHP_INT_MIN) <=> ($leftMetrics['latest_game_timestamp'] ?? PHP_INT_MIN);
+                }
+
+                if ($leftMetrics['latest_scorable_game_timestamp'] !== $rightMetrics['latest_scorable_game_timestamp']) {
+                    return ($rightMetrics['latest_scorable_game_timestamp'] ?? PHP_INT_MIN) <=> ($leftMetrics['latest_scorable_game_timestamp'] ?? PHP_INT_MIN);
+                }
+
+                return strcasecmp((string) $left->season?->name, (string) $right->season?->name);
+            })
+            ->mapWithKeys(fn ($seasonFollow): array => [$seasonFollow->season_id => (string) ($seasonFollow->season?->name ?? 'Season #'.$seasonFollow->season_id)])
+            ->toArray();
+    }
+
+    /**
+     * Resolve the default selected results season.
+     */
+    private function resolveDefaultResultsSeasonId(Group $group, array $resultsSeasonOptions): ?int
+    {
+        if ($resultsSeasonOptions === []) {
+            return null;
+        }
+
+        $seasonMetrics = $this->resultsSeasonMetrics($group);
+
+        foreach (array_keys($resultsSeasonOptions) as $seasonId) {
+            if (($seasonMetrics[(int) $seasonId]['is_active'] ?? false) === true) {
+                return (int) $seasonId;
+            }
+        }
+
+        foreach (array_keys($resultsSeasonOptions) as $seasonId) {
+            if (($seasonMetrics[(int) $seasonId]['latest_scorable_game_timestamp'] ?? null) !== null) {
+                return (int) $seasonId;
+            }
+        }
+
+        return (int) array_key_first($resultsSeasonOptions);
+    }
+
+    /**
+     * Resolve per-season ordering metrics used by the results selector.
+     *
+     * @return array<int, array{is_active: bool, latest_game_timestamp: int|null, latest_scorable_game_timestamp: int|null}>
+     */
+    private function resultsSeasonMetrics(Group $group): array
+    {
+        $seasonIds = $group->seasonFollows->pluck('season_id')->all();
+
+        if ($seasonIds === [] || $group->follows->isEmpty()) {
+            return $group->seasonFollows
+                ->mapWithKeys(fn ($seasonFollow): array => [
+                    $seasonFollow->season_id => [
+                        'is_active' => (bool) $seasonFollow->season?->active,
+                        'latest_game_timestamp' => null,
+                        'latest_scorable_game_timestamp' => null,
+                    ],
+                ])->all();
+        }
+
+        $followedTeamIds = $group->follows->pluck('team_id')->all();
+
+        $games = Game::query()
+            ->whereIn('season_id', $seasonIds)
+            ->where(function ($query) use ($followedTeamIds): void {
+                $query->whereIn('home_team_id', $followedTeamIds)
+                    ->orWhereIn('away_team_id', $followedTeamIds);
+            })
+            ->get(['season_id', 'start_date_time', 'home_team_score', 'away_team_score']);
+
+        $metrics = $group->seasonFollows
+            ->mapWithKeys(fn ($seasonFollow): array => [
+                $seasonFollow->season_id => [
+                    'is_active' => (bool) $seasonFollow->season?->active,
+                    'latest_game_timestamp' => null,
+                    'latest_scorable_game_timestamp' => null,
+                ],
+            ])->all();
+
+        foreach ($games as $game) {
+            $latestGameTimestamp = $game->start_date_time ? strtotime((string) $game->start_date_time) : null;
+            $isScorable = is_numeric($game->getRawOriginal('home_team_score')) && is_numeric($game->getRawOriginal('away_team_score'));
+
+            if ($latestGameTimestamp !== null && $latestGameTimestamp !== false) {
+                $metrics[$game->season_id]['latest_game_timestamp'] = max(
+                    $metrics[$game->season_id]['latest_game_timestamp'] ?? PHP_INT_MIN,
+                    $latestGameTimestamp,
+                );
+
+                if ($isScorable) {
+                    $metrics[$game->season_id]['latest_scorable_game_timestamp'] = max(
+                        $metrics[$game->season_id]['latest_scorable_game_timestamp'] ?? PHP_INT_MIN,
+                        $latestGameTimestamp,
+                    );
+                }
+            }
+        }
+
+        return $metrics;
     }
 
     /**
@@ -572,7 +763,7 @@ class GroupController extends Controller
             abort(404, 'Invalid member or not pending.');
         }
 
-        $this->memberCommandService->delete($member);
+        $this->memberCommandService->reject($member);
 
         $this->setFlashAlert('success', 'Join request rejected.');
 
@@ -596,11 +787,29 @@ class GroupController extends Controller
             abort(403, 'Cannot remove the group owner.');
         }
 
-        $this->memberCommandService->delete($member);
+        $this->memberCommandService->remove($member);
 
-        $this->setFlashAlert('success', 'Member removed from group.');
+        $this->setFlashAlert('success', 'Member removed from group. Their historical players and predictions were preserved.');
 
         return redirect()->back();
+    }
+
+    /**
+     * Allow an approved member to leave the group without deleting historical contributions.
+     */
+    public function leaveGroup(Request $request, Group $group): RedirectResponse
+    {
+        $member = $this->memberQueryService->findApprovedMemberForGroupAndUser($group, $request->user());
+
+        if ($member->user_id === $group->owner_id) {
+            abort(403, 'Group owners cannot leave their own group. Transfer ownership first.');
+        }
+
+        $this->memberCommandService->leave($member);
+
+        $this->setFlashAlert('success', 'You left the group. Your players and prediction history in this group were preserved.');
+
+        return redirect()->route('dashboard');
     }
 
     /**

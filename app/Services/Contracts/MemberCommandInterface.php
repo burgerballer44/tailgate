@@ -33,9 +33,23 @@ interface MemberCommandInterface
     public function update(Member $member, ValidatedMemberData $data): Member;
 
     /**
-     * Delete a member.
+     * Reject a pending join request while preserving membership history.
      *
-     * @param  Member  $member  The member to delete.
+     * @param  Member  $member  The pending membership to reject.
      */
-    public function delete(Member $member): void;
+    public function reject(Member $member): void;
+
+    /**
+     * Remove a member through an admin action while preserving historical data.
+     *
+     * @param  Member  $member  The membership to remove.
+     */
+    public function remove(Member $member): void;
+
+    /**
+     * Mark a member as left when they voluntarily leave the group.
+     *
+     * @param  Member  $member  The membership that is leaving.
+     */
+    public function leave(Member $member): void;
 }

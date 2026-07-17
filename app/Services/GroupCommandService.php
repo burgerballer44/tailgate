@@ -207,8 +207,8 @@ class GroupCommandService implements GroupCommandInterface
             throw new DomainException('Member does not belong to the provided group.');
         }
 
-        // Delegate deletion so admin-safety constraints stay in one service.
-        $this->memberCommandService->delete($member);
+        // Delegate removal so admin-safety constraints stay in one service.
+        $this->memberCommandService->remove($member);
     }
 
     /**

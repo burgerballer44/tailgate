@@ -16,4 +16,10 @@ enum MemberStatus: string
 
     /** Rejected by the group, but retained for history and auditing. */
     case REJECTED = 'Rejected';
+
+    /** Left voluntarily by the member and no longer active in the group. */
+    case LEFT = 'Left';
+
+    /** Removed by a group admin and no longer active in the group. */
+    case REMOVED = 'Removed';
 }

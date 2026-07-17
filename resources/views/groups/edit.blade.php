@@ -414,7 +414,7 @@
             {{-- Members --}}
             <x-groups.section-card
                 title="Members"
-                description="Manage members and approve join requests."
+                description="Manage members and approve join requests. Historical member records are retained so past predictions stay intact."
                 overflowClass="overflow-visible"
             >
                 <ul role="list" class="-mx-6 -my-5 divide-y divide-gray-100">
@@ -437,6 +437,12 @@
                                 <p class="text-xs text-gray-500">
                                     @if ($member->isPending())
                                         Requested to join
+                                    @elseif ($member->status === \App\Models\MemberStatus::REJECTED->value)
+                                        Join request rejected
+                                    @elseif ($member->status === \App\Models\MemberStatus::LEFT->value)
+                                        Left group
+                                    @elseif ($member->status === \App\Models\MemberStatus::REMOVED->value)
+                                        Removed by admin
                                     @elseif ($member->isOwner())
                                         Owner
                                     @elseif ($member->isAdmin())

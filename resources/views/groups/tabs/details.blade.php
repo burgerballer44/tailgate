@@ -75,3 +75,22 @@
     </div>
 
 </x-groups.section-card>
+
+@if (auth()->id() !== $group->owner_id)
+    <x-groups.section-card title="Leave group" description="Leave this group without losing your historical contribution data.">
+        <div class="space-y-3">
+            <p class="text-sm text-gray-700">
+                Leaving removes your active participation, but your existing players and past predictions in this group remain preserved for historical results.
+            </p>
+
+            <form action="{{ route('groups.leave', ['group' => $group]) }}" method="POST" onsubmit="return confirm('Leave this group? Your historical players and predictions will be preserved.');">
+                @csrf
+                @method('DELETE')
+
+                <x-buttons.danger-button type="submit">
+                    Leave group
+                </x-buttons.danger-button>
+            </form>
+        </div>
+    </x-groups.section-card>
+@endif

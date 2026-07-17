@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Group;
+use App\Models\MemberStatus;
 use App\Services\Contracts\GroupQueryInterface;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -78,7 +79,9 @@ class GroupQueryService implements GroupQueryInterface
      */
     public function isGroupMemberLimitReached(Group $group): bool
     {
-        // Compare live membership count with configured limit.
-        return $group->members()->count() >= $group->member_limit;
+        // Ex-members are retained for history and should not consume active capacity.
+        return $group->members()
+            ->whereIn('status', [MemberStatus::APPROVED->value, MemberStatus::PENDING->value])
+            ->count() >= $group->member_limit;
     }
 }

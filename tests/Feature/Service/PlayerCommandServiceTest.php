@@ -16,7 +16,9 @@ use App\Services\PlayerCommandService;
 use Illuminate\Support\Str;
 
 beforeEach(function () {
-    $this->service = new PlayerCommandService;
+    $this->service = new PlayerCommandService(
+        app(PredictionPolicyEvaluatorInterface::class),
+    );
 });
 
 describe('create player for member', function () {

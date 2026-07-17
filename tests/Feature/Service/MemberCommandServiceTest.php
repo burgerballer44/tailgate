@@ -69,15 +69,50 @@ describe('update member', function () {
     });
 });
 
-describe('delete member', function () {
-    test('removes member from database', function () {
-        // create member
-        $member = Member::factory()->create();
+describe('reject member', function () {
+    test('marks pending membership as rejected', function () {
+        $member = Member::factory()->create([
+            'status' => MemberStatus::PENDING->value,
+        ]);
 
-        // delete member
-        $this->service->delete($member);
+        $this->service->reject($member);
 
-        // verify removed
-        $this->assertDatabaseMissing('members', ['id' => $member->id]);
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'status' => MemberStatus::REJECTED->value,
+        ]);
+        expect($member->fresh()?->left_at)->not->toBeNull();
+    });
+});
+
+describe('remove member', function () {
+    test('marks approved member as removed and preserves record', function () {
+        $member = Member::factory()->create([
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $this->service->remove($member);
+
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'status' => MemberStatus::REMOVED->value,
+        ]);
+        expect($member->fresh()?->left_at)->not->toBeNull();
+    });
+});
+
+describe('leave member', function () {
+    test('marks approved member as left and preserves record', function () {
+        $member = Member::factory()->create([
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $this->service->leave($member);
+
+        $this->assertDatabaseHas('members', [
+            'id' => $member->id,
+            'status' => MemberStatus::LEFT->value,
+        ]);
+        expect($member->fresh()?->left_at)->not->toBeNull();
     });
 });

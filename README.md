@@ -304,9 +304,9 @@ Group-level policy selection:
 
 Before implementation begins, confirm or add:
 
-- Data model support for group points policy selection.
-- A non-null default policy value for groups (default: `PredictionDifferenceFromScorePointsPolicy`).
-- Policy registry/provider support that returns labels and descriptions for all policies.
+- ~~Data model support for group points policy selection.~~ **Done.** `prediction_scoring_policy` on `group_season_follows` (season-scoped rather than group-level).
+- ~~A non-null default policy value for groups (default: `PredictionDifferenceFromScorePointsPolicy`).~~ **Done.** Column default + model observer.
+- ~~Policy registry/provider support that returns labels and descriptions for all policies.~~ **Done.** `PredictionScoringPolicyCatalogService` / `PredictionScoringPolicyOptionInterface`.
 - Data model support for membership effective dates (join/leave) if not already present.
 - Canonical game status mapping for scorable vs non-scorable states.
 - Canonical season-to-sport relationship in queries.
@@ -316,79 +316,81 @@ Before implementation begins, confirm or add:
 
 ### Implementation task list (ordered)
 
-1. Implement admin policy selection first (required bootstrap)
-- Add group setting for selected points policy key.
-- Set and persist a non-null default (`PredictionDifferenceFromScorePointsPolicy`) for all groups.
-- Add group admin UI with radio button options (exactly one selectable policy).
-- Populate radio options from policy metadata (`key`, `label`, `description`) for all available policies.
-- Add validation to enforce one selected policy at all times.
-- Testing: add/extend model, service, request validation, and controller feature tests for defaulting, authorization, and invalid input handling.
+1. ~~Implement admin policy selection first (required bootstrap)~~ **DONE**
+- ~~Add group setting for selected points policy key.~~ Implemented as `prediction_scoring_policy` on `group_season_follows` rather than a flat group column. This is more granular than originally planned: each followed season carries its own scoring policy, allowing different seasons to use different policies within the same group.
+- ~~Set and persist a non-null default (`PredictionDifferenceFromScorePointsPolicy`) for all groups.~~ Default is enforced at the `group_season_follows` column level and via a `creating` model observer. `Group::DEFAULT_PREDICTION_SCORING_POLICY = 'prediction-difference-from-score'`.
+- ~~Add group admin UI with radio button options (exactly one selectable policy).~~ Implemented as a per-season radio group in the Seasons tab of the group edit page.
+- ~~Populate radio options from policy metadata (`key`, `label`, `description`) for all available policies.~~ Driven by `PredictionScoringPolicyCatalogInterface` / `PredictionScoringPolicyCatalogService`; `PredictionDifferenceFromScorePointsPolicy` and `PlacementPointsPolicy` both expose `key`, `label`, `description`, `is_default`.
+- ~~Add validation to enforce one selected policy at all times.~~ `UpdateGroupPredictionScoringPolicyRequest` enforces a required, valid policy key via `GroupValidationRulesTrait`.
+- ~~Testing: add/extend model, service, request validation, and controller feature tests for defaulting, authorization, and invalid input handling.~~ Covered in `GroupControllerTest` and `GroupCommandServiceTest`.
 - Dependency: none.
 
-2. Finalize product and domain rules
-- Confirm acceptance criteria for leaderboard columns and raw data columns.
-- Confirm missing prediction behavior for edge cases (no submitted predictions).
-- Confirm ranking tie-breakers for each policy.
-- Confirm mid-season membership and context-change behavior.
-- Testing: add specification-style tests that lock expected behavior for edge-case rules before implementation.
+2. ~~Finalize product and domain rules~~ **DONE**
+- ~~Confirm acceptance criteria for leaderboard columns and raw data columns.~~ Finalized in `config/prediction_results.php` (`leaderboard.required_columns`, `raw_prediction_data.required_game_columns`, `raw_prediction_data.required_player_columns`).
+- ~~Confirm missing prediction behavior for edge cases (no submitted predictions).~~ Finalized as `submitted_game_points_offset = 7` with deterministic no-submission fallback baseline `14` for `prediction-difference-from-score`; placement policy marks missing predictions as last-place rows.
+- ~~Confirm ranking tie-breakers for each policy.~~ Finalized as deterministic tie-break chain: `previous_week_rank_asc` then `player_id_asc` for both currently supported scoring policies.
+- ~~Confirm mid-season membership and context-change behavior.~~ Finalized rules: approved members only; membership window is `joined_at` inclusive and `left_at` exclusive; historical rows are recomputed from canonical records (`freeze_historical_rows = false`) with per-game context inclusion evaluation.
+- ~~Testing: add tests that lock expected behavior for edge-case rules before implementation.~~ Covered in `tests/Unit/Config/PredictionResultsRulesConfigTest.php`.
 - Dependency: task 1.
 
-3. Define service and DTO contracts
-- Create service interface and concrete class skeleton.
-- Define output DTOs for leaderboard and raw game data.
-- Define points policy interfaces and context/result DTOs.
-- Testing: add contract/unit tests that validate DTO shapes, required fields, and type expectations.
+3. ~~Define service and DTO contracts~~ **DONE**
+- ~~Create service interface and concrete class skeleton.~~ Added `GroupSeasonLeaderboardServiceInterface` and `GroupSeasonLeaderboardService` with `buildSeasonResults(int $groupId, int $seasonId, ?int $asOfGameId = null): SeasonResultsViewData`; service is container-bound in `AppServiceProvider` as a task-3 skeleton.
+- ~~Define output DTOs for leaderboard and raw game data.~~ Added `SeasonResultsViewData`, `PlayerLeaderboardRowData`, `GameRawPredictionData`, and `GameRawPredictionPlayerRowData` with typed constructors and response-oriented `toArray()` payloads.
+- ~~Define points policy interfaces and context/result DTOs.~~ Added `GroupPointsPolicyInterface` plus `GamePointsContext`, `MissingPredictionContext`, `PlayerGamePointsResult`, and `PlayerSeasonTotal`.
+- ~~Testing: add tests that validate DTO shapes, required fields, and type expectations.~~ Covered in `GroupSeasonLeaderboardServiceTest`, `SeasonResultsViewDataTest`, and `GroupPointsPolicyInterfaceTest`.
 - Dependency: tasks 1-2.
 
-4. Implement policy strategies
-- Implement default prediction-difference-from-score policy.
-- Implement placement policy.
-- Add static label/description methods for each policy class.
-- Implement shared tie-breaker and deterministic fallback behavior.
-- Testing: add unit tests per policy for calculation outcomes, tie-breakers, missing predictions, and metadata (`key`, `label`, `description`).
+4. ~~Implement policy strategies~~ **DONE**
+- ~~Implement default prediction-difference-from-score policy.~~ `PredictionDifferenceFromScorePointsPolicy` now implements scoring calculations (`abs` score deltas + penalties), missing-prediction assignment (worst submitted + configured offset), and ranking comparison.
+- ~~Implement placement policy.~~ `PlacementPointsPolicy` now supports rank-based game scoring, deterministic fallback behavior when rank context is unavailable, missing-prediction trailing placement behavior, and ranking comparison.
+- ~~Add static label/description methods for each policy class.~~ Retained and validated in policy tests.
+- ~~Implement shared tie-breaker and deterministic fallback behavior.~~ Added shared `DeterministicRankingComparison` concern and wired both policies to config-driven tie-breakers with deterministic `player_id` fallback.
+- ~~Testing: add tests per policy for calculation outcomes, tie-breakers, missing predictions, and metadata (`key`, `label`, `description`).~~ Covered in `PredictionDifferenceFromScorePointsPolicyTest` and `PlacementPointsPolicyTest`.
 - Dependency: task 3.
 
-5. Implement season results query orchestration
-- Build optimized query pipeline for games, predictions, players, and membership windows.
-- Filter to selected season and scorable games.
-- Exclude canceled/postponed games according to domain rules.
-- Testing: add integration/feature tests covering query scoping, status filtering, and membership-window inclusion rules.
+5. ~~Implement season results query orchestration~~ **DONE**
+- ~~Build optimized query pipeline for games, predictions, players, and membership windows.~~ `GroupSeasonLeaderboardService` now orchestrates eager-loaded game/prediction retrieval (`season`, `teams`, `predictions.player.member`) plus approved-membership/player loading and per-game eligibility-window evaluation.
+- ~~Filter to selected season and scorable games.~~ Service now scopes by `group_id + season_id + followed teams` and optionally `asOfGameId`, then filters to scorable games.
+- ~~Exclude canceled/postponed games according to domain rules.~~ Service excludes non-scorable games (including non-numeric score/status payloads such as postponed/canceled markers in score columns) and records exclusion reasons in `meta.excluded_games`.
+- ~~Testing: add tests covering query scoping, status filtering, and membership-window inclusion rules.~~ Added/updated `GroupSeasonLeaderboardServiceTest` coverage for season/follow scoping, non-scorable exclusion, join-window eligibility behavior, and `asOfGameId` filtering.
 - Dependency: tasks 1, 3.
 
-6. Implement leaderboard aggregation
-- Compute per-game points per player via selected policy.
-- Aggregate season totals.
-- Compute rank, previous rank, rank change, and points behind leader.
-- Support `asOfGameId` for progressive rank calculations if needed.
-- Testing: add deterministic unit tests for totals, ranks, previous-rank reconstruction, rank change, and points-behind calculations.
+6. ~~Implement leaderboard aggregation~~ **DONE**
+- ~~Compute per-game points per player via selected policy.~~ `GroupSeasonLeaderboardService` now computes per-game points through the selected `GroupPointsPolicyInterface`, including missing-prediction handling.
+- ~~Aggregate season totals.~~ Service now accumulates season totals per eligible player across scorable games.
+- ~~Compute rank, previous rank, rank change, and points behind leader.~~ Leaderboard rows now include deterministic rank ordering, prior snapshot rank, derived rank change, and points-behind-leader.
+- ~~Use previous-week snapshots for `previousRank` and `rankChange`.~~ Previous-rank reconstruction now rolls up the prior week bucket rather than the immediately prior game.
+- ~~Support `asOfGameId` for progressive rank calculations if needed.~~ Existing `asOfGameId` filtering now drives progressive leaderboard snapshots and ranking reconstruction.
+- ~~Testing: add deterministic unit tests for totals, ranks, previous-rank reconstruction, rank change, and points-behind calculations.~~ Covered in `GroupSeasonLeaderboardServiceTest` aggregation scenarios for prediction-difference and placement policies.
 - Dependency: tasks 4-5.
 
-7. Implement raw prediction data assembly
-- Build per-game blocks with final score metadata and player scoring rows.
-- Include penalties and calculation notes.
-- Testing: add unit/feature tests verifying row completeness, penalty handling, and calculation note coverage.
+7. ~~Implement raw prediction data assembly~~ **DONE**
+- ~~Build per-game blocks with final score metadata and player scoring rows.~~ `GroupSeasonLeaderboardService` now returns `rawGameRows` as `GameRawPredictionData[]` with followed/opponent team context, actual scores, and per-player rows.
+- ~~Include penalties and calculation notes.~~ Player raw rows now include `penalty_points`, `game_points`, and policy-generated `calculation_notes` for both submitted and missing predictions.
+- ~~Populate week/sequence and status fields for raw game rows.~~ Raw rows now derive stable week labels from game-date buckets and expose derived statuses for completed, postponed, canceled, scheduled, and pending games.
+- Note: penalty points remain `0` until explicit penalty-domain data is introduced; the payload and scoring pipeline already support non-zero values.
+- ~~Testing: add unit/feature tests verifying row completeness, penalty handling, and calculation note coverage.~~ Extended `GroupSeasonLeaderboardServiceTest` with raw-row assertions for structure completeness, penalty values, missing-prediction behavior, and calculation note coverage.
 - Dependency: tasks 4-5.
 
-8. Implement controller/query endpoint integration
-- Add user-facing endpoint(s) to retrieve season-scoped results payload.
-- Validate group access and season validity.
-- Reuse shared service contract.
-- Testing: add feature tests for authorization boundaries, validation failures, and response payload contract.
+8. ~~Implement controller/query endpoint integration~~ **DONE**
+- ~~Add user-facing endpoint(s) to retrieve season-scoped results payload.~~ Added member-scoped endpoint `GET /groups/{group}/season-results` (`groups.season-results`) in `web.php`.
+- ~~Validate group access and season validity.~~ Access is enforced by existing `user.group.member` middleware; request validation ensures `season_id` belongs to the group's `group_season_follows` and optional `as_of_game_id` belongs to the selected season.
+- ~~Reuse shared service contract.~~ `GroupController::seasonResults` now delegates to `GroupSeasonLeaderboardServiceInterface::buildSeasonResults(...)` and returns the DTO payload as JSON.
+- ~~Testing: add feature tests for authorization boundaries, validation failures, and response payload contract.~~ Added `seasonResults` feature tests in `GroupControllerTest` for approved-member success, non-member/pending-member 403s, season validation, `as_of_game_id` validation, and payload shape assertions.
 - Dependency: tasks 6-7.
 
-9. Build user-facing UI tabs and season selector
-- Add `Leaderboard` tab UI.
-- Add `Raw Prediction Data` tab UI.
-- Add season selector and loading/error/empty states.
-- Keep tabs synchronized to selected season.
-- Testing: add feature/browser-style tests for tab switching, season switching, empty states, and default selection behavior.
+9. ~~Build user-facing UI tabs and season selector~~ **DONE**
+- ~~Add `Leaderboard` tab UI.~~ Added group-page `Leaderboard` tab and season-results tab view rendering.
+- ~~Add `Raw Prediction Data` tab UI.~~ Added group-page `Raw Prediction Data` tab that reuses the season-results UI and renders per-game raw blocks.
+- ~~Add season selector and loading/error/empty states.~~ Added season selector (`results-season-selector`) with async loading, explicit error message state, and empty-state messaging when no season/result rows are available.
+- ~~Keep tabs synchronized to selected season.~~ Season changes now persist via `season_id` query parameter, and tab links preserve the selected season when switching between results tabs.
+- ~~Default the selector to the current active season, with fallback to the most recent followed season that has game data.~~ Group results now order seasons for the selector using active/current status and recent game data instead of simple name sorting.
 - Dependency: task 8.
 
 10. Validate policy-first UX and guardrails
 - Ensure results views and services always resolve a policy (selected or default).
 - Add fallback/guard behavior if legacy groups are missing policy data.
 - Verify radio button default selection is reflected in UI state.
-- Testing: add regression tests for fallback/default policy resolution and legacy data guard behavior.
 - Dependency: tasks 1, 8-9.
 
 11. Add automated tests
@@ -426,7 +428,7 @@ Before implementation begins, confirm or add:
 - Leaderboard and raw tabs exist and are season-scoped.
 - Required leaderboard columns are populated correctly.
 - Raw game data shows required fields and calculations.
-- Policy selection is configurable per group and enforced.
+- ~~Policy selection is configurable per group and enforced.~~ **Done.** Configurable per followed season (more granular than per group); enforced via request validation and service layer.
 - Default and alternate policies both pass tests.
 - Mid-season membership and game status edge cases are covered by tests.
 - Endpoint and UI performance are acceptable for target group sizes.

@@ -30,6 +30,7 @@ class GroupSeasonFollow extends Model
         'season_id',
         'prediction_scoring_policy',
         'enabled_prediction_policies',
+        'unfollowed_at',
     ];
 
     /**
@@ -39,6 +40,7 @@ class GroupSeasonFollow extends Model
      */
     protected $casts = [
         'enabled_prediction_policies' => 'array',
+        'unfollowed_at' => 'datetime',
     ];
 
     /**

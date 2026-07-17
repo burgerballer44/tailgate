@@ -9,6 +9,8 @@
         'details' => 'Details',
         'players' => 'My players',
         'upcoming-games' => 'Upcoming games',
+        'leaderboard' => 'Leaderboard',
+        'raw-prediction-data' => 'Raw Prediction Data',
     ];
 @endphp
 
@@ -32,7 +34,10 @@
                 label="Select a tab"
                 labelClass="sr-only"
                 :value="route('groups.show', ['group' => $group->ulid, 'tab' => $activeTab])"
-                :options="collect($tabs)->mapWithKeys(fn ($label, $key) => [route('groups.show', ['group' => $group->ulid, 'tab' => $key]) => $label])->toArray()"
+                :options="collect($tabs)->mapWithKeys(function ($label, $key) use ($group) {
+                    $params = ['group' => $group->ulid, 'tab' => $key];
+                    return [route('groups.show', $params) => $label];
+                })->toArray()"
                 containerClass="col-start-1 row-start-1"
                 class="w-full appearance-none py-2 text-base focus:outline-indigo-600"
                 aria-label="Select a tab"
@@ -60,8 +65,12 @@
                             $isActive = $activeTab === $key;
                         @endphp
 
+                        @php
+                            $tabParams = ['group' => $group->ulid, 'tab' => $key];
+                        @endphp
+
                         <a
-                            href="{{ route('groups.show', ['group' => $group->ulid, 'tab' => $key]) }}"
+                            href="{{ route('groups.show', $tabParams) }}"
                             @class([
                                 'inline-flex items-center border-b-2 px-1 py-4 text-sm font-medium',
                                 'border-navy text-navy' => $isActive,
@@ -88,6 +97,14 @@
 
         @if ($activeTab === 'upcoming-games')
             @include('groups.tabs.upcoming-games')
+        @endif
+
+        @if ($activeTab === 'leaderboard')
+            @include('groups.tabs.season-results', ['resultsMode' => 'leaderboard'])
+        @endif
+
+        @if ($activeTab === 'raw-prediction-data')
+            @include('groups.tabs.season-results', ['resultsMode' => 'raw-prediction-data'])
         @endif
     </div>
 </x-layouts.app>

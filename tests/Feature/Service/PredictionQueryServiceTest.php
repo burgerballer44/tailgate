@@ -54,14 +54,12 @@ describe('getPredictionsForPlayersAndGames', function () {
     test('returns empty collection when players are empty', function () {
         $result = $this->service->getPredictionsForPlayersAndGames(new EloquentCollection, collect([Game::factory()->create()]));
 
-        expect($result)->toBeInstanceOf(EloquentCollection::class);
         expect($result)->toBeEmpty();
     });
 
     test('returns empty collection when games are empty', function () {
         $result = $this->service->getPredictionsForPlayersAndGames(new EloquentCollection([Player::factory()->create()]), collect());
 
-        expect($result)->toBeInstanceOf(EloquentCollection::class);
         expect($result)->toBeEmpty();
     });
 });

@@ -52,6 +52,10 @@ applyTo: '**'
     - Event listeners or Jobs for asynchronous tasks
 
 - Avoid putting business logic in controllers; use domain service classes so that console commands, API controllers, and web controllers can reuse the same logic.
+- Controllers should not query the database directly through Eloquent or the Query Builder; delegate data access to focused service or repository classes.
+- Place new domain services in `app/Services` and keep each service single-purpose; avoid "God classes" that combine unrelated concerns.
+- Service classes may either adapt core/domain services for UI/API needs or encapsulate domain workflows, but each class should maintain a clear responsibility boundary.
+- Define an interface for each service contract and type-hint interfaces in controllers instead of concrete classes to improve testability and future implementation swaps.
 - Favor constructor injection over facades; when a facade is idiomatic (e.g., Cache, Log), it's fine.
 - Queues: for long-running tasks use jobs & dispatch with retry/backoff; never block HTTP.
 - Events/Listeners for side effects where helpful.

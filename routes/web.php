@@ -90,6 +90,8 @@ Route::middleware('auth')->group(function () {
             // these routes require the user to be an approved member of the group
             Route::middleware('user.group.member')->group(function () {
                 Route::get('{group}', [GroupController::class, 'show'])->name('show');
+                Route::get('{group}/season-results', [GroupController::class, 'seasonResults'])->name('season-results');
+                Route::delete('{group}/leave', [GroupController::class, 'leaveGroup'])->name('leave');
                 Route::post('{group}/players/{player}/predictions', [GroupController::class, 'storePrediction'])->name('predictions.store');
                 Route::patch('{group}/players/{player}/predictions/{prediction}', [GroupController::class, 'updatePrediction'])->name('predictions.update');
             });
