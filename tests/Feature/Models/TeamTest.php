@@ -1,10 +1,17 @@
 <?php
 
-use App\Models\HtmlEntity;
-use App\Models\Sport;
+use App\Models\Enums\HtmlEntity;
+use App\Models\Enums\Sport;
 use App\Models\Team;
+use App\Models\Enums\TeamFallback;
 use App\Models\TeamSport;
 use Illuminate\Support\HtmlString;
+
+describe('route binding and identifiers', function () {
+    test('uses ulid as the route key name', function () {
+        expect((new Team)->getRouteKeyName())->toBe('ulid');
+    });
+});
 
 describe('sports_html_entities', function () {
     test('returns an empty html string when team has no sports', function () {
@@ -65,7 +72,23 @@ describe('conference accessors', function () {
         $team = new Team;
         $team->setRelation('sports', collect());
 
-        expect($team->conference)->toBe(Team::UNKNOWN_CONFERENCE);
+        expect($team->conference)->toBe(TeamFallback::CONFERENCE->value());
+    });
+
+    test('returns unknown conference when all team sport conferences are blank', function () {
+        $team = new Team;
+        $team->setRelation('sports', collect([
+            new TeamSport([
+                'sport' => Sport::FOOTBALL,
+                'conference' => '',
+            ]),
+            new TeamSport([
+                'sport' => Sport::BASKETBALL,
+                'conference' => '   ',
+            ]),
+        ]));
+
+        expect($team->conference)->toBe(TeamFallback::CONFERENCE->value());
     });
 
     test('returns sport specific conference summary for each sport', function () {
@@ -82,6 +105,18 @@ describe('conference accessors', function () {
         ]));
 
         expect($team->sport_conference_summary)->toBe('Football: American Athletic, Basketball: Patriot');
+    });
+
+    test('uses unknown conference fallback when a sport conference is blank', function () {
+        $team = new Team;
+        $team->setRelation('sports', collect([
+            new TeamSport([
+                'sport' => Sport::FOOTBALL,
+                'conference' => '',
+            ]),
+        ]));
+
+        expect($team->sport_conference_summary)->toBe('Football: '.TeamFallback::CONFERENCE->value());
     });
 });
 

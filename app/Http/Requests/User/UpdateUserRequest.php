@@ -5,7 +5,7 @@ namespace App\Http\Requests\User;
 use App\DTO\ValidatedUserData;
 use App\Http\Requests\FormRequest;
 use App\Http\Requests\Traits\UserValidationRulesTrait;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\User;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -35,7 +35,11 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $user = request()->route('user');
+        $user = $this->route('user');
+
+        if (! $user instanceof User) {
+            abort(404);
+        }
 
         return $this->updateRules($user);
     }

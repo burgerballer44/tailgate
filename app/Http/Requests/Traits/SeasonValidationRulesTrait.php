@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use Illuminate\Validation\Rules\Enum;
 
 trait SeasonValidationRulesTrait

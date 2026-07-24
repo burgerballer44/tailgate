@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Group;
+use App\Models\Enums\InitialGroupLimitRule;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,9 +22,9 @@ class GroupFactory extends Factory
         return [
             'name' => fake()->name(),
             'owner_id' => User::factory(),
-            'member_limit' => Group::INITIAL_MEMBER_LIMIT,
-            'player_limit' => Group::INITIAL_PLAYER_LIMIT,
-            'follow_limit' => Group::INITIAL_FOLLOW_LIMIT,
+            'member_limit' => InitialGroupLimitRule::MEMBER_LIMIT->value(),
+            'player_limit' => InitialGroupLimitRule::PLAYER_LIMIT->value(),
+            'follow_limit' => InitialGroupLimitRule::FOLLOW_LIMIT->value(),
         ];
     }
 }

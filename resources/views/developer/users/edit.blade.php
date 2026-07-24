@@ -28,5 +28,5 @@
                 {{ __('Submit') }}
             </x-buttons.primary-button>
         </x-slot>
-    </x-form.user>
+    </x-form.developer.user>
 </x-layouts.app>

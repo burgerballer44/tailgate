@@ -1,8 +1,9 @@
 <?php
 
 use App\Models\User;
-use App\Models\UserRole;
-use App\Models\UserStatus;
+use App\Models\Enums\UserRole;
+use App\Models\Enums\UserStatus;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {
@@ -151,7 +152,7 @@ describe('index', function () {
 
 });
 
-describe('creat in a user', function () {
+describe('creating a user', function () {
     test('shows create form', function () {
         // visit the create page
         $response = $this->get(route('developer.users.create'));
@@ -217,10 +218,39 @@ describe('creat in a user', function () {
         $this->assertDatabaseCount('users', 2);
 
         // verify user was created with a password
-        $createdUser = User::where('email', $userData['email'])->first();
+        $createdUser = User::query()->where('email', $userData['email'])->first();
         expect($createdUser)->not->toBeNull();
         expect($createdUser->password)->not->toBeNull();
         expect($createdUser->password)->not->toBe('');
+    });
+
+    test('stores provided password when one is submitted', function () {
+        $plainPassword = 'password123';
+        $userData = User::factory()->make()->toArray();
+        $userData['password'] = $plainPassword;
+        $userData['password_confirmation'] = $plainPassword;
+
+        $this->post(route('developer.users.store'), $userData)
+            ->assertRedirect(route('developer.users.index'));
+
+        $createdUser = User::query()->where('email', $userData['email'])->first();
+        expect($createdUser)->not->toBeNull();
+        expect(Hash::check($plainPassword, $createdUser->password))->toBeTrue();
+    });
+
+    test('returns validation error when password confirmation does not match', function () {
+        $userData = User::factory()->make()->toArray();
+        $userData['password'] = 'password123';
+        $userData['password_confirmation'] = 'password321';
+
+        $this->assertDatabaseCount('users', 1);
+
+        $this->from(route('developer.users.create'))
+            ->post(route('developer.users.store'), $userData)
+            ->assertRedirect(route('developer.users.create'))
+            ->assertSessionHasErrors('password');
+
+        $this->assertDatabaseCount('users', 1);
     });
 
     test('flashes success message on store', function () {
@@ -311,6 +341,44 @@ describe('updating user', function () {
         expect($user->email)->toBe($updateData['email']);
         expect($user->status)->toBe($updateData['status']);
         expect($user->role)->toBe($updateData['role']);
+    });
+
+    test('updates user password when password is provided', function () {
+        $user = User::factory()->create([
+            'password' => Hash::make('old-password-123'),
+        ]);
+
+        $updateData = [
+            'name' => $user->name,
+            'email' => $user->email,
+            'status' => UserStatus::ACTIVE->value,
+            'role' => UserRole::REGULAR->value,
+            'password' => 'new-password-456',
+            'password_confirmation' => 'new-password-456',
+        ];
+
+        $this->patch(route('developer.users.update', $user), $updateData)
+            ->assertRedirect(route('developer.users.index'));
+
+        $user->refresh();
+        expect(Hash::check('new-password-456', $user->password))->toBeTrue();
+    });
+
+    test('returns validation error when updating with duplicate email', function () {
+        $existingUser = User::factory()->create(['email' => 'existing@example.com']);
+        $userToUpdate = User::factory()->create(['email' => 'target@example.com']);
+
+        $updateData = [
+            'name' => 'Updated Name',
+            'email' => $existingUser->email,
+            'status' => UserStatus::ACTIVE->value,
+            'role' => UserRole::REGULAR->value,
+        ];
+
+        $this->from(route('developer.users.edit', $userToUpdate))
+            ->patch(route('developer.users.update', $userToUpdate), $updateData)
+            ->assertRedirect(route('developer.users.edit', $userToUpdate))
+            ->assertSessionHasErrors('email');
     });
 
     test('flashes success message on update', function () {

@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Developer\DeveloperGameController;
 use App\Http\Controllers\Developer\DeveloperGroupController;
+use App\Http\Controllers\Developer\DeveloperImpersonationController;
 use App\Http\Controllers\Developer\DeveloperMemberController;
 use App\Http\Controllers\Developer\DeveloperPlayerController;
 use App\Http\Controllers\Developer\DeveloperRuleController;
@@ -65,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::post('developer/impersonation/stop', [DeveloperImpersonationController::class, 'stop'])->name('developer.impersonation.stop');
 
     // must be verified
     Route::middleware('verified')->group(function () {
@@ -123,6 +125,12 @@ Route::middleware('auth')->group(function () {
                 Route::post('{group}/reject/{member}', [GroupController::class, 'rejectMember'])
                     ->middleware('group.member.belongs')
                     ->name('reject-member');
+                Route::post('{group}/promote/{member}', [GroupController::class, 'promoteMember'])
+                    ->middleware(['group.member.belongs', 'group.member.approved'])
+                    ->name('promote-member');
+                Route::post('{group}/demote/{member}', [GroupController::class, 'demoteMember'])
+                    ->middleware(['group.member.belongs', 'group.member.approved'])
+                    ->name('demote-member');
                 Route::delete('{group}/remove/{member}', [GroupController::class, 'removeMember'])
                     ->middleware(['group.member.belongs', 'group.member.approved'])
                     ->name('remove-member');
@@ -136,9 +144,10 @@ Route::middleware('auth')->group(function () {
 
         // This is the developer area.
         // Only users with developer privileges can access these routes.
-        // These routes are all inntended for managing the application data outside of normal user interactions.
+        // These routes are all intended for managing the application data outside of normal user interactions.
         Route::prefix('developer')->name('developer.')->middleware('role:Developer')->group(function () {
             Route::get('rules', [DeveloperRuleController::class, 'index'])->name('rules.index');
+            Route::post('impersonation/{user}', [DeveloperImpersonationController::class, 'start'])->name('impersonation.start');
 
             Route::resource('users', DeveloperUserController::class);
 
@@ -155,6 +164,7 @@ Route::middleware('auth')->group(function () {
             Route::resource('seasons.games', DeveloperGameController::class);
 
             Route::resource('groups', DeveloperGroupController::class);
+            Route::get('groups/{group}/season-results', [DeveloperGroupController::class, 'seasonResults'])->name('groups.season-results');
 
             Route::get('groups/{group}/follow-team', [DeveloperGroupController::class, 'createFollowTeam'])->name('groups.follow-team.create');
             Route::post('groups/{group}/follow-team', [DeveloperGroupController::class, 'followTeam'])->name('groups.follow-team');

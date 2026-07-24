@@ -58,6 +58,10 @@ class GroupCommandService implements GroupCommandInterface
             $groupData['player_limit'] = $data->player_limit;
         }
 
+        if ($data->follow_limit !== null) {
+            $groupData['follow_limit'] = $data->follow_limit;
+        }
+
         // Persist group identity and optional limits in one write.
         return Group::create($groupData);
     }
@@ -84,6 +88,10 @@ class GroupCommandService implements GroupCommandInterface
 
         if ($data->player_limit !== null) {
             $updateData['player_limit'] = $data->player_limit;
+        }
+
+        if ($data->follow_limit !== null) {
+            $updateData['follow_limit'] = $data->follow_limit;
         }
 
         if ($data->owner_id !== null) {

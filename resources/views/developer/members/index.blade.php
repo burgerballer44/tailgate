@@ -36,6 +36,13 @@
                 'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
             ],
             [
+                'label' => 'View Group As User',
+                'type' => 'form',
+                'route' => 'developer.impersonation.start',
+                'routeParams' => ['user' => 'user.ulid', 'group' => $group->ulid],
+                'confirm' => 'Switch this browser session to this member and open this group?'
+            ],
+            [
                 'label' => 'Delete',
                 'type' => 'form',
                 'route' => 'developer.groups.members.destroy',

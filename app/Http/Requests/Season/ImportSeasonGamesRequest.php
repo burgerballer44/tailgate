@@ -4,7 +4,7 @@ namespace App\Http\Requests\Season;
 
 use App\DTO\GameImportData;
 use App\Http\Requests\FormRequest;
-use App\Models\SeasonType;
+use App\Models\Enums\SeasonType;
 use App\Services\Contracts\GameImportManagerInterface;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;

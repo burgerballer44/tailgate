@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

@@ -1,8 +1,9 @@
 @php
     $resultsMode = $resultsMode ?? 'leaderboard';
+    $highlightPlayerIds = collect($highlightPlayerIds ?? [])->map(static fn ($playerId): int => (int) $playerId)->values()->all();
 @endphp
 
-<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6" data-season-results-container data-mode="{{ $resultsMode }}" data-endpoint="{{ route('groups.season-results', ['group' => $group->ulid]) }}">
+<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-6" data-season-results-container data-mode="{{ $resultsMode }}" data-endpoint="{{ route('groups.season-results', ['group' => $group->ulid]) }}" data-highlight-player-ids='@json($highlightPlayerIds)'>
     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
             <h3 class="text-lg font-semibold text-gray-900">
@@ -52,11 +53,27 @@
 
                 const endpoint = container.dataset.endpoint;
                 const mode = container.dataset.mode;
+                const highlightPlayerIdsRaw = container.dataset.highlightPlayerIds || '[]';
                 const seasonSelector = container.querySelector('#results-season-selector');
                 const loadingState = container.querySelector('[data-results-loading]');
                 const errorState = container.querySelector('[data-results-error]');
                 const emptyState = container.querySelector('[data-results-empty]');
                 const contentState = container.querySelector('[data-results-content]');
+
+                let highlightPlayerIds = [];
+                try {
+                    highlightPlayerIds = JSON.parse(highlightPlayerIdsRaw);
+                } catch (_) {
+                    highlightPlayerIds = [];
+                }
+
+                const highlightPlayerIdSet = new Set(
+                    (Array.isArray(highlightPlayerIds) ? highlightPlayerIds : [])
+                        .map((playerId) => Number(playerId))
+                        .filter((playerId) => Number.isInteger(playerId) && playerId > 0),
+                );
+                const hasHighlightedPlayers = highlightPlayerIdSet.size > 0;
+                const isHighlightedPlayer = (playerId) => highlightPlayerIdSet.has(Number(playerId));
 
                 const escapeHtml = (value) => {
                     return String(value)
@@ -93,9 +110,14 @@
                     }
 
                     const htmlRows = rows.map((row) => {
+                        const isHighlighted = isHighlightedPlayer(row.player_id);
+                        const playerLabel = isHighlighted
+                            ? `${escapeHtml(row.player_name)} <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Your player</span>`
+                            : escapeHtml(row.player_name);
+
                         return `
-                            <tr class="border-b border-gray-100">
-                                <td class="px-3 py-2 text-sm text-gray-900">${escapeHtml(row.player_name)}</td>
+                            <tr class="${isHighlighted ? 'border-b border-amber-200 bg-amber-50' : 'border-b border-gray-100'}">
+                                <td class="px-3 py-2 text-sm ${isHighlighted ? 'font-semibold text-amber-900' : 'text-gray-900'}">${playerLabel}</td>
                                 <td class="px-3 py-2 text-sm text-gray-900">${formatGamePoints(row.total_points)}</td>
                                 <td class="px-3 py-2 text-sm text-gray-900">${escapeHtml(row.rank)}</td>
                                 <td class="px-3 py-2 text-sm text-gray-900">${row.previous_rank ?? '-'}</td>
@@ -105,7 +127,12 @@
                         `;
                     }).join('');
 
+                    const highlightedHint = hasHighlightedPlayers
+                        ? '<p class="mb-3 text-xs font-medium text-amber-800">Highlighted rows show your players.</p>'
+                        : '';
+
                     contentState.innerHTML = `
+                        ${highlightedHint}
                         <div class="overflow-x-auto rounded-md border border-gray-200">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
@@ -140,10 +167,14 @@
                     const blocks = gameRows.map((game) => {
                         const playerRows = (game.player_rows ?? []).map((row) => {
                             const notes = (row.calculation_notes ?? []).map(escapeHtml).join(', ');
+                            const isHighlighted = isHighlightedPlayer(row.player_id);
+                            const playerLabel = isHighlighted
+                                ? `${escapeHtml(row.player_name)} <span class="ml-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Your player</span>`
+                                : escapeHtml(row.player_name);
 
                             return `
-                                <tr class="border-b border-gray-100">
-                                    <td class="px-3 py-2 text-sm text-gray-900">${escapeHtml(row.player_name)}</td>
+                                <tr class="${isHighlighted ? 'border-b border-amber-200 bg-amber-50' : 'border-b border-gray-100'}">
+                                    <td class="px-3 py-2 text-sm ${isHighlighted ? 'font-semibold text-amber-900' : 'text-gray-900'}">${playerLabel}</td>
                                     <td class="px-3 py-2 text-sm text-gray-900">${row.predicted_followed_score ?? '-'}</td>
                                     <td class="px-3 py-2 text-sm text-gray-900">${row.predicted_opponent_score ?? '-'}</td>
                                     <td class="px-3 py-2 text-sm text-gray-900">${escapeHtml(row.penalty_points)}</td>
@@ -183,7 +214,11 @@
                         `;
                     }).join('');
 
-                    contentState.innerHTML = `<div class="space-y-4">${blocks}</div>`;
+                    const highlightedHint = hasHighlightedPlayers
+                        ? '<p class="text-xs font-medium text-amber-800">Highlighted rows show your players.</p>'
+                        : '';
+
+                    contentState.innerHTML = `<div class="space-y-4">${highlightedHint}${blocks}</div>`;
                     setState({});
                 };
 

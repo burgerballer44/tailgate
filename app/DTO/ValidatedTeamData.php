@@ -2,9 +2,9 @@
 
 namespace App\DTO;
 
-use App\Models\Sport;
-use App\Models\Team;
-use App\Models\TeamType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamFallback;
+use App\Models\Enums\TeamType;
 
 /**
  * Represents normalized team input ready for create/update operations.
@@ -56,9 +56,9 @@ readonly class ValidatedTeamData
             }, $data['sports']);
         }
 
-        $defaultConference = trim((string) ($data['conference'] ?? Team::UNKNOWN_CONFERENCE));
+        $defaultConference = trim((string) ($data['conference'] ?? TeamFallback::CONFERENCE->value()));
         if ($defaultConference === '') {
-            $defaultConference = Team::UNKNOWN_CONFERENCE;
+            $defaultConference = TeamFallback::CONFERENCE->value();
         }
 
         $providedSportConferences = [];

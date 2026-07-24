@@ -4,9 +4,10 @@ namespace App\Services;
 
 use App\DTO\ValidatedMemberData;
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\GroupThresholdRule;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Services\Contracts\MemberCommandInterface;
 use DomainException;
 use Illuminate\Support\Facades\Schema;
@@ -114,7 +115,7 @@ class MemberCommandService implements MemberCommandInterface
         $group = $member->group;
 
         if (
-            $group->admin->count() == Group::MIN_NUMBER_ADMINS &&
+            $group->admin->count() == GroupThresholdRule::MIN_NUMBER_ADMINS->value() &&
             $group->admin->first()->id == $member->id
         ) {
             throw new DomainException('Group admin minimum reached. Please update a different member to the Group Admin role before removing this member.');

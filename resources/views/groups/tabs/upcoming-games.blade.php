@@ -14,7 +14,7 @@
     $gamesForModal = $upcomingGames
         ->mapWithKeys(function ($game) {
             $gameDateTime = date_create_immutable((string) $game->start_date_time);
-            $sport = \App\Models\Sport::tryFrom((string) $game->season?->sport);
+            $sport = \App\Models\Enums\Sport::tryFrom((string) $game->season?->sport);
             $sportLabel = $sport?->value ?? ((string) $game->season?->sport ?: 'Sport unavailable');
             $sportIcon = $sport?->htmlEntity()->character();
 
@@ -216,7 +216,7 @@
             @foreach ($upcomingGames as $game)
                 @php
                     $gameDateTime = date_create_immutable((string) $game->start_date_time);
-                    $sport = \App\Models\Sport::tryFrom((string) $game->season?->sport);
+                    $sport = \App\Models\Enums\Sport::tryFrom((string) $game->season?->sport);
                     $sportLabel = $sport?->value ?? ((string) $game->season?->sport ?: 'Sport unavailable');
                     $sportIcon = $sport?->htmlEntity()->character();
                     $isBeforeLock = true;

@@ -31,13 +31,26 @@
             </div>
             @auth
                 <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    @php
+                        $accountMenuItems = [
+                            ['label' => 'Profile', 'route' => 'profile.edit'],
+                        ];
+
+                        if (session()->has('impersonator_user_id')) {
+                            $accountMenuItems[] = [
+                                'label' => 'Return to developer account',
+                                'route' => 'developer.impersonation.stop',
+                                'method' => 'POST',
+                            ];
+                        }
+
+                        $accountMenuItems[] = ['label' => 'Log out', 'route' => 'logout', 'method' => 'POST'];
+                    @endphp
+
                     <x-navigation.dropdown-nav-links
                         label="{{ Auth::user()->name }}"
                         align="end"
-                        :items="[
-                            ['label' => 'Profile', 'route' => 'profile.edit'],
-                            ['label' => 'Log out', 'route' => 'logout', 'method' => 'POST'],
-                        ]"
+                        :items="$accountMenuItems"
                     ></x-navigation.dropdown-nav-links>
                 </div>
             @endauth

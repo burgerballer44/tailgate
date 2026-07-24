@@ -3,14 +3,14 @@
 use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\Season;
-use App\Models\Sport;
+use App\Models\Enums\Sport;
 use App\Models\Team;
 use App\Models\User;
 
@@ -2227,6 +2227,115 @@ describe('removeMember', function () {
 
         $response->assertNotFound();
         $this->assertDatabaseHas('members', ['id' => $approvedMember->id]);
+    });
+});
+
+describe('promoteMember', function () {
+    test('promotes approved member for owner', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $approvedMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->post(route('groups.promote-member', [$group, $approvedMember]));
+
+        $response->assertRedirect();
+        $approvedMember->refresh();
+        expect($approvedMember->role)->toBe(GroupRole::GROUP_ADMIN->value);
+    });
+
+    test('promotes approved member for admin', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $approvedMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->post(route('groups.promote-member', [$group, $approvedMember]));
+
+        $response->assertRedirect();
+        $approvedMember->refresh();
+        expect($approvedMember->role)->toBe(GroupRole::GROUP_ADMIN->value);
+    });
+
+    test('denies promotion to regular members', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $approvedMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->post(route('groups.promote-member', [$group, $approvedMember]));
+
+        $response->assertForbidden();
+    });
+});
+
+describe('demoteMember', function () {
+    test('demotes approved admin for owner when another admin exists', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        Member::factory()->create([
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $adminToDemote = Member::factory()->create([
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->post(route('groups.demote-member', [$group, $adminToDemote]));
+
+        $response->assertRedirect();
+        $adminToDemote->refresh();
+        expect($adminToDemote->role)->toBe(GroupRole::GROUP_MEMBER->value);
+    });
+
+    test('denies demotion of owner membership role', function () {
+        $group = Group::factory()->create(['owner_id' => $this->user->id]);
+        $ownerMember = $group->members()->where('user_id', $group->owner_id)->firstOrFail();
+
+        $response = $this->post(route('groups.demote-member', [$group, $ownerMember]));
+
+        $response->assertForbidden();
+        $ownerMember->refresh();
+        expect($ownerMember->role)->toBe(GroupRole::GROUP_ADMIN->value);
+    });
+
+    test('denies demotion to regular members', function () {
+        $group = Group::factory()->create();
+        Member::factory()->create([
+            'user_id' => $this->user->id,
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_MEMBER->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $adminToDemote = Member::factory()->create([
+            'group_id' => $group->id,
+            'role' => GroupRole::GROUP_ADMIN->value,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $response = $this->post(route('groups.demote-member', [$group, $adminToDemote]));
+
+        $response->assertForbidden();
     });
 });
 

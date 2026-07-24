@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Group;
+use App\ScoringPolicies\PredictionDifferenceFromScorePointsPolicy;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +17,7 @@ return new class extends Migration
             $table->ulid('ulid')->unique();
             $table->unsignedBigInteger('group_id');
             $table->unsignedBigInteger('season_id');
-            $table->string('prediction_scoring_policy')->default(Group::DEFAULT_PREDICTION_SCORING_POLICY);
+            $table->string('prediction_scoring_policy')->default(PredictionDifferenceFromScorePointsPolicy::key());
             $table->json('enabled_prediction_policies')->nullable();
             $table->timestamps();
 

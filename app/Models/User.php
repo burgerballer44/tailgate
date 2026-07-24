@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Enums\HtmlEntity;
+use App\Models\Enums\MemberStatus;
+use App\Models\Enums\UserStatus;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;

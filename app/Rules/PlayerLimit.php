@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Models\Group;
+use App\Models\Enums\InitialGroupLimitRule;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -37,7 +37,7 @@ class PlayerLimit implements ValidationRule
 
         $limit = $isAdminManageContext
             ? $group->player_limit
-            : Group::REGULAR_MEMBER_PLAYER_LIMIT;
+            : InitialGroupLimitRule::MEMBER_PLAYER_LIMIT->value();
 
         if ($member->players()->count() >= $limit) {
             $fail('Player limit reached.');

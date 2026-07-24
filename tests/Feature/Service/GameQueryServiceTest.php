@@ -5,7 +5,7 @@ use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Season;
-use App\Models\Sport;
+use App\Models\Enums\Sport;
 use App\Models\Team;
 use App\Services\GameQueryService;
 use Illuminate\Contracts\Database\Eloquent\Builder;

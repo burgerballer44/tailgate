@@ -8,9 +8,9 @@ use App\DTO\ImportedGameData;
 use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
-use App\Models\Team;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamFallback;
 use App\Services\Contracts\GameImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
 use Carbon\CarbonImmutable;
@@ -76,7 +76,7 @@ class CBBDGameImportSource implements GameImportSourceInterface
                     $homeTeamConference = (string) $this->valueForAny(
                         $rawGame,
                         ['homeConference', 'home_conference'],
-                        Team::UNKNOWN_CONFERENCE,
+                        TeamFallback::CONFERENCE->value(),
                     );
                     $homeTeamScore = (int) $this->valueForAny(
                         $rawGame,
@@ -88,7 +88,7 @@ class CBBDGameImportSource implements GameImportSourceInterface
                     $awayTeamConference = (string) $this->valueForAny(
                         $rawGame,
                         ['awayConference', 'away_conference'],
-                        Team::UNKNOWN_CONFERENCE,
+                        TeamFallback::CONFERENCE->value(),
                     );
                     $awayTeamScore = (int) $this->valueForAny(
                         $rawGame,
@@ -153,7 +153,6 @@ class CBBDGameImportSource implements GameImportSourceInterface
 
         return match ($seasonType) {
             SeasonType::REGULAR->value => 'regular',
-            SeasonType::POST->value => 'postseason',
             default => $seasonType,
         };
     }

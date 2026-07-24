@@ -2,7 +2,7 @@
 
 namespace App\DTO;
 
-use App\Models\PredictionPolicyScope;
+use App\Models\Enums\PredictionPolicyScope;
 
 /**
  * Represents a single failed prediction policy check.

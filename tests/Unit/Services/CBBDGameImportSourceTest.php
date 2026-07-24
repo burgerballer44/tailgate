@@ -6,8 +6,8 @@ use App\DTO\ImportedGameData;
 use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use App\Services\ImportSources\CBBDGameImportSource;
 use Tests\TestCase;
 
@@ -133,11 +133,11 @@ describe('fetch - API client query parameters', function () {
         $this->source->fetch($season, $data);
     });
 
-    test('translates Postseason to the CBBD postseason slug before calling the client', function () {
+    test('passes unsupported season type through unchanged before calling the client', function () {
         $season = cbbdSeasonWithSport(Sport::BASKETBALL);
         $data = CBBDImportData([
             'year' => 2025,
-            'season_type' => SeasonType::POST->value,
+            'season_type' => 'Custom Season Type',
             'conference' => 'ACC',
             'team' => 'Duke',
             'start_date' => '2025-11-01',
@@ -149,7 +149,7 @@ describe('fetch - API client query parameters', function () {
             ->once()
             ->with([
                 'year' => 2025,
-                'seasonType' => 'postseason',
+                'seasonType' => 'Custom Season Type',
                 'conference' => 'ACC',
                 'team' => 'Duke',
                 'startDate' => '2025-11-01',

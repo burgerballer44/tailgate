@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

@@ -2,8 +2,8 @@
 
 namespace App\DTO;
 
-use App\Models\UserRole;
-use App\Models\UserStatus;
+use App\Models\Enums\UserRole;
+use App\Models\Enums\UserStatus;
 
 /**
  * Represents normalized user input for account lifecycle operations.

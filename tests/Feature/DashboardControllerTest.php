@@ -3,7 +3,7 @@
 use App\DTO\QuickPredictionPayload;
 use App\Models\Group;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\User;
 use App\Services\Contracts\QuickPredictionServiceInterface;
 use App\Services\QuickPredictionService;
@@ -43,6 +43,9 @@ describe('index', function () {
         $response->assertViewHas('quickPredictionWindowLabel', QuickPredictionService::predictionWindowLabel());
         $response->assertViewHas('user', $this->user);
         $response->assertSee('Open quick predictions');
+        $response->assertSee('quick_prediction_player');
+        $response->assertSee('quick_prediction_home_score');
+        $response->assertSee('quick_prediction_away_score');
     });
 
     test('shows user groups', function () {

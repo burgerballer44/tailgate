@@ -13,12 +13,14 @@ readonly class ValidatedGroupData
      * @param  int  $owner_id  The ID of the user who owns the group.
      * @param  int|null  $member_limit  The maximum number of members allowed, or null for no limit.
      * @param  int|null  $player_limit  The maximum number of players allowed, or null for no limit.
+     * @param  int|null  $follow_limit  The maximum number of followed teams allowed, or null for no limit.
      */
     public function __construct(
         public string $name,
         public int $owner_id,
         public ?int $member_limit,
         public ?int $player_limit,
+        public ?int $follow_limit,
     ) {}
 
     /**
@@ -33,6 +35,7 @@ readonly class ValidatedGroupData
             owner_id: (int) $data['owner_id'],
             member_limit: isset($data['member_limit']) ? (int) $data['member_limit'] : null,
             player_limit: isset($data['player_limit']) ? (int) $data['player_limit'] : null,
+            follow_limit: isset($data['follow_limit']) ? (int) $data['follow_limit'] : null,
         );
     }
 }

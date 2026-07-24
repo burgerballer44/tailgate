@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\User;
 
@@ -334,6 +334,8 @@ describe('store - creating a player', function () {
     it('allows admin to add extra players for a member up to group player limit', function () {
         $adminUser = User::factory()->create();
         $targetUser = User::factory()->create();
+
+        $this->group->update(['player_limit' => 2]);
 
         Member::factory()->for($this->group)->for($adminUser, 'user')->create([
             'role' => GroupRole::GROUP_ADMIN,

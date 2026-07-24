@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
-use App\Models\UserRole;
-use App\Models\UserStatus;
+use App\Models\Enums\UserRole;
+use App\Models\Enums\UserStatus;
 use App\Services\Contracts\UserCommandInterface;
 use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\View\View;
@@ -24,8 +24,8 @@ class DeveloperUserController extends Controller
      * @return void Initializes controller dependencies.
      */
     public function __construct(
-        private UserCommandInterface $userCommandService,
-        private UserQueryInterface $userQueryService
+        private readonly UserCommandInterface $userCommandService,
+        private readonly UserQueryInterface $userQueryService
     ) {}
 
     /**
@@ -36,10 +36,12 @@ class DeveloperUserController extends Controller
      */
     public function index(Request $request): View
     {
+        $formOptions = $this->userFormOptions();
+
         return view('developer.users.index', [
-            'users' => $this->userQueryService->query($request->all())->paginate(),
-            'statuses' => collect(UserStatus::cases())->pluck('value'),
-            'roles' => collect(UserRole::cases())->pluck('value'),
+            'users' => $this->userQueryService->query($request->query())->paginate(),
+            'statuses' => $formOptions['statuses'],
+            'roles' => $formOptions['roles'],
         ]);
     }
 
@@ -48,11 +50,13 @@ class DeveloperUserController extends Controller
      *
      * @return View Renders the developer user create form with allowed roles and statuses.
      */
-    public function create()
+    public function create(): View
     {
+        $formOptions = $this->userFormOptions();
+
         return view('developer.users.create', [
-            'roles' => collect(UserRole::cases())->pluck('value'),
-            'statuses' => collect(UserStatus::cases())->pluck('value'),
+            'roles' => $formOptions['roles'],
+            'statuses' => $formOptions['statuses'],
         ]);
     }
 
@@ -79,6 +83,8 @@ class DeveloperUserController extends Controller
      */
     public function show(User $user): View
     {
+        $user->loadCount(['members', 'socialAccounts']);
+
         return view('developer.users.show', ['user' => $user]);
     }
 
@@ -90,10 +96,12 @@ class DeveloperUserController extends Controller
      */
     public function edit(User $user): View
     {
+        $formOptions = $this->userFormOptions();
+
         return view('developer.users.edit', [
             'user' => $user,
-            'roles' => collect(UserRole::cases())->pluck('value'),
-            'statuses' => collect(UserStatus::cases())->pluck('value'),
+            'roles' => $formOptions['roles'],
+            'statuses' => $formOptions['statuses'],
         ]);
     }
 
@@ -126,5 +134,18 @@ class DeveloperUserController extends Controller
         $this->setFlashAlert('success', 'User deleted successfully!');
 
         return redirect()->route('developer.users.index');
+    }
+
+    /**
+     * Build enum-backed role and status options for developer user forms.
+     *
+        * @return array{roles: \Illuminate\Support\Collection<int, string>, statuses: \Illuminate\Support\Collection<int, string>} Form option collections keyed by option type.
+     */
+    private function userFormOptions(): array
+    {
+        return [
+            'roles' => collect(UserRole::cases())->pluck('value'),
+            'statuses' => collect(UserStatus::cases())->pluck('value'),
+        ];
     }
 }

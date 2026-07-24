@@ -1,10 +1,13 @@
 <?php
 
 use App\Models\Follow;
+use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
+use App\Models\Enums\MemberStatus;
 use App\Models\Player;
+use App\Models\Prediction;
 use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
@@ -234,12 +237,118 @@ describe('viewing a group', function () {
         $response = $this->get(route('developer.groups.show', $group));
 
         $response->assertOk();
-        $response->assertSee('Rules');
-        $response->assertSee('Policy Season');
-        $response->assertSee('Unique group prediction');
-        $response->assertSee('When enabled for a group, only one prediction for a game may exist within that group.');
-        $response->assertSee('Minimum lead time before lock');
-        $response->assertSee('Predictions must be submitted at least 30 minutes before the scheduled game start time.');
+        $response->assertSee('Season policy settings');
+    });
+
+    test('prediction feed can be filtered by player name', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        $homeTeam = Team::factory()->create();
+        $awayTeam = Team::factory()->create();
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+        ]);
+
+        $matchingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $nonMatchingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $matchingPlayer = Player::factory()->create([
+            'member_id' => $matchingMember->id,
+            'player_name' => 'Filter Alpha Player',
+        ]);
+        $nonMatchingPlayer = Player::factory()->create([
+            'member_id' => $nonMatchingMember->id,
+            'player_name' => 'Other Player',
+        ]);
+
+        Prediction::factory()->create([
+            'player_id' => $matchingPlayer->id,
+            'game_id' => $game->id,
+        ]);
+        Prediction::factory()->create([
+            'player_id' => $nonMatchingPlayer->id,
+            'game_id' => $game->id,
+        ]);
+
+        $response = $this->get(route('developer.groups.show', [
+            'group' => $group,
+            'tab' => 'upcoming-games',
+            'player' => $matchingPlayer->id,
+        ]));
+
+        $response->assertOk();
+
+        $predictions = $response->viewData('predictions');
+
+        expect($predictions)->not->toBeNull();
+        expect($predictions->pluck('player_id')->all())->toContain($matchingPlayer->id);
+        expect($predictions->pluck('player_id')->all())->not->toContain($nonMatchingPlayer->id);
+    });
+
+    test('prediction feed can be filtered by member name', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        $homeTeam = Team::factory()->create();
+        $awayTeam = Team::factory()->create();
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $homeTeam->id,
+            'away_team_id' => $awayTeam->id,
+        ]);
+
+        $matchingUser = User::factory()->create(['name' => 'Taylor Filter Member']);
+        $otherUser = User::factory()->create(['name' => 'Jordan Other Member']);
+
+        $matchingMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $matchingUser->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+        $otherMember = Member::factory()->create([
+            'group_id' => $group->id,
+            'user_id' => $otherUser->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $matchingPlayer = Player::factory()->create([
+            'member_id' => $matchingMember->id,
+            'player_name' => 'Member Filter Player',
+        ]);
+        $otherPlayer = Player::factory()->create([
+            'member_id' => $otherMember->id,
+            'player_name' => 'Other Member Player',
+        ]);
+
+        Prediction::factory()->create([
+            'player_id' => $matchingPlayer->id,
+            'game_id' => $game->id,
+        ]);
+        Prediction::factory()->create([
+            'player_id' => $otherPlayer->id,
+            'game_id' => $game->id,
+        ]);
+
+        $response = $this->get(route('developer.groups.show', [
+            'group' => $group,
+            'tab' => 'upcoming-games',
+            'member' => $matchingMember->id,
+        ]));
+
+        $response->assertOk();
+
+        $predictions = $response->viewData('predictions');
+
+        expect($predictions)->not->toBeNull();
+        expect($predictions->pluck('player_id')->all())->toContain($matchingPlayer->id);
+        expect($predictions->pluck('player_id')->all())->not->toContain($otherPlayer->id);
     });
 
     test('players tab action links resolve nested route params', function () {
@@ -254,6 +363,34 @@ describe('viewing a group', function () {
             route('developer.groups.members.players.show', [$group, $member, $player]),
             false
         );
+    });
+
+    test('season results endpoint returns payload for a followed season', function () {
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+        ]);
+
+        $response = $this->get(route('developer.groups.season-results', [
+            'group' => $group,
+            'season_id' => $season->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'data' => [
+                'group_id',
+                'season_id',
+                'points_policy',
+                'generated_at',
+                'leaderboard_rows',
+                'raw_game_rows',
+                'meta',
+            ],
+        ]);
     });
 });
 

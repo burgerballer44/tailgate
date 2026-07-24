@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\ScoringPolicies\PredictionDifferenceFromScorePointsPolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +31,6 @@ class GroupSeasonFollow extends Model
         'season_id',
         'prediction_scoring_policy',
         'enabled_prediction_policies',
-        'unfollowed_at',
     ];
 
     /**
@@ -40,7 +40,6 @@ class GroupSeasonFollow extends Model
      */
     protected $casts = [
         'enabled_prediction_policies' => 'array',
-        'unfollowed_at' => 'datetime',
     ];
 
     /**
@@ -62,7 +61,7 @@ class GroupSeasonFollow extends Model
             $groupSeasonFollow->ulid = Str::ulid();
 
             if (! $groupSeasonFollow->prediction_scoring_policy) {
-                $groupSeasonFollow->prediction_scoring_policy = Group::DEFAULT_PREDICTION_SCORING_POLICY;
+                $groupSeasonFollow->prediction_scoring_policy = PredictionDifferenceFromScorePointsPolicy::key();
             }
 
             if ($groupSeasonFollow->enabled_prediction_policies === null) {

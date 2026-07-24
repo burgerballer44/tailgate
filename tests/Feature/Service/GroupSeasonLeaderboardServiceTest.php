@@ -9,7 +9,7 @@ use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\Season;
@@ -412,6 +412,67 @@ describe('group season leaderboard service contract', function () {
             ->and($rows[$playerTwo->id]['rank_change'])->toBe(-1)
             ->and($rows[$playerTwo->id]['points_behind_leader'])->toBe(11.0)
             ->and($result->meta['total_leaderboard_rows'])->toBe(2);
+    });
+
+    test('preserves player names in leaderboard rows for numeric player ids', function () {
+        $service = app(GroupSeasonLeaderboardServiceInterface::class);
+        $group = Group::factory()->create();
+        $season = Season::factory()->active()->create();
+        $followedTeam = Team::factory()->create();
+        $opponent = Team::factory()->create();
+
+        Follow::factory()->create([
+            'group_id' => $group->id,
+            'team_id' => $followedTeam->id,
+        ]);
+
+        GroupSeasonFollow::factory()->create([
+            'group_id' => $group->id,
+            'season_id' => $season->id,
+            'prediction_scoring_policy' => 'prediction-difference-from-score',
+        ]);
+
+        $game = Game::factory()->create([
+            'season_id' => $season->id,
+            'home_team_id' => $followedTeam->id,
+            'away_team_id' => $opponent->id,
+            'home_team_score' => 28,
+            'away_team_score' => 21,
+            'start_date_time' => '2026-09-10 12:00:00',
+        ]);
+
+        $member = Member::factory()->create([
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+            'created_at' => '2026-08-01 00:00:00',
+        ]);
+
+        $alpha = Player::factory()->create(['member_id' => $member->id, 'player_name' => 'Alpha']);
+        $bravo = Player::factory()->create(['member_id' => $member->id, 'player_name' => 'Bravo']);
+
+        Prediction::factory()->create([
+            'player_id' => $alpha->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 28,
+            'away_team_prediction' => 21,
+        ]);
+
+        Prediction::factory()->create([
+            'player_id' => $bravo->id,
+            'game_id' => $game->id,
+            'home_team_prediction' => 30,
+            'away_team_prediction' => 20,
+        ]);
+
+        $result = $service->buildSeasonResults($group->id, $season->id);
+        $names = collect($result->leaderboardRows)
+            ->map(fn (PlayerLeaderboardRowData $row): string => $row->playerName)
+            ->values()
+            ->all();
+
+        expect($names)->toContain('Alpha')
+            ->and($names)->toContain('Bravo')
+            ->and($names)->not->toContain('Unknown player');
     });
 
     test('uses the previous week snapshot instead of the previous game snapshot for rank change', function () {

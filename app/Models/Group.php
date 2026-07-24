@@ -3,6 +3,10 @@
 namespace App\Models;
 
 use App\DTO\ValidatedMemberData;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\GroupThresholdRule;
+use App\Models\Enums\HtmlEntity;
+use App\Models\Enums\InitialGroupLimitRule;
 use App\Services\Contracts\MemberCommandInterface;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -19,55 +24,6 @@ use Illuminate\Support\Str;
 class Group extends Model
 {
     use HasFactory;
-
-    /**
-     * Default prediction scoring policy key for new groups.
-     */
-    public const DEFAULT_PREDICTION_SCORING_POLICY = 'prediction-difference-from-score';
-
-    // TODO: move these to an enum
-
-    /**
-     * Length of the invite code generated for a group on creation.
-     *
-     * @var int
-     */
-    public const LENGTH_INVITE_CODE = 10;
-
-    /**
-     * Default member limit assigned to newly created groups.
-     *
-     * @var int
-     */
-    public const INITIAL_MEMBER_LIMIT = 30;
-
-    /**
-     * Default player limit for groups that allow multiple players.
-     *
-     * @var int
-     */
-    public const INITIAL_PLAYER_LIMIT = 3;
-
-    /**
-     * Default player limit for standard self-service membership flows.
-     *
-     * @var int
-     */
-    public const REGULAR_MEMBER_PLAYER_LIMIT = 1;
-
-    /**
-     * Default follow limit assigned to newly created groups.
-     *
-     * @var int
-     */
-    public const INITIAL_FOLLOW_LIMIT = 1;
-
-    /**
-     * Minimum number of admins that must remain in a group.
-     *
-     * @var int
-     */
-    public const MIN_NUMBER_ADMINS = 1;
 
     /**
      * The attributes that should be hidden for arrays.
@@ -89,7 +45,6 @@ class Group extends Model
         'member_limit',
         'player_limit',
         'follow_limit',
-        'prediction_scoring_policy',
     ];
 
     /**
@@ -110,19 +65,16 @@ class Group extends Model
         static::creating(function ($group) {
             $group->ulid = Str::ulid();
             if (! $group->invite_code) {
-                $group->invite_code = substr(str_shuffle('23456789ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, self::LENGTH_INVITE_CODE);
+                $group->invite_code = substr(str_shuffle('23456789ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, GroupThresholdRule::INVITE_CODE_LENGTH->value());
             }
             if (! $group->member_limit) {
-                $group->member_limit = self::INITIAL_MEMBER_LIMIT;
+                $group->member_limit = InitialGroupLimitRule::MEMBER_LIMIT->value();
             }
             if (! $group->player_limit) {
-                $group->player_limit = self::INITIAL_PLAYER_LIMIT;
+                $group->player_limit = InitialGroupLimitRule::PLAYER_LIMIT->value();
             }
             if (! $group->follow_limit) {
-                $group->follow_limit = self::INITIAL_FOLLOW_LIMIT;
-            }
-            if (! $group->prediction_scoring_policy) {
-                $group->prediction_scoring_policy = self::DEFAULT_PREDICTION_SCORING_POLICY;
+                $group->follow_limit = InitialGroupLimitRule::FOLLOW_LIMIT->value();
             }
         });
 
@@ -214,7 +166,19 @@ class Group extends Model
      */
     public function seasonFollows(): HasMany
     {
-        return $this->hasMany(GroupSeasonFollow::class)->whereNull('unfollowed_at');
+        $relation = $this->hasMany(GroupSeasonFollow::class);
+
+        static $hasUnfollowedAtColumn = null;
+
+        if ($hasUnfollowedAtColumn === null) {
+            $hasUnfollowedAtColumn = Schema::hasColumn('group_season_follows', 'unfollowed_at');
+        }
+
+        if ($hasUnfollowedAtColumn) {
+            $relation->whereNull('unfollowed_at');
+        }
+
+        return $relation;
     }
 
     /**

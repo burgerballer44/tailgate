@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Sport;
+use App\Models\Enums\Sport;
 use App\Models\Team;
 use App\Models\TeamSport;
 use Illuminate\Database\Eloquent\Factories\Factory;

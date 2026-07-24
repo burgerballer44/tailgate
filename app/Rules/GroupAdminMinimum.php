@@ -2,8 +2,8 @@
 
 namespace App\Rules;
 
-use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\GroupThresholdRule;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -30,7 +30,7 @@ class GroupAdminMinimum implements ValidationRule
         $member = request()->route('member');
 
         if (
-            $group->admin->count() == Group::MIN_NUMBER_ADMINS &&
+            $group->admin->count() == GroupThresholdRule::MIN_NUMBER_ADMINS->value() &&
             $group->admin->first() == $member &&
             $value != GroupRole::GROUP_ADMIN
         ) {

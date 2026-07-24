@@ -1,10 +1,26 @@
+@php
+    $tabs = [
+        'details' => 'Details',
+        'members' => 'Members',
+        'players' => 'Players',
+        'upcoming-games' => 'Prediction feed',
+        'leaderboard' => 'Leaderboard',
+        'raw-prediction-data' => 'Raw prediction data',
+    ];
+
+    $followDescription = 'No team followed yet.';
+    if ($group->follows->isNotEmpty()) {
+        $followDescription = $group->follows->count().' team'.($group->follows->count() === 1 ? '' : 's').' followed';
+    }
+@endphp
+
 <x-layouts.app
-    mainHeading="Group: {{ $group->name }}"
-    mainDescription="Details of the group including members and players."
+    mainHeading="Developer group inspector: {{ $group->name }}"
+    mainDescription="{{ $followDescription }}. View group data, member activity, and season results."
     :mainActions="[
-        ['text' => 'Edit Group', 'route' => 'developer.groups.edit', 'params' => ['group' => $group->ulid]],
-        ['text' => 'Add Member', 'route' => 'developer.groups.members.create', 'params' => ['group' => $group->ulid]],
-        ['text' => 'Follow Team', 'route' => 'developer.groups.follow-team.create', 'params' => ['group' => $group->ulid]],
+        ['text' => 'Edit settings', 'route' => 'developer.groups.edit', 'params' => ['group' => $group->ulid]],
+        ['text' => 'Add member', 'route' => 'developer.groups.members.create', 'params' => ['group' => $group->ulid]],
+        ['text' => 'Follow team', 'route' => 'developer.groups.follow-team.create', 'params' => ['group' => $group->ulid]],
     ]"
 >
     <x-breadcrumb
@@ -14,15 +30,6 @@
             ['text' => $group->name, 'active' => true],
         ]"
     />
-
-    @php
-        $tabs = [
-            'details' => 'Details',
-            'members' => 'Members',
-            'players' => 'Players',
-            'predictions' => 'Predictions',
-        ];
-    @endphp
 
     <div class="mt-6">
         <div class="grid grid-cols-1 sm:hidden">
@@ -80,8 +87,8 @@
     @if ($activeTab === 'details')
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <x-model-viewer
-                message="Group information"
-                details="Primary identifiers and ownership details."
+                message="Group identity"
+                details="Primary identifiers and ownership details for this group."
                 tone="info"
                 :fields="[
                     [
@@ -112,8 +119,8 @@
             />
 
             <x-model-viewer
-                message="Limits and related records"
-                details="Capacity and relationship summary for this group."
+                message="Group settings"
+                details="Current mutable settings and capacity controls."
                 tone="success"
                 :fields="[
                     [
@@ -123,6 +130,10 @@
                     [
                         'label' => 'Player Limit',
                         'value' => $group->player_limit,
+                    ],
+                    [
+                        'label' => 'Follow Limit',
+                        'value' => $group->follow_limit,
                     ],
                     [
                         'label' => 'Member Count',
@@ -141,7 +152,7 @@
 
             <x-model-viewer
                 message="Metadata"
-                details="Lifecycle context for this group record."
+                details="Group record timestamps for creation and most recent update."
                 tone="neutral"
                 :fields="[
                     [
@@ -159,7 +170,7 @@
         <div class="mt-8">
             <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Prediction Policies</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">Season policy settings</h2>
                     <p class="mt-1 text-sm text-gray-600">Optional prediction policies currently enabled per followed season.</p>
                 </div>
 
@@ -196,10 +207,10 @@
             </section>
         </div>
 
-        <div class="mt-8">
+        <div class="mt-8 grid gap-6 lg:grid-cols-2">
             <section class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                 <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Following</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">Followed teams</h2>
                     <p class="mt-1 text-sm text-gray-600">The teams this group currently follows for predictions.</p>
                 </div>
 
@@ -237,14 +248,14 @@
 
     @if ($activeTab === 'members')
         <div class="mt-8">
-            <div class="mb-4 flex items-center justify-between">
+            <div class="mb-4">
                 <h2 class="text-lg font-semibold">Members</h2>
-                <a href="{{ route('developer.groups.members.create', $group) }}" class="btn btn-primary">Add Member</a>
             </div>
             <x-tables.full-width
                 heading="Members"
+                description="Includes a dedicated view-as-user action for reproducing member-specific issues."
                 :headers="['User', 'Role', 'Status', 'Joined', 'Actions']"
-                :rows="$group->members"
+                :rows="$members"
                 :columns="[
                     'user.name',
                     'role',
@@ -263,6 +274,13 @@
                         'routeParams' => ['group' => $group->ulid, 'member' => 'ulid'],
                     ],
                     [
+                        'label' => 'View Group As User',
+                        'type' => 'form',
+                        'route' => 'developer.impersonation.start',
+                        'routeParams' => ['user' => 'user.ulid', 'group' => $group->ulid],
+                        'confirm' => 'Switch this browser session to this member and open this group?'
+                    ],
+                    [
                         'label' => 'Delete',
                         'type' => 'form',
                         'route' => 'developer.groups.members.destroy',
@@ -271,6 +289,10 @@
                     ]
                 ]"
             ></x-tables.full-width>
+
+            <div class="mt-4 px-4 sm:px-6 lg:px-8">
+                {{ $members?->links() }}
+            </div>
         </div>
     @endif
 
@@ -279,8 +301,9 @@
             <h2 class="mb-4 text-lg font-semibold">Players</h2>
             <x-tables.full-width
                 heading="Players"
+                description="All group players with member ownership context."
                 :headers="['Player Name', 'Member', 'Created', 'Actions']"
-                :rows="$group->players"
+                :rows="$players"
                 :columns="[
                     'player_name',
                     'member.user.name',
@@ -306,14 +329,49 @@
                     ]
                 ]"
             ></x-tables.full-width>
+
+            <div class="mt-4 px-4 sm:px-6 lg:px-8">
+                {{ $players?->links() }}
+            </div>
         </div>
     @endif
 
-    @if ($activeTab === 'predictions')
+    @if ($activeTab === 'upcoming-games')
         <div class="mt-8">
-            <h2 class="mb-4 text-lg font-semibold">Recent Predictions</h2>
+            <h2 class="mb-4 text-lg font-semibold">Prediction feed</h2>
+
+            <form method="GET" action="{{ route('developer.groups.show', $group) }}" class="mb-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                <input type="hidden" name="tab" value="upcoming-games">
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <x-inputs.select
+                        id="prediction_player_filter"
+                        name="player"
+                        label="Player"
+                        :value="$predictionFeedFilters['player']"
+                        :options="$predictionFeedFilterOptions['players']"
+                        placeholder="All players"
+                    />
+
+                    <x-inputs.select
+                        id="prediction_member_filter"
+                        name="member"
+                        label="Member"
+                        :value="$predictionFeedFilters['member']"
+                        :options="$predictionFeedFilterOptions['members']"
+                        placeholder="All members"
+                    />
+
+                    <div class="flex items-end gap-2">
+                        <x-buttons.primary-button type="submit">Apply filters</x-buttons.primary-button>
+                        <x-buttons.nav-button route="developer.groups.show" :params="['group' => $group->ulid, 'tab' => 'upcoming-games']">Clear</x-buttons.nav-button>
+                    </div>
+                </div>
+            </form>
+
             <x-tables.full-width
                 heading="Predictions"
+                description="Recent prediction submissions for this group."
                 :headers="['Player', 'Member', 'Game', 'Prediction', 'Submitted', 'Actions']"
                 :rows="$predictions"
                 :columns="[
@@ -342,6 +400,18 @@
             <div class="mt-6 px-4 sm:px-6 lg:px-8">
                 {{ $predictions->links() }}
             </div>
+        </div>
+    @endif
+
+    @if ($activeTab === 'leaderboard')
+        <div class="mt-8">
+            @include('developer.groups.partials.season-results-debug', ['resultsMode' => 'leaderboard'])
+        </div>
+    @endif
+
+    @if ($activeTab === 'raw-prediction-data')
+        <div class="mt-8">
+            @include('developer.groups.partials.season-results-debug', ['resultsMode' => 'raw-prediction-data'])
         </div>
     @endif
 </x-layouts.app>

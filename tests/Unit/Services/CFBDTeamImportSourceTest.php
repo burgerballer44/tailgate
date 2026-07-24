@@ -5,8 +5,8 @@ use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 use App\Exceptions\TeamImportException;
-use App\Models\Sport;
-use App\Models\TeamType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamType;
 use App\Services\ImportSources\CFBDTeamImportSource;
 use Mockery\MockInterface;
 
@@ -186,7 +186,7 @@ describe('fetch', function () {
         ['teams' => $teams, 'errors' => $errors] = collectStream($source->fetch(teamImportData()));
 
         expect($teams)->toHaveCount(2)
-            ->and($teams[0]->organization)->toBe('Unknown')
+            ->and($teams[0]->organization)->toBe('Unknown Team')
             ->and($teams[1]->organization)->toBe('UCLA')
             ->and($errors)->toHaveCount(2)
             ->and($errors[0])->toContain('CFBD team 2')
@@ -284,7 +284,7 @@ describe('fetch', function () {
         ['teams' => $teams, 'errors' => $errors] = collectStream($source->fetch(teamImportData()));
 
         expect($teams)->toHaveCount(2)
-            ->and($teams[0]->conference)->toBe('Unknown')
+            ->and($teams[0]->conference)->toBe('Unknown Conference')
             ->and($teams[1]->conference)->toBe('SEC')
             ->and($errors)->toHaveCount(2)
             ->and($errors[0])->toContain('CFBD team 11')
@@ -300,7 +300,7 @@ describe('fetch', function () {
         ['teams' => $teams, 'errors' => $errors] = collectStream($source->fetch(teamImportData()));
 
         expect($teams)->toHaveCount(1)
-            ->and($teams[0]->organization)->toBe('Unknown')
+            ->and($teams[0]->organization)->toBe('Unknown Team')
             ->and($teams[0]->conference)->toBe('SEC')
             ->and($errors)->toBe([]);
     });

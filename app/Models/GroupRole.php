@@ -8,9 +8,9 @@ enum GroupRole: string
 {
     use EnumToArray;
 
-    /** Group administrator with elevated management permissions. */
+    // Group administrator with elevated management permissions.
     case GROUP_ADMIN = 'Group-Admin';
 
-    /** Standard group member without administrative permissions. */
+    // Standard group member without administrative permissions.
     case GROUP_MEMBER = 'Group-Member';
 }

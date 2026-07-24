@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

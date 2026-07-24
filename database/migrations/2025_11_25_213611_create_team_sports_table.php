@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Sport;
-use App\Models\Team;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamFallback;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('team_id');
             $table->enum('sport', Sport::values());
-            $table->string('conference')->default(Team::UNKNOWN_CONFERENCE);
+            $table->string('conference')->default(TeamFallback::CONFERENCE->value());
             $table->timestamps();
 
             $table->unique(['team_id', 'sport']);

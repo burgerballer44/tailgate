@@ -2,9 +2,10 @@
 
 use App\Models\Follow;
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
 use App\Models\GroupSeasonFollow;
-use App\Models\HtmlEntity;
+use App\Models\Enums\HtmlEntity;
+use App\Models\Enums\InitialGroupLimitRule;
 use App\Models\Member;
 use App\Models\Season;
 use App\Models\User;
@@ -98,15 +99,7 @@ describe('model defaults and accessors', function () {
             'follow_limit' => null,
         ]);
 
-        expect($group->fresh()->follow_limit)->toBe(Group::INITIAL_FOLLOW_LIMIT);
-    });
-
-    test('defaults prediction_scoring_policy when not provided', function () {
-        $group = Group::factory()->create([
-            'prediction_scoring_policy' => null,
-        ]);
-
-        expect($group->fresh()->prediction_scoring_policy)->toBe(Group::DEFAULT_PREDICTION_SCORING_POLICY);
+        expect($group->fresh()->follow_limit)->toBe(InitialGroupLimitRule::FOLLOW_LIMIT->value());
     });
 
     test('isFollowingSeason returns true only when the group explicitly follows the season', function () {

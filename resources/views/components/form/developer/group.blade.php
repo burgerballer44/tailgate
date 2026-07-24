@@ -7,7 +7,7 @@
     <x-slot name="sections">
         <x-forms.form-section
             title="Group details"
-            description="Enter the group name and assign an owner."
+            description="Configure owner, capacity limits, and other settings used during debugging."
         >
             <div>
                 <x-inputs.input-label for="name" class="font-semibold" :value="__('Name')" />
@@ -22,6 +22,50 @@
                     autocomplete="name"
                 />
                 <x-inputs.input-error class="mt-2" :messages="$errors->get('name')" />
+            </div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-3">
+                <div>
+                    <x-inputs.input-label for="member_limit" class="font-semibold" :value="__('Member limit')" />
+                    <x-inputs.text-input
+                        id="member_limit"
+                        name="member_limit"
+                        type="number"
+                        min="1"
+                        max="50"
+                        class="mt-1 block w-full"
+                        :value="old('member_limit', $group?->member_limit)"
+                    />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('member_limit')" />
+                </div>
+
+                <div>
+                    <x-inputs.input-label for="player_limit" class="font-semibold" :value="__('Player limit')" />
+                    <x-inputs.text-input
+                        id="player_limit"
+                        name="player_limit"
+                        type="number"
+                        min="1"
+                        max="10"
+                        class="mt-1 block w-full"
+                        :value="old('player_limit', $group?->player_limit)"
+                    />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('player_limit')" />
+                </div>
+
+                <div>
+                    <x-inputs.input-label for="follow_limit" class="font-semibold" :value="__('Follow limit')" />
+                    <x-inputs.text-input
+                        id="follow_limit"
+                        name="follow_limit"
+                        type="number"
+                        min="1"
+                        max="10"
+                        class="mt-1 block w-full"
+                        :value="old('follow_limit', $group?->follow_limit)"
+                    />
+                    <x-inputs.input-error class="mt-2" :messages="$errors->get('follow_limit')" />
+                </div>
             </div>
 
             <div class="mt-4">

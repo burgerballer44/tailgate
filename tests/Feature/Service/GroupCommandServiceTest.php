@@ -240,7 +240,7 @@ describe('remove member', function () {
     test('deactivates approved member in group', function () {
         // create member
         $member = Member::factory()->create([
-            'status' => \App\Models\MemberStatus::APPROVED->value,
+            'status' => \App\Models\Enums\MemberStatus::APPROVED->value,
         ]);
 
         // remove member
@@ -249,7 +249,7 @@ describe('remove member', function () {
         // verify deactivated
         $this->assertDatabaseHas('members', [
             'id' => $member->id,
-            'status' => \App\Models\MemberStatus::REMOVED->value,
+            'status' => \App\Models\Enums\MemberStatus::REMOVED->value,
         ]);
     });
 });

@@ -424,8 +424,27 @@
                             if ($member->isPending()) {
                                 $dropdownItems[] = ['label' => 'Approve', 'href' => route('groups.approve-member', [$group, $member]), 'method' => 'POST'];
                                 $dropdownItems[] = ['label' => 'Reject', 'href' => route('groups.reject-member', [$group, $member]), 'method' => 'POST', 'confirm' => 'Are you sure you want to reject this join request?'];
-                            } elseif ($member->canBeRemovedBy(request()->user())) {
-                                $dropdownItems[] = ['label' => 'Remove', 'href' => route('groups.remove-member', [$group, $member]), 'method' => 'DELETE', 'confirm' => 'Are you sure you want to remove this member?'];
+                            } elseif ($member->isApproved()) {
+                                if (! $member->isOwner()) {
+                                    if ($member->isAdmin()) {
+                                        $dropdownItems[] = [
+                                            'label' => 'Change to member',
+                                            'href' => route('groups.demote-member', [$group, $member]),
+                                            'method' => 'POST',
+                                            'confirm' => 'Change this admin to a regular member?',
+                                        ];
+                                    } else {
+                                        $dropdownItems[] = [
+                                            'label' => 'Promote to admin',
+                                            'href' => route('groups.promote-member', [$group, $member]),
+                                            'method' => 'POST',
+                                        ];
+                                    }
+                                }
+
+                                if ($member->canBeRemovedBy(request()->user())) {
+                                    $dropdownItems[] = ['label' => 'Remove', 'href' => route('groups.remove-member', [$group, $member]), 'method' => 'DELETE', 'confirm' => 'Are you sure you want to remove this member?'];
+                                }
                             }
                         @endphp
                         <li class="flex items-center gap-x-4 px-6 py-4 {{ $member->isPending() ? 'bg-yellow-50' : '' }}">

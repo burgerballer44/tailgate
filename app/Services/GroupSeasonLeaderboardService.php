@@ -14,7 +14,7 @@ use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\Prediction;
 use App\ScoringPolicies\Contracts\GroupPointsPolicyInterface;
 use App\ScoringPolicies\PlacementPointsPolicy;
@@ -71,7 +71,8 @@ class GroupSeasonLeaderboardService implements GroupSeasonLeaderboardServiceInte
         $eligiblePlayersByGame = $this->resolveEligiblePlayersByGame($membersWithSeasonHistory, $seasonGames);
         $predictionCount = $seasonGames->sum(fn (Game $game): int => $game->predictions->count());
         $playerNamesById = $membersWithSeasonHistory
-            ->flatMap(fn (Member $member) => $member->players->mapWithKeys(fn ($player): array => [$player->id => $player->player_name]))
+            ->flatMap(fn (Member $member) => $member->players)
+            ->mapWithKeys(fn ($player): array => [$player->id => $player->player_name])
             ->all();
 
         $leaderboardRows = $this->buildLeaderboardRows(

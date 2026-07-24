@@ -6,8 +6,8 @@ use App\DTO\ImportedGameData;
 use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use App\Services\ImportSources\CFBDGameImportSource;
 use Tests\TestCase;
 
@@ -165,14 +165,14 @@ describe('fetch – API client query parameters', function () {
         $this->source->fetch($season, $data);
     });
 
-    test('translates Postseason to the CFBD postseason slug before calling the client', function () {
+    test('passes unsupported season type through unchanged before calling the client', function () {
         $season = seasonWithSport(Sport::FOOTBALL);
-        $data = CFBDImportData(['year' => 2023, 'season_type' => SeasonType::POST->value, 'week' => 4]);
+        $data = CFBDImportData(['year' => 2023, 'season_type' => 'Custom Season Type', 'week' => 4]);
 
         $this->client
             ->shouldReceive('fetchGames')
             ->once()
-            ->with(['year' => 2023, 'seasonType' => 'postseason', 'week' => 4])
+            ->with(['year' => 2023, 'seasonType' => 'Custom Season Type', 'week' => 4])
             ->andReturn(gameRowStream([]));
 
         $this->source->fetch($season, $data);

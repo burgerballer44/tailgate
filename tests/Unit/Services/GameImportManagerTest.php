@@ -6,7 +6,7 @@ use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Game;
 use App\Models\Season;
-use App\Models\Sport;
+use App\Models\Enums\Sport;
 use App\Models\Team;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\Contracts\GameImportSourceInterface;

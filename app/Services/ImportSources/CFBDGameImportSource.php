@@ -8,9 +8,9 @@ use App\DTO\ImportedGameData;
 use App\DTO\ImportFetchStream;
 use App\Exceptions\GameImportException;
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
-use App\Models\Team;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamFallback;
 use App\Services\Contracts\GameImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
 use Carbon\CarbonImmutable;
@@ -100,12 +100,12 @@ class CFBDGameImportSource implements GameImportSourceInterface
 
                     // get values for home team
                     $homeTeam = $this->valueForAny($rawGame, ['homeTeam', 'home_team'], null);
-                    $homeTeamConference = (string) $this->valueForAny($rawGame, ['homeConference', 'home_conference'], Team::UNKNOWN_CONFERENCE);
+                    $homeTeamConference = (string) $this->valueForAny($rawGame, ['homeConference', 'home_conference'], TeamFallback::CONFERENCE->value());
                     $homeTeamScore = (int) $this->valueForAny($rawGame, ['homePoints', 'home_points'], default: 0);
 
                     // get values for away team
                     $awayTeam = $this->valueForAny($rawGame, ['awayTeam', 'away_team'], null);
-                    $awayTeamConference = (string) $this->valueForAny($rawGame, ['awayConference', 'away_conference'], Team::UNKNOWN_CONFERENCE);
+                    $awayTeamConference = (string) $this->valueForAny($rawGame, ['awayConference', 'away_conference'], TeamFallback::CONFERENCE->value());
                     $awayTeamScore = (int) $this->valueForAny($rawGame, ['awayPoints', 'away_points'], default: 0);
 
                     // get the start date and time for the game, ensuring we have a valid date to work with
@@ -163,7 +163,6 @@ class CFBDGameImportSource implements GameImportSourceInterface
 
         return match ($seasonType) {
             SeasonType::REGULAR->value => 'regular',
-            SeasonType::POST->value => 'postseason',
             default => $seasonType,
         };
     }

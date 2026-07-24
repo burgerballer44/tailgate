@@ -6,9 +6,9 @@ use App\Clients\CBBDApiClient;
 use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
-use App\Models\Sport;
-use App\Models\Team;
-use App\Models\TeamType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamFallback;
+use App\Models\Enums\TeamType;
 use App\Services\Contracts\TeamImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
 
@@ -60,8 +60,8 @@ class CBBDTeamImportSource implements TeamImportSourceInterface
                     $teamRow = $index + 1;
                     $teamId = $this->valueForAny($rawTeam, ['id', 'teamId', 'team_id'], $teamRow);
 
-                    $organization = $this->valueForAny($rawTeam, ['school', 'team', 'shortDisplayName', 'name'], Team::UNKNOWN_ORGANIZATION);
-                    $conference = $this->valueForAny($rawTeam, ['conference'], Team::UNKNOWN_CONFERENCE);
+                    $organization = $this->valueForAny($rawTeam, ['school', 'team', 'shortDisplayName', 'name'], TeamFallback::ORGANIZATION->value());
+                    $conference = $this->valueForAny($rawTeam, ['conference'], TeamFallback::CONFERENCE->value());
 
                     if (
                         ! is_string($organization)

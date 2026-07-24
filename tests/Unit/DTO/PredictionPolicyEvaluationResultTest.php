@@ -2,7 +2,7 @@
 
 use App\DTO\PredictionPolicyEvaluationResult;
 use App\DTO\PredictionPolicyViolation;
-use App\Models\PredictionPolicyScope;
+use App\Models\Enums\PredictionPolicyScope;
 
 describe('isValid', function () {
     test('returns true when no violations exist', function () {

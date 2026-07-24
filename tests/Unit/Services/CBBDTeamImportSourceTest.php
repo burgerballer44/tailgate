@@ -5,8 +5,8 @@ use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
 use App\Exceptions\TeamImportException;
-use App\Models\Sport;
-use App\Models\TeamType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamType;
 use App\Services\ImportSources\CBBDTeamImportSource;
 use Mockery\MockInterface;
 
@@ -231,7 +231,7 @@ describe('fetch', function () {
         ['teams' => $teams, 'errors' => $errors] = collectCBBDTeamStream($source->fetch(cbbdTeamImportData()));
 
         expect($teams)->toHaveCount(2)
-            ->and($teams[0]->organization)->toBe('Unknown')
+            ->and($teams[0]->organization)->toBe('Unknown Team')
             ->and($teams[0]->conference)->toBe('ACC')
             ->and($teams[1]->organization)->toBe('UCLA')
             ->and($teams[1]->conference)->toBe('Big Ten')
@@ -248,7 +248,7 @@ describe('fetch', function () {
         ['teams' => $teams, 'errors' => $errors] = collectCBBDTeamStream($source->fetch(cbbdTeamImportData()));
 
         expect($teams)->toHaveCount(1)
-            ->and($teams[0]->organization)->toBe('Unknown')
+            ->and($teams[0]->organization)->toBe('Unknown Team')
             ->and($teams[0]->conference)->toBe('SEC')
             ->and($errors)->toBe([]);
     });

@@ -1,6 +1,6 @@
 <x-layouts.app
     mainHeading="Users"
-    mainDescription="A list of all the users including their name, title, email and role."
+    mainDescription="A list of all users including name, email, status, and role."
     :mainActions="[
         ['text' => 'Add User', 'route' => 'developer.users.create'],
     ]"
@@ -46,8 +46,8 @@
             'status',
             'role',
             'verified_html_entity',
-            fn ($row) => $row->last_login_at?->diffForHumans(),
-            fn ($row) => $row->created_at->format('Y-M-d H:i:a'),
+            fn ($row) => $row->last_login_at?->diffForHumans() ?? 'Never',
+            fn ($row) => $row->created_at->format('Y-M-d h:i a'),
         ]"
         :rowActions="[
             [
@@ -59,6 +59,13 @@
                 'label' => 'Edit',
                 'route' => 'developer.users.edit',
                 'routeParams' => ['user' => 'ulid'],
+            ],
+            [
+                'label' => 'View As User',
+                'type' => 'form',
+                'route' => 'developer.impersonation.start',
+                'routeParams' => ['user' => 'ulid'],
+                'confirm' => 'Switch this browser session to this user?'
             ],
             [
                 'label' => 'Delete',

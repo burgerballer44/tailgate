@@ -17,9 +17,11 @@ use App\Http\Requests\Group\UserUpdateGroupRequest;
 use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\GroupThresholdRule;
+use App\Models\Enums\InitialGroupLimitRule;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Services\Contracts\GameQueryInterface;
@@ -238,6 +240,15 @@ class GroupController extends Controller
             $user
         );
 
+        $highlightPlayerIds = [];
+        if (in_array($activeTab, ['leaderboard', 'raw-prediction-data'], true)) {
+            $highlightPlayerIds = $this->playerQueryService->getAllForMember($currentMember)
+                ->pluck('id')
+                ->map(static fn ($playerId): int => (int) $playerId)
+                ->values()
+                ->all();
+        }
+
         if ($activeTab === 'details') {
             $group->load('owner')->loadCount('members');
         }
@@ -276,7 +287,8 @@ class GroupController extends Controller
             'playerCount' => $memberPlayers->count(),
             'upcomingGames' => $upcomingGames,
             'predictionLookup' => $predictionLookup,
-            'regularMemberPlayerLimit' => Group::REGULAR_MEMBER_PLAYER_LIMIT,
+            'highlightPlayerIds' => $highlightPlayerIds,
+            'regularMemberPlayerLimit' => InitialGroupLimitRule::MEMBER_PLAYER_LIMIT->value(),
             'availableGroupPolicies' => $this->policyEvaluator->groupRules(),
         ]);
     }
@@ -790,6 +802,70 @@ class GroupController extends Controller
         $this->memberCommandService->remove($member);
 
         $this->setFlashAlert('success', 'Member removed from group. Their historical players and predictions were preserved.');
+
+        return redirect()->back();
+    }
+
+    /**
+     * Promote an approved member to group admin.
+     */
+    public function promoteMember(Group $group, Member $member): RedirectResponse
+    {
+        if ($member->user_id === $group->owner_id) {
+            abort(403, 'The group owner already has administrative access.');
+        }
+
+        if ($member->role === GroupRole::GROUP_ADMIN->value) {
+            $this->setFlashAlert('success', 'Member is already an admin.');
+
+            return redirect()->back();
+        }
+
+        $memberData = ValidatedMemberData::fromArray([
+            'user_id' => $member->user_id,
+            'role' => GroupRole::GROUP_ADMIN,
+            'status' => MemberStatus::from($member->status),
+        ]);
+
+        $this->memberCommandService->update($member, $memberData);
+
+        $this->setFlashAlert('success', 'Member promoted to admin.');
+
+        return redirect()->back();
+    }
+
+    /**
+     * Demote an approved admin member to regular member.
+     */
+    public function demoteMember(Group $group, Member $member): RedirectResponse
+    {
+        if ($member->user_id === $group->owner_id) {
+            abort(403, 'The group owner role cannot be changed.');
+        }
+
+        if ($member->role === GroupRole::GROUP_MEMBER->value) {
+            $this->setFlashAlert('success', 'Member is already a regular member.');
+
+            return redirect()->back();
+        }
+
+        // Keep at least one admin assigned to preserve group governance.
+        if (
+            $group->admin->count() == GroupThresholdRule::MIN_NUMBER_ADMINS->value()
+            && $group->admin->first()?->id === $member->id
+        ) {
+            abort(422, 'Group admin minimum reached. Promote another member to admin before demoting this admin.');
+        }
+
+        $memberData = ValidatedMemberData::fromArray([
+            'user_id' => $member->user_id,
+            'role' => GroupRole::GROUP_MEMBER,
+            'status' => MemberStatus::from($member->status),
+        ]);
+
+        $this->memberCommandService->update($member, $memberData);
+
+        $this->setFlashAlert('success', 'Admin changed to regular member.');
 
         return redirect()->back();
     }

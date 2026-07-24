@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Models\Sport;
-use App\Models\TeamType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rules\Enum;
 

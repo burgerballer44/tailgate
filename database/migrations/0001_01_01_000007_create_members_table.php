@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\MemberStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

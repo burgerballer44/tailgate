@@ -2,8 +2,8 @@
 
 namespace App\DTO;
 
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\MemberStatus;
 
 /**
  * Represents normalized membership input for group member lifecycle operations.

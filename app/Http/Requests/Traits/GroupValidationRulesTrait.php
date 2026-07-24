@@ -23,6 +23,7 @@ trait GroupValidationRulesTrait
             'name' => 'nullable|string|max:255',
             'member_limit' => ['nullable', 'integer', 'max:50'],
             'player_limit' => ['nullable', 'integer', 'max:10'],
+            'follow_limit' => ['nullable', 'integer', 'max:10'],
         ];
     }
 
@@ -53,6 +54,9 @@ trait GroupValidationRulesTrait
         return [
             'name' => 'required|string|max:255',
             'owner_id' => ['required', 'exists:users,id'],
+            'member_limit' => ['nullable', 'integer', 'max:50'],
+            'player_limit' => ['nullable', 'integer', 'max:10'],
+            'follow_limit' => ['nullable', 'integer', 'max:10'],
         ];
     }
 

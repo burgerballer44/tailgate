@@ -100,11 +100,11 @@
         @endif
 
         @if ($activeTab === 'leaderboard')
-            @include('groups.tabs.season-results', ['resultsMode' => 'leaderboard'])
+            @include('groups.tabs.season-results', ['resultsMode' => 'leaderboard', 'highlightPlayerIds' => $highlightPlayerIds])
         @endif
 
         @if ($activeTab === 'raw-prediction-data')
-            @include('groups.tabs.season-results', ['resultsMode' => 'raw-prediction-data'])
+            @include('groups.tabs.season-results', ['resultsMode' => 'raw-prediction-data', 'highlightPlayerIds' => $highlightPlayerIds])
         @endif
     </div>
 </x-layouts.app>

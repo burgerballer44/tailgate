@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use App\Models\UserRole;
+use App\Models\Enums\UserRole;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -8,10 +8,10 @@ use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
-use App\Models\PredictionPolicyScope;
+use App\Models\Enums\PredictionPolicyScope;
 use App\Models\Season;
 use App\Services\Contracts\PlayerCommandInterface;
 

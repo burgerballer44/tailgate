@@ -6,9 +6,9 @@ use App\Clients\CFBDApiClient;
 use App\DTO\ImportedTeamData;
 use App\DTO\ImportFetchStream;
 use App\DTO\TeamImportData;
-use App\Models\Sport;
-use App\Models\Team;
-use App\Models\TeamType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamFallback;
+use App\Models\Enums\TeamType;
 use App\Services\Contracts\TeamImportSourceInterface;
 use App\Traits\ImportSourceDataHelpers;
 
@@ -87,8 +87,8 @@ class CFBDTeamImportSource implements TeamImportSourceInterface
                     $teamId = $this->valueForAny($rawTeam, ['id'], $teamRow);
 
                     // validate required fields and skip teams with missing data
-                    $organization = $this->valueForAny($rawTeam, ['school'], Team::UNKNOWN_ORGANIZATION);
-                    $conference = $this->valueForAny($rawTeam, ['conference'], Team::UNKNOWN_CONFERENCE);
+                    $organization = $this->valueForAny($rawTeam, ['school'], TeamFallback::ORGANIZATION->value());
+                    $conference = $this->valueForAny($rawTeam, ['conference'], TeamFallback::CONFERENCE->value());
 
                     if (
                         ! is_string($organization)

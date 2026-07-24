@@ -3,19 +3,20 @@
 use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupThresholdRule;
+use App\Models\Enums\GroupRole;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\UserRole;
-use App\Models\UserStatus;
+use App\Models\Enums\UserRole;
+use App\Models\Enums\UserStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -30,8 +31,8 @@ Artisan::command('inspire', function () {
 Artisan::command('tailgate:seed-debug-predictions {--seed=20260712}', function () {
     $seed = (int) $this->option('seed');
     mt_srand($seed);
-
     $today = CarbonImmutable::today();
+
     $runToken = strtolower(Str::random(8));
 
     $developerEmail = env('DEVELOPER_EMAIL', 'developer@example.com');
@@ -61,7 +62,7 @@ Artisan::command('tailgate:seed-debug-predictions {--seed=20260712}', function (
 
     $inviteCode = null;
     do {
-        $inviteCode = Str::upper(Str::random(Group::LENGTH_INVITE_CODE));
+        $inviteCode = Str::upper(Str::random(GroupThresholdRule::INVITE_CODE_LENGTH->value()));
     } while (Group::query()->where('invite_code', $inviteCode)->exists());
 
     $group = Group::factory()->create([
@@ -335,7 +336,37 @@ Artisan::command('tailgate:seed-debug-predictions {--seed=20260712}', function (
         ->filter(fn (Game $game): bool => is_numeric($game->home_team_score) && is_numeric($game->away_team_score))
         ->values();
 
+    $seedDemoPrediction = function (Player $player, Game $game): bool {
+        $prediction = Prediction::query()->updateOrCreate(
+            [
+                'player_id' => $player->id,
+                'game_id' => $game->id,
+            ],
+            [
+                'home_team_prediction' => (string) max(0, (int) $game->home_team_score + 3),
+                'away_team_prediction' => (string) max(0, (int) $game->away_team_score - 2),
+            ]
+        );
+
+        return (bool) $prediction->wasRecentlyCreated;
+    };
+
     $createdPredictions = 0;
+
+    $footballDemoGame = $occurredGames->first(fn (Game $game): bool => $game->season_id === $footballSeason->id);
+    if ($footballDemoGame instanceof Game) {
+        $createdPredictions += $seedDemoPrediction($players->first(), $footballDemoGame) ? 1 : 0;
+    }
+
+    $basketballDemoGame = $occurredGames->first(fn (Game $game): bool => $game->season_id === $basketballSeason->id);
+    if ($basketballDemoGame instanceof Game) {
+        $createdPredictions += $seedDemoPrediction($players->first(), $basketballDemoGame) ? 1 : 0;
+    }
+
+    $historicalDemoGame = $historicalFootballGames->first();
+    if ($historicalDemoGame instanceof Game) {
+        $createdPredictions += $seedDemoPrediction($players->first(), $historicalDemoGame) ? 1 : 0;
+    }
 
     foreach ($occurredGames as $game) {
         $isBasketballGame = $game->season_id === $basketballSeason->id;
@@ -357,21 +388,25 @@ Artisan::command('tailgate:seed-debug-predictions {--seed=20260712}', function (
                 $actualAway + ($isBasketballGame ? mt_rand(-18, 18) : mt_rand(-14, 14))
             );
 
-            Prediction::query()->create([
+            $prediction = Prediction::query()->updateOrCreate([
                 'player_id' => $player->id,
                 'game_id' => $game->id,
+            ], [
                 'home_team_prediction' => (string) $homePrediction,
                 'away_team_prediction' => (string) $awayPrediction,
             ]);
 
-            $createdPredictions++;
+            if ($prediction->wasRecentlyCreated) {
+                $createdPredictions++;
+            }
         }
     }
 
     $historicalPredictionPool = $players
-        ->shuffle()
-        ->take(12)
+        ->take(1)
+        ->merge($players->shuffle()->take(11))
         ->merge($historicalPlayers)
+        ->unique('id')
         ->values();
 
     $historicalPredictionsCreated = 0;
@@ -387,14 +422,17 @@ Artisan::command('tailgate:seed-debug-predictions {--seed=20260712}', function (
             $homePrediction = max(0, $actualHome + mt_rand(-14, 14));
             $awayPrediction = max(0, $actualAway + mt_rand(-14, 14));
 
-            Prediction::query()->create([
+            $prediction = Prediction::query()->updateOrCreate([
                 'player_id' => $player->id,
                 'game_id' => $game->id,
+            ], [
                 'home_team_prediction' => (string) $homePrediction,
                 'away_team_prediction' => (string) $awayPrediction,
             ]);
 
-            $historicalPredictionsCreated++;
+            if ($prediction->wasRecentlyCreated) {
+                $historicalPredictionsCreated++;
+            }
         }
     }
 

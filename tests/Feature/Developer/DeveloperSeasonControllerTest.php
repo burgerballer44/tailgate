@@ -2,8 +2,8 @@
 
 use App\Models\Game;
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use App\Models\Team;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -68,9 +68,6 @@ describe('index', function () {
     test('seasons can be filtered by season_type', function () {
         // create 2 basketball seasons
         [$season1, $season2] = Season::factory()->count(2)->create(['season_type' => SeasonType::REGULAR->value]);
-
-        // create 2 football seasons
-        [$season3, $season4] = Season::factory()->count(2)->create(['season_type' => SeasonType::POST->value]);
 
         // get the regular seasons only
         $response = $this->get(route('developer.seasons.index', ['season_type' => 'Regular Season']));
@@ -376,7 +373,7 @@ describe('updating season', function () {
         $updateData = [
             'name' => 'Updated Name',
             'sport' => Sport::FOOTBALL->value,
-            'season_type' => SeasonType::POST->value,
+            'season_type' => SeasonType::REGULAR->value,
             'active' => false,
         ];
 
@@ -402,7 +399,7 @@ describe('updating season', function () {
         $updateData = [
             'name' => 'Updated Name',
             'sport' => Sport::FOOTBALL->value,
-            'season_type' => SeasonType::POST->value,
+            'season_type' => SeasonType::REGULAR->value,
         ];
 
         $response = $this->patch(route('developer.seasons.update', $season), $updateData);
@@ -422,7 +419,7 @@ describe('updating season', function () {
         $updateData = [
             'name' => 'Updated Name',
             'sport' => Sport::FOOTBALL->value,
-            'season_type' => SeasonType::POST->value,
+            'season_type' => SeasonType::REGULAR->value,
             'active' => false,
         ];
 

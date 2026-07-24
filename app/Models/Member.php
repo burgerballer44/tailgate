@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\MemberStatus;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

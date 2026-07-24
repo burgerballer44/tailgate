@@ -2,9 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Sport;
+use App\Models\Enums\Sport;
 use App\Models\Team;
-use App\Models\TeamType;
+use App\Models\Enums\TeamFallback;
+use App\Models\Enums\TeamType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -63,13 +64,13 @@ class TeamFactory extends Factory
                 $sport = is_string($key) ? $key : $value;
                 $conference = is_string($key)
                     ? $value
-                    : Team::UNKNOWN_CONFERENCE;
+                    : TeamFallback::CONFERENCE->value();
 
                 $team->sports()->create([
                     'sport' => $sport instanceof Sport ? $sport->value : $sport,
                     'conference' => is_string($conference) && trim($conference) !== ''
                         ? trim($conference)
-                        : Team::UNKNOWN_CONFERENCE,
+                        : TeamFallback::CONFERENCE->value(),
                 ]);
             }
         });

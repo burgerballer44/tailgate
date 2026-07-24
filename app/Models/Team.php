@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Enums\Sport;
+use App\Models\Enums\TeamFallback;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,20 +15,6 @@ use Illuminate\Support\Str;
 class Team extends Model
 {
     use HasFactory;
-
-    /**
-     * Placeholder organization name used when source data is incomplete.
-     *
-     * @var string
-     */
-    public const UNKNOWN_ORGANIZATION = 'Unknown';
-
-    /**
-     * Placeholder conference name used when source data is incomplete.
-     *
-     * @var string
-     */
-    public const UNKNOWN_CONFERENCE = 'Unknown';
 
     /**
      * The attributes that should be hidden for arrays.
@@ -110,7 +98,7 @@ class Team extends Model
     /**
      * Build a stable, human-readable conference summary from sport associations.
      *
-     * @return string The conference summary, or "Unknown" when no sport conferences exist.
+        * @return string The conference summary, or "Unknown Conference" when no sport conferences exist.
      */
     public function getConferenceAttribute(): string
     {
@@ -125,7 +113,7 @@ class Team extends Model
             ->values();
 
         if ($conferences->isEmpty()) {
-            return self::UNKNOWN_CONFERENCE;
+            return TeamFallback::CONFERENCE->value();
         }
 
         return $conferences->join(', ');
@@ -148,7 +136,7 @@ class Team extends Model
                 $conference = trim((string) $teamSport->conference);
 
                 if ($conference === '') {
-                    $conference = self::UNKNOWN_CONFERENCE;
+                    $conference = TeamFallback::CONFERENCE->value();
                 }
 
                 return ucfirst($sport).': '.$conference;
@@ -157,7 +145,7 @@ class Team extends Model
             ->values();
 
         if ($summary->isEmpty()) {
-            return self::UNKNOWN_CONFERENCE;
+            return TeamFallback::CONFERENCE->value();
         }
 
         return $summary->implode(', ');

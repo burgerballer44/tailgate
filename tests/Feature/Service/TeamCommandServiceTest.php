@@ -1,9 +1,9 @@
 <?php
 
 use App\DTO\ValidatedTeamData;
-use App\Models\Sport;
+use App\Models\Enums\Sport;
 use App\Models\Team;
-use App\Models\TeamType;
+use App\Models\Enums\TeamType;
 use App\Services\TeamCommandService;
 use Illuminate\Support\Str;
 

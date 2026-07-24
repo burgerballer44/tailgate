@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\MemberStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

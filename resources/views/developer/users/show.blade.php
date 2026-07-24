@@ -78,11 +78,11 @@
                 ],
                 [
                     'label' => 'Membership Count',
-                    'value' => $user->members()->count(),
+                    'value' => $user->members_count,
                 ],
                 [
                     'label' => 'Social Account Count',
-                    'value' => $user->socialAccounts()->count(),
+                    'value' => $user->social_accounts_count,
                 ],
             ]"
         />

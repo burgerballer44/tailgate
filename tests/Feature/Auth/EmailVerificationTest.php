@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\User;
-use App\Models\UserStatus;
+use App\Models\Enums\UserStatus;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;

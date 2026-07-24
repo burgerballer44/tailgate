@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Season;
+use App\ScoringPolicies\PredictionDifferenceFromScorePointsPolicy;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +23,7 @@ class GroupSeasonFollowFactory extends Factory
         return [
             'group_id' => Group::factory(),
             'season_id' => Season::factory(),
-            'prediction_scoring_policy' => Group::DEFAULT_PREDICTION_SCORING_POLICY,
+            'prediction_scoring_policy' => PredictionDifferenceFromScorePointsPolicy::key(),
             'enabled_prediction_policies' => [],
         ];
     }

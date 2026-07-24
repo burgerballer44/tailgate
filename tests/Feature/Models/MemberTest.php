@@ -1,10 +1,97 @@
 <?php
 
 use App\Models\Group;
-use App\Models\GroupRole;
+use App\Models\Enums\GroupRole;
 use App\Models\Member;
-use App\Models\MemberStatus;
+use App\Models\Enums\MemberStatus;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Symfony\Component\Uid\Ulid;
+
+describe('route binding and identifiers', function () {
+    test('uses ulid as route key name', function () {
+        expect((new Member)->getRouteKeyName())->toBe('ulid');
+    });
+
+    test('generates ulid on create', function () {
+        $member = Member::factory()->create();
+
+        expect($member->ulid)->not->toBeNull();
+        expect($member->ulid)->toBeInstanceOf(Ulid::class);
+        expect((string) $member->ulid)->toHaveLength(26);
+    });
+});
+
+describe('casts', function () {
+    test('casts left_at to a datetime instance', function () {
+        $member = Member::factory()->create([
+            'left_at' => '2026-01-01 12:30:00',
+        ])->refresh();
+
+        expect($member->left_at)->toBeInstanceOf(Carbon::class);
+    });
+});
+
+describe('relationships', function () {
+    test('players returns has many relationship', function () {
+        $relation = (new Member)->players();
+
+        expect($relation)->toBeInstanceOf(HasMany::class);
+        expect($relation->getRelated())->toBeInstanceOf(App\Models\Player::class);
+    });
+
+    test('user returns belongs to relationship', function () {
+        $relation = (new Member)->user();
+
+        expect($relation)->toBeInstanceOf(BelongsTo::class);
+        expect($relation->getRelated())->toBeInstanceOf(User::class);
+    });
+
+    test('group returns belongs to relationship', function () {
+        $relation = (new Member)->group();
+
+        expect($relation)->toBeInstanceOf(BelongsTo::class);
+        expect($relation->getRelated())->toBeInstanceOf(Group::class);
+    });
+});
+
+describe('filter scope', function () {
+    test('filters by user_id, group_id, and status', function () {
+        $user = User::factory()->create();
+        $group = Group::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $matching = Member::factory()->create([
+            'user_id' => $user->id,
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $wrongStatus = Member::factory()->create([
+            'user_id' => $otherUser->id,
+            'group_id' => $group->id,
+            'status' => MemberStatus::PENDING->value,
+        ]);
+
+        $wrongUser = Member::factory()->create([
+            'user_id' => User::factory()->create()->id,
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+        ]);
+
+        $results = Member::query()->filter([
+            'user_id' => $user->id,
+            'group_id' => $group->id,
+            'status' => MemberStatus::APPROVED->value,
+        ])->get();
+
+        expect($results->pluck('id')->all())->toContain($matching->id);
+        expect($results->pluck('id')->all())->not->toContain($wrongStatus->id);
+        expect($results->pluck('id')->all())->not->toContain($wrongUser->id);
+    });
+});
 
 describe('isPending', function () {
     test('returns true for pending members', function () {
@@ -37,6 +124,24 @@ describe('isOwner', function () {
         $member = Member::factory()->create(['group_id' => $group->id]);
 
         expect($member->isOwner())->toBeFalse();
+    });
+});
+
+describe('isAdmin', function () {
+    test('returns true for group admin role', function () {
+        $member = Member::factory()->create([
+            'role' => GroupRole::GROUP_ADMIN->value,
+        ]);
+
+        expect($member->isAdmin())->toBeTrue();
+    });
+
+    test('returns false for regular group member role', function () {
+        $member = Member::factory()->create([
+            'role' => GroupRole::GROUP_MEMBER->value,
+        ]);
+
+        expect($member->isAdmin())->toBeFalse();
     });
 });
 

@@ -170,51 +170,50 @@
                                 <p class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" x-text="currentContextError()"></p>
                             </template>
 
-                            <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-900" for="quick_prediction_player">Player</label>
-                                    <select
-                                        id="quick_prediction_player"
-                                        class="mt-2 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        :value="selectedPlayerForCurrentGame()"
-                                        @change="onCurrentGamePlayerChange($event.target.value)"
-                                    >
-                                        <template x-for="player in currentGame().players" :key="`select-${currentGame().context_key}-${player.id}`">
-                                            <option :value="player.id" x-text="player.name"></option>
-                                        </template>
-                                    </select>
-                                    <template x-if="fieldError('player_id')">
-                                        <p class="mt-2 text-sm text-red-600" x-text="fieldError('player_id')"></p>
+                            <div class="space-y-3">
+                                <x-inputs.select
+                                    id="quick_prediction_player"
+                                    name="player_id"
+                                    label="Player"
+                                    :options="[]"
+                                    :error="[]"
+                                    containerClass="w-full"
+                                    x-bind:value="selectedPlayerForCurrentGame()"
+                                    @change="onCurrentGamePlayerChange($event.target.value)"
+                                >
+                                    <template x-for="player in currentGame().players" :key="`select-${currentGame().context_key}-${player.id}`">
+                                        <option :value="player.id" x-text="player.name"></option>
                                     </template>
-                                </div>
+                                </x-inputs.select>
+                                <template x-if="fieldError('player_id')">
+                                    <p class="mt-2 text-sm text-red-600" x-text="fieldError('player_id')"></p>
+                                </template>
 
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-900" for="quick_prediction_home_score" x-text="currentGame().game.home_team"></label>
-                                    <input
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <x-inputs.text-input
                                         id="quick_prediction_home_score"
                                         type="number"
                                         min="0"
-                                        class="mt-2 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        :value="scoreField(currentGame().context_key).home"
+                                        class="mt-0"
+                                        x-bind:value="scoreField(currentGame().context_key).home"
                                         @input="updateScore('home', $event.target.value)"
                                     />
-                                    <template x-if="fieldError('home_team_prediction')">
-                                        <p class="mt-2 text-sm text-red-600" x-text="fieldError('home_team_prediction')"></p>
-                                    </template>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-900" for="quick_prediction_away_score" x-text="currentGame().game.away_team"></label>
-                                    <input
+                                    <x-inputs.text-input
                                         id="quick_prediction_away_score"
                                         type="number"
                                         min="0"
-                                        class="mt-2 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                        :value="scoreField(currentGame().context_key).away"
+                                        class="mt-0"
+                                        x-bind:value="scoreField(currentGame().context_key).away"
                                         @input="updateScore('away', $event.target.value)"
                                     />
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <template x-if="fieldError('home_team_prediction')">
+                                        <p class="text-sm text-red-600" x-text="fieldError('home_team_prediction')"></p>
+                                    </template>
                                     <template x-if="fieldError('away_team_prediction')">
-                                        <p class="mt-2 text-sm text-red-600" x-text="fieldError('away_team_prediction')"></p>
+                                        <p class="text-sm text-red-600" x-text="fieldError('away_team_prediction')"></p>
                                     </template>
                                 </div>
                             </div>

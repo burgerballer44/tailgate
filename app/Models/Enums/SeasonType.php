@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Enums;
 
 use App\Traits\EnumToArray;
 
@@ -8,7 +8,5 @@ enum SeasonType: string
 {
     use EnumToArray;
 
-    case PRE = 'Preseason';
     case REGULAR = 'Regular Season';
-    case POST = 'Postseason';
 }

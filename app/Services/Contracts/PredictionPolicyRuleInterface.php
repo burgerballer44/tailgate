@@ -3,7 +3,7 @@
 namespace App\Services\Contracts;
 
 use App\DTO\PredictionPolicyContext;
-use App\Models\PredictionPolicyScope;
+use App\Models\Enums\PredictionPolicyScope;
 
 /**
  * Defines a single prediction policy rule.

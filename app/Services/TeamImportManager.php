@@ -7,9 +7,10 @@ use App\DTO\ImportResult;
 use App\DTO\TeamImportData;
 use App\DTO\ValidatedTeamData;
 use App\Exceptions\TeamImportException;
-use App\Models\Sport;
+use App\Models\Enums\Sport;
 use App\Models\Team;
-use App\Models\TeamType;
+use App\Models\Enums\TeamFallback;
+use App\Models\Enums\TeamType;
 use App\Services\Contracts\TeamCommandInterface;
 use App\Services\Contracts\TeamImportManagerInterface;
 use App\Services\Contracts\TeamImportSourceInterface;
@@ -183,7 +184,7 @@ class TeamImportManager implements TeamImportManagerInterface
         return [
             'organization' => $this->pickPreferredString($team->organization, $existingTeam->organization),
             'designation' => $this->pickPreferredString($team->designation, $existingTeam->designation),
-            'conference' => $this->pickPreferredString($team->conference, Team::UNKNOWN_CONFERENCE),
+            'conference' => $this->pickPreferredString($team->conference, TeamFallback::CONFERENCE->value()),
             'abbreviation' => $this->pickPreferredNullableString($team->abbreviation, $existingTeam->abbreviation),
             'color' => $this->pickPreferredNullableString($team->color, $existingTeam->color),
             'logos' => $this->mergeLists($existingTeam->logos, $team->logos),
@@ -337,7 +338,7 @@ class TeamImportManager implements TeamImportManagerInterface
         $normalizedSport = trim($sport);
         $normalizedConference = $this->hasValue($conference)
             ? trim((string) $conference)
-            : Team::UNKNOWN_CONFERENCE;
+            : TeamFallback::CONFERENCE->value();
 
         return [$normalizedSport => $normalizedConference];
     }
@@ -358,7 +359,7 @@ class TeamImportManager implements TeamImportManagerInterface
 
                 $conference = trim((string) $teamSport->conference);
                 if ($conference === '') {
-                    $conference = Team::UNKNOWN_CONFERENCE;
+                    $conference = TeamFallback::CONFERENCE->value();
                 }
 
                 return [$sportValue => $conference];

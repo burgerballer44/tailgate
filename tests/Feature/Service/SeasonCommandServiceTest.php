@@ -4,8 +4,8 @@ use App\DTO\ValidatedGameData;
 use App\DTO\ValidatedSeasonData;
 use App\Models\Game;
 use App\Models\Season;
-use App\Models\SeasonType;
-use App\Models\Sport;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
 use App\Models\Team;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\SeasonCommandService;
@@ -67,7 +67,7 @@ describe('update a season', function () {
         $data = ValidatedSeasonData::fromArray([
             'name' => 'New Name',
             'sport' => Sport::BASKETBALL->value,
-            'season_type' => SeasonType::POST->value,
+            'season_type' => SeasonType::REGULAR->value,
         ]);
 
         // ensure updated season does not exist
@@ -100,7 +100,7 @@ describe('update a season', function () {
         $updatedSeason = $this->service->update($season, ValidatedSeasonData::fromArray([
             'name' => 'Updated Name',
             'sport' => Sport::BASKETBALL->value,
-            'season_type' => SeasonType::POST->value,
+            'season_type' => SeasonType::REGULAR->value,
         ]));
 
         expect($updatedSeason->active)->toBeFalse();

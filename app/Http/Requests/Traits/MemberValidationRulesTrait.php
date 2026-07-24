@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Models\GroupRole;
-use App\Models\MemberStatus;
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\MemberStatus;
 use App\Rules\GroupAdminMinimum;
 use App\Rules\GroupMemberLimit;
 use App\Rules\MustNotBeAMember;

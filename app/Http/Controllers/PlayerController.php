@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Group\StorePlayerRequest;
 use App\Http\Requests\Group\UpdatePlayerRequest;
 use App\Models\Group;
+use App\Models\Enums\InitialGroupLimitRule;
 use App\Models\Member;
 use App\Models\Player;
 use App\Services\Contracts\PlayerCommandInterface;
@@ -228,7 +229,7 @@ class PlayerController extends Controller
             return $group->player_limit;
         }
 
-        return Group::REGULAR_MEMBER_PLAYER_LIMIT;
+        return InitialGroupLimitRule::MEMBER_PLAYER_LIMIT->value();
     }
 
     /**
