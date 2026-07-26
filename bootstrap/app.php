@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ShowComingSoonPage;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsureUserIsGroupAdmin;
 use App\Http\Middleware\EnsureUserIsGroupMember;
@@ -18,6 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(ShowComingSoonPage::class);
+
         // Central map of middleware aliases used by route definitions.
         $aliases = [
             'role' => CheckRole::class,

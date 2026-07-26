@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Coming soon mode
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, all application routes return a temporary coming soon page.
+    | Toggle this from the environment so it can be switched without code edits.
+    |
+    */
+
+    'coming_soon' => (bool) env('APP_COMING_SOON', false),
+
 ];
