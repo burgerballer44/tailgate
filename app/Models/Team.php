@@ -98,7 +98,7 @@ class Team extends Model
     /**
      * Build a stable, human-readable conference summary from sport associations.
      *
-        * @return string The conference summary, or "Unknown Conference" when no sport conferences exist.
+     * @return string The conference summary, or "Unknown Conference" when no sport conferences exist.
      */
     public function getConferenceAttribute(): string
     {

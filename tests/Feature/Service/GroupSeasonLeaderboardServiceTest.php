@@ -1,15 +1,15 @@
 <?php
 
-use App\DTO\SeasonResultsViewData;
-use App\DTO\PlayerLeaderboardRowData;
 use App\DTO\GameRawPredictionData;
 use App\DTO\GameRawPredictionPlayerRowData;
+use App\DTO\PlayerLeaderboardRowData;
+use App\DTO\SeasonResultsViewData;
+use App\Models\Enums\MemberStatus;
 use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
-use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\Season;
@@ -63,7 +63,7 @@ describe('group season leaderboard service contract', function () {
             ->and($result->groupId)->toBe($group->id)
             ->and($result->seasonId)->toBe($season->id)
             ->and($result->pointsPolicy)->toBe('placement-points')
-            ->and($result->generatedAt)->toBeInstanceOf(\DateTimeImmutable::class)
+            ->and($result->generatedAt)->toBeInstanceOf(DateTimeImmutable::class)
             ->and($result->leaderboardRows)->toBeArray()
             ->and($result->rawGameRows)->toBeArray()
             ->and($result->meta['status'])->toBe('query-orchestrated')

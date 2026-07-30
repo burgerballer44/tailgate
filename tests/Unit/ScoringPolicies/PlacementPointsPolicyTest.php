@@ -10,7 +10,7 @@ uses(TestCase::class);
 
 describe('placement points policy', function () {
     beforeEach(function () {
-        $this->policy = new PlacementPointsPolicy();
+        $this->policy = new PlacementPointsPolicy;
     });
 
     test('exposes expected metadata', function () {

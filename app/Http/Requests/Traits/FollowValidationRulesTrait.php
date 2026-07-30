@@ -12,7 +12,7 @@ trait FollowValidationRulesTrait
      *
      * Ensures the team exists and the specified sport is valid for that team if provided.
      *
-    * @return array<string, mixed> The team and season validation rules.
+     * @return array<string, mixed> The team and season validation rules.
      */
     protected function baseRules(): array
     {
@@ -40,7 +40,7 @@ trait FollowValidationRulesTrait
     /**
      * Define validation rules for creating a follow relationship.
      *
-    * @return array<string, mixed> The team follow validation rules.
+     * @return array<string, mixed> The team follow validation rules.
      */
     protected function storeRules(): array
     {
@@ -50,7 +50,7 @@ trait FollowValidationRulesTrait
     /**
      * Define validation rules for updating a follow relationship.
      *
-    * @return array<string, mixed> The team follow validation rules.
+     * @return array<string, mixed> The team follow validation rules.
      */
     protected function updateRules(): array
     {

@@ -2,10 +2,10 @@
 
 use App\DTO\ValidatedGameData;
 use App\DTO\ValidatedSeasonData;
-use App\Models\Game;
-use App\Models\Season;
 use App\Models\Enums\SeasonType;
 use App\Models\Enums\Sport;
+use App\Models\Game;
+use App\Models\Season;
 use App\Models\Team;
 use App\Services\Contracts\GameCommandInterface;
 use App\Services\SeasonCommandService;

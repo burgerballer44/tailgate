@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Traits;
 
-use App\Models\User;
 use App\Models\Enums\UserRole;
 use App\Models\Enums\UserStatus;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 

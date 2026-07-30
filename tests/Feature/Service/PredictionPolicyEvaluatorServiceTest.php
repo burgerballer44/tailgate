@@ -1,13 +1,13 @@
 <?php
 
 use App\DTO\ValidatedPredictionData;
+use App\Models\Enums\PredictionPolicyScope;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
 use App\Models\Player;
 use App\Models\Prediction;
-use App\Models\Enums\PredictionPolicyScope;
 use App\Models\Season;
 use App\PredictionPolicies\MinimumLeadTimeBeforeLockPolicy;
 use App\PredictionPolicies\PredictionLockTimePolicy;

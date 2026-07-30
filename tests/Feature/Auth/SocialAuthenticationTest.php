@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\SocialAccount;
-use App\Models\User;
 use App\Models\Enums\UserRole;
 use App\Models\Enums\UserStatus;
+use App\Models\SocialAccount;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Contracts\User as ProviderUser;

@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Developer;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
-use App\Models\User;
 use App\Models\Enums\UserRole;
 use App\Models\Enums\UserStatus;
+use App\Models\User;
 use App\Services\Contracts\UserCommandInterface;
 use App\Services\Contracts\UserQueryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 class DeveloperUserController extends Controller
 {
@@ -139,7 +140,7 @@ class DeveloperUserController extends Controller
     /**
      * Build enum-backed role and status options for developer user forms.
      *
-        * @return array{roles: \Illuminate\Support\Collection<int, string>, statuses: \Illuminate\Support\Collection<int, string>} Form option collections keyed by option type.
+     * @return array{roles: Collection<int, string>, statuses: Collection<int, string>} Form option collections keyed by option type.
      */
     private function userFormOptions(): array
     {

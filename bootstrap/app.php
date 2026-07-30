@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Middleware\ShowComingSoonPage;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsureUserIsGroupAdmin;
 use App\Http\Middleware\EnsureUserIsGroupMember;
 use App\Http\Middleware\FollowBelongsToGroup;
 use App\Http\Middleware\MemberMustBeApproved;
 use App\Http\Middleware\MemberMustBeInGroup;
+use App\Http\Middleware\ShowComingSoonPage;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;

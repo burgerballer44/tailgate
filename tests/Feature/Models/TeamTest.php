@@ -2,8 +2,8 @@
 
 use App\Models\Enums\HtmlEntity;
 use App\Models\Enums\Sport;
-use App\Models\Team;
 use App\Models\Enums\TeamFallback;
+use App\Models\Team;
 use App\Models\TeamSport;
 use Illuminate\Support\HtmlString;
 

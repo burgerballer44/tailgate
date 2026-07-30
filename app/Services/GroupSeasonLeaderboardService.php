@@ -6,23 +6,23 @@ use App\DTO\GamePointsContext;
 use App\DTO\GameRawPredictionData;
 use App\DTO\GameRawPredictionPlayerRowData;
 use App\DTO\MissingPredictionContext;
-use App\DTO\PlayerLeaderboardRowData;
 use App\DTO\PlayerGamePointsResult;
+use App\DTO\PlayerLeaderboardRowData;
 use App\DTO\PlayerSeasonTotal;
 use App\DTO\SeasonResultsViewData;
+use App\Models\Enums\MemberStatus;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
-use App\Models\Enums\MemberStatus;
 use App\Models\Prediction;
 use App\ScoringPolicies\Contracts\GroupPointsPolicyInterface;
 use App\ScoringPolicies\PlacementPointsPolicy;
 use App\ScoringPolicies\PredictionDifferenceFromScorePointsPolicy;
 use App\Services\Contracts\GroupSeasonLeaderboardServiceInterface;
 use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
-use DateTimeInterface;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 
@@ -95,7 +95,7 @@ class GroupSeasonLeaderboardService implements GroupSeasonLeaderboardServiceInte
             groupId: $groupId,
             seasonId: $seasonId,
             pointsPolicy: $pointsPolicy,
-            generatedAt: new DateTimeImmutable(),
+            generatedAt: new DateTimeImmutable,
             leaderboardRows: $leaderboardRows,
             rawGameRows: $rawGameRows,
             meta: [
@@ -569,8 +569,8 @@ class GroupSeasonLeaderboardService implements GroupSeasonLeaderboardServiceInte
     private function resolvePointsPolicy(string $pointsPolicyKey): GroupPointsPolicyInterface
     {
         return match ($pointsPolicyKey) {
-            PlacementPointsPolicy::key() => new PlacementPointsPolicy(),
-            default => new PredictionDifferenceFromScorePointsPolicy(),
+            PlacementPointsPolicy::key() => new PlacementPointsPolicy,
+            default => new PredictionDifferenceFromScorePointsPolicy,
         };
     }
 
@@ -650,7 +650,7 @@ class GroupSeasonLeaderboardService implements GroupSeasonLeaderboardServiceInte
             in_array($rawStatus, ['PST', 'PPD', 'POSTPONED'], true) => 'postponed',
             in_array($rawStatus, ['CANC', 'CANCELLED', 'CANCELED'], true) => 'canceled',
             $this->toDateTimeImmutable($game->start_date_time) instanceof DateTimeImmutable
-                && $this->toDateTimeImmutable($game->start_date_time) > new DateTimeImmutable() => 'scheduled',
+                && $this->toDateTimeImmutable($game->start_date_time) > new DateTimeImmutable => 'scheduled',
             default => 'pending',
         };
     }

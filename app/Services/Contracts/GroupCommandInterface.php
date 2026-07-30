@@ -4,9 +4,9 @@ namespace App\Services\Contracts;
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
-use App\DTO\ValidatedGroupSeasonFollowsData;
-use App\DTO\ValidatedGroupPredictionScoringPolicyData;
 use App\DTO\ValidatedGroupPoliciesData;
+use App\DTO\ValidatedGroupPredictionScoringPolicyData;
+use App\DTO\ValidatedGroupSeasonFollowsData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
 use App\Models\Follow;

@@ -10,7 +10,7 @@ uses(TestCase::class);
 
 describe('prediction difference from score points policy', function () {
     beforeEach(function () {
-        $this->policy = new PredictionDifferenceFromScorePointsPolicy();
+        $this->policy = new PredictionDifferenceFromScorePointsPolicy;
     });
 
     test('exposes expected metadata', function () {

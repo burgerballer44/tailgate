@@ -10,7 +10,7 @@ use App\Traits\EnumToArray;
 enum GroupThresholdRule
 {
     use EnumToArray;
-    
+
     // Invite code character length generated for new groups.
     case INVITE_CODE_LENGTH;
 

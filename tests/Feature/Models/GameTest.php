@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Game;
 use App\Models\Enums\HtmlEntity;
+use App\Models\Game;
 use App\Models\Prediction;
 use App\Models\Season;
 use App\Models\Team;

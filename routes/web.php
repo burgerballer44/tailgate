@@ -99,7 +99,7 @@ Route::middleware('auth')->group(function () {
             });
 
             // player management routes - nested resource for managing players within groups
-            Route::middleware('group.member.belongs', 'group.member.approved')
+            Route::middleware(['group.member.belongs', 'group.member.approved'])
                 ->resource('{group}/members.players', PlayerController::class)
                 ->except(['index', 'show']);
 

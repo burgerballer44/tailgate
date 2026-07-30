@@ -1,22 +1,22 @@
 <?php
 
+use App\Models\Enums\GroupRole;
+use App\Models\Enums\GroupThresholdRule;
+use App\Models\Enums\MemberStatus;
+use App\Models\Enums\SeasonType;
+use App\Models\Enums\Sport;
+use App\Models\Enums\UserRole;
+use App\Models\Enums\UserStatus;
 use App\Models\Follow;
 use App\Models\Game;
 use App\Models\Group;
-use App\Models\Enums\GroupThresholdRule;
-use App\Models\Enums\GroupRole;
 use App\Models\GroupSeasonFollow;
 use App\Models\Member;
-use App\Models\Enums\MemberStatus;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Models\Season;
-use App\Models\Enums\SeasonType;
-use App\Models\Enums\Sport;
 use App\Models\Team;
 use App\Models\User;
-use App\Models\Enums\UserRole;
-use App\Models\Enums\UserStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;

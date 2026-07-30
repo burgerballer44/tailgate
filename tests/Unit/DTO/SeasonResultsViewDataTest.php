@@ -42,7 +42,7 @@ describe('season results dto shapes', function () {
             groupId: 5,
             seasonId: 6,
             pointsPolicy: 'prediction-difference-from-score',
-            generatedAt: new \DateTimeImmutable('2026-07-11T00:00:00+00:00'),
+            generatedAt: new DateTimeImmutable('2026-07-11T00:00:00+00:00'),
             leaderboardRows: [$leaderboardRow],
             rawGameRows: [$rawGameRow],
             meta: ['warnings' => []],
@@ -82,7 +82,7 @@ describe('season results dto shapes', function () {
             previousRank: 2,
             rankChange: 1,
             pointsBehindLeader: 0,
-        ))->toThrow(\TypeError::class);
+        ))->toThrow(TypeError::class);
     });
 
     test('raw player row defaults calculation notes to empty array and supports nullable predictions', function () {

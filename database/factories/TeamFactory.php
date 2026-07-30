@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Enums\Sport;
-use App\Models\Team;
 use App\Models\Enums\TeamFallback;
 use App\Models\Enums\TeamType;
+use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

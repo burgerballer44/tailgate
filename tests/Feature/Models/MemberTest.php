@@ -1,9 +1,10 @@
 <?php
 
-use App\Models\Group;
 use App\Models\Enums\GroupRole;
-use App\Models\Member;
 use App\Models\Enums\MemberStatus;
+use App\Models\Group;
+use App\Models\Member;
+use App\Models\Player;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -39,7 +40,7 @@ describe('relationships', function () {
         $relation = (new Member)->players();
 
         expect($relation)->toBeInstanceOf(HasMany::class);
-        expect($relation->getRelated())->toBeInstanceOf(App\Models\Player::class);
+        expect($relation->getRelated())->toBeInstanceOf(Player::class);
     });
 
     test('user returns belongs to relationship', function () {

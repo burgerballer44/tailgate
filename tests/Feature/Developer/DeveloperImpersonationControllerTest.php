@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Models\Enums\UserRole;
+use App\Models\User;
 
 beforeEach(function () {
     $this->developer = signInDeveloperUser();

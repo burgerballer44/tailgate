@@ -2,8 +2,8 @@
 
 use App\DTO\ValidatedTeamData;
 use App\Models\Enums\Sport;
-use App\Models\Team;
 use App\Models\Enums\TeamType;
+use App\Models\Team;
 use App\Services\TeamCommandService;
 use Illuminate\Support\Str;
 

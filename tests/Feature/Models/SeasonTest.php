@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\Game;
-use App\Models\GroupSeasonFollow;
 use App\Models\Enums\HtmlEntity;
-use App\Models\Season;
 use App\Models\Enums\SeasonType;
 use App\Models\Enums\Sport;
+use App\Models\Game;
+use App\Models\GroupSeasonFollow;
+use App\Models\Season;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\HtmlString;
 use Symfony\Component\Uid\Ulid;

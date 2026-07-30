@@ -8,20 +8,20 @@ use App\Http\Requests\Group\FollowTeamRequest;
 use App\Http\Requests\Group\GetGroupSeasonResultsRequest;
 use App\Http\Requests\Group\JoinGroupRequest;
 use App\Http\Requests\Group\StoreGroupRequest;
-use App\Http\Requests\Group\UpdateGroupSeasonFollowsRequest;
-use App\Http\Requests\Group\UpdateGroupPredictionScoringPolicyRequest;
 use App\Http\Requests\Group\SubmitPredictionRequest;
 use App\Http\Requests\Group\UpdateGroupPoliciesRequest;
+use App\Http\Requests\Group\UpdateGroupPredictionScoringPolicyRequest;
+use App\Http\Requests\Group\UpdateGroupSeasonFollowsRequest;
 use App\Http\Requests\Group\UpdatePredictionRequest;
 use App\Http\Requests\Group\UserUpdateGroupRequest;
-use App\Models\Follow;
-use App\Models\Game;
-use App\Models\Group;
 use App\Models\Enums\GroupRole;
 use App\Models\Enums\GroupThresholdRule;
 use App\Models\Enums\InitialGroupLimitRule;
-use App\Models\Member;
 use App\Models\Enums\MemberStatus;
+use App\Models\Follow;
+use App\Models\Game;
+use App\Models\Group;
+use App\Models\Member;
 use App\Models\Player;
 use App\Models\Prediction;
 use App\Services\Contracts\GameQueryInterface;
@@ -33,8 +33,8 @@ use App\Services\Contracts\MemberQueryInterface;
 use App\Services\Contracts\PlayerCommandInterface;
 use App\Services\Contracts\PlayerQueryInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
-use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
 use App\Services\Contracts\PredictionQueryInterface;
+use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
 use App\Services\Contracts\SeasonQueryInterface;
 use App\Services\Contracts\TeamQueryInterface;
 use Illuminate\Contracts\View\View;
@@ -128,8 +128,8 @@ class GroupController extends Controller
      * Process a request to join a group via invite code.
      *
      * This method handles the user's request to join a group. It validates the
-        * invite code, checks current membership state, and either creates a new
-        * pending membership or reactivates a previously removed membership.
+     * invite code, checks current membership state, and either creates a new
+     * pending membership or reactivates a previously removed membership.
      *
      * @param  JoinGroupRequest  $request  The validated request containing the invite code
      * @return RedirectResponse Redirects back with success/error messages

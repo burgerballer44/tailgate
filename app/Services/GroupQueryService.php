@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Group;
 use App\Models\Enums\MemberStatus;
+use App\Models\Group;
 use App\Services\Contracts\GroupQueryInterface;
 use Illuminate\Database\Eloquent\Builder;
 

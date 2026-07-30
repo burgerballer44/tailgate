@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTO\PredictionScoringPolicyOptionData;
+use App\ScoringPolicies\Contracts\PredictionScoringPolicyOptionInterface;
 use App\ScoringPolicies\PlacementPointsPolicy;
 use App\ScoringPolicies\PredictionDifferenceFromScorePointsPolicy;
 use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
@@ -13,7 +14,7 @@ use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
 class PredictionScoringPolicyCatalogService implements PredictionScoringPolicyCatalogInterface
 {
     /**
-     * @var array<int, class-string<\App\ScoringPolicies\Contracts\PredictionScoringPolicyOptionInterface>>
+     * @var array<int, class-string<PredictionScoringPolicyOptionInterface>>
      */
     private const POLICY_CLASSES = [
         PredictionDifferenceFromScorePointsPolicy::class,

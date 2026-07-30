@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Group;
 use App\Models\Enums\InitialGroupLimitRule;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

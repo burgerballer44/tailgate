@@ -7,9 +7,9 @@ xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
 database:
-    type: postgres
-    version: '17'
-host_db_port: 54320
+    type: mysql
+    version: '8.4'
+host_db_port: 33060
 use_dns_when_possible: true
 composer_version: '2'
 web_environment: []

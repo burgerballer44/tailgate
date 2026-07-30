@@ -17,7 +17,7 @@ class GameBelongsToFollowedTeam implements ValidationRule
      * Validates that the selected game is eligible for this group's follow configuration.
      *
      * Resolves the group from the current route and checks whether the game's home or
-    * away team is in the group's followed-team list.
+     * away team is in the group's followed-team list.
      * Uses already-loaded follows when available to avoid redundant queries.
      *
      * @param  string  $attribute  The dot-notation field name being validated.

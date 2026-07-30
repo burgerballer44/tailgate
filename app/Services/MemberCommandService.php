@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\DTO\ValidatedMemberData;
-use App\Models\Group;
 use App\Models\Enums\GroupRole;
 use App\Models\Enums\GroupThresholdRule;
-use App\Models\Member;
 use App\Models\Enums\MemberStatus;
+use App\Models\Group;
+use App\Models\Member;
 use App\Services\Contracts\MemberCommandInterface;
 use DomainException;
 use Illuminate\Support\Facades\Schema;

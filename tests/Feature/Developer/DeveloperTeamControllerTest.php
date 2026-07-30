@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Season;
 use App\Models\Enums\SeasonType;
 use App\Models\Enums\Sport;
-use App\Models\Team;
 use App\Models\Enums\TeamType;
+use App\Models\Season;
+use App\Models\Team;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 

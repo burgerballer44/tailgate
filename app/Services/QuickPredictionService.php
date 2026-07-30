@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\DTO\QuickPredictionPayload;
+use App\Models\Enums\Sport;
 use App\Models\Game;
 use App\Models\Group;
 use App\Models\Member;
-use App\Models\Enums\Sport;
 use App\Models\User;
 use App\Services\Contracts\GameQueryInterface;
 use App\Services\Contracts\MemberQueryInterface;

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Developer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Group;
 use App\Models\Enums\UserRole;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

@@ -28,7 +28,7 @@ class FollowTeamRequest extends FormRequest
      *
      * Ensures the team exists and at least one active season is selected.
      *
-    * @return array<string, mixed> The team and selected-season validation rules.
+     * @return array<string, mixed> The team and selected-season validation rules.
      */
     public function rules(): array
     {

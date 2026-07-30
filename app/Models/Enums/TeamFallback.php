@@ -10,7 +10,7 @@ use App\Traits\EnumToArray;
 enum TeamFallback: string
 {
     use EnumToArray;
-    
+
     // Placeholder organization name used when source data is incomplete.
     case ORGANIZATION = 'Unknown Team';
 

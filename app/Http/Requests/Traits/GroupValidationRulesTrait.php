@@ -3,9 +3,9 @@
 namespace App\Http\Requests\Traits;
 
 use App\Rules\UserMustBeAMember;
-use App\Services\Contracts\SeasonQueryInterface;
-use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
 use App\Services\Contracts\PredictionPolicyEvaluatorInterface;
+use App\Services\Contracts\PredictionScoringPolicyCatalogInterface;
+use App\Services\Contracts\SeasonQueryInterface;
 
 trait GroupValidationRulesTrait
 {

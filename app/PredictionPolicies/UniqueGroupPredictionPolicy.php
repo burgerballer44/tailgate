@@ -3,8 +3,8 @@
 namespace App\PredictionPolicies;
 
 use App\DTO\PredictionPolicyContext;
-use App\Models\Prediction;
 use App\Models\Enums\PredictionPolicyScope;
+use App\Models\Prediction;
 use App\Services\Contracts\PredictionPolicyRuleInterface;
 
 /**

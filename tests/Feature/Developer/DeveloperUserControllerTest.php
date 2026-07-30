@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\User;
 use App\Models\Enums\UserRole;
 use App\Models\Enums\UserStatus;
-use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 
 beforeEach(function () {
     $this->user = signInDeveloperUser();

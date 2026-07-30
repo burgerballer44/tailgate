@@ -22,7 +22,7 @@ class UpdateGroupPredictionScoringPolicyRequest extends FormRequest
     }
 
     /**
-    * Validate required season-scoped prediction scoring policy selection.
+     * Validate required season-scoped prediction scoring policy selection.
      *
      * @return array<string, array<int, string>|string>
      */

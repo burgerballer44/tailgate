@@ -2,11 +2,12 @@
 
 use App\DTO\ValidatedFollowData;
 use App\DTO\ValidatedGroupData;
-use App\DTO\ValidatedGroupSeasonFollowsData;
-use App\DTO\ValidatedGroupPredictionScoringPolicyData;
 use App\DTO\ValidatedGroupPoliciesData;
+use App\DTO\ValidatedGroupPredictionScoringPolicyData;
+use App\DTO\ValidatedGroupSeasonFollowsData;
 use App\DTO\ValidatedMemberData;
 use App\DTO\ValidatedPlayerData;
+use App\Models\Enums\MemberStatus;
 use App\Models\Follow;
 use App\Models\Group;
 use App\Models\GroupSeasonFollow;
@@ -240,7 +241,7 @@ describe('remove member', function () {
     test('deactivates approved member in group', function () {
         // create member
         $member = Member::factory()->create([
-            'status' => \App\Models\Enums\MemberStatus::APPROVED->value,
+            'status' => MemberStatus::APPROVED->value,
         ]);
 
         // remove member
@@ -249,7 +250,7 @@ describe('remove member', function () {
         // verify deactivated
         $this->assertDatabaseHas('members', [
             'id' => $member->id,
-            'status' => \App\Models\Enums\MemberStatus::REMOVED->value,
+            'status' => MemberStatus::REMOVED->value,
         ]);
     });
 });

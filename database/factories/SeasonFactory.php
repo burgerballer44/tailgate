@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Season;
 use App\Models\Enums\SeasonType;
 use App\Models\Enums\Sport;
+use App\Models\Season;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
