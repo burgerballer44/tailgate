@@ -6,7 +6,7 @@ use App\Http\Middleware\EnsureUserIsGroupMember;
 use App\Http\Middleware\FollowBelongsToGroup;
 use App\Http\Middleware\MemberMustBeApproved;
 use App\Http\Middleware\MemberMustBeInGroup;
-use App\Http\Middleware\ShowComingSoonPage;
+use App\Http\Middleware\AppComingSoon;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(ShowComingSoonPage::class);
+        $middleware->appendToGroup('web', AppComingSoon::class);
 
         // Central map of middleware aliases used by route definitions.
         $aliases = [

@@ -135,4 +135,16 @@ return [
 
     'coming_soon' => (bool) env('APP_COMING_SOON', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Coming soon bypass code
+    |--------------------------------------------------------------------------
+    |
+    | This invite code is used by the alpha access form to grant a temporary
+    | session-based bypass while coming soon mode is enabled.
+    |
+    */
+
+    'coming_soon_bypass_code' => env('APP_COMING_SOON_BYPASS_CODE'),
+
 ];

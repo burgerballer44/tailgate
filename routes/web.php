@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthenticationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\AlphaAccessController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Developer\DeveloperGameController;
 use App\Http\Controllers\Developer\DeveloperGroupController;
@@ -35,6 +36,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('/alpha', [AlphaAccessController::class, 'create'])->name('alpha.create');
+Route::post('/alpha', [AlphaAccessController::class, 'store'])->name('alpha.store');
 
 // cannot be not signed in
 Route::middleware('guest')->group(function () {
