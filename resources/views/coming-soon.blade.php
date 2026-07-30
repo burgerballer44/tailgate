@@ -1,5 +1,11 @@
 <x-layouts.guest>
     <div class="mx-auto max-w-2xl text-center">
+        <img
+            src="{{ asset('images/tar-heel-tailgate-logo.svg') }}"
+            alt="Tar Heel Tailgate logo"
+            class="mx-auto mb-6 h-28 w-28 sm:h-32 sm:w-32"
+        />
+
         <h1 class="text-navy text-4xl font-bold sm:text-6xl">{{ config('app.name') }}</h1>
         <p class="text-carolina mt-6 text-lg leading-8">Coming Soon</p>
 

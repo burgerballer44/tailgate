@@ -78,4 +78,6 @@
             </x-buttons.primary-button>
         </div>
     </form>
+
+    @include('auth.partials.google-auth')
 </x-layouts.guest>

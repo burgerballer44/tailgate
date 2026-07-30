@@ -1,0 +1,43 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">Tar Heel Tailgate logo</title>
+  <desc id="logoDesc">A modern circular logo featuring a prominent grill, a football-shaped flame rising from the grill, and Tar Heel Tailgate text in navy, Carolina blue, and slate gray.</desc>
+
+  <defs>
+    <linearGradient id="innerBlue" x1="100" y1="84" x2="410" y2="438" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8CB9DC" />
+      <stop offset="1" stop-color="#6AA4D0" />
+    </linearGradient>
+    <linearGradient id="grillNavy" x1="160" y1="160" x2="354" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1F3A5F" />
+      <stop offset="1" stop-color="#152A46" />
+    </linearGradient>
+  </defs>
+
+  <circle cx="256" cy="256" r="224" fill="#E2E8F0" />
+  <circle cx="256" cy="256" r="208" fill="url(#innerBlue)" />
+
+  <rect x="152" y="174" width="208" height="138" rx="36" fill="url(#grillNavy)" />
+  <rect x="170" y="198" width="172" height="78" rx="22" fill="#1E293B" />
+
+  <path d="M190 216H322" stroke="#94A3B8" stroke-width="7" stroke-linecap="round" />
+  <path d="M190 234H322" stroke="#94A3B8" stroke-width="7" stroke-linecap="round" />
+  <path d="M190 252H322" stroke="#94A3B8" stroke-width="7" stroke-linecap="round" />
+
+  <rect x="204" y="313" width="24" height="44" rx="10" fill="#475569" />
+  <rect x="284" y="313" width="24" height="44" rx="10" fill="#475569" />
+  <rect x="182" y="356" width="148" height="14" rx="7" fill="#475569" />
+
+  <path d="M248 182C248 169 253 158 256 152C259 158 264 169 264 182V196H248V182Z" fill="#64748B" />
+
+  <ellipse cx="256" cy="129" rx="42" ry="28" fill="#1F3A5F" />
+  <ellipse cx="256" cy="129" rx="34" ry="22" fill="#7BAFD4" />
+  <path d="M237 129H275" stroke="#F8FAFC" stroke-width="4" stroke-linecap="round" />
+  <path d="M247 121L244 137" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" />
+  <path d="M256 121L253 137" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" />
+  <path d="M265 121L262 137" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round" />
+
+  <text x="256" y="409" text-anchor="middle" fill="#152A46" font-size="34" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-weight="800" letter-spacing="1.6">Tar Heel</text>
+  <text x="256" y="443" text-anchor="middle" fill="#334155" font-size="33" font-family="Segoe UI, Helvetica Neue, Arial, sans-serif" font-weight="700" letter-spacing="1.2">Tailgate</text>
+
+  <circle cx="256" cy="256" r="224" stroke="#1E293B" stroke-width="12" />
+</svg>
